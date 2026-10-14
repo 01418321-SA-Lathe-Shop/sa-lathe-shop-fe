@@ -6,7 +6,7 @@ Source of truth: `docs/02-frontend.md`. Owner confirmations received on 2026-10-
 
 ## Repository findings
 
-- The application currently consists of the Next.js starter in `app/page.tsx`, with `app/layout.tsx`, `app/globals.css`, and favicon. No business screens or authentication implementation were found in `app/`.
+- At the Phase 1 review, the application consisted of the Next.js starter in `app/page.tsx`, with `app/layout.tsx`, `app/globals.css`, and favicon. Phase 2 subsequently added the approved demo shell; see `docs/03-phase-two-handoff.md`. Production authentication and business actions are still unimplemented.
 - `package.json` declares Next.js 16.4.0, React 19.3.0, TypeScript, and Tailwind CSS 4. This is compatible with the guide's Next.js requirement; the guide does not prescribe exact versions or a folder layout.
 - `docs/02-frontend.md` is the available frontend requirements guide. It contains data/action needs, but no endpoint contract, exact field schema, or authentication design.
 - Existing changes in `package.json` and `package-lock.json` are outside this documentation task and are excluded from its commits.
@@ -37,7 +37,7 @@ All open entries are **To be defined**. Suggestions or source assumptions do not
 | ID | Topic / question | Current evidence / temporary assumption | Blocks |
 |---|---|---|---|
 | D01 | Production authentication provider, session, reset, account linkage to `PERSON`? | Initial explicitly labeled demo accounts approved; real authentication remains deferred | Production authentication and Backend integration; demo login may proceed |
-| D02 | What are the exact screens/routes, fields, validation, error copy, and list behavior? | The guide identifies UC screen groups but not a confirmed screen inventory | Detailed UC1–UC9 forms and routing; agree designs before adding folders |
+| D02 | What are the exact screens/routes, fields, validation, error copy, and list behavior? | Phase 2 was authorized by the owner and implements the documented role groups as demo workspace panels at `/`. Detailed business forms/routes remain open | Detailed UC1–UC9 forms and routing; agree designs before adding folders |
 | D03 | What are endpoints, payloads, errors, pagination, and date/money serialization? | Only “Needs from Backend” reads/actions are documented | Real API integration for all UCs |
 | D04 | Which Admin actions exist beyond Worker management and UC6? What operations does Worker management include? | UC6 is now confirmed for both roles; master-data CRUD and order approval remain undefined | Phase 5 Admin screens and permission policy |
 | D05 | When does `JOB_REQUEST` become `completed`? | JOB production completes before delivery; request completion could follow delivery or full payment | UC9 completion display and final lifecycle |
@@ -71,7 +71,7 @@ All open entries are **To be defined**. Suggestions or source assumptions do not
 - [x] Record known facts, open decisions, and affected UCs.
 - [x] Confirm markup basis, UC6 roles, and the Deposit/PO deadline.
 - [x] Approve demo accounts for initial login and saved planned-material quantities per JOB.
-- [ ] Confirm remaining Phase 2 navigation/screen details and permission boundaries (D02/D04); production authentication is explicitly deferred.
+- [x] Proceed with owner-authorized Phase 2 demo navigation using only confirmed role groups. Detailed forms and additional Admin permissions remain open; production authentication is explicitly deferred.
 - [ ] Define or explicitly defer each remaining workflow/API decision with an owner-approved implementation boundary.
 - [ ] Record answers consistently in the frontend guide, this register, and the implementation plan.
 - [ ] Mark Phase 1 complete only after its agreed exit criteria are satisfied.

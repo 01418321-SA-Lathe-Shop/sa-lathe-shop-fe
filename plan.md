@@ -17,7 +17,8 @@ This plan uses `docs/02-frontend.md` as the product source of truth and the repo
 ## Phase status and commit policy
 
 - Phase 1: in progress. Repository review and a decision register are available in `docs/01-phase-one-decisions.md`; unanswered decisions remain open.
-- Phases 2–7: not started. Do not implement behavior that depends on unanswered decisions.
+- Phase 2: completed for the approved demo scope. Responsive demo login, sign-out, session restoration, role navigation, and empty workspaces are implemented. See `docs/03-phase-two-handoff.md` for scope, validation, and local run instructions.
+- Phases 3–7: not started. Do not implement behavior that depends on unanswered decisions.
 - Commit each coherent, verified group separately with a descriptive purpose. Push groups as work progresses and push all completed work before handing off a finished phase. Do not leave the entire project for one final commit/push.
 - Stage only task-related files/hunks and exclude unrelated user edits. Use the detailed commit and push workflow in `AGENTS.md`.
 - Documentation verification: review consistency with the source guide, check references, and run `git diff --check`. Application checks are required when application code changes.
@@ -43,10 +44,14 @@ Keep implementation choices that depend on these items open until confirmed:
 
 ### 2. Establish role-aware application shell
 
+Completed on 2026-10-15 as a demo shell at `/`. Workspace panels use client state rather than new routes. Business actions, production authentication, and API integration remain deferred.
+
 - Use the existing App Router structure; add folders only when the screen design is confirmed.
 - Provide explicitly labeled demo login and role-aware navigation for Customer, Worker, and Admin. Real authentication remains deferred until Backend defines its contract.
 - Do not expose Supplier as an in-app role unless requirements change; Supplier is currently an external actor.
 - Do not grant unconfirmed Admin capabilities or assume Admin inherits all Worker permissions.
+
+Validation passed: `npm run lint`, `npm run build`, five native Node role-access tests, desktop/mobile browser checks, demo session restoration, and sign-out. The app shell and verification handoff are separate commit groups on `develop`.
 
 ### 3. Implement Customer workflows (UC1, UC3, UC4, UC9)
 

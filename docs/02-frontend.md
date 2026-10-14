@@ -69,6 +69,8 @@ The flow is based on the Use Cases, Sequence Diagrams, and Collaboration Diagram
 
 ## Navigation and screens by role
 
+Phase 2 implementation note (2026-10-15): the owner authorized the demo shell. Login and documented workspace groups now run as panels at `/`, with a responsive sidebar/mobile menu. This is the initial prototype navigation, not a finalized route or form contract. Demo role selection is stored in this tab's `sessionStorage`, invalid values are rejected, and sign-out removes it. If storage is blocked, it falls back to page memory. Business actions and Backend authentication remain deferred. Implementation and checks are documented in `docs/03-phase-two-handoff.md`.
+
 The overview specifies use cases and permissions, but **does not specify exact screen names, routes, layouts, or navigation**. The groups below are workflow screens/steps inferred as necessary from the UCs, not a confirmed screen count or URL design.
 
 | Role | Screen/work groups | UCs | Limits / notes |
