@@ -23,6 +23,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Commit and push workflow
 
+- Work on `develop` and push ongoing project commits to `origin/develop`. Verify the active branch before editing or committing; do not commit or push ongoing work to `main` unless the user explicitly requests it.
 - Commit work in small, coherent groups, each with one understandable purpose and a descriptive message. Keep each group easy to review, debug, and revert.
 - Validate each group before committing. Stage specific files or hunks; exclude unrelated user changes and secrets.
 - Push verified commit groups as work progresses, and finish every completed phase with all its commits pushed to the configured remote branch. Do not collect the entire project into one final commit and push.
