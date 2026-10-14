@@ -17,7 +17,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - The UI must not contain S3 or authentication secrets. Use environment configuration for the API base URL; authentication/session details are not yet defined.
 - Display times in `Asia/Bangkok`, money in baht, and do not add VAT. Enforce the documented 100 MB document/image upload limit and offer “Upload again” after a failed upload (new upload, not automatic retry).
 - Do not invent form fields, routes, endpoints, API shapes, status transitions, error behavior, or business rules. Mark unspecified items as “To be defined” and surface conflicts/open questions before choosing an implementation.
-- Preserve temporary assumptions and proposals as such. The 14-day deadline starts at quotation acceptance, but its scope remains unconfirmed; planned-material/shortage logic and the UC7-to-UC5 handoff also remain unconfirmed. Confirmed pricing uses minimum 60% markup on material plus labor cost, and both Admin and Worker may perform UC6.
+- Preserve temporary assumptions and proposals as such. Confirmed pricing uses minimum 60% markup on material plus labor cost. Required Deposit/PO must be submitted within 14 days after quotation acceptance. Both Admin and Worker may perform UC6; planned materials and required quantities are saved per JOB. Exact shortage logic and the UC7-to-UC5 handoff remain unconfirmed.
+- Initial login may use explicitly labeled demo accounts until Backend defines real authentication. Treat demo login as prototype behavior; it does not establish production authentication or API authorization.
 - Before editing application code, follow the generated Next.js instructions above and consult the relevant local Next.js guide under `node_modules/next/dist/docs/`.
 
 ## Commit and push workflow

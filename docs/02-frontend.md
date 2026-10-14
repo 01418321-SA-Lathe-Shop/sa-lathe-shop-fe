@@ -8,7 +8,7 @@ The system brings customer requests, quotations, production jobs, material purch
 |---|---|---|
 | Customer (`individual` or `company`) | Submit requests and attachments, view/respond to quotations, submit Deposit or PO evidence, inspect delivered work, and pay | UC1, UC3, UC4, UC9 |
 | Worker (technician) | Estimate prices, check/reserve stock, order materials, receive goods/record Supplier payment, produce/issue materials, deliver/record payment | UC2, UC5–UC9 |
-| Admin | Manage Workers and order from Suppliers, as confirmed by the owner | No separate UC; UC6 names Worker as its actor |
+| Admin | Manage Workers and order from Suppliers, as confirmed by the owner | No separate management UC; Admin and Worker may perform UC6 (confirmed during Phase 1) |
 | Supplier | Accept/reject orders, deliver materials, and receive payment; an external actor | UC6, UC7 |
 
 Customer `individual` and `company` are customer types, not permission roles. Every use case has a login precondition. Supplier is an external actor. Do not implicitly grant Admin permissions beyond those explicitly listed.
@@ -25,7 +25,7 @@ flowchart TD
   UC3 -->|5th rejection| CANCELED
   UC3 -->|Accept: determine Deposit/PO| UC4[UC4 Record Deposit and/or PO]
   UC4 -->|Requirements met within the deadline| JOB[Create JOB: queued]
-  UC4 -->|Deadline missed after 14 days, temporary assumption| CANCELED
+  UC4 -->|Required Deposit/PO not submitted within 14 days of acceptance| CANCELED
   JOB --> UC5[UC5 Check and reserve materials]
   UC5 -->|Materials available| UC8[UC8 Produce and record actual usage]
   UC5 -->|Materials insufficient| UC6[UC6 Order materials from Supplier]
@@ -60,7 +60,7 @@ The flow is based on the Use Cases, Sequence Diagrams, and Collaboration Diagram
 ## Frontend scope and display requirements
 
 - Use **Next.js**.
-- The Frontend **must never hold or embed secrets**, such as S3 or authentication secrets. Configure the API base URL through environment variables as noted in the overview. Authentication/session details remain to be defined.
+- The Frontend **must never hold or embed secrets**, such as S3 or authentication secrets. Configure the API base URL through environment variables as noted in the overview. Initial login may use explicitly labeled demo accounts, confirmed during Phase 1; production authentication/session details remain to be defined.
 - Backend uses PostgreSQL, S3-compatible object storage (URL stored in DB), Outbox + worker, and Docker Compose. Notifications to the shop/customer and reminders to follow up on collection are required, but channels and UI details remain to be defined.
 - Display time in `Asia/Bangkok`; display money in baht; **do not charge VAT**.
 - IDs are UUIDs, but how UUIDs appear in the UI is not specified.
@@ -74,21 +74,21 @@ The overview specifies use cases and permissions, but **does not specify exact s
 | Role | Screen/work groups | UCs | Limits / notes |
 |---|---|---|---|
 | Customer | Login; submit request and attachments; view/respond to quotation; submit Deposit/PO evidence; inspect delivery and pay invoice | UC1, UC3, UC4, UC9 | `individual`/`company` are customer types; PO/Deposit requirements depend on customer type/price; show relevant lifecycle statuses below |
-| Worker | Login; estimate/send quotation; check/reserve stock; order materials; receive good/defective goods and record Supplier payment; perform work/issue materials; deliver/record payment | UC2, UC5–UC9 | UC6 names Worker as actor; Admin's UC6 permission is unconfirmed |
-| Admin | Login; manage Workers; order from Suppliers as confirmed by the owner | No separate UC; UC6 | Scope of Worker-management screens and other permissions must be defined; do not assume Admin has all Worker permissions |
+| Worker | Login; estimate/send quotation; check/reserve stock; order materials; receive good/defective goods and record Supplier payment; perform work/issue materials; deliver/record payment | UC2, UC5–UC9 | Both Worker and Admin may perform UC6, confirmed during Phase 1 |
+| Admin | Login; manage Workers; order from Suppliers as confirmed by the owner | No separate management UC; UC6 | UC6 access is confirmed; scope of Worker-management screens and other permissions must be defined; do not assume Admin has all Worker permissions |
 | Supplier | No in-app navigation specified in the current workflow | UC6, UC7 | External actor; whether Supplier logs into the system is not specified |
 
 ## Business rules the UI must reflect
 
 | Topic | Required UI behavior |
 |---|---|
-| Login | Customer, Admin, and Worker must log in before using a UC; login/session/reset details remain to be defined |
+| Login | Customer, Admin, and Worker must log in before using a UC. Explicitly labeled demo accounts are approved for initial frontend work; production login/session/reset details remain to be defined |
 | Customer type | `individual` and `company` are customer types, not roles |
 | Deposit/PO | `individual`: 50% Deposit, no PO; `company` price ≤ THB 10,000: PO only; `company` price > THB 10,000: PO + 50% Deposit |
 | Quotation rejection | Count Customer rejections; up to 5; the request is automatically canceled on the 5th rejection |
 | Payments | Installments are allowed; invoice is `partial` until fully paid, then `paid` |
-| Payment period | 14 days; start date and scope (Deposit/PO/invoice) are unconfirmed, so due-date/countdown display must wait for clarification |
-| Pricing | `final_price` consists of material cost + labor cost + minimum 60% profit; the basis for 60% is unclear. Do not invent or display a guessed formula |
+| Deposit/PO deadline | Submit required Deposit/PO within 14 days after quotation acceptance, confirmed during Phase 1. This confirmation does not define invoice payment terms |
+| Pricing | Minimum 60% markup on total material and labor cost, confirmed during Phase 1: minimum `final_price = (material cost + labor cost) × 1.60`. Money precision and rounding remain to be defined |
 | Stock | `qty_available = qty_on_hand - qty_reserved` for active reservations; only good materials increase on-hand stock; defects are separate and have a defect log |
 | VAT | No VAT; the business is not registered as a company, as confirmed |
 
@@ -99,11 +99,11 @@ The overview does not define routes, complete form schemas, or error codes. Only
 | UC | Steps / known data and validation | Actions / states the UI must support |
 |---|---|---|
 | UC1 Submit request | Customer enters job details and attaches documents/images ≤ 100 MB; exact fields and detail validation are **to be defined** | Submit request; loading during submission; initial empty state as designed; validation/error behavior to be defined; show “Upload again” after upload failure |
-| UC2 Estimate price | Worker estimates material cost, labor cost, and final price; minimum 60% profit but the basis is unclear; exact input fields are **to be defined** | Save draft, send quotation, or reject request; show `draft`/`sent`; loading/errors and confirmation messages to be defined |
+| UC2 Estimate price | Worker estimates material cost, labor cost, and final price; confirmed minimum price is `(material cost + labor cost) × 1.60`; exact input fields and rounding are **to be defined** | Save draft, send quotation, or reject request; show `draft`/`sent`; loading/errors and confirmation messages to be defined |
 | UC3 Respond to quotation | Customer views quotation/revisions and accepts or rejects; show rejection count, limit 5 | Accept to UC4; reject back to UC2; cancel request on fifth rejection; loading/empty/error copy and behavior after limit to be defined |
-| UC4 Deposit/PO | Show rules by customer type/price: individual = 50% Deposit, no PO; company ≤ THB 10,000 = PO only; company > THB 10,000 = PO + 50% Deposit. Collect evidence per workflow; exact fields/file types/due date to be defined | Submit/record Deposit or PO; create JOB when requirements are met; 14-day expiry is a temporary assumption; states for expiration/missing documents to be defined |
-| UC5 Check/reserve stock | Show `qty_available = qty_on_hand - qty_reserved`; UC5 accepts `requiredMaterials`, but the fields/source of planned quantities are unclear | Check and reserve material; if available, proceed to UC8; if short, go to UC6. Shortage formula conflicts in the source; do not calculate results from unconfirmed information. Loading/empty/error to be defined |
-| UC6 Order materials | Select Supplier and order needed materials per workflow; form fields/validation are not specified | Submit order; Worker is the UC actor, while the owner separately confirmed Admin can order from Suppliers; exact role permissions need confirmation; statuses/errors to be defined |
+| UC4 Deposit/PO | Show rules by customer type/price: individual = 50% Deposit, no PO; company ≤ THB 10,000 = PO only; company > THB 10,000 = PO + 50% Deposit. Collect evidence per workflow; exact fields/file types to be defined | Submit/record Deposit or PO; create JOB when requirements are met; required evidence must be submitted within 14 days after quotation acceptance; expiration/missing-document states to be defined |
+| UC5 Check/reserve stock | Show `qty_available = qty_on_hand - qty_reserved`; save a planned-material list with material and required quantity per JOB, confirmed during Phase 1; exact fields/schema remain to be defined | Check and reserve material; if available, proceed to UC8; if short, go to UC6. Shortage formula conflicts in the source; do not calculate results from unconfirmed information. Loading/empty/error to be defined |
+| UC6 Order materials | Select Supplier and order needed materials per workflow; form fields/validation are not specified | Submit order; Admin and Worker are both authorized, confirmed during Phase 1; statuses/errors to be defined |
 | UC7 Receive goods | Show good/defective received quantities; record Supplier payment; exact fields/payment methods are not specified | Receive goods/record payment; order status changes based on receipt; may return to UC5 for stock recheck (temporary proposal); errors/loading to be defined |
 | UC8 Produce | Show job/material issuance; record images, actual cost/time; file is a document/image ≤ 100 MB; exact production fields are not specified | Start/continue/record actual usage; `JOB` goes to `in_progress`, then `completed`; returned work resumes production; show “Upload again” after upload failure; other states/errors to be defined |
 | UC9 Deliver/receive payment | Show delivery/pickup, recipient/evidence, invoice; initial amount is job price less Deposit; support installments; exact fields/evidence types are not specified | Deliver and record payment; Customer inspects/pays; returned work goes back to UC8; loading/empty/error and balance/allocation display to be defined |
@@ -141,12 +141,12 @@ Endpoints, request/response fields, and error codes are not included in the over
 
 | Screen/flow | Data to read | Actions required |
 |---|---|---|
-| Login / role navigation | Logged-in user and role used to render navigation | Login/logout; session/reset/provider to be defined |
+| Login / role navigation | Logged-in user and role used to render navigation | Initial explicitly labeled demo login is approved; production login/logout/session/reset/provider remain to be defined |
 | UC1 Request | `JOB_REQUEST` list/details and file URL/metadata needed for display | Create request, upload file, start a new upload after failure |
 | UC2–UC3 Quotation | Request, quotation revisions/status, `QUOTATION_COST` visible to the role, rejection count | Save draft/send/reject request; Customer accept/reject; enforce limit of 5 |
 | UC4 Deposit/PO | Customer type, quotation amount, required terms, Deposit/PO records, due/expiry once defined | Attach/record Deposit or PO evidence; create JOB when requirements are met |
-| UC5 Stock | `MATERIAL` quantities, `qty_on_hand`, `qty_reserved`, `qty_available`, reservations, and required/planned materials once designed | Check availability and reserve; return shortage/needed quantity according to confirmed logic |
-| UC6 Order | Selectable Suppliers/materials, shortage, `MATERIAL_ORDER` and items/status | Create/send order; role policy needs confirmation |
+| UC5 Stock | `MATERIAL` quantities, `qty_on_hand`, `qty_reserved`, `qty_available`, reservations, and saved planned materials/required quantities per JOB | Save planned material list; check availability and reserve; return shortage/needed quantity according to logic still to be confirmed |
+| UC6 Order | Selectable Suppliers/materials, shortage, `MATERIAL_ORDER` and items/status | Create/send order for Admin and Worker; API authorization must enforce both confirmed roles |
 | UC7 Receiving | Order/items, good/defective received quantities, `MATERIAL`, defect/claim, Supplier payment status | Record receipt, stock movement/cost update, defect, Supplier payment |
 | UC8 Production | `JOB`, reservations, stock, actual material usage, actual cost/time, images and URLs | Change job status, record material use/issue, upload production evidence |
 | UC9 Delivery/invoice | Delivery/status/evidence, invoice totals/balance/status, payment allocations | Record delivery/acceptance/return; issue invoice; receive multiple payments and allocate amounts |
@@ -166,14 +166,14 @@ The following are Backend transaction/data-integrity requirements. The UI must n
 
 | Topic | Known information | Confirmation needed / assumption |
 |---|---|---|
-| Who performs UC6 | UC6 names Worker; owner confirmed Admin can order from Supplier | Temporary assumption: Admin and Worker can use UC6; confirm permissions |
+| Who performs UC6 | Admin and Worker may perform UC6 | Confirmed during Phase 1; remaining Admin permissions still require definition |
 | Admin permissions | Admin manages Workers and orders from Suppliers, per owner | Other screens/permissions, master data `MATERIAL`, `UNIT`, `SUPPLIER`, and order approval are undefined |
 | `JOB_REQUEST.completed` | Exists in ER but has no UC transition; JOB completes before delivery | Confirm whether request is shown as completed after delivery or after invoice is fully paid |
-| 60% profit formula | Final price = material + labor + minimum 60% profit | Confirm whether based on total cost or sales margin; do not guess a value |
-| 14 days | Payment period is 14 days | Temporary assumption: applies to sending Deposit/PO after quotation approval for UC4 expiry; confirm start date and invoice scope before showing due date/countdown |
-| Planned materials/shortage | UC5 accepts `requiredMaterials`; Q6.1 shortage formula conflicts with UC5 | Confirm Worker input and formula; do not calculate a stock-shortage preview from unconfirmed logic |
+| 60% profit formula | Minimum price = `(material cost + labor cost) × 1.60` | Markup basis confirmed during Phase 1; money precision/rounding remain to be defined |
+| 14 days | Required Deposit/PO must be submitted within 14 days after quotation acceptance | Confirmed during Phase 1; invoice payment terms are not specified by this decision |
+| Planned materials/shortage | Save material and required quantity per JOB, confirmed during Phase 1; Q6.1 shortage formula conflicts with UC5 | Exact schema/input and shortage formula remain to be defined; do not calculate a stock-shortage preview from unconfirmed logic |
 | Upload | Documents/images ≤ 100 MB; failed upload must be uploaded again | MIME/extension allowlist, partial upload handling, signed URL lifetime/acquisition method remain to be defined |
-| Authentication | Customer/Admin/Worker login | Provider, session, reset/login UI, and linkage to `PERSON` remain undefined |
+| Authentication | Customer/Admin/Worker login; explicitly labeled demo accounts approved initially | Production provider, session, reset/login UI, and linkage to `PERSON` remain undefined |
 | Supplier payment | `CREDIT` is `pending`; other methods are `paid` per UC7 | Payment options and outstanding-credit settlement UI need definition |
 | Notifications | Notify shop/customer and remind staff to follow up on collection | Channel, event, recipients, and notification UI need definition |
 | UI details | Overview has UCs/flow but no routes, exact form fields, loading/error copy, pagination/filter/sort | Must be defined; the screen groups here are not a confirmed screen inventory |
@@ -185,7 +185,7 @@ The following are Backend transaction/data-integrity requirements. The UI must n
 - Start with role-aware navigation and login for Customer/Admin/Worker; hide permissions that are not confirmed.
 - Build the UC1–UC4 flow first using the same entity/status names as this guide; do not bind to request/response shapes until the data contract is agreed.
 - Build upload UI for documents/images ≤ 100 MB; after failure, provide an “Upload again” action.
-- Display time in `Asia/Bangkok`, money in baht, and no VAT; do not implement a 60% profit formula until its basis is confirmed.
+- Display time in `Asia/Bangkok`, money in baht, and no VAT; use confirmed minimum 60% markup, with precision/rounding to be defined.
 - Prepare loading/empty/error states for each workflow and wait for the Backend error/message contract.
 
 ## Coverage from the source overview
