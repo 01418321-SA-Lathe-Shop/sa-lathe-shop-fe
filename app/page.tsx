@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { canAccessWorkspace, getWorkspaces, ROLE_DESCRIPTIONS, ROLES, type Role, type WorkspaceId } from "./demo-access";
 import { getDemoRole, getServerDemoRole, setDemoRole, subscribeToDemoRole } from "./demo-session";
+import CustomerWorkspace from "./customer-workspace";
 
 function Icon({ name, className = "" }: { name: string; className?: string }) {
   const paths: Record<string, string[]> = {
@@ -57,7 +58,10 @@ export default function Home() {
     if (!role || !canAccessWorkspace(role, id)) return;
     setActiveId(id);
     setNavOpen(false);
-    requestAnimationFrame(() => document.getElementById("workspace-title")?.focus());
+    requestAnimationFrame(() => {
+      document.getElementById("workspace-title")?.focus({ preventScroll: true });
+      window.scrollTo({ top: 0 });
+    });
   }
 
   function signOut() {
@@ -113,11 +117,12 @@ export default function Home() {
       <header className="topbar"><div className="topbar-left"><button className="icon-button mobile-menu" aria-label={navOpen ? "Close navigation" : "Open navigation"} aria-expanded={navOpen} aria-controls="workspace-navigation" onClick={toggleNavigation}><Icon name={navOpen ? "close" : "menu"} /></button><span className="breadcrumb">Workspace<span>/</span><strong>{active?.label ?? "Overview"}</strong></span></div><div className="topbar-right"><span className="demo-badge compact">Demo mode</span><button className="signout-button" onClick={signOut}><Icon name="logout" /><span>Sign out</span></button></div></header>
       <main id="main-content" className="workspace-main" tabIndex={-1}>
         <div className="page-heading"><div><p className="eyebrow">{isOverview ? "YOUR WORKSHOP, AT A GLANCE" : active?.useCase}</p><h1 id="workspace-title" tabIndex={-1}>{isOverview ? `Welcome, ${role}.` : active?.label}</h1><p className="text-muted">{isOverview ? ROLE_DESCRIPTIONS[role] : active?.description}</p></div><span className="workspace-label"><span className="status-dot" />{role} workspace</span></div>
-        <div className="demo-notice"><span className="notice-icon"><Icon name="production" /></span><p><strong>You’re exploring the demo workspace.</strong><span>Navigation is ready. Business records and actions will arrive in the next phases.</span></p></div>
+        <div className="demo-notice"><span className="notice-icon"><Icon name="production" /></span><p><strong>You’re exploring the demo workspace.</strong><span>{role === "Customer" ? "Try requests, quotation responses, confirmations, and installments with sample data. No live orders or payments." : "Navigation is ready. Business records and actions will arrive in the next phases."}</span></p></div>
+        {role === "Customer" && <CustomerWorkspace workspaceId={active?.id ?? "overview"} navigate={navigate} />}
         {isOverview ? <>
           <section aria-labelledby="workspaces-heading"><div className="section-heading"><h2 id="workspaces-heading">Your workspaces</h2><span>{workspaces.length} areas</span></div><div className="workspace-grid">{workspaces.map((item) => <button key={item.id} className="workspace-card" onClick={() => navigate(item.id)}><span className="workspace-card-top"><span className="card-icon"><Icon name={item.id} /></span><span className="uc-tag">{item.useCase}</span></span><strong>{item.label}</strong><span className="card-description">{item.description}</span><span className="card-link">Open workspace<Icon name="arrow" /></span></button>)}</div></section>
           <section className="journey-panel" aria-labelledby="journey-heading"><div><span className="eyebrow">THE BIG PICTURE</span><h2 id="journey-heading">Every job has a clear journey.</h2><p className="text-muted">One workflow, from the first conversation to the final handover.</p></div><ol className="journey-steps">{["Request", "Quotation", "Deposit / PO", "Production", "Delivery & payment"].map((step, i) => <li key={step}><span>{String(i + 1).padStart(2, "0")}</span><strong>{step}</strong></li>)}</ol></section>
-        </> : active && <section className="empty-panel" aria-labelledby="empty-heading"><div className="empty-art" aria-hidden="true"><Icon name={active.id} /></div><span className="demo-badge">COMING IN A LATER PHASE</span><h2 id="empty-heading">{active.emptyTitle}</h2><p className="text-muted">{active.emptyDescription}</p><button className="button-secondary" onClick={() => navigate("overview")}>Back to overview<Icon name="arrow" /></button></section>}
+        </> : active && role !== "Customer" && <section className="empty-panel" aria-labelledby="empty-heading"><div className="empty-art" aria-hidden="true"><Icon name={active.id} /></div><span className="demo-badge">COMING IN A LATER PHASE</span><h2 id="empty-heading">{active.emptyTitle}</h2><p className="text-muted">{active.emptyDescription}</p><button className="button-secondary" onClick={() => navigate("overview")}>Back to overview<Icon name="arrow" /></button></section>}
         <footer className="workspace-footer"><span>Lathe Shop · Demo workspace</span><span><Icon name="clock" />Asia/Bangkok<span className="footer-divider">/</span>THB<span className="footer-divider">/</span>No VAT</span></footer>
       </main>
     </div>

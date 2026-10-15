@@ -131,3 +131,79 @@ h1 { letter-spacing: -.04em; }
   .sidebar.is-open { position: fixed; top: 73px; left: 0; z-index: 10; max-height: calc(100svh - 73px); box-shadow: 0 12px 25px #172d2e22; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
+
+/* Customer demo workflows (UC1, UC3, UC4, UC9). */
+.workflow-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.workflow-toolbar > p { color: var(--muted); font-size: 11px; line-height: 1.6; }
+.workflow-success { padding: 15px 18px; background: #eaf6ef; border: 1px solid #c8e4d2; color: #275b3c; border-radius: 8px; font-size: 12px; line-height: 1.7; margin-bottom: 18px; overflow-wrap: anywhere; }
+.field-error { font-size: 12px; color: #9a3434; background: #fff1ef; border: 1px solid #efd1cb; padding: 12px; border-radius: 7px; margin: 10px 0; line-height: 1.7; }
+.record-layout { display: grid; grid-template-columns: minmax(200px, 31%) minmax(0, 1fr); gap: 20px; align-items: start; }
+.record-list { display: grid; gap: 10px; }
+.record-list-item { min-width: 0; width: 100%; text-align: left; display: grid; gap: 12px; padding: 17px; border: 1px solid var(--border); border-radius: 9px; background: white; }
+.record-list-item:hover { border-color: #90bba6; }
+.record-list-item.selected { border-color: var(--accent); box-shadow: inset 3px 0 var(--accent); background: #f4faf6; }
+.record-list-item > span:first-child { font-size: 10px; color: #7d8f86; text-transform: capitalize; }
+.record-list-item > strong { font-size: 12px; line-height: 1.6; font-weight: 550; overflow-wrap: anywhere; }
+.record-list-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: center; }
+.record-list-bottom > span:last-child { font-size: 8px; color: #718078; }
+.record-status { display: inline-flex; align-items: center; border-radius: 5px; padding: 4px 8px; font-size: 9px; font-weight: 550; color: #66757b; background: #edf0f2; width: fit-content; }
+.status-approved, .status-paid, .status-delivered, .status-completed { background: #e3f1e8; color: #357247; }
+.status-sent, .status-ongoing, .status-shipping { background: #e6f0f6; color: #376782; }
+.status-partial, .status-pending { background: #fbf1d8; color: #896b25; }
+.status-canceled, .status-rejected, .status-returned { background: #f9e9e6; color: #9a5044; }
+.record-detail, .workflow-form-panel { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 25px; min-width: 0; }
+.record-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; }
+.record-heading h2 { font-size: 19px; line-height: 1.5; letter-spacing: -.025em; margin-top: 8px; font-weight: 600; overflow-wrap: anywhere; }
+.record-id { font-size: 9px; color: #86938f; overflow-wrap: anywhere; margin: 12px 0 20px; }
+.detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; padding: 18px; border: 1px solid var(--border); border-radius: 8px; background: #fbfcfb; margin: 20px 0; }
+.detail-grid dt { font-size: 10px; color: #809087; margin-bottom: 6px; }
+.detail-grid dd { margin: 0; font-size: 12px; overflow-wrap: anywhere; }
+.record-detail h3 { font-size: 12px; margin: 24px 0 12px; font-weight: 600; }
+.attachment-list { display: grid; gap: 9px; margin: 12px 0 20px; }
+.attachment-link { display: flex; justify-content: space-between; gap: 12px; width: 100%; min-height: 44px; padding: 11px 13px; background: #f7faf8; border: 1px solid #dae7df; border-radius: 6px; color: #4d6c58; font-size: 11px; text-align: left; overflow-wrap: anywhere; margin: 8px 0; }
+.attachment-link > span { color: #397b55; font-weight: 600; flex-shrink: 0; }
+.price-summary { padding: 23px; background: #f0f6f2; border: 1px solid #d9e7dc; border-radius: 9px; display: grid; gap: 10px; }
+.price-summary > span { font-size: 11px; color: #6c8574; }
+.price-summary > strong { font-size: 32px; letter-spacing: -.045em; font-weight: 600; color: #235c3d; }
+.terms-summary { padding: 18px 0; font-size: 12px; line-height: 1.8; }
+.terms-summary > strong { font-weight: 600; }
+.terms-summary > p { color: #6f7c76; font-size: 11px; margin-top: 6px; }
+.workflow-note { font-size: 11px; color: #7a8780; line-height: 1.8; margin: 15px 0; }
+.form-actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0; }
+.button-danger { background: white; color: #a1483b; border: 1px solid #e0c9c3; border-radius: 8px; min-height: 46px; padding: 12px 18px; font-size: 12px; }
+button:disabled { cursor: not-allowed; opacity: .45; }
+.revision-history { margin-top: 28px; border-top: 1px solid var(--border); padding-top: 16px; }
+.revision-history summary, .demo-tools summary { cursor: pointer; color: #6e8275; font-size: 11px; min-height: 30px; }
+.revision-history p { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 11px; align-items: center; padding: 10px 0; }
+.workflow-form-panel { margin-bottom: 22px; }
+.workflow-form-panel h2 { font-size: 20px; letter-spacing: -.025em; margin-bottom: 20px; }
+.form-field { display: grid; gap: 8px; color: #475d50; font-size: 12px; margin-bottom: 19px; }
+.form-field input, .form-field textarea, .form-field select { width: 100%; min-width: 0; background: #fff; color: var(--foreground); border: 1px solid #cfdbd3; border-radius: 7px; padding: 12px; min-height: 45px; font-size: 14px; }
+.form-field textarea { resize: vertical; line-height: 1.7; }
+.file-picker { padding: 15px; border: 1px dashed #baccbf; background: #f9fcfa; border-radius: 8px; margin-bottom: 16px; }
+.file-picker label { display: grid; gap: 12px; font-size: 11px; color: #496351; font-weight: 550; }
+.file-picker input { width: 100%; min-width: 0; color: #6d7f73; font-size: 11px; }
+.file-picker input::file-selector-button { background: #fff; border: 1px solid #c7d8cd; border-radius: 5px; padding: 9px; margin-right: 10px; color: #456b53; cursor: pointer; }
+.file-picker-hint { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-top: 12px; align-items: center; }
+.file-picker-hint > span { font-size: 9px; color: #8a978e; line-height: 1.7; }
+.text-action { color: #377354; background: transparent; border: 0; padding: 5px 0; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+.confirmation-files { display: grid; gap: 16px; margin-bottom: 20px; }
+.balance-strip { background: #f7f9f8; border: 1px solid var(--border); border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; margin: 22px 0; }
+.balance-strip span { display: block; font-size: 10px; color: #819086; margin-bottom: 7px; }
+.balance-strip strong { font-size: 21px; color: #346249; letter-spacing: -.03em; }
+.payment-history { list-style: none; padding: 0; margin: 0; }
+.payment-history li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--border); padding: 12px 0; font-size: 11px; color: #76867b; }
+.payment-history strong { color: #3d6650; }
+.payment-form { padding: 18px; border: 1px solid #dde6df; border-radius: 8px; }
+.demo-tools { border-top: 1px solid var(--border); margin-top: 28px; padding-top: 18px; }
+.demo-tools p { font-size: 11px; line-height: 1.7; color: #819086; margin: 10px 0; }
+.demo-tools button { margin: 8px 10px 0 0; font-size: 11px; }
+.customer-dialog { width: min(640px, calc(100vw - 32px)); max-height: calc(100svh - 40px); overflow-y: auto; background: #fff; color: var(--foreground); border: 1px solid #d8e4dc; border-radius: 12px; padding: 25px; margin: auto; box-shadow: 0 20px 80px #102d2c33; }
+.customer-dialog::backdrop { background: #102d2c88; }
+.dialog-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 20px; }
+.dialog-heading h2 { font-size: 20px; letter-spacing: -.025em; overflow-wrap: anywhere; }
+.dialog-heading > button { flex-shrink: 0; font-size: 11px; }
+.attachment-preview { display: block; width: 100%; max-height: 55svh; object-fit: contain; margin: 20px 0; }
+.sample-document { white-space: pre-wrap; overflow-wrap: anywhere; color: #5e7266; background: #f4f8f5; padding: 22px; font-size: 12px; line-height: 1.8; margin: 20px 0; }
+@media (max-width: 1100px) { .record-layout { grid-template-columns: 1fr; } .record-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .workflow-toolbar { flex-wrap: wrap; } .record-list { grid-template-columns: 1fr; max-height: 320px; overflow-y: auto; } .record-detail, .workflow-form-panel { padding: 18px; } .record-heading { flex-wrap: wrap; } .record-heading h2 { font-size: 18px; } .detail-grid { gap: 16px 10px; padding: 14px; } .balance-strip { padding: 15px; gap: 10px; } .balance-strip strong { font-size: 18px; } .price-summary > strong { font-size: 28px; } .customer-dialog { padding: 20px; } .form-actions > button { flex: 1; } }
