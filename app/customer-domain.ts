@@ -1,7 +1,7 @@
 // Local prototype model. These names do not define a Backend API contract.
 export type CustomerType = "individual" | "company";
 export type Attachment = { id: string; name: string; size: number; type: string; sample?: boolean };
-export type Quotation = { id: string; revision: number; price: number; status: "sent" | "approved" | "rejected" };
+export type Quotation = { id: string; revision: number; price: number; status: "draft" | "sent" | "approved" | "rejected"; costs?: { material: number; labor: number } };
 export type Payment = { id: string; amount: number; at: string };
 export type CustomerRequest = {
   id: string;
@@ -15,8 +15,8 @@ export type CustomerRequest = {
   acceptedAt?: string;
   depositProof?: Attachment;
   poProof?: Attachment;
-  job?: { id: string; status: "queued" | "in_progress" | "completed" };
-  delivery?: { id: string; status: "shipping" | "delivered" | "returned" };
+  job?: { id: string; status: "queued" | "in_progress" | "completed"; actual?: { cost: number; minutes: number; evidence: Attachment[] } };
+  delivery?: { id: string; status: "shipping" | "delivered" | "returned"; method?: "delivery" | "pickup"; recipient?: string; evidence?: Attachment[] };
   invoice?: { id: string; total: number; payments: Payment[] };
 };
 export type CustomerState = { version: 1; requests: CustomerRequest[] };
@@ -25,6 +25,10 @@ export const DEADLINE_MS = 14 * 24 * 60 * 60 * 1000;
 
 export function latestQuotation(request: CustomerRequest): Quotation | undefined {
   return request.quotations.at(-1);
+}
+
+export function latestVisibleQuotation(request: CustomerRequest): Quotation | undefined {
+  return request.quotations.filter((quotation) => quotation.status !== "draft").at(-1);
 }
 
 // Prices/amounts in this prototype are integer satang, avoiding float addition.
