@@ -21,7 +21,8 @@ This plan uses `docs/02-frontend.md` as the product source of truth and the repo
 - Phase 3: implemented as a Customer demo for review. UC1/UC3/UC4/UC9, native rule tests, and local browser checks pass. Local form/file/payment choices and request completion remain explicitly open; see `docs/04-phase-three-handoff.md`.
 - Phase 4: implemented and verified as a local Worker prototype, including Admin UC6 ordering. Shared in-memory records now survive demo role switches; reset/reload clears all roles. Automatic shortage recommendations remain disabled; see `docs/05-phase-four-handoff.md` for scope and demo-only safety gates.
 - Phase 5: implemented as an Admin demo: add/edit Workers with required name/email/phone, deactivate/reactivate, and clearly labeled password-change simulation. No real credential or login-enforcement behavior is inferred. See `docs/06-phase-five-handoff.md`.
-- Phases 6–7: not started. Do not implement production behavior that depends on unanswered decisions. Real account/password policy remains D01/D15; additional Admin permissions remain D04.
+- Phase 6: implemented and verified for the local demo. Shared Bangkok/THB formatting, accessible dialogs/file feedback, canceled-read cleanup, contextual empty states, stale-notice prevention, mobile controls, and demo storage fallback are covered. See `docs/07-phase-six-handoff.md`.
+- Phase 7: not started; real integration requires an agreed Backend/API/auth/upload contract. Do not implement production behavior that depends on unanswered decisions. Real account/password policy remains D01/D15; additional Admin permissions remain D04.
 - Commit each coherent, verified group separately with a descriptive purpose. Push groups as work progresses and push all completed work before handing off a finished phase. Do not leave the entire project for one final commit/push.
 - Stage only task-related files/hunks and exclude unrelated user edits. Use the detailed commit and push workflow in `AGENTS.md`.
 - Documentation verification: review consistency with the source guide, check references, and run `git diff --check`. Application checks are required when application code changes.
@@ -92,12 +93,16 @@ Delivered on 2026-10-15 as local demo management at `/`. Owner confirmed add/edi
 
 ### 6. Apply shared display and interaction rules
 
+Delivered on 2026-10-15 for the existing demo panels, without new dependencies, folders, routes, endpoints, or business transitions. Forty native tests, lint/build, all three prior browser regression suites, focused canceled-read/focus/mobile/timezone checks, and four storage-failure scenarios passed. Exact production UI/API/loading/retry contracts remain open; local synchronous saves do not fabricate network loading or remote success.
+
 - Display time in `Asia/Bangkok`, amounts in baht, and no VAT.
 - Use the documented entity and status names. Do not offer actions for unconfirmed transitions.
 - Provide loading, empty, and error states for each implemented flow; exact copy and retry semantics require definition.
 - For failed uploads, provide “Upload again” to start a new upload. Do not assume automatic or resumable retries.
 - Do not show an operation as successful until the system confirms it.
 - Never place S3 or authentication secrets in frontend code. Configure the API base URL through environment variables.
+
+Implemented details: shared display-only helpers and unit tests; shared dialogs with unique accessible titles and focus restoration; common file picker/preview with processing state, hint/error association, and aborted-read cleanup; contextual Customer empty states; keyboard focus/touch-size/mobile input improvements; atomic local action notices; page-memory demo role fallback on read/write/remove failure. Storage fallback is not authentication and cannot delete a stored role when browser removal is forbidden. See the handoff for integration limits and the checklist mapping.
 
 ### 7. Integrate with Backend
 

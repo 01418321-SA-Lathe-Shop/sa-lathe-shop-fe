@@ -119,6 +119,20 @@ Password change is a clearly labeled form simulation until real authentication i
 
 Implemented at the existing Admin → Workers panel. Profile/status changes persist across demo role switches and reset on reload/global reset. Status changes ask for confirmation; dialogs support Escape and return focus to their opener. No delete or assignment action is exposed. Local validation, native tests, mobile browser checks and the Customer/Worker regression checks are documented in `docs/06-phase-five-handoff.md`. No new route, API contract, dependency, or production auth provider was introduced.
 
+### Phase 6 shared interaction/display implementation (2026-10-15)
+
+Customer, Worker, and Admin now share display-only THB/two-decimal and `Asia/Bangkok`/ICT formatting. Invalid/missing display data is labeled `Unavailable`, not fabricated as zero or the current time. This is presentation behavior only; it does not decide production money precision, rounding, serialization, or date-boundary rules.
+
+Shared dialog, file-picker, and preview components stay directly under the existing `app/` directory. Dialogs have unique accessible title IDs, keyboard/Escape behavior, opener focus restoration without scroll jumps, and a workspace-heading fallback if the action removes its opener. Customer empty-state text points to the appropriate request/quotation/delivery step. Keyboard focus is visible on selects, textareas, summaries and scroll regions; mobile form text uses 16px and secondary text actions use minimum 44px touch height.
+
+File selection shows local processing via `aria-busy` and blocks dependent submission until settled. Validation/errors are associated with the file input. Failure still requires explicit “Upload again”/new selection; no automatic or resumable retry is added. Navigating away or resetting aborts pending local preparation, releases its busy count once, and prevents an old read from registering an orphan attachment. Existing document/image/decimal-100-MB demo validation remains unchanged; production allowlist/security/storage behavior remains D11.
+
+Local action failure preserves committed data and shows no success. Silent expiry updates clear old action notices rather than retaining stale success/error text. There is no artificial network spinner or claimed remote save; real load/error/retry/signed-link behavior still needs the Backend contract.
+
+The documented demo-role storage fallback now handles failed writes/removals as well as blocked reads, preserving the last valid in-page role and allowing sign-out/role changes in page memory. After a storage failure the current page ignores stale stored roles. This is **not production authentication**: if the browser forbids removal, an old stored demo role can remain and be restored after reload. No passwords/tokens/provider were added; the production auth boundary remains D01/D15.
+
+Forty native tests, existing role/workflow regressions, focused canceled-file/focus/mobile/timezone browser checks, and four storage-failure scenarios passed. See `docs/07-phase-six-handoff.md` for the evidence and Phase 7 prerequisites. UI copy and presentation choices here are demo behavior, not a new API/schema or business-rule contract.
+
 The overview specifies use cases and permissions, but **does not specify exact screen names, routes, layouts, or navigation**. The groups below are workflow screens/steps inferred as necessary from the UCs, not a confirmed screen count or URL design.
 
 | Role | Screen/work groups | UCs | Limits / notes |
