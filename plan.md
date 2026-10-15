@@ -106,6 +106,10 @@ Implemented details: shared display-only helpers and unit tests; shared dialogs 
 
 ### 7. Integrate with Backend
 
+Owner authorized integration. Implement in coherent groups: (1) tested memory-only Bearer API client with exact decimal/int64 handling and private upload protocol; (2) real login/registration, memberships/invitations, UC1 requests/files/inbox, UC2 quotations and UC3 decisions/terms at the existing `/` panel structure; (3) verification and handoff. Real mode must never use demo records or automatically fall back to the demo after API failure. Keep UC4–UC9 demo-only because the backend has no contracts for them yet.
+
+Contract overrides: Backend `docs/AUTH.md`, `UC1.md`, `UC2.md`, `UC3.md` define active integration behavior. Sixth distinct customer rejection cancels (five permit revision); accepted deposit rounds upward to a satang; immutable terms/deadline come from server. API money is decimal strings; quantities use int64 without JS precision loss. Required Worker email/phone remain an explicit backend implementation gap: do not integrate contact writes by dropping fields. Backend code/schema changes are not part of this frontend phase.
+
 Request the reads and actions listed in `docs/02-frontend.md` under “Needs from Backend.” Agree on the API contract before wiring request/response logic. Backend remains the source of truth for business validation and atomic transactions, including UC2, UC7, and UC8.
 
 ## Validation checklist
