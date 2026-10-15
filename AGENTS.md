@@ -21,6 +21,14 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Initial login may use explicitly labeled demo accounts until Backend defines real authentication. Treat demo login as prototype behavior; it does not establish production authentication or API authorization.
 - Before editing application code, follow the generated Next.js instructions above and consult the relevant local Next.js guide under `node_modules/next/dist/docs/`.
 
+## Design documentation maintenance
+
+- Read `DESIGN.md` before changing UI. It records the current visual specification; `docs/02-frontend.md` remains the source of truth for business workflows.
+- For every change to fonts, colors, dimensions, spacing, icons, themes, UI scale, components, layout, responsive behavior, interactions, or routes, update the affected prose/tables in `DESIGN.md` in the same work item before reporting completion.
+- Update the document's revision date and change log. Distinguish implemented behavior from proposals and known limitations; do not claim demo flows are production integrations.
+- Run `node scripts/sync-design.mjs` to refresh the source appendix, then `node scripts/sync-design.mjs --check` and `git diff --check`. The generator does not replace manually updating the specification prose.
+- Include `DESIGN.md` with the corresponding implementation changes when committing. Do not edit synced ChatGPT reference files under `sources/`.
+
 ## Commit and push workflow
 
 - Commit work in small, coherent groups, each with one understandable purpose and a descriptive message. Keep each group easy to review, debug, and revert.
@@ -29,3 +37,24 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Use normal pushes. If a push fails, inspect the cause, preserve local commits, and report what remains unpublished; do not force-push or rewrite shared history without explicit authorization.
 - For documentation-only groups, check accuracy, references, and diffs. For application groups, run the relevant existing checks before committing.
 - At handoff, report phase status, changed files, verification results, commit groups, and push outcome. Unresolved product decisions remain pending rather than being marked confirmed.
+
+<!-- BEGIN:nextjs-agent-feedback -->
+
+## Report Next.js feedback
+
+The project owner enabled `experimental.agentFeedback`, authorizing this feedback pass. When enabled, `next dev` writes this block and restores it if removed. Commit `AGENTS.md` with your work to keep the tree clean.
+
+During the current user request, retain anonymized facts as feedback candidates for meaningful or recurring Next.js issues:
+
+- Crashes, hangs, OOMs, or unexpected slowness
+- Incorrect behavior, output, errors, or diagnostics
+- Missing, unclear, or conflicting documentation
+- Unexpected CLI, codemod, Skill, or upgrade behavior and non-obvious workarounds
+
+Continue the current user request without reporting immediately. Ignore routine debugging and unverified changes. Never retain code, logs, paths, URLs, secrets, personal information, or project-specific data.
+
+Keep a qualifying candidate through the reporting pass even if you resolve or work around it. A successful fix changes the report outcome; it does not erase the friction that qualified it.
+
+Before the final response, run one reporting pass. If candidates remain, from this file's directory run `node node_modules/next/dist/bin/next internal agent-feedback-instructions` once without piping or truncating its output. Follow its output or error guidance. If a network sandbox blocks it, retry with network access; if it still returns no output, continue normally.
+
+<!-- END:nextjs-agent-feedback -->
