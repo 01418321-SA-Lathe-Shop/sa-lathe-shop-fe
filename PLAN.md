@@ -8,16 +8,23 @@ This plan uses `docs/02-frontend.md` as the product source of truth and the repo
 
 ## Current repository baseline
 
-- App Router source: `app/` (`page.tsx`, `layout.tsx`, `globals.css`, and favicon).
+- App Router source: `app/` with standalone landing, login, registration, Staff, and Customer routes.
 - Product requirements: `docs/02-frontend.md`.
+- Design specification: `DESIGN.md`; update it with every visual, route, interaction, theme, scale, or responsive change.
 - Stack declared in `package.json`: Next.js 16.4.0, React 19.3.0, TypeScript, Tailwind CSS 4.
 - Existing root `AGENTS.md` contains generated Next.js guidance and project-specific frontend conventions.
 - Do not restructure folders or install/upgrade dependencies without approval.
 
 ## Phase status and commit policy
 
-- Phase 1: in progress. Repository review and a decision register are available in `docs/01-phase-one-decisions.md`; unanswered decisions remain open.
-- Phases 2–7: not started. Do not implement behavior that depends on unanswered decisions.
+- Phase 1 — **in progress**. Confirmed decisions and unresolved questions remain in `docs/01-phase-one-decisions.md` and `docs/02-frontend.md`.
+- Phase 2 — **UI shell implemented as a frontend prototype**. App Router paths, Staff/Customer navigation, landing, login, registration, demo role entry, themes, UI scale, and responsive shell are present. Production authentication/session and final Admin permission boundaries remain open.
+- Phase 3 — **screen surfaces partially implemented; workflows not integrated**. Customer overview plus jobs, quotations, documents, and payments routes exist. UC1/UC3/UC4/UC9 transactions, rules, states, evidence, payments, and API integration remain pending.
+- Phase 4 — **screen surfaces partially implemented; workflows not integrated**. Staff request, quotation, production, delivery, material, payment, and debtor routes exist with mock content. UC2/UC5–UC9 forms, validation, transitions, uploads, persistence, permissions, and API integration remain pending.
+- Phase 5 — **not started**. A mock administrator label is not Worker management or an implemented Admin workflow.
+- Phase 6 — **visual foundation partially implemented**. Dark/Light themes, three UI scales, responsive layouts, key accessible labels, and design documentation exist. Systematic loading/empty/error states, upload retry, full keyboard/accessibility review, and production feedback remain pending.
+- Phase 7 — **not started**. No Backend API or production authentication/session integration is wired.
+- Current milestone: a high-fidelity frontend prototype and design baseline, not a production-ready UC1–UC9 implementation.
 - Commit each coherent, verified group separately with a descriptive purpose. Push groups as work progresses and push all completed work before handing off a finished phase. Do not leave the entire project for one final commit/push.
 - Stage only task-related files/hunks and exclude unrelated user edits. Use the detailed commit and push workflow in `AGENTS.md`.
 - Documentation verification: review consistency with the source guide, check references, and run `git diff --check`. Application checks are required when application code changes.
@@ -43,6 +50,8 @@ Keep implementation choices that depend on these items open until confirmed:
 
 ### 2. Establish role-aware application shell
 
+Status: visual prototype implemented; production authentication and permission enforcement pending.
+
 - Use the existing App Router structure; add folders only when the screen design is confirmed.
 - Provide explicitly labeled demo login and role-aware navigation for Customer, Worker, and Admin. Real authentication remains deferred until Backend defines its contract.
 - Do not expose Supplier as an in-app role unless requirements change; Supplier is currently an external actor.
@@ -50,12 +59,16 @@ Keep implementation choices that depend on these items open until confirmed:
 
 ### 3. Implement Customer workflows (UC1, UC3, UC4, UC9)
 
+Status: route and display prototypes exist; transactional workflows and Backend integration pending.
+
 - UC1: submit a manufacturing request and document/image attachments up to 100 MB.
 - UC3: review quotation revisions and accept/reject; show rejection count and the fifth-rejection cancellation behavior.
 - UC4: present Deposit/PO rules by customer type and quotation amount; collect the applicable evidence.
 - UC9: show delivery/invoice information, support installment payments, and let the Customer inspect/accept or return work.
 
 ### 4. Implement Worker workflows (UC2, UC5–UC9)
+
+Status: route and list/dashboard prototypes exist; operational forms, validation, transitions, persistence, and Backend integration pending.
 
 - UC2: prepare/save/send a quotation, or reject a request; minimum 60% markup is confirmed, while exact inputs and rounding require definition.
 - UC5: show `qty_on_hand`, `qty_reserved`, and `qty_available`; reserve materials only according to confirmed stock logic.
@@ -66,10 +79,14 @@ Keep implementation choices that depend on these items open until confirmed:
 
 ### 5. Implement Admin workflows
 
+Status: not started. Do not infer completion from the mock account label.
+
 - Support Worker management and Supplier ordering only within confirmed permissions.
 - Do not add material/unit/Supplier master-data management or order-approval screens until approved.
 
 ### 6. Apply shared display and interaction rules
+
+Status: visual system in progress; see `DESIGN.md`. Required production states and complete accessibility validation remain pending.
 
 - Display time in `Asia/Bangkok`, amounts in baht, and no VAT.
 - Use the documented entity and status names. Do not offer actions for unconfirmed transitions.
@@ -79,6 +96,8 @@ Keep implementation choices that depend on these items open until confirmed:
 - Never place S3 or authentication secrets in frontend code. Configure the API base URL through environment variables.
 
 ### 7. Integrate with Backend
+
+Status: not started; blocked on an agreed API/auth contract rather than UI routing.
 
 Request the reads and actions listed in `docs/02-frontend.md` under “Needs from Backend.” Agree on the API contract before wiring request/response logic. Backend remains the source of truth for business validation and atomic transactions, including UC2, UC7, and UC8.
 
