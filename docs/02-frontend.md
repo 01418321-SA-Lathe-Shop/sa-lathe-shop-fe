@@ -117,6 +117,8 @@ The authorized frontend demo uses shared in-memory Worker profiles, a list/searc
 
 Password change is a clearly labeled form simulation until real authentication is defined: only use synthetic values; require nonempty matching new/confirmation entries, clear both entries on attempted submission, and store only a demo simulation timestamp. Passwords/hashes are never placed in shared state, browser storage, requests, logs, or fixtures. The generic Worker demo login remains unchanged. No password-strength, current-password, reauthentication, reset-delivery or session-revocation policy is inferred.
 
+Implemented at the existing Admin → Workers panel. Profile/status changes persist across demo role switches and reset on reload/global reset. Status changes ask for confirmation; dialogs support Escape and return focus to their opener. No delete or assignment action is exposed. Local validation, native tests, mobile browser checks and the Customer/Worker regression checks are documented in `docs/06-phase-five-handoff.md`. No new route, API contract, dependency, or production auth provider was introduced.
+
 The overview specifies use cases and permissions, but **does not specify exact screen names, routes, layouts, or navigation**. The groups below are workflow screens/steps inferred as necessary from the UCs, not a confirmed screen count or URL design.
 
 | Role | Screen/work groups | UCs | Limits / notes |

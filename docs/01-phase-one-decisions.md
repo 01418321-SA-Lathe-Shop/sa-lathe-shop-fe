@@ -6,7 +6,7 @@ Source of truth: `docs/02-frontend.md`. Owner confirmations received on 2026-10-
 
 ## Repository findings
 
-- At the Phase 1 review, the application consisted of the Next.js starter in `app/page.tsx`, with `app/layout.tsx`, `app/globals.css`, and favicon. Phase 2 added the demo shell; Phase 3 added Customer actions; Phase 4 added Worker actions and Admin UC6 ordering with shared in-memory demo records. See their handoff documents. Production authentication and real business API actions remain unimplemented.
+- At the Phase 1 review, the application consisted of the Next.js starter in `app/page.tsx`, with `app/layout.tsx`, `app/globals.css`, and favicon. Phase 2 added the demo shell; Phase 3 added Customer actions; Phase 4 added Worker actions and Admin UC6 ordering with shared in-memory demo records; Phase 5 added confirmed Admin Worker-management actions and a clearly labeled password-change simulation. See their handoff documents. Production authentication and real business API actions remain unimplemented.
 - `package.json` declares Next.js 16.4.0, React 19.3.0, TypeScript, and Tailwind CSS 4. This is compatible with the guide's Next.js requirement; the guide does not prescribe exact versions or a folder layout.
 - `docs/02-frontend.md` is the available frontend requirements guide. It contains data/action needs, but no endpoint contract, exact field schema, or authentication design.
 - Existing changes in `package.json` and `package-lock.json` are outside this documentation task and are excluded from its commits.

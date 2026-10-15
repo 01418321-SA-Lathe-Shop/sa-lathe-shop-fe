@@ -116,3 +116,5 @@ Existing user changes to `package.json` / `package-lock.json` are preserved and 
 ## Next phase
 
 Phase 5 is Admin Worker management. Before defining those screens/actions, confirm D04: which operations Admin may perform, required Worker fields, account lifecycle, and status-change rules. UC6 ordering is already available. Do not invent worker CRUD, new Admin permissions, master-data management, or real auth endpoints.
+
+Subsequent owner confirmation: add/edit, deactivate/reactivate, and password change are approved; Worker name/email/phone are required. Phase 5 implements local profile management and a clearly labeled password-change simulation, without inventing real auth endpoints or account/session effects. See `docs/06-phase-five-handoff.md` for the current handoff; this Phase 4 section records the earlier decision boundary.

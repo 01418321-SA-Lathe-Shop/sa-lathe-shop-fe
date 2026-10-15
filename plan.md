@@ -20,7 +20,8 @@ This plan uses `docs/02-frontend.md` as the product source of truth and the repo
 - Phase 2: completed for the approved demo scope. Responsive demo login, sign-out, session restoration, role navigation, and empty workspaces are implemented. See `docs/03-phase-two-handoff.md` for scope, validation, and local run instructions.
 - Phase 3: implemented as a Customer demo for review. UC1/UC3/UC4/UC9, native rule tests, and local browser checks pass. Local form/file/payment choices and request completion remain explicitly open; see `docs/04-phase-three-handoff.md`.
 - Phase 4: implemented and verified as a local Worker prototype, including Admin UC6 ordering. Shared in-memory records now survive demo role switches; reset/reload clears all roles. Automatic shortage recommendations remain disabled; see `docs/05-phase-four-handoff.md` for scope and demo-only safety gates.
-- Phases 5–7: not started. Do not implement production behavior that depends on unanswered decisions. Phase 5 Worker-management actions still need definition (D04).
+- Phase 5: implemented as an Admin demo: add/edit Workers with required name/email/phone, deactivate/reactivate, and clearly labeled password-change simulation. No real credential or login-enforcement behavior is inferred. See `docs/06-phase-five-handoff.md`.
+- Phases 6–7: not started. Do not implement production behavior that depends on unanswered decisions. Real account/password policy remains D01/D15; additional Admin permissions remain D04.
 - Commit each coherent, verified group separately with a descriptive purpose. Push groups as work progresses and push all completed work before handing off a finished phase. Do not leave the entire project for one final commit/push.
 - Stage only task-related files/hunks and exclude unrelated user edits. Use the detailed commit and push workflow in `AGENTS.md`.
 - Documentation verification: review consistency with the source guide, check references, and run `git diff --check`. Application checks are required when application code changes.
@@ -34,7 +35,7 @@ Keep implementation choices that depend on these items open until confirmed:
 - Explicitly labeled demo accounts are approved for initial frontend login. Production authentication provider, session/reset behavior, and account linkage to `PERSON` remain open.
 - Exact screens/routes, form fields, validation copy, loading/empty/error behavior, and pagination/filter/sort.
 - API endpoints, request/response shapes, error format, date/money serialization, and file authorization/signed URL behavior.
-- The complete Admin permission boundary; both Admin and Worker may perform UC6, confirmed during Phase 1.
+- Additional Admin permissions; both Admin and Worker may perform UC6, confirmed during Phase 1. Worker add/edit/deactivate/reactivate/password change and required name/email/phone were confirmed during Phase 5; production auth semantics remain open.
 - Whether `JOB_REQUEST.completed` occurs after delivery or after full invoice payment.
 - Required Deposit/PO must be submitted within 14 days after quotation acceptance, confirmed during Phase 1. Invoice payment terms remain to be defined.
 - Money precision/rounding for confirmed minimum price `(material cost + labor cost) × 1.60` (60% markup).
@@ -81,7 +82,12 @@ Automatic shortage calculation is deliberately disabled because D08 is unresolve
 
 ### 5. Implement Admin workflows
 
-- Support Worker management and Supplier ordering only within confirmed permissions.
+Delivered on 2026-10-15 as local demo management at `/`. Owner confirmed add/edit, deactivate/reactivate, password change, and required name/email/phone. The Admin-only screen provides synthetic profiles, search/status filtering, forms, status confirmation, and password-change simulation. Existing UC6 purchasing is unchanged. Real password changes require the Backend authentication contract; the app never persists or transmits password text.
+
+- Support Worker management and Supplier ordering only within confirmed permissions. Do not grant Admin Worker UCs or offer permanent deletion/job reassignment.
+- Preserve shared workshop data during profile/status edits. Reload/global reset restores all role fixtures; pending Admin forms clear on reset.
+- Treat new-profile active default, simple email validation, contact-format/uniqueness, and real login/session effects as explicit prototype choices or pending decisions, not new business rules.
+- Verify required fields, immutable profile updates, status toggling, role isolation, password-entry clearing, no credential persistence/transmission, and mobile layout.
 - Do not add material/unit/Supplier master-data management or order-approval screens until approved.
 
 ### 6. Apply shared display and interaction rules
