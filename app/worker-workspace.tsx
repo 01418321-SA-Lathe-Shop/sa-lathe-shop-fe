@@ -3,15 +3,12 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { Role, WorkspaceId } from "./demo-access";
 import { invoiceBalance, invoiceStatus, recordPayment, type Attachment, type CustomerRequest } from "./customer-domain";
-import { FilePicker, FilePreview } from "./customer-workspace";
+import { FilePicker, FilePreview } from "./demo-ui";
+import { formatTHB as money, formatBangkok as date } from "./demo-display";
 import { parsePaymentInput } from "./customer-files";
 import { useWorkshop } from "./workshop-context";
 import * as rules from "./worker-domain";
 
-const currency = new Intl.NumberFormat("en-GB", { style: "currency", currency: "THB", minimumFractionDigits: 2 });
-const dates = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Bangkok", dateStyle: "medium", timeStyle: "short" });
-const money = (value: number) => currency.format(value / 100);
-const date = (value: string) => `${dates.format(new Date(value))} ICT`;
 const uuid = () => crypto.randomUUID();
 function amount(form: FormData, name: string): number {
   const value = String(form.get(name) ?? "").trim();

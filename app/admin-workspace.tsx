@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useState } from "react";
+import { Dialog as Modal } from "./demo-ui";
+import { formatBangkok } from "./demo-display";
 import type { Role } from "./demo-access";
 import { useWorkshop } from "./workshop-context";
 import {
@@ -9,26 +11,7 @@ import {
 } from "./admin-domain";
 
 const scope = "Admin:workers";
-const dates = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Bangkok", dateStyle: "medium", timeStyle: "short" });
 
-function Modal({ title, children, close }: { title: string; children: ReactNode; close: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  const titleId = useId();
-  useEffect(() => {
-    const opener = document.activeElement;
-    const dialog = ref.current;
-    dialog?.showModal();
-    return () => {
-      if (dialog?.open) dialog.close();
-      if (opener instanceof HTMLElement && opener.isConnected) opener.focus({ preventScroll: true });
-    };
-  }, []);
-  return <dialog ref={ref} className="customer-dialog" aria-labelledby={titleId}
-    onCancel={(event) => { event.preventDefault(); close(); }}>
-    <div className="dialog-heading"><h2 id={titleId}>{title}</h2><button type="button" className="button-secondary" aria-label="Close dialog" onClick={close}>Close</button></div>
-    {children}
-  </dialog>;
-}
 
 function ProfileForm({ worker, save, cancel }: {
   worker?: WorkerProfile; save: (fields: WorkerFields) => void; cancel: () => void;
@@ -109,7 +92,7 @@ function WorkerManagement() {
     <p className="workflow-note" role="status">Showing {visible.length} of {workers.length} Workers</p>
     {selected ? <div className="record-layout"><div className="record-list" aria-label="Worker profiles">{visible.map((worker) => <button key={worker.id} className={`record-list-item ${worker.id === selected.id ? "selected" : ""}`} aria-pressed={worker.id === selected.id} onClick={() => { setSelectedId(worker.id); setForm(undefined); }}><strong>{worker.name}</strong><span className="worker-contact">{worker.email}</span><span className="worker-contact">{worker.phone}</span><span className={`record-status status-${worker.status}`}>{worker.status}</span></button>)}</div>
       <article className="record-detail"><div className="record-heading"><h2>{selected.name}</h2><span className={`record-status status-${selected.status}`}>{selected.status}</span></div><p className="record-id">Worker ID: {selected.id}</p>
-        {form === "edit" ? <ProfileForm key={selected.id} worker={selected} save={save} cancel={() => setForm(undefined)} /> : <><dl className="detail-grid"><div><dt>Email</dt><dd>{selected.email}</dd></div><div><dt>Phone</dt><dd>{selected.phone}</dd></div><div><dt>Profile status</dt><dd>{selected.status}</dd></div><div><dt>Last password-change simulation</dt><dd>{selected.passwordChangeSimulatedAt ? `${dates.format(new Date(selected.passwordChangeSimulatedAt))} ICT` : "Not simulated"}</dd></div></dl><div className="form-actions"><button className="button-secondary" onClick={() => setForm("edit")}>Edit Worker</button><button className={selected.status === "active" ? "button-danger" : "button-secondary"} onClick={() => setStatusPrompt({ id: selected.id, status: selected.status === "active" ? "inactive" : "active" })}>{selected.status === "active" ? "Deactivate Worker" : "Reactivate Worker"}</button><button className="button-secondary" onClick={() => setPasswordId(selected.id)}>Change password</button></div></>}
+        {form === "edit" ? <ProfileForm key={selected.id} worker={selected} save={save} cancel={() => setForm(undefined)} /> : <><dl className="detail-grid"><div><dt>Email</dt><dd>{selected.email}</dd></div><div><dt>Phone</dt><dd>{selected.phone}</dd></div><div><dt>Profile status</dt><dd>{selected.status}</dd></div><div><dt>Last password-change simulation</dt><dd>{selected.passwordChangeSimulatedAt ? formatBangkok(selected.passwordChangeSimulatedAt) : "Not simulated"}</dd></div></dl><div className="form-actions"><button className="button-secondary" onClick={() => setForm("edit")}>Edit Worker</button><button className={selected.status === "active" ? "button-danger" : "button-secondary"} onClick={() => setStatusPrompt({ id: selected.id, status: selected.status === "active" ? "inactive" : "active" })}>{selected.status === "active" ? "Deactivate Worker" : "Reactivate Worker"}</button><button className="button-secondary" onClick={() => setPasswordId(selected.id)}>Change password</button></div></>}
       </article></div> : <section className="empty-panel"><h2>{workers.length ? "No Workers match" : "No Workers yet"}</h2><p className="text-muted">{workers.length ? "Try another name, email, phone, or status." : "Add a Worker with a name, email, and phone."}</p>{workers.length > 0 && <button className="button-secondary" onClick={() => { setSearch(""); setFilter("all"); }}>Clear filters</button>}</section>}
 
     {passwordWorker && <PasswordForm worker={passwordWorker} close={() => setPasswordId(undefined)} submit={() => { const at = new Date().toISOString(); dispatch({ scope, transform: (data) => ({ ...data, workers: simulatePasswordChange(data.workers, "Admin", passwordWorker.id, at) }), message: "Password change simulated only. Entered values were discarded; the demo login is unchanged." }); setPasswordId(undefined); }} />}

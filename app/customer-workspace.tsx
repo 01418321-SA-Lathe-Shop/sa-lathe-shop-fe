@@ -8,12 +8,9 @@ import {
   submitConfirmation, type Attachment, type CustomerRequest, type CustomerState, type CustomerType,
 } from "./customer-domain";
 import { useWorkshop } from "./workshop-context";
-import { FILE_ACCEPT, fileError, parsePaymentInput } from "./customer-files";
-
-const currency = new Intl.NumberFormat("en-GB", { style: "currency", currency: "THB", minimumFractionDigits: 2 });
-const dateTime = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Bangkok", dateStyle: "medium", timeStyle: "short" });
-const money = (amount: number) => currency.format(amount / 100);
-const date = (value: string | number) => `${dateTime.format(new Date(value))} ICT`;
+import { parsePaymentInput } from "./customer-files";
+import { Dialog, FilePicker, FilePreview } from "./demo-ui";
+import { formatTHB as money, formatBangkok as date } from "./demo-display";
 
 type Update = { transform: (data: CustomerState) => CustomerState; message?: string; scope?: WorkspaceId };
 
@@ -25,67 +22,6 @@ function AttachmentButton({ attachment, open }: { attachment: Attachment; open: 
   return <button type="button" className="attachment-link" onClick={() => open(attachment)}>{attachment.name}<span>View</span></button>;
 }
 
-function Dialog({ title, children, close }: { title: string; children: ReactNode; close: () => void }) {
-  const ref = useRef<HTMLDialogElement>(null);
-  useEffect(() => { ref.current?.showModal(); }, []);
-  return (
-    <dialog ref={ref} className="customer-dialog" aria-labelledby="dialog-title" onCancel={(event) => { event.preventDefault(); close(); }}>
-      <div className="dialog-heading"><h2 id="dialog-title">{title}</h2><button className="button-secondary" onClick={close} aria-label="Close dialog">Close</button></div>
-      {children}
-    </dialog>
-  );
-}
-
-export function FilePreview({ attachment, url, close }: { attachment: Attachment; url: string; close: () => void }) {
-  return (
-    <Dialog title={attachment.name} close={close}>
-      <p className="text-muted">Local demo attachment · {(attachment.size / 1000).toFixed(1)} KB</p>
-      {attachment.sample && <p className="workflow-note">Synthetic sample document. This is not proof of a real order or payment.</p>}
-      {url && attachment.type.startsWith("image/") ? (
-        // A local Blob URL is intentionally rendered without a Next.js image optimization request.
-        // eslint-disable-next-line @next/next/no-img-element
-        <img className="attachment-preview" src={url} alt={attachment.name} />
-      ) : attachment.sample ? <pre className="sample-document">DEMO DOCUMENT{"\n\n"}{attachment.name}{"\n\n"}For prototype testing only.{"\n"}No real payment, order, or delivery is represented.</pre>
-        : <p className="workflow-note">Use the download link to open this document in your preferred viewer.</p>}
-      {url ? <a className="button-primary" href={url} download={attachment.name}>Download local file</a> : <p role="status">Preparing local preview…</p>}
-    </Dialog>
-  );
-}
-
-export function FilePicker({ label, onSelect, registerFile, busyChange, shouldFail }: {
-  label: string; onSelect: (attachment: Attachment) => void;
-  registerFile: (file: File) => Attachment; busyChange: (delta: number) => void; shouldFail: () => boolean;
-}) {
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  const input = useRef<HTMLInputElement>(null);
-  async function select(file: File, sample = false) {
-    const invalid = fileError(file);
-    setError(invalid ?? "");
-    if (invalid) { if (input.current) input.current.value = ""; return; }
-    setBusy(true);
-    busyChange(1);
-    try {
-      if (shouldFail()) throw new Error("Demo upload failed. Upload again by choosing a file anew.");
-      await file.slice(0, 8).arrayBuffer();
-      onSelect({ ...registerFile(file), sample });
-    } catch {
-      setError("The file could not be attached. Upload again by choosing a file anew.");
-    } finally {
-      setBusy(false);
-      busyChange(-1);
-      if (input.current) input.current.value = "";
-    }
-  }
-  return (
-    <div className="file-picker">
-      <label><span>{label}</span><input ref={input} type="file" accept={FILE_ACCEPT} disabled={busy} onChange={(event) => { const file = event.target.files?.[0]; if (file) void select(file); }} /></label>
-      <div className="file-picker-hint"><span>Documents and images · up to 100 MB each · local demo</span><button type="button" className="text-action" disabled={busy} onClick={() => void select(new File(["DEMO DOCUMENT — no real transaction.\n"], "demo-document.txt", { type: "text/plain" }), true)}>Use demo document</button></div>
-      {busy && <p role="status">Preparing file locally…</p>}
-      {error && <div className="field-error" role="alert"><p>{error}</p><button type="button" className="text-action" onClick={() => input.current?.click()}>Upload again</button></div>}
-    </div>
-  );
-}
 
 export default function CustomerWorkspace({ workspaceId, navigate }: { workspaceId: WorkspaceId; navigate: (id: WorkspaceId) => void }) {
   const { state, dispatch: sharedDispatch, registerFile, getFile, resetDemo } = useWorkshop();
@@ -145,6 +81,13 @@ export default function CustomerWorkspace({ workspaceId, navigate }: { workspace
   const terms = selected && quotation ? confirmationTerms(selected.customerType, quotation.price) : undefined;
   const deposit = evidence.requestId === selected?.id ? evidence.deposit : undefined;
   const po = evidence.requestId === selected?.id ? evidence.po : undefined;
+  const empty = workspaceId === "quotations"
+    ? { title: "No quotations yet", body: "A Worker must send a quotation before you can review it.", next: "requests" as const, action: "Open requests" }
+    : workspaceId === "delivery-payment"
+      ? { title: "No deliveries or invoices yet", body: "Delivery and invoice information appears after production and Worker handover.", next: "requests" as const, action: "Open requests" }
+      : workspaceId === "deposit-po"
+        ? { title: "No confirmations awaiting evidence", body: "Accept a quotation to see the required Deposit and/or PO.", next: "quotations" as const, action: "Open quotations" }
+        : { title: "No requests yet", body: "Start by submitting a manufacturing request and any supporting documents.", next: "requests" as const, action: "New request" };
 
   const uploadFields = (requestId: string) => <div className="confirmation-files" key={requestId}>
     {!!terms?.deposit && <div><FilePicker label={`Deposit evidence — ${money(terms.deposit)}`} onSelect={(file) => setEvidence((current) => ({ ...(current.requestId === requestId ? current : {}), requestId, deposit: file }))} {...pickerProps} />{deposit && fileLink(deposit)}</div>}
@@ -214,7 +157,7 @@ export default function CustomerWorkspace({ workspaceId, navigate }: { workspace
             <h3>Payment history</h3>{selected.invoice.payments.length ? <ul className="payment-history">{selected.invoice.payments.map((payment) => <li key={payment.id}><span>{date(payment.at)}</span><strong>{money(payment.amount)}</strong></li>)}</ul> : <p className="text-muted">No installments recorded yet.</p>}
           </>}
         </article>}
-      </div> : <div className="empty-panel"><h2>No records here yet</h2><p className="text-muted">Accept a quotation to see its Deposit/PO requirements.</p><button className="button-secondary" onClick={() => navigate("quotations")}>Open quotations</button></div>}
+      </div> : <div className="empty-panel"><h2>{empty.title}</h2><p className="text-muted">{empty.body}</p><button className="button-secondary" onClick={() => workspaceId === "requests" ? setCreating(true) : navigate(empty.next)}>{empty.action}</button></div>}
 
       <details className="demo-tools"><summary>Demo tools</summary><p>These controls affect shared sample data for all roles in this browser view.</p><button className="button-secondary" onClick={() => { failNextFile.current = true; dispatch({ transform: (data) => data, message: "The next file attachment will fail once so you can try Upload again." }); }}>Fail next file attachment</button><button className="button-secondary" onClick={() => setPrompt({ title: "Reset sample data?", body: "All roles' local demo changes and attachments will be replaced with the original sample scenarios.", action: () => { selectRequest(""); setCreating(false); setRequestFiles([]); failNextFile.current = false; resetDemo(scope); } })}>Reset sample data</button></details>
       {prompt && <Dialog title={prompt.title} close={() => setPrompt(undefined)}><p className="text-muted">{prompt.body}</p><div className="form-actions"><button className="button-primary" onClick={() => { prompt.action(); setPrompt(undefined); }}>Confirm</button><button className="button-secondary" onClick={() => setPrompt(undefined)}>Cancel</button></div></Dialog>}

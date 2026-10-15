@@ -7,7 +7,7 @@ body { margin: 0; background: var(--background); color: var(--foreground); font-
 button, input { font: inherit; }
 button { cursor: pointer; touch-action: manipulation; }
 button, a, input { -webkit-tap-highlight-color: transparent; }
-button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid #30a480; outline-offset: 4px; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible, [tabindex]:focus-visible { outline: 3px solid #30a480; outline-offset: 4px; }
 h1, h2, p { margin: 0; }
 h1 { letter-spacing: -.04em; }
 .text-muted { color: var(--muted); line-height: 1.65; }
@@ -187,6 +187,9 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .file-picker-hint { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-top: 12px; align-items: center; }
 .file-picker-hint > span { font-size: 9px; color: #8a978e; line-height: 1.7; }
 .text-action { color: #377354; background: transparent; border: 0; padding: 5px 0; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+.text-action, .revision-history summary, .demo-tools summary { min-height: 44px; }
+.file-picker[aria-busy="true"] { border-style: solid; }
+@media (max-width: 760px) { .form-field input, .form-field textarea, .form-field select { font-size: 16px; } .file-picker input::file-selector-button { min-height: 44px; } }
 .confirmation-files { display: grid; gap: 16px; margin-bottom: 20px; }
 .balance-strip { background: #f7f9f8; border: 1px solid var(--border); border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 20px; margin: 22px 0; }
 .balance-strip span { display: block; font-size: 10px; color: #819086; margin-bottom: 7px; }
