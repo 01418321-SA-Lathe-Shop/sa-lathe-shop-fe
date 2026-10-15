@@ -4,19 +4,22 @@ import { isRole, type Role } from "./demo-access";
 const STORAGE_KEY = "sa-lathe-demo-role";
 const CHANGE_EVENT = "sa-lathe-demo-session-change";
 let memoryRole: Role | null = null;
+let memoryOnly = false;
 
 export function getDemoRole(): Role | null {
+  if (memoryOnly) return memoryRole;
   try {
     const stored = window.sessionStorage.getItem(STORAGE_KEY);
-    return isRole(stored) ? stored : null;
-  } catch { return memoryRole; }
+    memoryRole = isRole(stored) ? stored : null;
+    return memoryRole;
+  } catch { memoryOnly = true; return memoryRole; }
 }
 export function setDemoRole(role: Role | null): void {
   memoryRole = role;
-  try {
+  if (!memoryOnly) try {
     if (role) window.sessionStorage.setItem(STORAGE_KEY, role);
     else window.sessionStorage.removeItem(STORAGE_KEY);
-  } catch { /* Use an in-memory demo session when browser storage is blocked. */ }
+  } catch { memoryOnly = true; /* A readable stale value must not override a failed write/sign-out. */ }
   window.dispatchEvent(new Event(CHANGE_EVENT));
 }
 export function subscribeToDemoRole(onChange: () => void): () => void {
