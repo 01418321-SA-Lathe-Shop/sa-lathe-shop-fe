@@ -18,7 +18,8 @@ This plan uses `docs/02-frontend.md` as the product source of truth and the repo
 
 - Phase 1: in progress. Repository review and a decision register are available in `docs/01-phase-one-decisions.md`; unanswered decisions remain open.
 - Phase 2: completed for the approved demo scope. Responsive demo login, sign-out, session restoration, role navigation, and empty workspaces are implemented. See `docs/03-phase-two-handoff.md` for scope, validation, and local run instructions.
-- Phases 3–7: not started. Do not implement behavior that depends on unanswered decisions.
+- Phase 3: implemented as a Customer demo for review. UC1/UC3/UC4/UC9, native rule tests, and local browser checks pass. Local form/file/payment choices and request completion remain explicitly open; see `docs/04-phase-three-handoff.md`.
+- Phases 4–7: not started. Do not implement production behavior that depends on unanswered decisions.
 - Commit each coherent, verified group separately with a descriptive purpose. Push groups as work progresses and push all completed work before handing off a finished phase. Do not leave the entire project for one final commit/push.
 - Stage only task-related files/hunks and exclude unrelated user edits. Use the detailed commit and push workflow in `AGENTS.md`.
 - Documentation verification: review consistency with the source guide, check references, and run `git diff --check`. Application checks are required when application code changes.
@@ -55,10 +56,14 @@ Validation passed: `npm run lint`, `npm run build`, five native Node role-access
 
 ### 3. Implement Customer workflows (UC1, UC3, UC4, UC9)
 
+Delivered on 2026-10-15 as local demo workflows at `/`. Sample records and file objects are held in memory and reset on sign-out/reload. No real API, payment transfer, or S3 upload is performed. The request completion rule remains unchanged pending confirmation; local installment recording updates only the sample invoice.
+
 - UC1: submit a manufacturing request and document/image attachments up to 100 MB.
 - UC3: review quotation revisions and accept/reject; show rejection count and the fifth-rejection cancellation behavior.
 - UC4: present Deposit/PO rules by customer type and quotation amount; collect the applicable evidence.
 - UC9: show delivery/invoice information, support installment payments, and let the Customer inspect/accept or return work.
+
+Verification: 15 native tests passed; lint/build passed; headless Chromium checks covered request creation, document preview, failed attachment recovery, all three Deposit/PO combinations, fifth-rejection cancellation, delivery acceptance/return, installment arithmetic/overpayment, mobile widths, and role isolation. Changes are split into domain/tests, UI, and handoff commits on `develop`.
 
 ### 4. Implement Worker workflows (UC2, UC5–UC9)
 

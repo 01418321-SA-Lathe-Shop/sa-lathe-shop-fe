@@ -6,7 +6,7 @@ Source of truth: `docs/02-frontend.md`. Owner confirmations received on 2026-10-
 
 ## Repository findings
 
-- At the Phase 1 review, the application consisted of the Next.js starter in `app/page.tsx`, with `app/layout.tsx`, `app/globals.css`, and favicon. Phase 2 subsequently added the approved demo shell; see `docs/03-phase-two-handoff.md`. Production authentication and business actions are still unimplemented.
+- At the Phase 1 review, the application consisted of the Next.js starter in `app/page.tsx`, with `app/layout.tsx`, `app/globals.css`, and favicon. Phase 2 added the approved demo shell; Phase 3 added Customer demo actions. See their handoff documents. Production authentication and real business API actions remain unimplemented.
 - `package.json` declares Next.js 16.4.0, React 19.3.0, TypeScript, and Tailwind CSS 4. This is compatible with the guide's Next.js requirement; the guide does not prescribe exact versions or a folder layout.
 - `docs/02-frontend.md` is the available frontend requirements guide. It contains data/action needs, but no endpoint contract, exact field schema, or authentication design.
 - Existing changes in `package.json` and `package-lock.json` are outside this documentation task and are excluded from its commits.
@@ -37,18 +37,19 @@ All open entries are **To be defined**. Suggestions or source assumptions do not
 | ID | Topic / question | Current evidence / temporary assumption | Blocks |
 |---|---|---|---|
 | D01 | Production authentication provider, session, reset, account linkage to `PERSON`? | Initial explicitly labeled demo accounts approved; real authentication remains deferred | Production authentication and Backend integration; demo login may proceed |
-| D02 | What are the exact screens/routes, fields, validation, error copy, and list behavior? | Phase 2 was authorized by the owner and implements the documented role groups as demo workspace panels at `/`. Detailed business forms/routes remain open | Detailed UC1–UC9 forms and routing; agree designs before adding folders |
+| D02 | What are the exact production screens/routes, fields, validation, error copy, and list behavior? | Authorized demo phases use panels at `/`; Phase 3 implements minimal Customer forms for review. Their shape is not a confirmed Backend field contract | Final business forms/routes; agree designs before adding folders |
 | D03 | What are endpoints, payloads, errors, pagination, and date/money serialization? | Only “Needs from Backend” reads/actions are documented | Real API integration for all UCs |
 | D04 | Which Admin actions exist beyond Worker management and UC6? What operations does Worker management include? | UC6 is now confirmed for both roles; master-data CRUD and order approval remain undefined | Phase 5 Admin screens and permission policy |
 | D05 | When does `JOB_REQUEST` become `completed`? | JOB production completes before delivery; request completion could follow delivery or full payment | UC9 completion display and final lifecycle |
 | D06 | Invoice payment due terms and exact deadline/time calculation? | Required Deposit/PO within 14 days after quotation acceptance is confirmed; invoice due terms and boundary handling remain undefined | Exact UC4 deadline behavior and UC9 invoice due behavior |
-| D07 | Money precision, rounding, and threshold comparison? | Minimum 60% markup confirmed; no precision/rounding specified | UC2 calculation, UC4 threshold/deposit, UC9 balances |
+| D07 | Production money precision, rounding, and threshold comparison? | Minimum 60% markup confirmed. Demo input/display uses two decimals and integer satang; half-satang Deposits are explicitly rejected. These are prototype choices for review | Production UC2 calculation, UC4 Deposit rounding, UC9 serialization |
 | D08 | Exact planned-material schema and shortage calculation? | Saved material/required quantity per JOB confirmed; Q6.1 conflicts with reserving available stock and ordering only shortage | UC5 form/data model and UC6 ordered quantity |
 | D09 | Which Supplier payment methods exist and how is credit settled? | `CREDIT` → `pending`; other methods → `paid`; actual choices and settlement flow undefined | UC7 payment fields/actions |
 | D10 | Notification channels, recipients, events, retry policy, and UI? | Outbox + worker required; shop/customer notifications and collection reminders mentioned | Notification implementation and Backend integration |
-| D11 | MIME/extension allowlist, signed URL lifetime/access, partial upload cleanup? | Documents/images ≤100 MB and upload-again behavior confirmed; specific storage contract missing | Reliable file validation and real upload integration |
+| D11 | MIME/extension allowlist, signed URL lifetime/access, partial upload cleanup? | Documents/images ≤100 MB and upload-again behavior confirmed. Demo checks common extensions and 100,000,000 bytes; production MIME/content validation and storage contract remain open | Secure real upload integration |
 | D12 | Missing transitions and proposed statuses? | Item `partially_received` is proposed; `requote`, `released`, `preparing`, `in_transit`, defect resolution/write-off, and account active/inactive rules lack defined actions | Related action controls and lifecycle implementation |
 | D13 | Does receipt in UC7 return to UC5 to recheck job readiness? | UC7-to-UC5 connection is a temporary proposal | Receiving-to-production readiness handoff |
+| D14 | Who verifies Customer installments before they affect invoice balances? | Phase 3's explicitly labeled local recording immediately updates sample invoices only; it does not define production verification policy | Production Customer-payment workflow |
 
 ## UI/API needs by use case
 

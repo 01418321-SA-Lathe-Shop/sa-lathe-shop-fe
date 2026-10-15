@@ -69,7 +69,21 @@ The flow is based on the Use Cases, Sequence Diagrams, and Collaboration Diagram
 
 ## Navigation and screens by role
 
-Phase 2 implementation note (2026-10-15): the owner authorized the demo shell. Login and documented workspace groups now run as panels at `/`, with a responsive sidebar/mobile menu. This is the initial prototype navigation, not a finalized route or form contract. Demo role selection is stored in this tab's `sessionStorage`, invalid values are rejected, and sign-out removes it. If storage is blocked, it falls back to page memory. Business actions and Backend authentication remain deferred. Implementation and checks are documented in `docs/03-phase-two-handoff.md`.
+Phase 2 implementation note (2026-10-15): the owner authorized the demo shell. Login and documented workspace groups run as panels at `/`, with a responsive sidebar/mobile menu. This is the initial prototype navigation, not a finalized route or form contract. Demo role selection is stored in this tab's `sessionStorage`, invalid values are rejected, and sign-out removes it. If storage is blocked, it falls back to page memory. Business actions were deferred in Phase 2; the Phase 3 Customer prototype below now replaces its Customer placeholders. Backend authentication remains deferred. Phase 2 checks are documented in `docs/03-phase-two-handoff.md`.
+
+### Phase 3 Customer prototype (2026-10-15)
+
+The owner authorized the next phase. UC1/UC3/UC4/UC9 now have local demo actions: request details/customer type/attachments, quotation history and accept/reject, Deposit/PO evidence, delivery inspection, and sample installment recording. Synthetic records cover individual, company at THB 10,000, company above THB 10,000, a fifth-rejection example, and an invoiced delivery. New requests remain pending a Worker estimate; the Customer UI does not issue quotations.
+
+Prototype choices presented for review, rather than confirmed production rules:
+
+- Minimal forms use the information named above. Customer type is selected per synthetic scenario/request, not a finalized account-to-customer schema.
+- Input/display uses two decimal places; integer satang is used internally for exact sums. Production precision and rounding remain open; a half-satang Deposit is rejected rather than silently rounded.
+- Local file selection uses common document/image extensions and a decimal 100 MB limit (100,000,000 bytes). MIME/content security rules and the production allowlist still need agreement. “Use demo document” and one-shot failure controls allow local testing; nothing is uploaded to S3.
+- “Record demo installment” immediately updates the sample invoice; it is not a real payment or a decision about production payment verification. Who verifies actual Customer payments remains open.
+- `JOB_REQUEST.completed` is still not applied automatically. The final request-completion trigger awaits confirmation.
+
+Local changes and file objects survive workspace navigation, but reset on sign-out or reload. Attached files can be inspected/downloaded locally, and synthetic document contents are visibly labeled. Details and verification are in `docs/04-phase-three-handoff.md`. The open contract/field questions elsewhere in this guide still apply to production integration.
 
 The overview specifies use cases and permissions, but **does not specify exact screen names, routes, layouts, or navigation**. The groups below are workflow screens/steps inferred as necessary from the UCs, not a confirmed screen count or URL design.
 
