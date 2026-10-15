@@ -7,6 +7,7 @@ import CustomerWorkspace from "./customer-workspace";
 import WorkerWorkspace from "./worker-workspace";
 import AdminWorkspace from "./admin-workspace";
 import { DemoWorkshopProvider, useWorkshop } from "./workshop-context";
+import BackendWorkspace from "./backend-workspace";
 
 function Icon({ name, className = "" }: { name: string; className?: string }) {
   const paths: Record<string, string[]> = {
@@ -34,6 +35,12 @@ function Brand() {
 }
 
 export default function Home() {
+  const [demo, setDemo] = useState(false);
+  if (!demo) return <BackendWorkspace onDemo={() => setDemo(true)} />;
+  return <><button className="live-return" onClick={() => setDemo(false)}>Return to connected sign-in</button><DemoHome /></>;
+}
+
+function DemoHome() {
   return <Suspense fallback={<main className="workspace-main"><p role="status">Preparing demo workspace…</p></main>}><DemoWorkshopProvider><WorkshopApp /></DemoWorkshopProvider></Suspense>;
 }
 

@@ -50,3 +50,29 @@ test("401 expires session once and errors retain reference without logging bodie
     await assert.rejects(api.call("//other.test"));
   } finally { globalThis.fetch = original; }
 });
+test("failed upload requires a fresh intent and never completes failed storage writes", async () => {
+  const original = globalThis.fetch; let intents = 0; let completions = 0; let fail = true;
+  globalThis.fetch = async (url) => {
+    if (String(url).endsWith("/uploads")) return Response.json({ url: "https://storage.test/private", attachment_id: `attempt-${++intents}` });
+    if (String(url).includes("storage.test")) return new Response(null, { status: fail ? 503 : 200 });
+    completions++; return new Response(null, { status: 204 });
+  };
+  try {
+    const api = new BackendApi("https://api.test"); const file = new File(["notes"], "notes.txt", { type: "text/plain" });
+    await assert.rejects(api.upload("request", file), /Upload again/);
+    assert.equal(intents, 1); assert.equal(completions, 0);
+    fail = false; await api.upload("request", file);
+    assert.equal(intents, 2); assert.equal(completions, 1);
+  } finally { globalThis.fetch = original; }
+});
+test("API requests omit cookies, reject redirects, bypass cache and abort on session close", async () => {
+  const original = globalThis.fetch; let captured;
+  globalThis.fetch = async (_, init) => { captured = init; return new Response(null, { status: 204 }); };
+  try {
+    const api = new BackendApi("https://api.test"); await api.call("/requests");
+    assert.equal(captured.credentials, "omit"); assert.equal(captured.redirect, "error"); assert.equal(captured.cache, "no-store");
+    assert.equal(captured.signal.aborted, false); api.close(); assert.equal(captured.signal.aborted, true);
+    assert.throws(() => new BackendApi("https://user:secret@api.test"));
+    assert.throws(() => new BackendApi("https://api.test?token=not-allowed"));
+  } finally { globalThis.fetch = original; }
+});
