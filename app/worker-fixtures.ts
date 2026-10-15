@@ -16,6 +16,10 @@ export function createWorkshopDemo(customer: CustomerState, now: number): Worksh
     { id: id(3), name: "Demo aluminium blanks", unit: "pcs", onHand: 12, avgCost: { numerator: "45000", denominator: "1" } },
   ];
   return {
+    workers: [
+      { id: "50000000-0000-4000-8000-000000000001", name: "Demo technician A", email: "technician.a@example.test", phone: "+66 80 000 0001", status: "active" },
+      { id: "50000000-0000-4000-8000-000000000002", name: "Demo technician B", email: "technician.b@example.test", phone: "+66 80 000 0002", status: "inactive" },
+    ],
     ...customer, requests: [pending, queued, ...customer.requests], materials,
     suppliers: [{ id: id(501), name: "Demo Steel Supply" }, { id: id(502), name: "Demo Metals Supply" }],
     plans: [{ jobId: id(402), materialId: id(2), quantity: 8 }], reservations: [], orders: [], usages: [], receipts: [], defects: [],

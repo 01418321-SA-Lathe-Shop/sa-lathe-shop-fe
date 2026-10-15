@@ -109,13 +109,21 @@ Additional prototype choices for review, **not confirmed production rules**:
 
 Verification and a step-by-step demo are in `docs/05-phase-four-handoff.md`. Existing requirements and open questions below still govern production behavior.
 
+### Phase 5 Admin scope confirmed by owner (2026-10-15)
+
+Admin may add and edit Workers, deactivate/reactivate them, and change their passwords. Worker name, email, and phone are all required. This supersedes earlier statements that Worker-management operations/fields were undefined. Admin UC6 ordering stays unchanged; no permanent deletion, job reassignment, master-data management, or additional Worker permissions are added.
+
+The authorized frontend demo uses shared in-memory Worker profiles, a list/search/status filter, required contact forms, and explicit active/inactive confirmation. New synthetic profiles default `active` as a prototype choice. Basic email syntax and trimmed required contacts are local validation; phone format, contact uniqueness, provisioning, real inactive-login/session behavior, and audit/API fields remain To be defined (D01/D15).
+
+Password change is a clearly labeled form simulation until real authentication is defined: only use synthetic values; require nonempty matching new/confirmation entries, clear both entries on attempted submission, and store only a demo simulation timestamp. Passwords/hashes are never placed in shared state, browser storage, requests, logs, or fixtures. The generic Worker demo login remains unchanged. No password-strength, current-password, reauthentication, reset-delivery or session-revocation policy is inferred.
+
 The overview specifies use cases and permissions, but **does not specify exact screen names, routes, layouts, or navigation**. The groups below are workflow screens/steps inferred as necessary from the UCs, not a confirmed screen count or URL design.
 
 | Role | Screen/work groups | UCs | Limits / notes |
 |---|---|---|---|
 | Customer | Login; submit request and attachments; view/respond to quotation; submit Deposit/PO evidence; inspect delivery and pay invoice | UC1, UC3, UC4, UC9 | `individual`/`company` are customer types; PO/Deposit requirements depend on customer type/price; show relevant lifecycle statuses below |
 | Worker | Login; estimate/send quotation; check/reserve stock; order materials; receive good/defective goods and record Supplier payment; perform work/issue materials; deliver/record payment | UC2, UC5–UC9 | Both Worker and Admin may perform UC6, confirmed during Phase 1 |
-| Admin | Login; manage Workers; order from Suppliers as confirmed by the owner | No separate management UC; UC6 | UC6 access is confirmed; scope of Worker-management screens and other permissions must be defined; do not assume Admin has all Worker permissions |
+| Admin | Login; add/edit Workers (name/email/phone required), deactivate/reactivate, change password; order from Suppliers | No separate management UC; UC6 | Worker-management operations/required contacts confirmed during Phase 5. Password change is demo-only until real auth is defined. Other Admin permissions remain undefined; do not inherit Worker UCs |
 | Supplier | No in-app navigation specified in the current workflow | UC6, UC7 | External actor; whether Supplier logs into the system is not specified |
 
 ## Business rules the UI must reflect
@@ -171,7 +179,8 @@ Use the exact status values below as system names; English display labels are no
 | `DELIVERY` | `preparing`, `shipping`, `delivered`, `returned` | UC9 creates `shipping`; Customer acceptance sets `delivered`; return sets `returned`; no transition to `preparing` is specified |
 | `INVOICE` | `unpaid`, `partial`, `paid` | Create as `unpaid`; partial payment sets `partial`; full payment sets `paid` |
 | `MATERIAL_ORDER.payment_status` | `unpaid`, `pending`, `paid` | Create as `unpaid`; CREDIT sets `pending`; other methods set `paid` per UC7; actual method is unclear |
-| `WORKER.status`, `ADMIN.status` | `active`, `inactive` | Enums exist; status-change rules are not specified |
+| `WORKER.status` | `active`, `inactive` | Admin deactivates/reactivates, confirmed during Phase 5; real login/session/job effects remain To be defined |
+| `ADMIN.status` | `active`, `inactive` | Status-change rules are not specified |
 
 Adding `MATERIAL_ORDER_ITEM.partially_received` is a proposal. `JOB_REQUEST.completed`, `QUOTATION.requote`, `DELIVERY.preparing`, `MATERIAL_RESERVATION.released`, `preparing`/`in_transit`, and other statuses without transitions need definition. The UI should not offer an action whose transition/permission has not been confirmed.
 
@@ -190,6 +199,7 @@ Endpoints, request/response fields, and error codes are not included in the over
 | UC7 Receiving | Order/items, good/defective received quantities, `MATERIAL`, defect/claim, Supplier payment status | Record receipt, stock movement/cost update, defect, Supplier payment |
 | UC8 Production | `JOB`, reservations, stock, actual material usage, actual cost/time, images and URLs | Change job status, record material use/issue, upload production evidence |
 | UC9 Delivery/invoice | Delivery/status/evidence, invoice totals/balance/status, payment allocations | Record delivery/acceptance/return; issue invoice; receive multiple payments and allocate amounts |
+| Admin Worker management (no numbered UC) | Worker UUID, name/email/phone, active/inactive status; auth action outcomes once defined | Admin add/edit/deactivate/reactivate/change password. Exact API, password/security policy, provisioning and deactivation/session semantics remain To be defined; do not expose credential values in read responses |
 | All list screens | Pagination/filter/sort requirements are unspecified | Define format and parameters |
 
 Backend is the source of truth for business validation; UI validation only helps users catch errors before submission. Error response, date/money serialization, signed URL lifetime, and file-read authorization are **to be defined**.
@@ -207,7 +217,7 @@ The following are Backend transaction/data-integrity requirements. The UI must n
 | Topic | Known information | Confirmation needed / assumption |
 |---|---|---|
 | Who performs UC6 | Admin and Worker may perform UC6 | Confirmed during Phase 1; remaining Admin permissions still require definition |
-| Admin permissions | Admin manages Workers and orders from Suppliers, per owner | Other screens/permissions, master data `MATERIAL`, `UNIT`, `SUPPLIER`, and order approval are undefined |
+| Admin permissions | Admin add/edit/deactivate/reactivate/password-change operations and required Worker name/email/phone confirmed during Phase 5; UC6 ordering confirmed | Production credential/security contract and inactive-account effects remain D01/D15. Master data `MATERIAL`, `UNIT`, `SUPPLIER`, order approval, and other permissions remain undefined |
 | `JOB_REQUEST.completed` | Exists in ER but has no UC transition; JOB completes before delivery | Confirm whether request is shown as completed after delivery or after invoice is fully paid |
 | 60% profit formula | Minimum price = `(material cost + labor cost) × 1.60` | Markup basis confirmed during Phase 1; money precision/rounding remain to be defined |
 | 14 days | Required Deposit/PO must be submitted within 14 days after quotation acceptance | Confirmed during Phase 1; invoice payment terms are not specified by this decision |

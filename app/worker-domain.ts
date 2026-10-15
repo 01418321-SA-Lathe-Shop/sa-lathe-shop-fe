@@ -1,4 +1,5 @@
 import type { Attachment, CustomerRequest, CustomerState, Quotation } from "./customer-domain";
+import type { WorkerProfile } from "./admin-domain";
 
 // Local demo model only. Quantities use whole pieces; production precision is open.
 export type ExactCost = { numerator: string; denominator: string };
@@ -10,6 +11,7 @@ export type Usage = Plan & { id: string; at: string; cost: ExactCost };
 export type OrderItem = { id: string; materialId: string; quantity: number; unitPrice: number; good: number; defective: number; status: "ordered" | "partially_received" | "received" | "damaged" };
 export type MaterialOrder = { id: string; jobId: string; supplierId: string; at: string; items: OrderItem[]; status: "ordered" | "partially_received" | "received" | "cancelled"; paymentStatus: "unpaid" | "pending" | "paid" };
 export type WorkshopState = CustomerState & {
+  workers: WorkerProfile[];
   materials: Material[];
   suppliers: { id: string; name: string }[];
   plans: Plan[];
