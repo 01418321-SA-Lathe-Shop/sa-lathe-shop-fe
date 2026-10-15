@@ -19,7 +19,8 @@ This plan uses `docs/02-frontend.md` as the product source of truth and the repo
 - Phase 1: in progress. Repository review and a decision register are available in `docs/01-phase-one-decisions.md`; unanswered decisions remain open.
 - Phase 2: completed for the approved demo scope. Responsive demo login, sign-out, session restoration, role navigation, and empty workspaces are implemented. See `docs/03-phase-two-handoff.md` for scope, validation, and local run instructions.
 - Phase 3: implemented as a Customer demo for review. UC1/UC3/UC4/UC9, native rule tests, and local browser checks pass. Local form/file/payment choices and request completion remain explicitly open; see `docs/04-phase-three-handoff.md`.
-- Phases 4–7: not started. Do not implement production behavior that depends on unanswered decisions.
+- Phase 4: implemented and verified as a local Worker prototype, including Admin UC6 ordering. Shared in-memory records now survive demo role switches; reset/reload clears all roles. Automatic shortage recommendations remain disabled; see `docs/05-phase-four-handoff.md` for scope and demo-only safety gates.
+- Phases 5–7: not started. Do not implement production behavior that depends on unanswered decisions. Phase 5 Worker-management actions still need definition (D04).
 - Commit each coherent, verified group separately with a descriptive purpose. Push groups as work progresses and push all completed work before handing off a finished phase. Do not leave the entire project for one final commit/push.
 - Stage only task-related files/hunks and exclude unrelated user edits. Use the detailed commit and push workflow in `AGENTS.md`.
 - Documentation verification: review consistency with the source guide, check references, and run `git diff --check`. Application checks are required when application code changes.
@@ -56,7 +57,7 @@ Validation passed: `npm run lint`, `npm run build`, five native Node role-access
 
 ### 3. Implement Customer workflows (UC1, UC3, UC4, UC9)
 
-Delivered on 2026-10-15 as local demo workflows at `/`. Sample records and file objects are held in memory and reset on sign-out/reload. No real API, payment transfer, or S3 upload is performed. The request completion rule remains unchanged pending confirmation; local installment recording updates only the sample invoice.
+Delivered on 2026-10-15 as local demo workflows at `/`. Sample records and file objects are held in memory. Phase 4 supersedes the original sign-out reset: records survive role switches and reset only on reload/global reset. No real API, payment transfer, or S3 upload is performed. The request completion rule remains unchanged pending confirmation; local installment recording updates only the sample invoice.
 
 - UC1: submit a manufacturing request and document/image attachments up to 100 MB.
 - UC3: review quotation revisions and accept/reject; show rejection count and the fifth-rejection cancellation behavior.
@@ -66,6 +67,10 @@ Delivered on 2026-10-15 as local demo workflows at `/`. Sample records and file 
 Verification: 15 native tests passed; lint/build passed; headless Chromium checks covered request creation, document preview, failed attachment recovery, all three Deposit/PO combinations, fifth-rejection cancellation, delivery acceptance/return, installment arithmetic/overpayment, mobile widths, and role isolation. Changes are split into domain/tests, UI, and handoff commits on `develop`.
 
 ### 4. Implement Worker workflows (UC2, UC5–UC9)
+
+Delivered on 2026-10-15 as local demo panels at `/`. UC6 is also available to Admin without granting other Worker permissions. Native tests (26 total), lint, production build, cross-role Chromium checks, and six-panel mobile checks passed. Domain/tests and shared-state/UI commits were pushed separately to `origin/develop`; the handoff is a third documentation group.
+
+Automatic shortage calculation is deliberately disabled because D08 is unresolved. The UI shows saved required quantities, usage, reservations, free stock, and incoming orders; order quantity is manually entered for review. Whole-piece quantities, reservation/production safety gates, and demo payment/status choices are not confirmed production policy. See `docs/05-phase-four-handoff.md`.
 
 - UC2: prepare/save/send a quotation, or reject a request; minimum 60% markup is confirmed, while exact inputs and rounding require definition.
 - UC5: show `qty_on_hand`, `qty_reserved`, and `qty_available`; reserve materials only according to confirmed stock logic.

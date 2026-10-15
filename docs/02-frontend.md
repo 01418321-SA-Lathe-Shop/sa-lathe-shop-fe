@@ -83,7 +83,31 @@ Prototype choices presented for review, rather than confirmed production rules:
 - “Record demo installment” immediately updates the sample invoice; it is not a real payment or a decision about production payment verification. Who verifies actual Customer payments remains open.
 - `JOB_REQUEST.completed` is still not applied automatically. The final request-completion trigger awaits confirmation.
 
-Local changes and file objects survive workspace navigation, but reset on sign-out or reload. Attached files can be inspected/downloaded locally, and synthetic document contents are visibly labeled. Details and verification are in `docs/04-phase-three-handoff.md`. The open contract/field questions elsewhere in this guide still apply to production integration.
+Local changes and file objects survive workspace navigation. Phase 4 supersedes Phase 3's original sign-out reset: records now survive demo role changes and reset on reload or global sample reset. Attached files can be inspected/downloaded locally, and synthetic document contents are visibly labeled. Phase 3 verification is in `docs/04-phase-three-handoff.md`. The open contract/field questions elsewhere in this guide still apply to production integration.
+
+### Phase 4 Worker prototype (2026-10-15)
+
+The owner authorized the next phase. Worker panels at `/` now support UC2 and UC5–UC9; Admin can use the same UC6 order form without access to Worker receiving/production/delivery actions. Customer/Worker/Admin share sample records and local file objects in browser memory, enabling role-switch demonstrations. This is not real multi-user storage or authorization. Reload resets all records; reset clears all roles' records, pending forms, and selected evidence. Only the demo role is restored from `sessionStorage`.
+
+| UC | Local prototype behavior / boundary |
+|---|---|
+| UC2 | Enter material/labor/final price, validate confirmed 60% markup, save draft, send, revise after Customer rejection, or reject a request. Customer cannot see drafts or internal costs. Revisions sent/accepted are not edited in place |
+| UC5 | Search existing synthetic materials; show on-hand, active reserved, available, and Moving Average. Save material/required-quantity plans per JOB; reserve free planned stock. Show required/used/reserved/free/incoming quantities. **Automatic shortage recommendations remain disabled**; the formula is To be defined |
+| UC6 | Admin/Worker manually select a planned material, Supplier, whole-piece quantity, and unit price for a demo order. No shortage-based recommended quantity or final order ceiling is inferred. Existing orders/incoming counts remain visible for manual review. Worker may simulate external Supplier rejection of an untouched order |
+| UC7 | Record partial good/defective receipts, update good stock/Moving Average/ledger and defect log together, simulate claim notification, and simulate Supplier paid or CREDIT pending. Item `partially_received` remains a proposal. A fully accounted-for order may include defective items; this does not mean the job has usable materials |
+| UC8 | Start a ready job, issue reserved materials partially/fully, record actual cost/time/evidence, complete production, and resume returned work. Exact transaction-equivalent local state updates preserve stock/reservation/usage/ledger consistency |
+| UC9 | Record delivery/pickup, recipient/evidence, create invoice less applicable Deposit, and record installments. Redelivery preserves the existing invoice and payments; Deposit is not deducted again. Customer inspection/return remains in the Customer workspace |
+
+Additional prototype choices for review, **not confirmed production rules**:
+
+- Synthetic inventory uses `pcs` and whole quantities. Forms, units, actual cost/time semantics, and Backend schemas remain To be defined. Stock/cost inputs use integer satang; Moving Average and material-issue costs retain exact rational values internally so display formatting does not select a storage-rounding rule.
+- Safety gates: plan edits stop after reservations or active orders; start requires full planned reservation; completion requires saved actuals and all planned material issued. These avoid silently releasing stock before variance/release rules are defined. Returned jobs retain their existing usage and saved actuals, which can be revised; final rework accounting remains open.
+- Supplier payment controls change sample status only, after a first receipt. No payment method, actual transfer, credit settlement, claim resolution/write-off, replacement automation, or notification service is implemented.
+- Receipt completion uses cumulative good plus defective quantities; only good goods enter usable stock. The proposed manual “Recheck stock” link does not auto-reserve or start work.
+- Minimal local order/delivery/production forms and synchronous save/empty/error notices are prototype interactions, not a production API/UI contract. File selection shows local processing/failure states and requires an explicit new upload after failure.
+- `JOB_REQUEST.completed`, invoice due dates, real auth/API/S3/Outbox integration, and Admin Worker-management actions remain deferred.
+
+Verification and a step-by-step demo are in `docs/05-phase-four-handoff.md`. Existing requirements and open questions below still govern production behavior.
 
 The overview specifies use cases and permissions, but **does not specify exact screen names, routes, layouts, or navigation**. The groups below are workflow screens/steps inferred as necessary from the UCs, not a confirmed screen count or URL design.
 

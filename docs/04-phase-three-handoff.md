@@ -2,6 +2,8 @@
 
 Status: **Implemented and verified as a local prototype for review**, 2026-10-15. Production decisions remain open in `docs/01-phase-one-decisions.md`.
 
+Historical handoff: Phase 4 supersedes the original sign-out/reset behavior described below. Customer and Worker now share in-memory records and files across demo role switches; reload or global reset clears them. See `docs/05-phase-four-handoff.md` for current behavior. The Phase 3 verification results below describe that phase's original build.
+
 ## Scope
 
 | Use case | Implemented demo behavior |
