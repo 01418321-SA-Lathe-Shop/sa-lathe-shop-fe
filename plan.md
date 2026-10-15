@@ -22,7 +22,7 @@ This plan uses `docs/02-frontend.md` as the product source of truth and the repo
 - Phase 4: implemented and verified as a local Worker prototype, including Admin UC6 ordering. Shared in-memory records now survive demo role switches; reset/reload clears all roles. Automatic shortage recommendations remain disabled; see `docs/05-phase-four-handoff.md` for scope and demo-only safety gates.
 - Phase 5: implemented as an Admin demo: add/edit Workers with required name/email/phone, deactivate/reactivate, and clearly labeled password-change simulation. No real credential or login-enforcement behavior is inferred. See `docs/06-phase-five-handoff.md`.
 - Phase 6: implemented and verified for the local demo. Shared Bangkok/THB formatting, accessible dialogs/file feedback, canceled-read cleanup, contextual empty states, stale-notice prevention, mobile controls, and demo storage fallback are covered. See `docs/07-phase-six-handoff.md`.
-- Phase 7: not started; real integration requires an agreed Backend/API/auth/upload contract. Do not implement production behavior that depends on unanswered decisions. Real account/password policy remains D01/D15; additional Admin permissions remain D04.
+- Phase 7: supported-scope integration implemented against backend AUTH/UC1/UC2/UC3. Memory-only real sessions, registration/memberships, requests/private files/inbox, quotations and decisions/terms are connected; existing Worker list/status/password actions work. Required Worker email/phone create/edit remains blocked by missing backend support; real UC4–UC9 remain unavailable. Verification and limitations are recorded in `docs/08-backend-integration-handoff.md`.
 - Commit each coherent, verified group separately with a descriptive purpose. Push groups as work progresses and push all completed work before handing off a finished phase. Do not leave the entire project for one final commit/push.
 - Stage only task-related files/hunks and exclude unrelated user edits. Use the detailed commit and push workflow in `AGENTS.md`.
 - Documentation verification: review consistency with the source guide, check references, and run `git diff --check`. Application checks are required when application code changes.
@@ -62,7 +62,7 @@ Validation passed: `npm run lint`, `npm run build`, five native Node role-access
 Delivered on 2026-10-15 as local demo workflows at `/`. Sample records and file objects are held in memory. Phase 4 supersedes the original sign-out reset: records survive role switches and reset only on reload/global reset. No real API, payment transfer, or S3 upload is performed. The request completion rule remains unchanged pending confirmation; local installment recording updates only the sample invoice.
 
 - UC1: submit a manufacturing request and document/image attachments up to 100 MB.
-- UC3: review quotation revisions and accept/reject; show rejection count and the fifth-rejection cancellation behavior.
+- UC3: review quotation revisions and accept/reject; show rejection count. Historical Phase 3 used fifth-rejection cancellation; Phase 7 corrects the demo and real integration to sixth-rejection cancellation.
 - UC4: present Deposit/PO rules by customer type and quotation amount; collect the applicable evidence.
 - UC9: show delivery/invoice information, support installment payments, and let the Customer inspect/accept or return work.
 
@@ -110,12 +110,14 @@ Owner authorized integration. Implement in coherent groups: (1) tested memory-on
 
 Contract overrides: Backend `docs/AUTH.md`, `UC1.md`, `UC2.md`, `UC3.md` define active integration behavior. Sixth distinct customer rejection cancels (five permit revision); accepted deposit rounds upward to a satang; immutable terms/deadline come from server. API money is decimal strings; quantities use int64 without JS precision loss. Required Worker email/phone remain an explicit backend implementation gap: do not integrate contact writes by dropping fields. Backend code/schema changes are not part of this frontend phase.
 
+Delivered groups: `2f0b6ac` API utilities/tests, `7a446a3` connected screens/configuration, `81b69cc` demo six-rejection correction, then documentation handoff. Each implementation group was pushed separately to `origin/develop`. Verification passed: 47 native tests, lint, production build, and real Chromium → isolated Go API/PostgreSQL/private S3/outbox flow including genuine stale-edit 409, fresh-intent upload retry and sixth-rejection cancellation. No backend source, existing database or unrelated dependency edits were changed. See `docs/08-backend-integration-handoff.md` for setup, full changed-file list and remaining gaps.
+
 Request the reads and actions listed in `docs/02-frontend.md` under “Needs from Backend.” Agree on the API contract before wiring request/response logic. Backend remains the source of truth for business validation and atomic transactions, including UC2, UC7, and UC8.
 
 ## Validation checklist
 
 - Verify role navigation and permissions against confirmed rules.
-- Verify the individual/company Deposit and PO thresholds and the fifth-rejection behavior.
+- Verify the individual/company Deposit and PO thresholds: five rejections allow revision, the sixth cancels.
 - Verify installment payment display and invoice states (`unpaid`, `partial`, `paid`).
 - Verify stock values use the confirmed availability/shortage logic.
 - Verify files are documents/images no larger than 100 MB and failed uploads offer “Upload again.”

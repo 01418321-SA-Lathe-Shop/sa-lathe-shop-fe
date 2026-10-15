@@ -4,6 +4,20 @@ Status: **In progress — discovery prepared; outstanding decisions need confirm
 
 Source of truth: `docs/02-frontend.md`. Owner confirmations received on 2026-10-15 are recorded explicitly below. This register does not introduce routes, endpoints, or an implementation contract.
 
+## Phase 7 integration update
+
+The historical register below describes discovery and demo phases. The owner has now authorized real integration against backend `docs/AUTH.md` and `UC1.md`–`UC3.md`. See the current-contract section in `02-frontend.md` and the verified handoff in `08-backend-integration-handoff.md`. These supersede older "unimplemented" or "undefined" statements for the supported scope only.
+
+| Decision | Resolved for connected scope | Still open / unavailable |
+|---|---|---|
+| D01/D03 | Existing opaque Bearer login/logout/me, memory-only browser session, registration/memberships, documented UC1–UC3 endpoints/errors/pagination | Persistent cookie/refresh/reset contract; UC4–UC9 endpoints |
+| D06 | Acceptance snapshot deadline = accepted_at + 336 hours | Invoice terms; UC4 submission/expiry implementation |
+| D07 | Whole-request totals; two-decimal JSON strings; `NUMERIC(18,2)`; markup minimum and 50% deposit round upward to satang | Later-UC stock/accounting precision beyond current contracts |
+| D10 | UC1 per-account inbox + mark-read using outbox/worker; no quotation outbound event | Collection reminders and later business events; real LINE delivery verification |
+| D11 | PDF/DOC/DOCX/XLS/XLSX/TXT/JPEG/PNG; 100,000,000 bytes; private signed links ten minutes; fresh upload intent after failure | Production malware policy/lifecycle operations and later-UC evidence contracts |
+| D15 | Existing Worker username/employee number, password rules and session revocation; status/password mutations connected | Required email/phone schema, validation/normalization, legacy backfill, contact create/edit integration |
+| UC3 rejection correction | Owner confirmed five distinct rejections allow revision, sixth cancels; active company members may decide | No fifth-rejection cancellation in current behavior |
+
 ## Repository findings
 
 - At the Phase 1 review, the application consisted of the Next.js starter in `app/page.tsx`, with `app/layout.tsx`, `app/globals.css`, and favicon. Phase 2 added the demo shell; Phase 3 added Customer actions; Phase 4 added Worker actions and Admin UC6 ordering with shared in-memory demo records; Phase 5 added confirmed Admin Worker-management actions and a clearly labeled password-change simulation. See their handoff documents. Production authentication and real business API actions remain unimplemented.
@@ -19,7 +33,7 @@ Source of truth: `docs/02-frontend.md`. Owner confirmations received on 2026-10-
 | Roles | Customer, Admin, Worker require login; Supplier is external | UC1–UC9 |
 | Customer types | `individual` and `company` are customer types, not roles | UC1, UC3, UC4 |
 | Deposit/PO | individual: 50% Deposit, no PO; company price ≤ THB 10,000: PO only; company price > THB 10,000: PO + 50% Deposit | UC3, UC4 |
-| Rejections | Count Customer rejections; cancel request on fifth rejection | UC3 |
+| Rejections | Count distinct Customer rejections; five allow revision, sixth cancels (owner-confirmed correction) | UC3 |
 | Pricing | Owner confirmed markup: minimum `final_price = (material cost + labor cost) × 1.60`; higher prices are not excluded by the minimum requirement | UC2 |
 | Deposit/PO deadline | Owner confirmed required Deposit/PO must be submitted within 14 days after quotation acceptance; invoice payment terms are not established by this decision | UC3, UC4 |
 | Purchasing role | Owner confirmed Admin and Worker can place material orders | UC6 |

@@ -1,5 +1,22 @@
 # Machine Shop Custom Manufacturing System — Frontend Guide
 
+## Current integration contract — Phase 7
+
+This section supersedes the earlier demo-only integration assumptions below for authentication and UC1–UC3. The owner approved connecting the existing backend. Contracts are the backend repository's `docs/AUTH.md`, `docs/UC1.md`, `docs/UC2.md`, and `docs/UC3.md`; verified backend source resolves response-field details. Older phase descriptions below are historical demo scope, not permission to guess production behavior.
+
+- `/` initially shows real sign-in for Customer, Worker and Admin. “Explore separate demo” opens the original role-selectable prototype; “Return to connected sign-in” leaves it. These are separate mounted trees: live data is never backed by fixtures and connection failures never select demo mode.
+- Keep the existing `app/` layout, Next.js stack and dependencies. `NEXT_PUBLIC_API_BASE_URL` is the only frontend configuration added; it is a public API URL, not a secret. Default local API: `http://localhost:8080`. See `.env.example` and `docs/08-backend-integration-handoff.md` for first-day setup.
+- Opaque Bearer tokens stay only in the mounted client instance's memory. Login is checked with `/auth/me`; reload requires a new sign-in. Expiry or a protected 401 closes the client and clears the connected view; logout requests server revocation and clears local memory even on network failure, with an explicit warning when server revocation is unconfirmed. No cookies, localStorage token, authentication provider or refresh flow is introduced.
+- UC1: real customer self-registration (individual / new company / invited company member), membership reads, owner-only private one-use invitations, joining by invitation, scoped request list/detail/create, ready attachment listing/private downloads, upload intent → S3 PUT → completion, and inbox/read actions. New request fields: membership `customer_id`, `description`, positive int64 `qty`, optional `material_spec` and future requested `deadline`. Entered deadlines explicitly use `Asia/Bangkok`, not the device timezone. Membership determines customer type; it is not selected per live request.
+- UC2: Workers estimate/create/edit/send quotations and refuse pending requests with a Customer-visible reason. Admin may read the shop queue and internal quote costs but cannot perform Worker quote mutations. Customer JSON never contains drafts/internal costs. Lists use `limit`/`offset`; stale `expected_lock_version` produces 409 and requires reload, never silent overwrite.
+- UC3: any active Customer/company member can accept/reject its latest sent quote. **Five distinct rejections permit revision; the sixth cancels.** This owner-confirmed correction also applies to the separate demo and its fixtures/tests. Acceptance terms, rejection count and historical request status come from server decision history. Current request status is read separately. The client never fabricates legacy decisions or recalculates saved terms.
+- Price values are exact JSON decimal strings with two decimal places, PostgreSQL `NUMERIC(18,2)` range; zero costs/zero minimum are valid. Totals cover the entire requested quantity, not a unit price. Minimum 60% markup rounds upward to a satang. Required 50% deposit also rounds upward to a satang. Display server-supplied immutable terms and the fixed acceptance-plus-336-hours deadline; no VAT. Unsafe int64 quantities/sequence values are preserved as decimal strings in memory and sent as exact JSON integer tokens where required.
+- Production file allowlist: PDF, DOC/DOCX, XLS/XLSX, TXT, JPEG/PNG, maximum 100,000,000 bytes; MIME must match extension. Browser validation is preliminary; backend validates content/size. Links expire after ten minutes and are requested on demand, not stored/logged. Database stores private object keys/metadata, not public URLs. After failure, “Upload again” creates a fresh intent; no automatic/resumable retry. API Bearer credentials never accompany the storage PUT.
+- Admin can read existing Workers, deactivate/reactivate and change passwords through the current API using account IDs. Passwords require at least 12 Unicode characters and at most 128 UTF-8 bytes. Deactivation/password changes revoke all Worker sessions; reactivation does not restore them. **Add/edit contact profiles remains blocked**: required email/phone support is documented but not implemented in the backend. The connected UI states this instead of dropping contacts or guessing a schema/backfill policy.
+- Real UC4 evidence/job opening and UC5–UC9 endpoints are not available; no such live actions are exposed. Saved acceptance terms are requirements, not payment confirmation. Later-UC behavior remains the explicitly separate local demo, including its older money/file limitations. Notifications currently cover backend UC1 new-request inbox events; no outbound quotation delivery, real LINE recipient test, collection reminder or payment notification is claimed.
+
+Connected components: `backend-workspace.tsx` (session/navigation/auth/Admin/inbox/membership), `backend-requests.tsx` (UC1/detail/files/history/terms), `backend-quotations.tsx` (UC2–UC3), shared `backend-api.ts`, `backend-hooks.ts`, `backend-ui.tsx`. Loading/empty/error states use real requests, explicit reload controls and server-confirmed writes; there are no automatic mutation retries or optimistic stock/payment changes.
+
 ## Project summary
 
 The system brings customer requests, quotations, production jobs, material purchasing/receiving, inventory, delivery, and payments into one workflow. It addresses the current lack of job/payment tracking and reliable stock information. The business is not registered as a company and does not charge VAT, as confirmed by the owner.
@@ -21,8 +38,8 @@ flowchart TD
   UC2 -->|Send quotation| UC3[UC3 Customer reviews and responds]
   UC2 -->|Save draft| UC2
   UC2 -->|Reject request| CANCELED[Request canceled]
-  UC3 -->|Customer rejects fewer than 5 times| UC2
-  UC3 -->|5th rejection| CANCELED
+  UC3 -->|Customer rejects up to 5 times| UC2
+  UC3 -->|6th rejection| CANCELED
   UC3 -->|Accept: determine Deposit/PO| UC4[UC4 Record Deposit and/or PO]
   UC4 -->|Requirements met within the deadline| JOB[Create JOB: queued]
   UC4 -->|Required Deposit/PO not submitted within 14 days of acceptance| CANCELED
@@ -149,7 +166,7 @@ The overview specifies use cases and permissions, but **does not specify exact s
 | Login | Customer, Admin, and Worker must log in before using a UC. Explicitly labeled demo accounts are approved for initial frontend work; production login/session/reset details remain to be defined |
 | Customer type | `individual` and `company` are customer types, not roles |
 | Deposit/PO | `individual`: 50% Deposit, no PO; `company` price ≤ THB 10,000: PO only; `company` price > THB 10,000: PO + 50% Deposit |
-| Quotation rejection | Count Customer rejections; up to 5; the request is automatically canceled on the 5th rejection |
+| Quotation rejection | Count distinct Customer rejections across revisions; five allow revision; the sixth automatically cancels the request |
 | Payments | Installments are allowed; invoice is `partial` until fully paid, then `paid` |
 | Deposit/PO deadline | Submit required Deposit/PO within 14 days after quotation acceptance, confirmed during Phase 1. This confirmation does not define invoice payment terms |
 | Pricing | Minimum 60% markup on total material and labor cost, confirmed during Phase 1: minimum `final_price = (material cost + labor cost) × 1.60`. Money precision and rounding remain to be defined |
@@ -164,7 +181,7 @@ The overview does not define routes, complete form schemas, or error codes. Only
 |---|---|---|
 | UC1 Submit request | Customer enters job details and attaches documents/images ≤ 100 MB; exact fields and detail validation are **to be defined** | Submit request; loading during submission; initial empty state as designed; validation/error behavior to be defined; show “Upload again” after upload failure |
 | UC2 Estimate price | Worker estimates material cost, labor cost, and final price; confirmed minimum price is `(material cost + labor cost) × 1.60`; exact input fields and rounding are **to be defined** | Save draft, send quotation, or reject request; show `draft`/`sent`; loading/errors and confirmation messages to be defined |
-| UC3 Respond to quotation | Customer views quotation/revisions and accepts or rejects; show rejection count, limit 5 | Accept to UC4; reject back to UC2; cancel request on fifth rejection; loading/empty/error copy and behavior after limit to be defined |
+| UC3 Respond to quotation | Customer views quotation/revisions and accepts or rejects; show server rejection history/count | Accept to UC4 terms (evidence not connected); reject back to UC2; sixth rejection cancels. Five permit revision |
 | UC4 Deposit/PO | Show rules by customer type/price: individual = 50% Deposit, no PO; company ≤ THB 10,000 = PO only; company > THB 10,000 = PO + 50% Deposit. Collect evidence per workflow; exact fields/file types to be defined | Submit/record Deposit or PO; create JOB when requirements are met; required evidence must be submitted within 14 days after quotation acceptance; expiration/missing-document states to be defined |
 | UC5 Check/reserve stock | Show `qty_available = qty_on_hand - qty_reserved`; save a planned-material list with material and required quantity per JOB, confirmed during Phase 1; exact fields/schema remain to be defined | Check and reserve material; if available, proceed to UC8; if short, go to UC6. Shortage formula conflicts in the source; do not calculate results from unconfirmed information. Loading/empty/error to be defined |
 | UC6 Order materials | Select Supplier and order needed materials per workflow; form fields/validation are not specified | Submit order; Admin and Worker are both authorized, confirmed during Phase 1; statuses/errors to be defined |
@@ -186,7 +203,7 @@ Use the exact status values below as system names; English display labels are no
 | Entity | Status values | Transitions the user/workflow can trigger |
 |---|---|---|
 | `JOB_REQUEST` | `pending`, `ongoing`, `completed`, `canceled` | Create as `pending`; sending quotation sets `ongoing`; rejection/expiry sets `canceled`; no transition to `completed` is specified |
-| `QUOTATION` | `draft`, `sent`, `approved`, `rejected`; ER also has `requote` without a transition | Worker saves draft/sends; Customer accepts/rejects; rejection creates a new `draft` revision; fifth rejection cancels request; `requote` must be defined |
+| `QUOTATION` | `draft`, `sent`, `approved`, `rejected`; ER also has `requote` without a transition | Worker saves draft/sends; Customer accepts/rejects; Worker creates a new `draft` revision after rejection; sixth rejection cancels request; `requote` must be defined |
 | `JOB` | `queued`, `in_progress`, `completed`, `cancelled` | Create as `queued`; production starts as `in_progress`; production completion sets `completed`; customer return resumes as `in_progress` |
 | `MATERIAL_RESERVATION` | `reserved`, `consumed`, `released` | Reserve as `reserved`; issue as `consumed`; `released` has no workflow transition |
 | `MATERIAL_ORDER` | `ordered`, `partially_received`, `received`, `cancelled` | Order as `ordered`; partial receipt as `partially_received`; full receipt as `received`; Supplier rejection as `cancelled` |
@@ -208,7 +225,7 @@ Endpoints, request/response fields, and error codes are not included in the over
 |---|---|---|
 | Login / role navigation | Logged-in user and role used to render navigation | Initial explicitly labeled demo login is approved; production login/logout/session/reset/provider remain to be defined |
 | UC1 Request | `JOB_REQUEST` list/details and file URL/metadata needed for display | Create request, upload file, start a new upload after failure |
-| UC2–UC3 Quotation | Request, quotation revisions/status, `QUOTATION_COST` visible to the role, rejection count | Save draft/send/reject request; Customer accept/reject; enforce limit of 5 |
+| UC2–UC3 Quotation | Request, quotation revisions/status, `QUOTATION_COST` visible to the role, rejection count | Save draft/send/reject request; Customer accept/reject; five rejections permit revision, sixth cancels |
 | UC4 Deposit/PO | Customer type, quotation amount, required terms, Deposit/PO records, due/expiry once defined | Attach/record Deposit or PO evidence; create JOB when requirements are met |
 | UC5 Stock | `MATERIAL` quantities, `qty_on_hand`, `qty_reserved`, `qty_available`, reservations, and saved planned materials/required quantities per JOB | Save planned material list; check availability and reserve; return shortage/needed quantity according to logic still to be confirmed |
 | UC6 Order | Selectable Suppliers/materials, shortage, `MATERIAL_ORDER` and items/status | Create/send order for Admin and Worker; API authorization must enforce both confirmed roles |
