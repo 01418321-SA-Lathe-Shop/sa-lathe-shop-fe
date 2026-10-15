@@ -12,7 +12,7 @@ const WORKSPACES: Record<Exclude<WorkspaceId, "overview">, Workspace> = {
   receiving: { id: "receiving", label: "Receiving", description: "Keep track of materials arriving from Suppliers.", useCase: "UC7", emptyTitle: "No deliveries to receive", emptyDescription: "Incoming material orders will appear here. Recording good or defective goods and Supplier payments is planned for a later phase." },
   production: { id: "production", label: "Production", description: "Follow jobs through production and record actual usage.", useCase: "UC8", emptyTitle: "The workshop is ready", emptyDescription: "Confirmed production jobs will appear here. Production and material-usage actions are planned for a later phase." },
   "delivery-payment": { id: "delivery-payment", label: "Delivery & payments", description: "Keep delivery and invoice progress together.", useCase: "UC9", emptyTitle: "No deliveries or invoices yet", emptyDescription: "Completed production jobs and invoices will appear here. Delivery and installment payment actions are planned for a later phase." },
-  workers: { id: "workers", label: "Workers", description: "Your workshop team, organized in one workspace.", useCase: "Admin management", emptyTitle: "Your team will appear here", emptyDescription: "Worker management is planned for a later phase. The exact management actions still need to be defined." },
+  workers: { id: "workers", label: "Workers", description: "Your workshop team, organized in one workspace.", useCase: "Admin management", emptyTitle: "Your team will appear here", emptyDescription: "Add a demo Worker with a name, email, and phone to get started." },
 };
 
 export const ROLE_WORKSPACES: Record<Role, readonly Exclude<WorkspaceId, "overview">[]> = {

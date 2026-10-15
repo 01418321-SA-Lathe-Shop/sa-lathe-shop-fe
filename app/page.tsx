@@ -5,6 +5,7 @@ import { canAccessWorkspace, getWorkspaces, ROLE_DESCRIPTIONS, ROLES, type Role,
 import { getDemoRole, getServerDemoRole, setDemoRole, subscribeToDemoRole } from "./demo-session";
 import CustomerWorkspace from "./customer-workspace";
 import WorkerWorkspace from "./worker-workspace";
+import AdminWorkspace from "./admin-workspace";
 import { DemoWorkshopProvider, useWorkshop } from "./workshop-context";
 
 function Icon({ name, className = "" }: { name: string; className?: string }) {
@@ -127,10 +128,11 @@ function WorkshopApp() {
         <div className="demo-notice"><span className="notice-icon"><Icon name="production" /></span><p><strong>You’re exploring the demo workspace.</strong><span>Try the shared Customer and workshop flow by signing out and switching demo roles. No live orders, uploads, notifications, or payments. Reload resets sample data.</span></p></div>
         {role === "Customer" && <CustomerWorkspace key={generation} workspaceId={active?.id ?? "overview"} navigate={navigate} />}
         {role !== "Customer" && <WorkerWorkspace key={generation} role={role} workspaceId={active?.id ?? "overview"} navigate={navigate} />}
+        {role === "Admin" && active?.id === "workers" && <AdminWorkspace key={generation} role={role} />}
         {isOverview ? <>
           <section aria-labelledby="workspaces-heading"><div className="section-heading"><h2 id="workspaces-heading">Your workspaces</h2><span>{workspaces.length} areas</span></div><div className="workspace-grid">{workspaces.map((item) => <button key={item.id} className="workspace-card" onClick={() => navigate(item.id)}><span className="workspace-card-top"><span className="card-icon"><Icon name={item.id} /></span><span className="uc-tag">{item.useCase}</span></span><strong>{item.label}</strong><span className="card-description">{item.description}</span><span className="card-link">Open workspace<Icon name="arrow" /></span></button>)}</div></section>
           <section className="journey-panel" aria-labelledby="journey-heading"><div><span className="eyebrow">THE BIG PICTURE</span><h2 id="journey-heading">Every job has a clear journey.</h2><p className="text-muted">One workflow, from the first conversation to the final handover.</p></div><ol className="journey-steps">{["Request", "Quotation", "Deposit / PO", "Production", "Delivery & payment"].map((step, i) => <li key={step}><span>{String(i + 1).padStart(2, "0")}</span><strong>{step}</strong></li>)}</ol></section>
-        </> : active && role === "Admin" && active.id === "workers" && <section className="empty-panel" aria-labelledby="empty-heading"><div className="empty-art" aria-hidden="true"><Icon name={active.id} /></div><span className="demo-badge">COMING IN A LATER PHASE</span><h2 id="empty-heading">{active.emptyTitle}</h2><p className="text-muted">{active.emptyDescription}</p><button className="button-secondary" onClick={() => navigate("overview")}>Back to overview<Icon name="arrow" /></button></section>}
+        </> : null}
         <footer className="workspace-footer"><span>Lathe Shop · Demo workspace</span><span><Icon name="clock" />Asia/Bangkok<span className="footer-divider">/</span>THB<span className="footer-divider">/</span>No VAT</span></footer>
       </main>
     </div>

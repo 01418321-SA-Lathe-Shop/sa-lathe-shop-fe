@@ -216,6 +216,13 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .supplier-order { border: 1px solid var(--border); padding: 18px; border-radius: 8px; margin-bottom: 18px; }
 .supplier-order .button-danger { margin-top: 16px; }
 .worker-ledger { max-height: 400px; overflow-y: auto; }
+.admin-toolbar-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.admin-filters { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 18px; }
+.admin-boundary { background: #f0f6f2; border: 1px solid #d9e7dc; border-radius: 8px; padding: 16px; }
+.worker-contact { overflow-wrap: anywhere; }
+.status-active { background: #e3f1e8; color: #357247; }
+.status-inactive { background: #edf0f2; color: #66757b; }
+@media (max-width: 600px) { .admin-filters { grid-template-columns: 1fr; gap: 0; } .admin-toolbar-actions { width: 100%; } .admin-toolbar-actions > button { flex: 1; } }
 @media (max-width: 1100px) { .stock-cards { grid-template-columns: 1fr; } }
 @media (max-width: 600px) { .worker-form-grid { grid-template-columns: 1fr; } .worker-workflow .workflow-toolbar > button { width: 100%; } .supplier-order { padding: 13px; } }
 .dialog-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 20px; }
