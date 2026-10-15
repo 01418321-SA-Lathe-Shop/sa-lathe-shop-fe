@@ -5,19 +5,9 @@ import { expireConfirmations, type Attachment } from "./customer-domain";
 import { createCustomerDemo } from "./customer-fixtures";
 import { createWorkshopDemo } from "./worker-fixtures";
 import type { WorkshopState } from "./worker-domain";
+import { reduceWorkshop, type WorkshopUpdate, type WorkshopViewState as ViewState } from "./workshop-state";
 
-export type WorkshopUpdate = { transform: (data: WorkshopState) => WorkshopState; message?: string; scope?: string; reset?: boolean };
-type ViewState = { data: WorkshopState; message: string; error: string; scope?: string; generation: number };
 function createState(now: number): WorkshopState { return createWorkshopDemo(createCustomerDemo(now), now); }
-function reduceWorkshop(state: ViewState, action: WorkshopUpdate): ViewState {
-  try {
-    const data = action.transform(state.data);
-    if (data === state.data && !action.message) return state;
-    return { data, message: action.message ?? state.message, error: "", scope: action.scope ?? state.scope, generation: state.generation + (action.reset ? 1 : 0) };
-  } catch (error) {
-    return { ...state, message: "", error: error instanceof Error ? error.message : "The demo action could not be completed.", scope: action.scope };
-  }
-}
 type WorkshopContextValue = {
   state: ViewState;
   dispatch: (action: WorkshopUpdate) => void;

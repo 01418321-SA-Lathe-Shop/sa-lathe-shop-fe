@@ -1,4 +1,5 @@
 // Prototype document categories. Production allowlist/content scanning needs Backend agreement.
+import type { Attachment } from "./customer-domain";
 const DOCUMENT_TYPES = new Set(["pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx", "txt", "csv", "rtf", "odt", "ods", "odp"]);
 const IMAGE_TYPES = new Set(["png", "jpg", "jpeg", "gif", "webp", "bmp", "tif", "tiff", "svg", "avif", "heic", "heif"]);
 export const FILE_ACCEPT = "image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.rtf,.odt,.ods,.odp";
@@ -9,6 +10,17 @@ export function fileError(file: { name: string; size: number; type: string }): s
   const extension = file.name.toLowerCase().split(".").at(-1) ?? "";
   if (!DOCUMENT_TYPES.has(extension) && !IMAGE_TYPES.has(extension)) return "Choose a supported document or image, such as PDF, Office, text, PNG, or JPEG.";
   return undefined;
+}
+
+// Local file preparation only. Aborted reads must not register orphan attachments.
+export async function prepareDemoFile(file: File, signal: AbortSignal, shouldFail: () => boolean, registerFile: (file: File) => Attachment): Promise<Attachment | undefined> {
+  if (signal.aborted) return undefined;
+  const invalid = fileError(file);
+  if (invalid) throw new Error(invalid);
+  if (shouldFail()) throw new Error("Demo file preparation failed. Upload again by choosing a file anew.");
+  await file.slice(0, 8).arrayBuffer();
+  if (signal.aborted) return undefined;
+  return registerFile(file);
 }
 
 // Demo input precision only; production NUMERIC precision/rounding is still open.
