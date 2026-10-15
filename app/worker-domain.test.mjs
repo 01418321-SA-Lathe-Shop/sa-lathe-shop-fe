@@ -100,6 +100,27 @@ test('UC7 all-defective items never change stock or Moving Average',()=>{
   assert.equal(data.orders[0].items[0].status,'damaged');
   assert.equal(w.recordSupplierPayment(data,'order',false).orders[0].paymentStatus,'paid');
 });
+test('UC7 fractional averages retain exact precision through UC8 material issues',()=>{
+  let data=fresh(); const job=queued(data).job.id, material=data.materials[1].id;
+  data=w.savePlan(data,job,[{materialId:material,quantity:4}]);
+  data=w.createOrder(data,job,data.suppliers[0].id,[{id:'fraction-line',materialId:material,quantity:1,unitPrice:300001}],'fraction-order',at);
+  data=w.receiveMaterial(data,'fraction-order','fraction-line',1,0,{receipt:'r',movement:'m',defect:'d'},at);
+  assert.deepEqual(data.materials[1].avgCost,{numerator:'900001',denominator:'4'});
+  data=w.reserveJob(data,job,{[material]:'reservation'});
+  data=w.startJob(data,job);
+  data=w.issueMaterial(data,job,material,1,{usage:'u',movement:'issue',consumed:'c'},at);
+  assert.deepEqual(data.usages[0].cost,{numerator:'900001',denominator:'4'});
+  assert.deepEqual(data.materials[1].avgCost,{numerator:'900001',denominator:'4'});
+});
+test('UC5 another job cannot reserve stock already held by the first job',()=>{
+  let data=fresh(); const request=queued(data), material=data.materials[1].id;
+  data=w.reserveJob(data,request.job.id,{[material]:'first'});
+  data={...data,requests:[...data.requests,{...request,id:'second-request',job:{id:'second-job',status:'queued'}}]};
+  data=w.savePlan(data,'second-job',[{materialId:material,quantity:2}]);
+  data=w.reserveJob(data,'second-job',{[material]:'second'});
+  assert.equal(w.reservedQuantity(data,material,'second-job'),0);
+  assert.equal(w.availableQuantity(data,material),0);
+});
 test('UC8 partial issue consumes only issued reservations and preserves exact fractional cost',()=>{
   let {data,job,material}=ready();
   assert.deepEqual(data.materials[1].avgCost,w.exactCost(262500));

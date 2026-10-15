@@ -200,6 +200,24 @@ button:disabled { cursor: not-allowed; opacity: .45; }
 .demo-tools button { margin: 8px 10px 0 0; font-size: 11px; }
 .customer-dialog { width: min(640px, calc(100vw - 32px)); max-height: calc(100svh - 40px); overflow-y: auto; background: #fff; color: var(--foreground); border: 1px solid #d8e4dc; border-radius: 12px; padding: 25px; margin: auto; box-shadow: 0 20px 80px #102d2c33; }
 .customer-dialog::backdrop { background: #102d2c88; }
+.worker-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 18px; margin-top: 22px; }
+.stock-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.stock-card { padding: 16px; border: 1px solid var(--border); border-radius: 8px; min-width: 0; }
+.stock-card h3, .supplier-order h3, .worker-workflow h3 { font-size: 13px; font-weight: 600; line-height: 1.6; margin: 14px 0; }
+.stock-card .detail-grid { padding: 0; background: transparent; border: 0; margin-bottom: 0; }
+.table-scroll { width: 100%; min-width: 0; overflow-x: auto; margin: 20px 0; border: 1px solid var(--border); border-radius: 8px; }
+.workflow-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; }
+.workflow-table th, .workflow-table td { padding: 14px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.workflow-table thead { background: #f1f6f3; color: #4f705c; }
+.workflow-table tbody th { font-weight: 500; }
+.worker-history-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--border); font-size: 12px; overflow-wrap: anywhere; }
+.worker-history-row > span { min-width: 0; }
+.worker-history-row small { display: block; font-size: 10px; color: #7a8780; margin-top: 7px; line-height: 1.7; overflow-wrap: anywhere; }
+.supplier-order { border: 1px solid var(--border); padding: 18px; border-radius: 8px; margin-bottom: 18px; }
+.supplier-order .button-danger { margin-top: 16px; }
+.worker-ledger { max-height: 400px; overflow-y: auto; }
+@media (max-width: 1100px) { .stock-cards { grid-template-columns: 1fr; } }
+@media (max-width: 600px) { .worker-form-grid { grid-template-columns: 1fr; } .worker-workflow .workflow-toolbar > button { width: 100%; } .supplier-order { padding: 13px; } }
 .dialog-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 20px; }
 .dialog-heading h2 { font-size: 20px; letter-spacing: -.025em; overflow-wrap: anywhere; }
 .dialog-heading > button { flex-shrink: 0; font-size: 11px; }

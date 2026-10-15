@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useReducer, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { WorkspaceId } from "./demo-access";
 import {
-  confirmationDeadline, confirmationTerms, expireConfirmations, inspectDelivery,
-  invoiceBalance, invoiceStatus, latestQuotation, recordPayment, respondToQuotation,
+  confirmationDeadline, confirmationTerms, inspectDelivery,
+  invoiceBalance, invoiceStatus, latestVisibleQuotation as latestQuotation, recordPayment, respondToQuotation,
   submitConfirmation, type Attachment, type CustomerRequest, type CustomerState, type CustomerType,
 } from "./customer-domain";
-import { createCustomerDemo } from "./customer-fixtures";
+import { useWorkshop } from "./workshop-context";
 import { FILE_ACCEPT, fileError, parsePaymentInput } from "./customer-files";
 
 const currency = new Intl.NumberFormat("en-GB", { style: "currency", currency: "THB", minimumFractionDigits: 2 });
@@ -15,17 +15,7 @@ const dateTime = new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Bangkok", da
 const money = (amount: number) => currency.format(amount / 100);
 const date = (value: string | number) => `${dateTime.format(new Date(value))} ICT`;
 
-type ViewState = { data: CustomerState; message: string; error: string; scope?: WorkspaceId };
 type Update = { transform: (data: CustomerState) => CustomerState; message?: string; scope?: WorkspaceId };
-function reduceView(state: ViewState, action: Update): ViewState {
-  try {
-    const data = action.transform(state.data);
-    if (data === state.data && !action.message) return state;
-    return { data, message: action.message ?? state.message, error: "", scope: action.scope ?? state.scope };
-  } catch (error) {
-    return { ...state, message: "", error: error instanceof Error ? error.message : "The demo action could not be completed.", scope: action.scope };
-  }
-}
 
 function Status({ children }: { children: ReactNode }) {
   return <span className={`record-status status-${String(children)}`}>{children}</span>;
@@ -46,7 +36,7 @@ function Dialog({ title, children, close }: { title: string; children: ReactNode
   );
 }
 
-function FilePreview({ attachment, url, close }: { attachment: Attachment; url: string; close: () => void }) {
+export function FilePreview({ attachment, url, close }: { attachment: Attachment; url: string; close: () => void }) {
   return (
     <Dialog title={attachment.name} close={close}>
       <p className="text-muted">Local demo attachment · {(attachment.size / 1000).toFixed(1)} KB</p>
@@ -62,7 +52,7 @@ function FilePreview({ attachment, url, close }: { attachment: Attachment; url: 
   );
 }
 
-function FilePicker({ label, onSelect, registerFile, busyChange, shouldFail }: {
+export function FilePicker({ label, onSelect, registerFile, busyChange, shouldFail }: {
   label: string; onSelect: (attachment: Attachment) => void;
   registerFile: (file: File) => Attachment; busyChange: (delta: number) => void; shouldFail: () => boolean;
 }) {
@@ -98,8 +88,9 @@ function FilePicker({ label, onSelect, registerFile, busyChange, shouldFail }: {
 }
 
 export default function CustomerWorkspace({ workspaceId, navigate }: { workspaceId: WorkspaceId; navigate: (id: WorkspaceId) => void }) {
-  const [state, rawDispatch] = useReducer(reduceView, undefined, (): ViewState => ({ data: createCustomerDemo(Date.now()), message: "", error: "" }));
-  const dispatch = (action: Update) => rawDispatch({ ...action, scope: workspaceId });
+  const { state, dispatch: sharedDispatch, registerFile, getFile, resetDemo } = useWorkshop();
+  const scope = `Customer:${workspaceId}`;
+  const dispatch = (action: Update) => sharedDispatch({ transform: (data) => ({ ...data, requests: action.transform(data).requests }), message: action.message, scope });
   const [selectedId, setSelectedId] = useState("");
   const [creating, setCreating] = useState(false);
   const [details, setDetails] = useState("");
@@ -111,28 +102,15 @@ export default function CustomerWorkspace({ workspaceId, navigate }: { workspace
   const [uploads, setUploads] = useState(0);
   const [preview, setPreview] = useState<{ attachment: Attachment; url: string }>();
   const [prompt, setPrompt] = useState<{ title: string; body: string; action: () => void }>();
-  const files = useRef(new Map<string, File>());
   const previewUrls = useRef(new Set<string>());
   const failNextFile = useRef(false);
   const busyChange = (delta: number) => setUploads((value) => value + delta);
-
-  useEffect(() => {
-    const check = () => { const now = Date.now(); rawDispatch({ transform: (data) => expireConfirmations(data, now) }); };
-    const timer = window.setInterval(check, 10_000);
-    window.addEventListener("focus", check);
-    return () => { window.clearInterval(timer); window.removeEventListener("focus", check); };
-  }, []);
 
   useEffect(() => {
     const urls = previewUrls.current;
     return () => { urls.forEach((url) => URL.revokeObjectURL(url)); };
   }, []);
 
-  function registerFile(file: File): Attachment {
-    const id = crypto.randomUUID();
-    files.current.set(id, file);
-    return { id, name: file.name, size: file.size, type: file.type };
-  }
   function shouldFail() { const fail = failNextFile.current; failNextFile.current = false; return fail; }
   const pickerProps = { registerFile, busyChange, shouldFail };
   function updateRequest(id: string, transform: (request: CustomerRequest) => CustomerRequest, message: string) {
@@ -144,7 +122,7 @@ export default function CustomerWorkspace({ workspaceId, navigate }: { workspace
     updateRequest(id, (request) => respondToQuotation(request, response, at), message);
   }
   function openPreview(attachment: Attachment) {
-      const file = files.current.get(attachment.id) ?? (attachment.sample ? new File(["DEMO DOCUMENT — no real transaction."], attachment.name, { type: "text/plain" }) : undefined);
+      const file = getFile(attachment.id) ?? (attachment.sample ? new File(["DEMO DOCUMENT — no real transaction."], attachment.name, { type: "text/plain" }) : undefined);
       if (!file) return;
       const url = URL.createObjectURL(file);
       previewUrls.current.add(url);
@@ -157,7 +135,7 @@ export default function CustomerWorkspace({ workspaceId, navigate }: { workspace
   if (workspaceId === "overview") return null;
 
   const visible = state.data.requests.filter((request) => {
-    if (workspaceId === "quotations") return request.quotations.length > 0;
+    if (workspaceId === "quotations") return request.quotations.some((quotation) => quotation.status !== "draft");
     if (workspaceId === "deposit-po") return !!request.acceptedAt && !request.invoice;
     if (workspaceId === "delivery-payment") return !!request.delivery && !!request.invoice;
     return true;
@@ -175,9 +153,9 @@ export default function CustomerWorkspace({ workspaceId, navigate }: { workspace
 
   return (
     <section className="customer-workflow" aria-label="Customer demo workflow">
-      <div className="workflow-toolbar"><p>Sample scenarios and local changes · reset on sign-out or reload</p>{workspaceId === "requests" && <button className="button-primary" onClick={() => setCreating(true)}>+ New request</button>}</div>
-      {state.message && state.scope === workspaceId && <p className="workflow-success" role="status">{state.message}</p>}
-      {state.error && state.scope === workspaceId && <p className="field-error" role="alert">{state.error}</p>}
+      <div className="workflow-toolbar"><p>Shared demo records survive role switches · reload or reset clears all roles</p>{workspaceId === "requests" && <button className="button-primary" onClick={() => setCreating(true)}>+ New request</button>}</div>
+      {state.message && state.scope === scope && <p className="workflow-success" role="status">{state.message}</p>}
+      {state.error && state.scope === scope && <p className="field-error" role="alert">{state.error}</p>}
 
       {creating && workspaceId === "requests" && <section className="workflow-form-panel" aria-labelledby="new-request-heading">
         <h2 id="new-request-heading">New manufacturing request</h2>
@@ -215,7 +193,7 @@ export default function CustomerWorkspace({ workspaceId, navigate }: { workspace
             <p className="workflow-note">Customer rejections: <strong>{selected.rejections} / 5</strong>. The fifth rejection cancels the request.</p>
             {quotation.status === "sent" && selected.status !== "canceled" && <div className="form-actions"><button className="button-primary" onClick={() => setPrompt({ title: "Accept this quotation?", body: `Accept ${money(quotation.price)} and start the 14-day Deposit/PO submission period?`, action: () => respond(selected.id, "approved", "Quotation approved. Continue to Deposit & PO to confirm the order.") })}>Accept quotation</button><button className="button-danger" onClick={() => setPrompt({ title: "Reject this quotation?", body: selected.rejections === 4 ? "This is the fifth rejection. The request will be canceled." : "This response counts toward the five-rejection limit. A Worker must issue another quotation before you can respond again.", action: () => respond(selected.id, "rejected", selected.rejections === 4 ? "Fifth rejection recorded. The request is canceled." : "Quotation rejected. Waiting for a Worker revision.") })}>Reject quotation</button></div>}
             {quotation.status === "approved" && <button className="button-primary" onClick={() => navigate("deposit-po")}>Continue to Deposit & PO</button>}
-            <details className="revision-history"><summary>Quotation revision history ({selected.quotations.length})</summary>{selected.quotations.map((item) => <p key={item.id}>Revision {item.revision}<span>{money(item.price)}</span><Status>{item.status}</Status></p>)}</details>
+            <details className="revision-history"><summary>Quotation revision history ({selected.quotations.filter((item) => item.status !== "draft").length})</summary>{selected.quotations.filter((item) => item.status !== "draft").map((item) => <p key={item.id}>Revision {item.revision}<span>{money(item.price)}</span><Status>{item.status}</Status></p>)}</details>
           </>}
 
           {workspaceId === "deposit-po" && quotation && <>
@@ -238,7 +216,7 @@ export default function CustomerWorkspace({ workspaceId, navigate }: { workspace
         </article>}
       </div> : <div className="empty-panel"><h2>No records here yet</h2><p className="text-muted">Accept a quotation to see its Deposit/PO requirements.</p><button className="button-secondary" onClick={() => navigate("quotations")}>Open quotations</button></div>}
 
-      <details className="demo-tools"><summary>Demo tools</summary><p>These controls affect only sample data in this browser view.</p><button className="button-secondary" onClick={() => { failNextFile.current = true; dispatch({ transform: (data) => data, message: "The next file attachment will fail once so you can try Upload again." }); }}>Fail next file attachment</button><button className="button-secondary" onClick={() => setPrompt({ title: "Reset sample data?", body: "Your local demo changes and attachments will be replaced with the original sample scenarios.", action: () => { const now = Date.now(); files.current.clear(); selectRequest(""); setCreating(false); setRequestFiles([]); failNextFile.current = false; dispatch({ transform: () => createCustomerDemo(now), message: "Sample data reset." }); } })}>Reset sample data</button></details>
+      <details className="demo-tools"><summary>Demo tools</summary><p>These controls affect shared sample data for all roles in this browser view.</p><button className="button-secondary" onClick={() => { failNextFile.current = true; dispatch({ transform: (data) => data, message: "The next file attachment will fail once so you can try Upload again." }); }}>Fail next file attachment</button><button className="button-secondary" onClick={() => setPrompt({ title: "Reset sample data?", body: "All roles' local demo changes and attachments will be replaced with the original sample scenarios.", action: () => { selectRequest(""); setCreating(false); setRequestFiles([]); failNextFile.current = false; resetDemo(scope); } })}>Reset sample data</button></details>
       {prompt && <Dialog title={prompt.title} close={() => setPrompt(undefined)}><p className="text-muted">{prompt.body}</p><div className="form-actions"><button className="button-primary" onClick={() => { prompt.action(); setPrompt(undefined); }}>Confirm</button><button className="button-secondary" onClick={() => setPrompt(undefined)}>Cancel</button></div></Dialog>}
       {preview && <FilePreview attachment={preview.attachment} url={preview.url} close={() => { URL.revokeObjectURL(preview.url); previewUrls.current.delete(preview.url); setPreview(undefined); }} />}
     </section>
