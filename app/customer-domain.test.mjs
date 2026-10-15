@@ -43,9 +43,11 @@ test("one sent quotation can only be accepted or rejected once", () => {
   assert.throws(()=>respondToQuotation(rejected,"rejected",at));
 });
 
-test("the fifth customer rejection cancels the request", () => {
-  const result=respondToQuotation(request({rejections:4}),"rejected",at);
-  assert.equal(result.rejections,5);
+test("five customer rejections allow revision; the sixth cancels", () => {
+  assert.equal(respondToQuotation(request({rejections:4}),"rejected",at).status,"ongoing");
+  assert.equal(respondToQuotation(request({rejections:5}),"approved",at).status,"ongoing");
+  const result=respondToQuotation(request({rejections:5}),"rejected",at);
+  assert.equal(result.rejections,6);
   assert.equal(result.status,"canceled");
   assert.throws(()=>respondToQuotation(result,"approved",at));
 });
