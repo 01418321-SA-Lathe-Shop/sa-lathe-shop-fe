@@ -14,7 +14,7 @@
 | `app/appearance.tsx` | Icons, Logo, theme/scale provider และ Settings |
 | `app/workspace-shell.tsx`, `app/workspace-routes.ts` | Shared role shell, permissions mapping และ URL |
 | `app/workflows.css` | Functional UC forms/tables และ role shell overrides |
-| `app/auth-gateway.tsx`, `app/backend-workspace.tsx`, `app/auth-page.tsx` | Connected Login/Register และ explicit demo entries |
+| `app/auth-gateway.tsx`, `app/backend-workspace.tsx` | Connected Login/Register ในดีไซน์หลัก และปุ่ม demo bypass ใต้ฟอร์ม |
 | `app/layout.tsx` | Font loading, language และ provider |
 | `app/**/page.tsx` | Route จริง |
 | `docs/02-frontend.md` | Business rules, roles และ UC1–UC9 |
@@ -122,7 +122,7 @@ Record layout31%/1fr ยุบ1columnที่68.75rem Cards เลือกไ�
 
 ### Forms and dialogs
 
-Connected auth ใช้ `/login` และ `/register` ร่วมกับ backend เดียวกันสำหรับ Customer, Staff และ Admin โดย session อยู่ใน memory และไม่ fallback เข้า demo เมื่อ API ล้มเหลว ฟอร์มบัญชีทดสอบถูกแยกชัดเจนและมีปุ่ม Customer/Staff/Admin สามปุ่ม
+Connected auth ใช้ดีไซน์ Login/Register หลักที่ `/login` และ `/register` ร่วมกับ backend เดียวกันสำหรับ Customer, Staff และ Admin โดย session อยู่ใน memory และไม่ fallback เข้า demo เมื่อ API ล้มเหลว ใต้ฟอร์มจริงมีส่วน "บัญชีทดสอบ — ข้ามการเข้าสู่ระบบ" พร้อมปุ่ม Customer/Staff/Admin สามปุ่ม
 
 UC forms มี validation, local attachment preparation/preview และ Upload again ตาม develop จำกัด100MB ยังไม่มี S3 upload จริง Input1rem, button min-height2.875rem, panel radius1rem, heading1.375rem, bodyอย่างน้อย.75rem สีพื้น/ขอบ/ข้อความใช้ semantic tokens ใน workflows.css Status badges มีสีแยก light/dark
 
@@ -139,7 +139,7 @@ Brand mark เป็น CSS square สีส้มหมุน45° พร้อ�
 | URL | Surface |
 | --- | --- |
 | / | Landing |
-| /login, /register | Connected sign-in / customer registration พร้อมทางเข้า demo ที่แยกจากข้อมูลจริง |
+| /login, /register | ฟอร์มดีไซน์หลักที่เชื่อม sign-in / customer registration จริง พร้อม demo bypass ใต้ฟอร์ม |
 | /staff | Staff overview |
 | /staff/quotations, /staff/materials, /staff/orders, /staff/receiving, /staff/production, /staff/delivery-payment | UC2 และ UC5–UC9 |
 | /customer | Customer overview |
@@ -200,6 +200,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 | --- | --- | --- |
 | 2026-10-16 | Merge design with functional develop flows, Admin routes, Staff naming, shared provider, pinned sidebar และ workflow theme tokens | Verification: docs/08-design-workflow-integration.md |
 | 2026-10-16 | Merge latest develop: connected AUTH/UC1–UC3 at `/login` and `/register`, separate demo entry, sixth-rejection rule และ themed live surfaces | 47 tests + production build |
+| 2026-10-16 | ย้าย logic AUTH จริงเข้า Login/Register ดีไซน์หลักโดยตรง และวาง Customer/Staff/Admin bypass ไว้ใต้ฟอร์ม | Browser + 47 tests + production build |
 | 2026-10-16 | Initial implemented-design baseline: themes, UI scale, scrollable sidebar, Settings border state, typography, routes and source snapshot | Source comparison and snapshot check |
 
 ## Generated source appendix
@@ -943,11 +944,12 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .workflow-skip:focus { top:1rem; }
 .navigation-scrim { display:none; }
 .auth-availability { color:var(--muted); font-size:.85rem; line-height:1.8; padding:1rem; border:1px solid var(--line); border-radius:.75rem; margin:1.5rem 0; }
-.pending-auth { border:0; padding:0; margin:0; min-width:0; opacity:.55; }
 .login-card .bypass-actions { grid-template-columns:1fr; }
 .login-card .bypass-actions button { min-height:4.5rem; }
 .login-register-link { display:block; text-align:center; }
-.auth-connected-link { width:100%; border:0; background:transparent; color:var(--lime); cursor:pointer; }
+.login-field select { width:100%; border:0; outline:0; background:transparent; color:var(--text); font:inherit; font-size:.8125rem; }
+.auth-help,.auth-api { display:block; color:var(--muted); font-size:.6875rem; line-height:1.6; }
+.auth-api { margin-top:1rem; text-align:center; opacity:.7; }
 @media(max-width:75rem) { .workspace-links { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:900px) {
   .integrated-shell .integrated-sidebar { width:min(20rem,88vw); transform:translateX(-100%); visibility:hidden; z-index:45; padding:1rem; }
@@ -978,10 +980,6 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .live-main { max-width:87.5rem; margin:auto; padding:1.75rem 5%; }
 .live-main>h1 { font-size:1.5625rem; margin-bottom:.75rem; overflow-wrap:anywhere; }
 .live-main .demo-notice { margin:1.25rem 0; }
-.live-login { min-height:100svh; display:grid; place-items:center; padding:1.75rem 1rem; background:var(--bg); }
-.live-login>section { width:min(100%,34.375rem); }
-.live-login h1 { font-size:1.625rem; margin:1rem 0; }
-.live-login p { margin:.75rem 0; overflow-wrap:anywhere; }
 .live-fields { display:grid; gap:.875rem; border:0; padding:0; min-width:0; }
 .live-section { border-top:.0625rem solid var(--line); padding-top:1.375rem; margin-top:1.5rem; }
 .live-section h3,.live-section h4 { margin-bottom:.875rem; }
@@ -989,7 +987,7 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .workflow-error { font-size:.8125rem; color:var(--danger); background:color-mix(in srgb,var(--danger) 8%,var(--surface)); border:.0625rem solid var(--danger); padding:.875rem; border-radius:.5rem; margin:.875rem 0; line-height:1.7; overflow-wrap:anywhere; }
 .live-description,.private-invitation { white-space:pre-wrap; overflow-wrap:anywhere; }
 .private-invitation { display:block; user-select:all; }
-.live-shell button,.live-login button { min-height:2.75rem; padding:.5625rem .75rem; }
+.live-shell button { min-height:2.75rem; padding:.5625rem .75rem; }
 .live-shell .form-actions { align-items:center; }
 .live-shell .record-detail,.live-shell .record-list-item { overflow-wrap:anywhere; }
 @media(max-width:37.5rem) { .live-main { padding:1.25rem .875rem; } .live-main .detail-grid { grid-template-columns:1fr; } .live-tabs { gap:.25rem; padding:.5rem; } }

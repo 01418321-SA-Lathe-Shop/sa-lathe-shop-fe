@@ -141,6 +141,6 @@ Owner authorized merging the saved orange design with the functional develop wor
 - Separate URLs under /staff, /customer and /admin replace the historical single-page panels. Root layout owns the shared demo provider so client navigation and role switching retain records and attached files.
 - Overview counts derive from shared data. Former placeholder request/payment/debtor paths redirect to the corresponding functional workspace.
 - Settings and account remain outside the scrolling sidebar region; mobile uses a drawer.
-- `/login` and `/register` now use the connected backend authentication and registration flow. A clearly separate demo chooser retains the three local role entries without granting live access.
+- `/login` and `/register` keep the designed auth presentation while using the connected backend authentication and registration flow. Three clearly labeled local demo bypass buttons sit below the real form without granting live access.
 - Business validation is preserved, including demo-only assumptions. Both demo and backend quotation flows now use the confirmed rule: five rejections allow revision and the sixth cancels.
 - UI details and route inventory: DESIGN.md. Verification evidence: docs/08-design-workflow-integration.md.

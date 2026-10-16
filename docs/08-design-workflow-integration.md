@@ -11,7 +11,7 @@ The owner authorized merging the saved design branch into develop, displaying Wo
 - Placed DemoWorkshopProvider in the root layout so client navigation and role switches retain records and file references. Reload still resets sample data.
 - Kept Settings and account outside the sidebar scroll region, including the mobile drawer. Unique radio group IDs prevent settings from conflicting with cached route instances.
 - Preserved light/dark transitions and Small/Medium/Large UI scale. Adapted all imported workflow styles to rem dimensions and semantic colors.
-- Integrated the backend client at `/login` and `/register`. Real AUTH/UC1–UC3 use memory-only sessions; the separate demo chooser remains available for all three roles and never grants live access.
+- Integrated the backend client directly into the designed `/login` and `/register` forms. Real AUTH/UC1–UC3 use memory-only sessions; Customer/Staff/Admin demo bypass buttons remain directly below the form and never grant live access.
 
 ## Verification
 
