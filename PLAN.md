@@ -22,7 +22,7 @@ This plan uses `docs/02-frontend.md` as the product source of truth and the repo
 - Phase 4: implemented and verified as a local Worker prototype, including Admin UC6 ordering. Shared in-memory records now survive demo role switches; reset/reload clears all roles. Automatic shortage recommendations remain disabled; see `docs/05-phase-four-handoff.md` for scope and demo-only safety gates.
 - Phase 5: implemented as an Admin demo: add/edit Workers with required name/email/phone, deactivate/reactivate, and clearly labeled password-change simulation. No real credential or login-enforcement behavior is inferred. See `docs/06-phase-five-handoff.md`.
 - Phase 6: implemented and verified for the local demo. Shared Bangkok/THB formatting, accessible dialogs/file feedback, canceled-read cleanup, contextual empty states, stale-notice prevention, mobile controls, and demo storage fallback are covered. See `docs/07-phase-six-handoff.md`.
-- Phase 7: not started; real integration requires an agreed Backend/API/auth/upload contract. Do not implement production behavior that depends on unanswered decisions. Real account/password policy remains D01/D15; additional Admin permissions remain D04.
+- Phase 7: started. The authenticated backend client and upload protocol are implemented; live login/registration and UC screen wiring remain pending. The merged UI continues in explicitly labeled demo mode.
 - Commit each coherent, verified group separately with a descriptive purpose. Push groups as work progresses and push all completed work before handing off a finished phase. Do not leave the entire project for one final commit/push.
 - Stage only task-related files/hunks and exclude unrelated user edits. Use the detailed commit and push workflow in `AGENTS.md`.
 - Documentation verification: review consistency with the source guide, check references, and run `git diff --check`. Application checks are required when application code changes.
@@ -130,3 +130,15 @@ Request the reads and actions listed in `docs/02-frontend.md` under “Needs fro
 - Invented API endpoints/contracts, routes, form fields, roles, notifications, or business rules.
 - A guessed money-rounding rule or invoice due-date policy; markup basis and the Deposit/PO deadline are confirmed.
 - Supplier login or unconfirmed Admin/master-data capabilities.
+
+## Design / workflow integration — 2026-10-16
+
+Owner authorized merging the saved orange design with the functional develop workflows.
+- Restored Landing, common Login/Register presentation, light/dark transitions and Small/Medium/Large UI presets.
+- Staff is the UI name for domain/API role Worker. UC2 and UC5–UC9 remain Staff duties. Admin manages Staff profiles and UC6 purchasing; no implicit inheritance.
+- Separate URLs under /staff, /customer and /admin replace the historical single-page panels. Root layout owns the shared demo provider so client navigation and role switching retain records and attached files.
+- Overview counts derive from shared data. Former placeholder request/payment/debtor paths redirect to the corresponding functional workspace.
+- Settings and account remain outside the scrolling sidebar region; mobile uses a drawer.
+- Login/registration are visibly unavailable for real credentials; three explicit demo entry buttons use the existing demo session. Backend API client remains intact.
+- Business validation is preserved, including demo-only assumptions. The historical fifth-rejection demo rule and the backend sixth-rejection contract remain distinct pending live integration.
+- UI details and route inventory: DESIGN.md. Verification evidence: docs/08-design-workflow-integration.md.

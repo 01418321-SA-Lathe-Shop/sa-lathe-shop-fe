@@ -69,6 +69,9 @@ The flow is based on the Use Cases, Sequence Diagrams, and Collaboration Diagram
 
 ## Navigation and screens by role
 
+Current UI integration (2026-10-16): the owner approved merging the orange design with these functional demos. Worker is displayed as **Staff**, without changing its domain/API identifier or UC2/UC5–UC9 permissions. Admin retains Staff management and UC6 purchasing only. Current screens have separate routes under `/staff`, `/customer`, and `/admin`; the historical single-page descriptions below refer to the earlier implementation. See `DESIGN.md`, `PLAN.md`, and `docs/08-design-workflow-integration.md` for the current route inventory and verification. The root provider preserves shared sample records/files across client navigation and role switching. Real authentication and live workflow integration remain pending.
+
+
 Phase 2 implementation note (2026-10-15): the owner authorized the demo shell. Login and documented workspace groups run as panels at `/`, with a responsive sidebar/mobile menu. This is the initial prototype navigation, not a finalized route or form contract. Demo role selection is stored in this tab's `sessionStorage`, invalid values are rejected, and sign-out removes it. If storage is blocked, it falls back to page memory. Business actions were deferred in Phase 2; the Phase 3 Customer prototype below now replaces its Customer placeholders. Backend authentication remains deferred. Phase 2 checks are documented in `docs/03-phase-two-handoff.md`.
 
 ### Phase 3 Customer prototype (2026-10-15)
