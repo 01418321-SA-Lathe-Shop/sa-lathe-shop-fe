@@ -124,6 +124,8 @@ Record layout31%/1fr ยุบ1columnที่68.75rem Cards เลือกไ�
 
 Connected auth ใช้ดีไซน์ Login/Register หลักที่ `/login` และ `/register` ร่วมกับ backend เดียวกันสำหรับ Customer, Staff และ Admin โดย session อยู่ใน memory และไม่ fallback เข้า demo เมื่อ API ล้มเหลว ใต้ฟอร์มจริงมีส่วน "บัญชีทดสอบ — ข้ามการเข้าสู่ระบบ" พร้อมปุ่ม Customer/Staff/Admin สามปุ่ม
 
+Auth spacing ใช้ระยะจากช่องสุดท้ายถึงปุ่มหลัก `1.5rem`, จากปุ่มหลักถึงลิงก์สลับ Login/Register `1rem`, ก่อน divider ของ demo bypass `1.75rem` และระหว่างปุ่ม bypass `.75rem` เพื่อรักษาลำดับสายตาในทุก UI scale
+
 UC forms มี validation, local attachment preparation/preview และ Upload again ตาม develop จำกัด100MB ยังไม่มี S3 upload จริง Input1rem, button min-height2.875rem, panel radius1rem, heading1.375rem, bodyอย่างน้อย.75rem สีพื้น/ขอบ/ข้อความใช้ semantic tokens ใน workflows.css Status badges มีสีแยก light/dark
 
 Settings ใช้ native dialog width min(32.5rem,100vw−2rem), max-height100dvh−2rem, overflow:auto ตัวเลือก radio มีกรอบปุ่ม min-height3.25rem สถานะปัจจุบันแสดงด้วยกรอบส้มและ checked state เท่านั้น Dialog ของ UC ใช้ demo-ui.tsx พร้อม Escape และคืน focus
@@ -201,6 +203,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 | 2026-10-16 | Merge design with functional develop flows, Admin routes, Staff naming, shared provider, pinned sidebar และ workflow theme tokens | Verification: docs/08-design-workflow-integration.md |
 | 2026-10-16 | Merge latest develop: connected AUTH/UC1–UC3 at `/login` and `/register`, separate demo entry, sixth-rejection rule และ themed live surfaces | 47 tests + production build |
 | 2026-10-16 | ย้าย logic AUTH จริงเข้า Login/Register ดีไซน์หลักโดยตรง และวาง Customer/Staff/Admin bypass ไว้ใต้ฟอร์ม | Browser + 47 tests + production build |
+| 2026-10-16 | ปรับ vertical rhythm ของปุ่ม Login/Register, ลิงก์สลับหน้า และ demo bypass | Browser + design snapshot |
 | 2026-10-16 | Initial implemented-design baseline: themes, UI scale, scrollable sidebar, Settings border state, typography, routes and source snapshot | Source comparison and snapshot check |
 
 ## Generated source appendix
@@ -944,11 +947,15 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .workflow-skip:focus { top:1rem; }
 .navigation-scrim { display:none; }
 .auth-availability { color:var(--muted); font-size:.85rem; line-height:1.8; padding:1rem; border:1px solid var(--line); border-radius:.75rem; margin:1.5rem 0; }
-.login-card .bypass-actions { grid-template-columns:1fr; }
+.login-card .live-fields { gap:0; }
+.login-card .login-submit { margin-top:1.5rem; }
+.login-card .bypass-actions { grid-template-columns:1fr; gap:.75rem; }
 .login-card .bypass-actions button { min-height:4.5rem; }
-.login-register-link { display:block; text-align:center; }
+.login-card .login-divider { margin-top:1.75rem; }
+.login-register-link { display:block; margin-top:1rem; text-align:center; line-height:1.5; }
 .login-field select { width:100%; border:0; outline:0; background:transparent; color:var(--text); font:inherit; font-size:.8125rem; }
 .auth-help,.auth-api { display:block; color:var(--muted); font-size:.6875rem; line-height:1.6; }
+.auth-help { margin:.625rem 0 0; }
 .auth-api { margin-top:1rem; text-align:center; opacity:.7; }
 @media(max-width:75rem) { .workspace-links { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:900px) {
