@@ -100,9 +100,10 @@ function LiveLogin({ base, notice, initialRegister, onLogin }: { base: string; n
         <button className="login-submit" type="submit">{register ? "สมัครบัญชี" : "เข้าสู่ระบบ"} <Icon name="arrow"/></button>
       </fieldset></form>
       <Feedback {...action}/><Link className="login-register-link" href={register ? "/login" : "/register"}>{register ? "มีบัญชีแล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครบัญชี"}</Link>
-      <div className="login-divider"><span>บัญชีทดสอบ — ข้ามการเข้าสู่ระบบ</span></div>
-      <div className="bypass-actions">{ROLES.map((role) => <button type="button" key={role} disabled={action.busy} onClick={() => enterDemo(role)}><Icon name={role === "Worker" ? "machine" : role === "Admin" ? "grid" : "file"}/><span><strong>ทดสอบ {ROLE_LABELS[role]}</strong><small>{role === "Worker" ? "งานผลิตและเอกสาร" : role === "Admin" ? "จัดการพนักงานและสั่งซื้อ" : "คำขอและใบเสนอราคา"}</small></span><Icon name="arrow"/></button>)}</div>
-      <p className="demo-context">บัญชีทดสอบไม่เชื่อมข้อมูลจริง และข้อมูลจะเริ่มใหม่เมื่อรีโหลดหน้า</p>
+      <details className="demo-bypass"><summary><span>บัญชีทดสอบ — ข้ามการเข้าสู่ระบบ</span><i aria-hidden="true"/></summary><div className="demo-bypass-content">
+        <div className="bypass-actions">{ROLES.map((role) => <button type="button" key={role} disabled={action.busy} onClick={() => enterDemo(role)}><Icon name={role === "Worker" ? "machine" : role === "Admin" ? "grid" : "file"}/><span><strong>ทดสอบ {ROLE_LABELS[role]}</strong><small>{role === "Worker" ? "งานผลิตและเอกสาร" : role === "Admin" ? "จัดการพนักงานและสั่งซื้อ" : "คำขอและใบเสนอราคา"}</small></span><Icon name="arrow"/></button>)}</div>
+        <p className="demo-context">บัญชีทดสอบไม่เชื่อมข้อมูลจริง และข้อมูลจะเริ่มใหม่เมื่อรีโหลดหน้า</p>
+      </div></details>
       <span className="auth-api">Connected API · {base}</span></div>
     </section>
   </main>;

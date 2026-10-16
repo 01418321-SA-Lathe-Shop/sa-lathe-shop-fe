@@ -126,6 +126,8 @@ Connected auth ใช้ดีไซน์ Login/Register หลักที่ 
 
 Auth spacing ใช้ระยะจากช่องสุดท้ายถึงปุ่มหลัก `1.5rem`, จากปุ่มหลักถึงลิงก์สลับ Login/Register `1rem`, ก่อน divider ของ demo bypass `1.75rem` และระหว่างปุ่ม bypass `.75rem` เพื่อรักษาลำดับสายตาในทุก UI scale
 
+ส่วน "บัญชีทดสอบ — ข้ามการเข้าสู่ระบบ" ใช้ native `details/summary` และปิดเป็นค่าเริ่มต้น หัวข้อสูงอย่างน้อย `3.5rem` มี chevron หมุนเมื่อเปิด รองรับ keyboard และปิด transition เมื่อผู้ใช้ตั้งค่า reduced motion
+
 UC forms มี validation, local attachment preparation/preview และ Upload again ตาม develop จำกัด100MB ยังไม่มี S3 upload จริง Input1rem, button min-height2.875rem, panel radius1rem, heading1.375rem, bodyอย่างน้อย.75rem สีพื้น/ขอบ/ข้อความใช้ semantic tokens ใน workflows.css Status badges มีสีแยก light/dark
 
 Settings ใช้ native dialog width min(32.5rem,100vw−2rem), max-height100dvh−2rem, overflow:auto ตัวเลือก radio มีกรอบปุ่ม min-height3.25rem สถานะปัจจุบันแสดงด้วยกรอบส้มและ checked state เท่านั้น Dialog ของ UC ใช้ demo-ui.tsx พร้อม Escape และคืน focus
@@ -204,6 +206,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 | 2026-10-16 | Merge latest develop: connected AUTH/UC1–UC3 at `/login` and `/register`, separate demo entry, sixth-rejection rule และ themed live surfaces | 47 tests + production build |
 | 2026-10-16 | ย้าย logic AUTH จริงเข้า Login/Register ดีไซน์หลักโดยตรง และวาง Customer/Staff/Admin bypass ไว้ใต้ฟอร์ม | Browser + 47 tests + production build |
 | 2026-10-16 | ปรับ vertical rhythm ของปุ่ม Login/Register, ลิงก์สลับหน้า และ demo bypass | Browser + design snapshot |
+| 2026-10-16 | ทำส่วนบัญชีทดสอบใต้ฟอร์มให้ collapse ได้และปิดเป็นค่าเริ่มต้น | Browser keyboard/state + production build |
 | 2026-10-16 | Initial implemented-design baseline: themes, UI scale, scrollable sidebar, Settings border state, typography, routes and source snapshot | Source comparison and snapshot check |
 
 ## Generated source appendix
@@ -951,12 +954,19 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .login-card .login-submit { margin-top:1.5rem; }
 .login-card .bypass-actions { grid-template-columns:1fr; gap:.75rem; }
 .login-card .bypass-actions button { min-height:4.5rem; }
-.login-card .login-divider { margin-top:1.75rem; }
 .login-register-link { display:block; margin-top:1rem; text-align:center; line-height:1.5; }
+.demo-bypass { margin-top:1.75rem; border-top:.0625rem solid var(--line); border-bottom:.0625rem solid var(--line); }
+.demo-bypass summary { display:flex; align-items:center; justify-content:space-between; gap:1rem; min-height:3.5rem; color:var(--muted); font-size:.6875rem; cursor:pointer; list-style:none; }
+.demo-bypass summary::-webkit-details-marker { display:none; }
+.demo-bypass summary i { width:.625rem; height:.625rem; flex:none; border-right:.09375rem solid currentColor; border-bottom:.09375rem solid currentColor; transform:rotate(45deg); transition:transform .2s ease; }
+.demo-bypass[open] summary i { transform:rotate(225deg); }
+.demo-bypass-content { padding:0 0 1rem; }
+.demo-bypass .demo-context { margin-bottom:0; }
 .login-field select { width:100%; border:0; outline:0; background:transparent; color:var(--text); font:inherit; font-size:.8125rem; }
 .auth-help,.auth-api { display:block; color:var(--muted); font-size:.6875rem; line-height:1.6; }
 .auth-help { margin:.625rem 0 0; }
 .auth-api { margin-top:1rem; text-align:center; opacity:.7; }
+@media(prefers-reduced-motion:reduce) { .demo-bypass summary i { transition:none; } }
 @media(max-width:75rem) { .workspace-links { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:900px) {
   .integrated-shell .integrated-sidebar { width:min(20rem,88vw); transform:translateX(-100%); visibility:hidden; z-index:45; padding:1rem; }

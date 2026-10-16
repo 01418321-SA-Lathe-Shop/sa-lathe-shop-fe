@@ -160,12 +160,19 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .login-card .login-submit { margin-top:1.5rem; }
 .login-card .bypass-actions { grid-template-columns:1fr; gap:.75rem; }
 .login-card .bypass-actions button { min-height:4.5rem; }
-.login-card .login-divider { margin-top:1.75rem; }
 .login-register-link { display:block; margin-top:1rem; text-align:center; line-height:1.5; }
+.demo-bypass { margin-top:1.75rem; border-top:.0625rem solid var(--line); border-bottom:.0625rem solid var(--line); }
+.demo-bypass summary { display:flex; align-items:center; justify-content:space-between; gap:1rem; min-height:3.5rem; color:var(--muted); font-size:.6875rem; cursor:pointer; list-style:none; }
+.demo-bypass summary::-webkit-details-marker { display:none; }
+.demo-bypass summary i { width:.625rem; height:.625rem; flex:none; border-right:.09375rem solid currentColor; border-bottom:.09375rem solid currentColor; transform:rotate(45deg); transition:transform .2s ease; }
+.demo-bypass[open] summary i { transform:rotate(225deg); }
+.demo-bypass-content { padding:0 0 1rem; }
+.demo-bypass .demo-context { margin-bottom:0; }
 .login-field select { width:100%; border:0; outline:0; background:transparent; color:var(--text); font:inherit; font-size:.8125rem; }
 .auth-help,.auth-api { display:block; color:var(--muted); font-size:.6875rem; line-height:1.6; }
 .auth-help { margin:.625rem 0 0; }
 .auth-api { margin-top:1rem; text-align:center; opacity:.7; }
+@media(prefers-reduced-motion:reduce) { .demo-bypass summary i { transition:none; } }
 @media(max-width:75rem) { .workspace-links { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:900px) {
   .integrated-shell .integrated-sidebar { width:min(20rem,88vw); transform:translateX(-100%); visibility:hidden; z-index:45; padding:1rem; }
