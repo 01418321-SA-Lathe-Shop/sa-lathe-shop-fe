@@ -1,6 +1,6 @@
 # Lathe Shop Control — Design specification
 
-อัปเดตล่าสุด: 2026-10-16 · สถานะ: merged design + functional demo workflows
+อัปเดตล่าสุด: 2026-10-16 · สถานะ: merged design + connected AUTH/UC1–UC3 + demo UC4–UC9
 
 เอกสารนี้ใช้ส่งต่องานให้ designer และ developer เพื่อสร้าง UI ให้ตรงกับระบบปัจจุบัน อ่านคู่กับ `docs/02-frontend.md` ซึ่งเป็นแหล่งอ้างอิง Business Flow และ permission ข้อมูลบนหน้าปัจจุบันหลายส่วนเป็น mock data และยังไม่ใช่หลักฐานว่า Backend หรือ UC1–UC9 ทำงานครบ
 
@@ -14,7 +14,7 @@
 | `app/appearance.tsx` | Icons, Logo, theme/scale provider และ Settings |
 | `app/workspace-shell.tsx`, `app/workspace-routes.ts` | Shared role shell, permissions mapping และ URL |
 | `app/workflows.css` | Functional UC forms/tables และ role shell overrides |
-| `app/auth-page.tsx` | Login/Register presentation และ explicit demo entries |
+| `app/auth-gateway.tsx`, `app/backend-workspace.tsx`, `app/auth-page.tsx` | Connected Login/Register และ explicit demo entries |
 | `app/layout.tsx` | Font loading, language และ provider |
 | `app/**/page.tsx` | Route จริง |
 | `docs/02-frontend.md` | Business rules, roles และ UC1–UC9 |
@@ -122,7 +122,7 @@ Record layout31%/1fr ยุบ1columnที่68.75rem Cards เลือกไ�
 
 ### Forms and dialogs
 
-Auth field สูง3.5rem radius.75rem Credential forms ถูก disabled พร้อมข้อความสถานะจนกว่าจะเชื่อม backend ใช้ปุ่มทดสอบ Customer/Staff/Admin สามปุ่ม
+Connected auth ใช้ `/login` และ `/register` ร่วมกับ backend เดียวกันสำหรับ Customer, Staff และ Admin โดย session อยู่ใน memory และไม่ fallback เข้า demo เมื่อ API ล้มเหลว ฟอร์มบัญชีทดสอบถูกแยกชัดเจนและมีปุ่ม Customer/Staff/Admin สามปุ่ม
 
 UC forms มี validation, local attachment preparation/preview และ Upload again ตาม develop จำกัด100MB ยังไม่มี S3 upload จริง Input1rem, button min-height2.875rem, panel radius1rem, heading1.375rem, bodyอย่างน้อย.75rem สีพื้น/ขอบ/ข้อความใช้ semantic tokens ใน workflows.css Status badges มีสีแยก light/dark
 
@@ -139,7 +139,7 @@ Brand mark เป็น CSS square สีส้มหมุน45° พร้อ�
 | URL | Surface |
 | --- | --- |
 | / | Landing |
-| /login, /register | Auth presentation และ explicit demo entry; real credentials ยังไม่เปิด |
+| /login, /register | Connected sign-in / customer registration พร้อมทางเข้า demo ที่แยกจากข้อมูลจริง |
 | /staff | Staff overview |
 | /staff/quotations, /staff/materials, /staff/orders, /staff/receiving, /staff/production, /staff/delivery-payment | UC2 และ UC5–UC9 |
 | /customer | Customer overview |
@@ -199,6 +199,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 | Date | Change | Verification |
 | --- | --- | --- |
 | 2026-10-16 | Merge design with functional develop flows, Admin routes, Staff naming, shared provider, pinned sidebar และ workflow theme tokens | Verification: docs/08-design-workflow-integration.md |
+| 2026-10-16 | Merge latest develop: connected AUTH/UC1–UC3 at `/login` and `/register`, separate demo entry, sixth-rejection rule และ themed live surfaces | 47 tests + production build |
 | 2026-10-16 | Initial implemented-design baseline: themes, UI scale, scrollable sidebar, Settings border state, typography, routes and source snapshot | Source comparison and snapshot check |
 
 ## Generated source appendix
@@ -946,6 +947,7 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .login-card .bypass-actions { grid-template-columns:1fr; }
 .login-card .bypass-actions button { min-height:4.5rem; }
 .login-register-link { display:block; text-align:center; }
+.auth-connected-link { width:100%; border:0; background:transparent; color:var(--lime); cursor:pointer; }
 @media(max-width:75rem) { .workspace-links { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:900px) {
   .integrated-shell .integrated-sidebar { width:min(20rem,88vw); transform:translateX(-100%); visibility:hidden; z-index:45; padding:1rem; }
@@ -965,6 +967,32 @@ button:disabled { opacity:.5; cursor:not-allowed; }
   .switch-account { font-size:.7rem; padding:.6rem; }
   .workflow-content .button-primary,.workflow-content .button-secondary { white-space:normal; }
 }
+
+/* Connected backend surfaces share the same appearance tokens and UI scale. */
+.live-shell { min-height:100svh; background:var(--bg); }
+.live-header,.live-tabs { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; padding:1rem 5%; background:var(--surface); border-bottom:.0625rem solid var(--line); }
+.live-header { justify-content:space-between; }
+.live-header>div { display:flex; flex-wrap:wrap; align-items:center; gap:1rem; }
+.live-tabs button { text-transform:capitalize; padding:.625rem 1rem; border-radius:.5rem; }
+.live-tabs button[aria-current="page"] { background:color-mix(in srgb,var(--lime) 12%,var(--surface)); color:var(--lime); }
+.live-main { max-width:87.5rem; margin:auto; padding:1.75rem 5%; }
+.live-main>h1 { font-size:1.5625rem; margin-bottom:.75rem; overflow-wrap:anywhere; }
+.live-main .demo-notice { margin:1.25rem 0; }
+.live-login { min-height:100svh; display:grid; place-items:center; padding:1.75rem 1rem; background:var(--bg); }
+.live-login>section { width:min(100%,34.375rem); }
+.live-login h1 { font-size:1.625rem; margin:1rem 0; }
+.live-login p { margin:.75rem 0; overflow-wrap:anywhere; }
+.live-fields { display:grid; gap:.875rem; border:0; padding:0; min-width:0; }
+.live-section { border-top:.0625rem solid var(--line); padding-top:1.375rem; margin-top:1.5rem; }
+.live-section h3,.live-section h4 { margin-bottom:.875rem; }
+.live-section form { margin-top:1.125rem; }
+.workflow-error { font-size:.8125rem; color:var(--danger); background:color-mix(in srgb,var(--danger) 8%,var(--surface)); border:.0625rem solid var(--danger); padding:.875rem; border-radius:.5rem; margin:.875rem 0; line-height:1.7; overflow-wrap:anywhere; }
+.live-description,.private-invitation { white-space:pre-wrap; overflow-wrap:anywhere; }
+.private-invitation { display:block; user-select:all; }
+.live-shell button,.live-login button { min-height:2.75rem; padding:.5625rem .75rem; }
+.live-shell .form-actions { align-items:center; }
+.live-shell .record-detail,.live-shell .record-list-item { overflow-wrap:anywhere; }
+@media(max-width:37.5rem) { .live-main { padding:1.25rem .875rem; } .live-main .detail-grid { grid-template-columns:1fr; } .live-tabs { gap:.25rem; padding:.5rem; } }
 ```
 
 ### B. Font loading and root layout — app/layout.tsx

@@ -160,6 +160,7 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .login-card .bypass-actions { grid-template-columns:1fr; }
 .login-card .bypass-actions button { min-height:4.5rem; }
 .login-register-link { display:block; text-align:center; }
+.auth-connected-link { width:100%; border:0; background:transparent; color:var(--lime); cursor:pointer; }
 @media(max-width:75rem) { .workspace-links { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:900px) {
   .integrated-shell .integrated-sidebar { width:min(20rem,88vw); transform:translateX(-100%); visibility:hidden; z-index:45; padding:1rem; }
@@ -179,3 +180,29 @@ button:disabled { opacity:.5; cursor:not-allowed; }
   .switch-account { font-size:.7rem; padding:.6rem; }
   .workflow-content .button-primary,.workflow-content .button-secondary { white-space:normal; }
 }
+
+/* Connected backend surfaces share the same appearance tokens and UI scale. */
+.live-shell { min-height:100svh; background:var(--bg); }
+.live-header,.live-tabs { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; padding:1rem 5%; background:var(--surface); border-bottom:.0625rem solid var(--line); }
+.live-header { justify-content:space-between; }
+.live-header>div { display:flex; flex-wrap:wrap; align-items:center; gap:1rem; }
+.live-tabs button { text-transform:capitalize; padding:.625rem 1rem; border-radius:.5rem; }
+.live-tabs button[aria-current="page"] { background:color-mix(in srgb,var(--lime) 12%,var(--surface)); color:var(--lime); }
+.live-main { max-width:87.5rem; margin:auto; padding:1.75rem 5%; }
+.live-main>h1 { font-size:1.5625rem; margin-bottom:.75rem; overflow-wrap:anywhere; }
+.live-main .demo-notice { margin:1.25rem 0; }
+.live-login { min-height:100svh; display:grid; place-items:center; padding:1.75rem 1rem; background:var(--bg); }
+.live-login>section { width:min(100%,34.375rem); }
+.live-login h1 { font-size:1.625rem; margin:1rem 0; }
+.live-login p { margin:.75rem 0; overflow-wrap:anywhere; }
+.live-fields { display:grid; gap:.875rem; border:0; padding:0; min-width:0; }
+.live-section { border-top:.0625rem solid var(--line); padding-top:1.375rem; margin-top:1.5rem; }
+.live-section h3,.live-section h4 { margin-bottom:.875rem; }
+.live-section form { margin-top:1.125rem; }
+.workflow-error { font-size:.8125rem; color:var(--danger); background:color-mix(in srgb,var(--danger) 8%,var(--surface)); border:.0625rem solid var(--danger); padding:.875rem; border-radius:.5rem; margin:.875rem 0; line-height:1.7; overflow-wrap:anywhere; }
+.live-description,.private-invitation { white-space:pre-wrap; overflow-wrap:anywhere; }
+.private-invitation { display:block; user-select:all; }
+.live-shell button,.live-login button { min-height:2.75rem; padding:.5625rem .75rem; }
+.live-shell .form-actions { align-items:center; }
+.live-shell .record-detail,.live-shell .record-list-item { overflow-wrap:anywhere; }
+@media(max-width:37.5rem) { .live-main { padding:1.25rem .875rem; } .live-main .detail-grid { grid-template-columns:1fr; } .live-tabs { gap:.25rem; padding:.5rem; } }

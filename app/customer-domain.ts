@@ -81,7 +81,7 @@ export function respondToQuotation(request: CustomerRequest, response: "approved
     ...request,
     quotations: request.quotations.map((item) => item.id === quotation.id ? { ...item, status: response } : item),
     rejections,
-    status: rejections >= 5 ? "canceled" : request.status,
+    status: rejections >= 6 ? "canceled" : request.status,
     acceptedAt: response === "approved" ? at : undefined,
   };
 }

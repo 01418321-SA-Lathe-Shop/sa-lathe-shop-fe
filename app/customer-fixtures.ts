@@ -14,10 +14,10 @@ export function createCustomerDemo(now: number): CustomerState {
   const personal = quoted(1, "Rubber mold insert — individual sample", "individual", 640_000);
   const smallCompany = quoted(2, "Mold repair — company threshold sample", "company", 1_000_000);
   const largeCompany = quoted(3, "Compression mold assembly — company sample", "company", 1_600_000);
-  const finalRevision = quoted(4, "Rubber mold revision — fifth-response sample", "individual", 960_000);
-  finalRevision.rejections = 4;
-  finalRevision.quotations = Array.from({ length: 5 }, (_, i): Quotation => ({
-    id: uuid(200 + i), revision: i + 1, price: 960_000, status: i === 4 ? "sent" : "rejected",
+  const finalRevision = quoted(4, "Rubber mold revision — sixth-response sample", "individual", 960_000);
+  finalRevision.rejections = 5;
+  finalRevision.quotations = Array.from({ length: 6 }, (_, i): Quotation => ({
+    id: uuid(200 + i), revision: i + 1, price: 960_000, status: i === 5 ? "sent" : "rejected",
   }));
   const deliveredJob = quoted(5, "Completed rubber mold — delivery and payment sample", "individual", 1_280_000);
   deliveredJob.quotations[0].status = "approved";
