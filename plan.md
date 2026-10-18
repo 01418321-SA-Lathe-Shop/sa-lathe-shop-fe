@@ -116,6 +116,12 @@ Request the reads and actions listed in `docs/02-frontend.md` under “Needs fro
 
 ## Validation checklist
 
+### 8. Connect Worker contacts and UC4 fulfillment — in progress
+
+Owner authorized the next frontend phase. Backend develop `ab0c224` now implements required Worker contacts and UC4 (also UC5/UC6, intentionally deferred to following frontend phases). Use AUTH.md/UC4.md and verified DTOs, no backend changes. Preserve existing `/` panels/design, dependencies, memory-only sessions and unrelated package edits.
+
+Commit groups: exact evidence/contact types and validation tests; real Admin Worker add/edit with nullable legacy display; UC4 Customer file-to-evidence submission and Admin/Worker review with queued job display; verification/handoff. Use a new ready upload for rejected replacement, retain identical idempotency payload for uncertain submission retry, and distinguish technical upload completion from payment verification. No bank transfer or invoice action. Later backend-confirmed Admin-only UC6 overrides the older shared Admin/Worker rule; no live procurement actions in this phase.
+
 - Verify role navigation and permissions against confirmed rules.
 - Verify the individual/company Deposit and PO thresholds: five rejections allow revision, the sixth cancels.
 - Verify installment payment display and invoice states (`unpaid`, `partial`, `paid`).

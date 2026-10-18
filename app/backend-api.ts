@@ -11,7 +11,10 @@ export type Terms = { customer_type: string; final_price: string; deposit_requir
 export type Decision = { quotation_id: string; request_id: string; actor_id: string; outcome: "accept" | "reject"; reason?: string; expected_lock_version: Integer; decided_at: string; rejection_count: number; request_status: string; terms?: Terms };
 export type Attachment = { id: string; file_name: string; byte_size: number; content_type: string; state: string };
 export type Notification = { id: string; request_id: string; title: string; created_at: string; read_at?: string };
-export type Worker = Account & { employee_no: string; position?: string };
+export type Worker = Account & { employee_no: string; position?: string; email: string | null; phone: string | null };
+export type EvidenceSubmission = { idempotency_key: string; attachment_id: string; kind: "deposit" | "po"; amount?: string; paid_at?: string };
+export type Evidence = EvidenceSubmission & { id: string; quotation_id: string; submitted_by: string; status: "pending" | "approved" | "rejected"; version: Integer; submitted_at: string; reviewed_by: string | null; reviewed_at: string | null; reason?: string };
+export type Fulfillment = { quotation_id: string; request_status: string; terms: Terms; evidence: Evidence[] | null; job: { id: string; quotation_id: string; request_id: string; status: string; deposit_amount: string; balance: string; due_at: string | null; created_at: string } | null; canceled_at: string | null };
 export type Page<T> = { items: T[] | null; limit: number; offset: number };
 export type SignedLink = { url: string; headers?: Record<string, string>; expires_at: string; attachment_id?: string };
 
@@ -111,7 +114,7 @@ export class BackendApi {
     return session;
   }
   async logout() { try { await this.call<void>("/auth/logout", "POST"); } finally { this.close(); } }
-  async upload(requestId: string, file: File, signal?: AbortSignal): Promise<void> {
+  async upload(requestId: string, file: File, signal?: AbortSignal): Promise<Attachment> {
     const type = uploadType(file);
     const link = await this.call<SignedLink>(`/requests/${requestId}/uploads`, "POST", { file_name: file.name, content_type: type, byte_size: file.size }, signal);
     const url = new URL(link.url);
@@ -120,6 +123,6 @@ export class BackendApi {
     headers.delete("Authorization"); // Never forward API credentials to object storage.
     const response = await fetch(url, { method: "PUT", headers, body: file, credentials: "omit", redirect: "error", signal: signal ? AbortSignal.any([signal, this.controller.signal]) : this.controller.signal });
     if (!response.ok) throw new Error("Storage upload failed. Upload again with a new upload intent.");
-    await this.call(`/uploads/${link.attachment_id}/complete`, "POST", undefined, signal);
+    return this.call<Attachment>(`/uploads/${link.attachment_id}/complete`, "POST", undefined, signal);
   }
 }
