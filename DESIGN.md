@@ -124,6 +124,10 @@ Record layout31%/1fr ยุบ1columnที่68.75rem Cards เลือกไ�
 
 Phase 8 extension (2026-10-19): connected Admin → Workers adds inline Create/Edit profiles with required name, email and phone alongside username/employee number. Existing account status/password controls stay real; legacy null contacts display as missing, not invented values. Editing loads the current profile from the API. Inputs reuse `.form-field` and semantic theme tokens; `.live-editor` uses divider-separated inline sections, not new modal/card layers. `.live-worker-row` separates records with a thin divider. New spacing uses rem so Small/Medium/Large continue to apply. Backend/API role remains `worker`; connected legacy English labels are retained in this scope.
 
+UC4 extension appears inline under each approved connected quotation: Deposit/PO requirements, original deadline, upload-and-submit form for Customer, private evidence download, one manual review for Admin/Staff, rejection history and server-returned queued job. Keep amount/date controls labeled THB/Asia-Bangkok. File validation and staff approval are separate steps. Exact submission/review retry controls preserve immutable original payloads after uncertain responses; no automatic retries. Deadline/cancellation/current job come from backend, never demo fixtures. Evidence records use divider-separated `.live-evidence-record` rows and tabular numerals; the review checkbox uses `.live-review-confirm`. No new route, visual identity, icon library, font, or dependency is added.
+
+Connected mobile actions wrap by whole button (8rem flex basis) rather than splitting words. Scope notice separates heading/body with .5rem. Skip-to-workspace is hidden offscreen until keyboard focus. After an approved/sent/draft quote, no additional create-revision form is offered; existing drafts use Edit and new revisions require rejected history. This prevents irrelevant UC2 controls distracting from UC4 fulfillment.
+
 Connected auth ใช้ดีไซน์ Login/Register หลักที่ `/login` และ `/register` ร่วมกับ backend เดียวกันสำหรับ Customer, Staff และ Admin โดย session อยู่ใน memory และไม่ fallback เข้า demo เมื่อ API ล้มเหลว ใต้ฟอร์มจริงมีส่วน "บัญชีทดสอบ — ข้ามการเข้าสู่ระบบ" พร้อมปุ่ม Customer/Staff/Admin สามปุ่ม
 
 Auth spacing ใช้ระยะจากช่องสุดท้ายถึงปุ่มหลัก `1.5rem`, จากปุ่มหลักถึงลิงก์สลับ Login/Register `1rem`, ก่อน divider ของ demo bypass `1.75rem` และระหว่างปุ่ม bypass `.75rem` เพื่อรักษาลำดับสายตาในทุก UI scale
@@ -204,6 +208,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-19 | Connect inline UC4 evidence submission/review and queued job display under approved quotations; preserve theme/scale tokens | Exact domain tests + build; real full-stack browser flow in Phase 8 handoff |
 | 2026-10-19 | Add connected Worker contact create/edit and retain nullable legacy profiles; preserve upstream auth design/routes | Exact contact tests + build; browser verification in Phase 8 handoff |
 | 2026-10-19 | Preserve upstream designed auth/routes while merging Phase 8 exact evidence/contact primitives; no intentional visual redesign | Production build + 53 native tests; source appendix refreshed |
 | 2026-10-16 | Merge design with functional develop flows, Admin routes, Staff naming, shared provider, pinned sidebar และ workflow theme tokens | Verification: docs/08-design-workflow-integration.md |
@@ -1016,8 +1021,18 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .live-worker-row { padding:1.25rem 0; border-bottom:.0625rem solid var(--line-soft); }
 .live-worker-row p,.live-editor p { line-height:1.7; font-size:.875rem; }
 .live-worker-row .detail-grid { background:transparent; }
+.live-worker-row .form-actions>button { flex:1 1 8rem; white-space:normal; overflow-wrap:normal; }
+.live-shell .demo-notice strong,.live-shell .demo-notice span { display:block; }
+.live-shell .demo-notice span { margin-top:.5rem; }
+.live-shell .skip-link { position:fixed; top:-10rem; left:1rem; z-index:60; background:var(--surface); color:var(--text); padding:.75rem 1rem; border:.0625rem solid var(--lime); }
+.live-shell .skip-link:focus { top:1rem; }
 .live-shell :is(input,textarea,select) { caret-color:var(--lime); }
 .live-shell ::selection { color:var(--text); background:color-mix(in srgb,var(--lime) 25%,var(--surface)); }
+.fulfillment-section { font-variant-numeric:tabular-nums; }
+.live-evidence-record { margin-top:1.25rem; padding:1.25rem 0; border-top:.0625rem solid var(--line-soft); }
+.live-evidence-record p { margin:.75rem 0; line-height:1.7; font-size:.875rem; overflow-wrap:anywhere; }
+.live-review-confirm { display:flex; align-items:start; gap:.75rem; line-height:1.6; }
+.live-review-confirm input { width:1.25rem; min-height:1.25rem; flex:none; margin-top:.1875rem; accent-color:var(--lime); }
 @media(max-width:37.5rem) { .live-main { padding:1.25rem .875rem; } .live-main .detail-grid { grid-template-columns:1fr; } .live-tabs { gap:.25rem; padding:.5rem; } }
 ```
 

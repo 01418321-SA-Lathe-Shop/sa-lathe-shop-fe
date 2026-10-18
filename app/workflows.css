@@ -218,6 +218,16 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .live-worker-row { padding:1.25rem 0; border-bottom:.0625rem solid var(--line-soft); }
 .live-worker-row p,.live-editor p { line-height:1.7; font-size:.875rem; }
 .live-worker-row .detail-grid { background:transparent; }
+.live-worker-row .form-actions>button { flex:1 1 8rem; white-space:normal; overflow-wrap:normal; }
+.live-shell .demo-notice strong,.live-shell .demo-notice span { display:block; }
+.live-shell .demo-notice span { margin-top:.5rem; }
+.live-shell .skip-link { position:fixed; top:-10rem; left:1rem; z-index:60; background:var(--surface); color:var(--text); padding:.75rem 1rem; border:.0625rem solid var(--lime); }
+.live-shell .skip-link:focus { top:1rem; }
 .live-shell :is(input,textarea,select) { caret-color:var(--lime); }
 .live-shell ::selection { color:var(--text); background:color-mix(in srgb,var(--lime) 25%,var(--surface)); }
+.fulfillment-section { font-variant-numeric:tabular-nums; }
+.live-evidence-record { margin-top:1.25rem; padding:1.25rem 0; border-top:.0625rem solid var(--line-soft); }
+.live-evidence-record p { margin:.75rem 0; line-height:1.7; font-size:.875rem; overflow-wrap:anywhere; }
+.live-review-confirm { display:flex; align-items:start; gap:.75rem; line-height:1.6; }
+.live-review-confirm input { width:1.25rem; min-height:1.25rem; flex:none; margin-top:.1875rem; accent-color:var(--lime); }
 @media(max-width:37.5rem) { .live-main { padding:1.25rem .875rem; } .live-main .detail-grid { grid-template-columns:1fr; } .live-tabs { gap:.25rem; padding:.5rem; } }

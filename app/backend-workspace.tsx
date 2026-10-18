@@ -32,7 +32,7 @@ export default function BackendWorkspace({ initialRegister = false }: { initialR
     return () => window.clearTimeout(timer);
   }, [session]);
 
-  if (!session) return <LiveLogin base={base} notice={notice} initialRegister={initialRegister} onLogin={async (username, password) => {
+  if (!session) return <LiveLogin key={initialRegister ? "register" : "login"} base={base} notice={notice} initialRegister={initialRegister} onLogin={async (username, password) => {
     const api = new BackendApi(base, () => { setSession(null); setNotice("Session expired or revoked. Please sign in again."); });
     active.current?.close(); active.current = api;
     try {
@@ -55,7 +55,7 @@ export default function BackendWorkspace({ initialRegister = false }: { initialR
     }, "")}>Sign out</button></header>
     <nav className="live-tabs" aria-label="Connected workspace">{tabs.map((name) => <button key={name} aria-current={tab === name ? "page" : undefined} onClick={() => { setTab(name); requestAnimationFrame(() => document.getElementById("live-title")?.focus()); }}>{name}</button>)}</nav>
     <main id="live-main" className="live-main" tabIndex={-1}><h1 id="live-title" tabIndex={-1}>{account.name} · {tab}</h1><p className="text-muted">Real backend records. Asia/Bangkok · THB · No VAT. Reload requires sign-in; no token is stored in browser storage.</p>
-      <div className="demo-notice"><p><strong>Connected scope: authentication and UC1–UC3.</strong><span>Deposit/PO evidence, jobs, stock, purchasing, delivery and payments are not connected. Acceptance terms are requirements, not proof of payment. Worker contact creation/editing waits for backend email/phone support.</span></p></div>
+      <div className="demo-notice"><p><strong>Connected scope: accounts, Worker contacts and UC1–UC4.</strong><span>Open an approved quotation to submit or review Deposit/PO evidence and see the resulting job. Approval is manual—not a bank transfer. Stock, procurement, production, delivery and invoice settlement are not connected in this frontend phase.</span></p></div>
       {tab === "requests" && <LiveRequests api={api} account={account} />}
       {tab === "inbox" && <Inbox api={api} />}
       {tab === "memberships" && <Memberships api={api} />}
@@ -63,7 +63,6 @@ export default function BackendWorkspace({ initialRegister = false }: { initialR
     </main>
   </div>;
 }
-
 function LiveLogin({ base, notice, initialRegister, onLogin }: { base: string; notice: string; initialRegister: boolean; onLogin: (username: string, password: string) => Promise<void> }) {
   const router = useRouter();
   const [register, setRegister] = useState(initialRegister);
@@ -71,7 +70,6 @@ function LiveLogin({ base, notice, initialRegister, onLogin }: { base: string; n
   const [companyMode, setCompanyMode] = useState("new");
   const action = useCommand();
   const registrationApi = useRef<BackendApi | null>(null);
-  useEffect(() => setRegister(initialRegister), [initialRegister]);
   useEffect(() => () => registrationApi.current?.close(), []);
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); const form = event.currentTarget; const data = new FormData(form);
