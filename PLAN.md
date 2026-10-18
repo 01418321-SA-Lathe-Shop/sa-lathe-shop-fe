@@ -116,11 +116,13 @@ Request the reads and actions listed in `docs/02-frontend.md` under “Needs fro
 
 ## Validation checklist
 
-### 8. Connect Worker contacts and UC4 fulfillment — in progress
+### 8. Connect Worker contacts and UC4 fulfillment — implementation done; full-stack verification pending
 
 Owner authorized the next frontend phase. Backend develop `ab0c224` now implements required Worker contacts and UC4 (also UC5/UC6, intentionally deferred to following frontend phases). Use AUTH.md/UC4.md and verified DTOs, no backend changes. Preserve existing `/` panels/design, dependencies, memory-only sessions and unrelated package edits.
 
 Commit groups: exact evidence/contact types and validation tests; real Admin Worker add/edit with nullable legacy display; UC4 Customer file-to-evidence submission and Admin/Worker review with queued job display; verification/handoff. Use a new ready upload for rejected replacement, retain identical idempotency payload for uncertain submission retry, and distinguish technical upload completion from payment verification. No bank transfer or invoice action. Later backend-confirmed Admin-only UC6 overrides the older shared Admin/Worker rule; no live procurement actions in this phase.
+
+Implemented/pushed groups: `58279b7` exact inputs/tests; `9a37d21` merge existing upstream designed auth/routes (preserved plan rename to uppercase PLAN.md); `b29e722` live Worker contacts; `6ad3f82` UC4 submission/review/job display. This is not an all-green completed phase: real API/PostgreSQL/S3 browser verification remains blocked by Docker Desktop startup at its dockerInference socket. Normal startup failed; no reset, socket/data deletion or settings change was attempted. Owner was asked to start Docker. Production build + 53 native tests + changed-file lint + design snapshot/detector pass. Contract-stubbed browser checks pass and are explicitly not backend verification. Full-project lint still flags upstream appearance.tsx effect/unused directive; do not suppress or silently claim success. See docs/09-phase-eight-handoff.md. Next: once Docker is healthy, run real UC4 verification, then separately authorize/connect frontend UC5 (not backend UC7).
 
 - Verify role navigation and permissions against confirmed rules.
 - Verify the individual/company Deposit and PO thresholds: five rejections allow revision, the sixth cancels.

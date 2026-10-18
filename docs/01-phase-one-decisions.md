@@ -6,6 +6,8 @@ Source of truth: `docs/02-frontend.md`. Owner confirmations received on 2026-10-
 
 ## Phase 7 integration update
 
+Phase 8 update (2026-10-19): backend contact support now resolves the earlier D15 implementation gap. Current AUTH.md defines required/non-unique contacts, email syntax/254-byte limit, phone syntax/normalization, nullable legacy reads and backfill by PATCH. Frontend create/edit is implemented. UC4 now resolves manual review roles (Admin/Worker), single deposit from minimum through total, timely-complete-late-review handling, missing-evidence expiry and one job per approved request/quotation. These are backend owner-confirmed contracts, not frontend guesses. Backend UC6 now restricts procurement to Admin only. Frontend UC5/UC6 integration and real UC4 stack verification remain pending; see `09-phase-eight-handoff.md`.
+
 The historical register below describes discovery and demo phases. The owner has now authorized real integration against backend `docs/AUTH.md` and `UC1.md`–`UC3.md`. See the current-contract section in `02-frontend.md` and the verified handoff in `08-backend-integration-handoff.md`. These supersede older "unimplemented" or "undefined" statements for the supported scope only.
 
 | Decision | Resolved for connected scope | Still open / unavailable |

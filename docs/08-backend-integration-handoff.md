@@ -1,5 +1,7 @@
 # Phase 7 — Backend integration handoff
 
+Historical Phase 7 record. Current routes/design and connected scope are superseded by `09-phase-eight-handoff.md`: real auth uses `/login` / `/register`, Worker contacts and UC4 now have frontend implementation, and their new full-stack verification is pending Docker recovery. The successful real-stack results below describe Phase 7 only, not proof of the new UC4 phase.
+
 ## Delivered scope
 
 The frontend now defaults to connected sign-in at `/`. It calls the existing Go API directly; there is no invented Next.js API proxy, new auth provider, dependency installation, folder restructure, or backend implementation change. The backend contracts reviewed are `docs/AUTH.md`, `UC1.md`, `UC2.md`, `UC3.md`, and the overall `01-backend.md`, checked against Go handlers/DTOs. Backend snapshot used for isolated verification: `e0808ec`.
