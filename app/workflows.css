@@ -213,4 +213,11 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .live-shell button { min-height:2.75rem; padding:.5625rem .75rem; }
 .live-shell .form-actions { align-items:center; }
 .live-shell .record-detail,.live-shell .record-list-item { overflow-wrap:anywhere; }
+.live-editor { margin:1.5rem 0; padding:1.25rem 0; border-top:.0625rem solid var(--line); border-bottom:.0625rem solid var(--line); }
+.live-editor h3 { margin-bottom:1rem; font-size:1.125rem; }
+.live-worker-row { padding:1.25rem 0; border-bottom:.0625rem solid var(--line-soft); }
+.live-worker-row p,.live-editor p { line-height:1.7; font-size:.875rem; }
+.live-worker-row .detail-grid { background:transparent; }
+.live-shell :is(input,textarea,select) { caret-color:var(--lime); }
+.live-shell ::selection { color:var(--text); background:color-mix(in srgb,var(--lime) 25%,var(--surface)); }
 @media(max-width:37.5rem) { .live-main { padding:1.25rem .875rem; } .live-main .detail-grid { grid-template-columns:1fr; } .live-tabs { gap:.25rem; padding:.5rem; } }

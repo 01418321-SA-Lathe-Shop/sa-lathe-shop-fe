@@ -4,9 +4,10 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon, Logo, ThemeToggle } from "./appearance";
-import { BackendApi, type Account, type Customer, type Notification, type Page, type Worker } from "./backend-api";
+import { BackendApi, type Account, type Customer, type Notification, type Page } from "./backend-api";
 import { useCommand, useResource } from "./backend-hooks";
 import { LiveRequests } from "./backend-requests";
+import { LiveWorkers } from "./backend-workers";
 import { formatBangkok } from "./demo-display";
 import { ROLES, type Role } from "./demo-access";
 import { setDemoRole } from "./demo-session";
@@ -58,7 +59,7 @@ export default function BackendWorkspace({ initialRegister = false }: { initialR
       {tab === "requests" && <LiveRequests api={api} account={account} />}
       {tab === "inbox" && <Inbox api={api} />}
       {tab === "memberships" && <Memberships api={api} />}
-      {tab === "workers" && account.role === "admin" && <Workers api={api} />}
+      {tab === "workers" && account.role === "admin" && <LiveWorkers api={api} />}
     </main>
   </div>;
 }
@@ -125,10 +126,3 @@ function Memberships({ api }: { api: BackendApi }) {
   </section>;
 }
 
-function Workers({ api }: { api: BackendApi }) {
-  const [offset, setOffset] = useState(0); const resource = useResource<Page<Worker>>(api, `/admin/workers?limit=20&offset=${offset}`); const action = useCommand(); const [selected, setSelected] = useState<Worker | null>(null);
-  return <section className="record-detail"><h2>Workers</h2><p className="field-error">Add/edit contact profiles is unavailable: backend email/phone persistence is pending. No contacts will be discarded. Existing account status and password actions are supported.</p><button onClick={resource.reload}>Refresh workers</button><Feedback busy={resource.loading} error={resource.error} />
-    {resource.data && <>{!resource.data.items?.length && <p>No Workers on this page.</p>}{resource.data.items?.map((worker) => <article className="supplier-order" key={worker.id}><h3>{worker.name}</h3><p>{worker.username} · {worker.employee_no} · {worker.position || "No position"} · {worker.is_active ? "active" : "inactive"}</p><p>Email / phone: unavailable in current API.</p><div className="form-actions"><button disabled={action.busy} onClick={() => { if (!window.confirm(`${worker.is_active ? "Deactivate" : "Reactivate"} ${worker.name}? Deactivation revokes all their sessions; reactivation does not restore them.`)) return; void action.run(async (signal) => { await api.call(`/admin/workers/${worker.id}`, "PATCH", { is_active: !worker.is_active }, signal); resource.reload(); }, "Worker status updated."); }}>{worker.is_active ? "Deactivate" : "Reactivate"}</button><button onClick={() => setSelected(worker)}>Change password</button></div></article>)}<Paging offset={offset} count={resource.data.items?.length ?? 0} busy={action.busy} setOffset={setOffset} /></>}
-    {selected && <form key={selected.id} className="workflow-form-panel" onSubmit={(event) => { event.preventDefault(); const form = event.currentTarget; const data = new FormData(form); const password = text(data, "password"); const confirmation = text(data, "confirm"); form.reset(); void action.run(async (signal) => { const invalid = passwordError(password); if (invalid) throw new Error(invalid); if (password !== confirmation) throw new Error("Passwords must match."); await api.call(`/admin/workers/${selected.id}`, "PATCH", { password }, signal); setSelected(null); }, "Password changed; all Worker sessions revoked."); }}><h3>Change password: {selected.name}</h3><Field label="New password"><input name="password" type="password" required autoComplete="new-password" /></Field><Field label="Confirm new password"><input name="confirm" type="password" required autoComplete="new-password" /></Field><p>At least 12 characters; at most 128 UTF-8 bytes. All Worker sessions will be revoked.</p><button disabled={action.busy} type="submit">Change password</button><button type="button" disabled={action.busy} onClick={() => setSelected(null)}>Cancel</button></form>}<Feedback {...action} />
-  </section>;
-}

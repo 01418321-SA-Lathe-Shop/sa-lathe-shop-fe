@@ -122,6 +122,8 @@ Record layout31%/1fr ยุบ1columnที่68.75rem Cards เลือกไ�
 
 ### Forms and dialogs
 
+Phase 8 extension (2026-10-19): connected Admin → Workers adds inline Create/Edit profiles with required name, email and phone alongside username/employee number. Existing account status/password controls stay real; legacy null contacts display as missing, not invented values. Editing loads the current profile from the API. Inputs reuse `.form-field` and semantic theme tokens; `.live-editor` uses divider-separated inline sections, not new modal/card layers. `.live-worker-row` separates records with a thin divider. New spacing uses rem so Small/Medium/Large continue to apply. Backend/API role remains `worker`; connected legacy English labels are retained in this scope.
+
 Connected auth ใช้ดีไซน์ Login/Register หลักที่ `/login` และ `/register` ร่วมกับ backend เดียวกันสำหรับ Customer, Staff และ Admin โดย session อยู่ใน memory และไม่ fallback เข้า demo เมื่อ API ล้มเหลว ใต้ฟอร์มจริงมีส่วน "บัญชีทดสอบ — ข้ามการเข้าสู่ระบบ" พร้อมปุ่ม Customer/Staff/Admin สามปุ่ม
 
 Auth spacing ใช้ระยะจากช่องสุดท้ายถึงปุ่มหลัก `1.5rem`, จากปุ่มหลักถึงลิงก์สลับ Login/Register `1rem`, ก่อน divider ของ demo bypass `1.75rem` และระหว่างปุ่ม bypass `.75rem` เพื่อรักษาลำดับสายตาในทุก UI scale
@@ -202,6 +204,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-19 | Add connected Worker contact create/edit and retain nullable legacy profiles; preserve upstream auth design/routes | Exact contact tests + build; browser verification in Phase 8 handoff |
 | 2026-10-19 | Preserve upstream designed auth/routes while merging Phase 8 exact evidence/contact primitives; no intentional visual redesign | Production build + 53 native tests; source appendix refreshed |
 | 2026-10-16 | Merge design with functional develop flows, Admin routes, Staff naming, shared provider, pinned sidebar และ workflow theme tokens | Verification: docs/08-design-workflow-integration.md |
 | 2026-10-16 | Merge latest develop: connected AUTH/UC1–UC3 at `/login` and `/register`, separate demo entry, sixth-rejection rule และ themed live surfaces | 47 tests + production build |
@@ -1008,6 +1011,13 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .live-shell button { min-height:2.75rem; padding:.5625rem .75rem; }
 .live-shell .form-actions { align-items:center; }
 .live-shell .record-detail,.live-shell .record-list-item { overflow-wrap:anywhere; }
+.live-editor { margin:1.5rem 0; padding:1.25rem 0; border-top:.0625rem solid var(--line); border-bottom:.0625rem solid var(--line); }
+.live-editor h3 { margin-bottom:1rem; font-size:1.125rem; }
+.live-worker-row { padding:1.25rem 0; border-bottom:.0625rem solid var(--line-soft); }
+.live-worker-row p,.live-editor p { line-height:1.7; font-size:.875rem; }
+.live-worker-row .detail-grid { background:transparent; }
+.live-shell :is(input,textarea,select) { caret-color:var(--lime); }
+.live-shell ::selection { color:var(--text); background:color-mix(in srgb,var(--lime) 25%,var(--surface)); }
 @media(max-width:37.5rem) { .live-main { padding:1.25rem .875rem; } .live-main .detail-grid { grid-template-columns:1fr; } .live-tabs { gap:.25rem; padding:.5rem; } }
 ```
 
