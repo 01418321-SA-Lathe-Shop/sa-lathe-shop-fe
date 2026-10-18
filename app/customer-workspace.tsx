@@ -82,9 +82,9 @@ export default function CustomerWorkspace({ workspaceId, navigate }: { workspace
   const deposit = evidence.requestId === selected?.id ? evidence.deposit : undefined;
   const po = evidence.requestId === selected?.id ? evidence.po : undefined;
   const empty = workspaceId === "quotations"
-    ? { title: "No quotations yet", body: "A Worker must send a quotation before you can review it.", next: "requests" as const, action: "Open requests" }
+    ? { title: "No quotations yet", body: "A Staff must send a quotation before you can review it.", next: "requests" as const, action: "Open requests" }
     : workspaceId === "delivery-payment"
-      ? { title: "No deliveries or invoices yet", body: "Delivery and invoice information appears after production and Worker handover.", next: "requests" as const, action: "Open requests" }
+      ? { title: "No deliveries or invoices yet", body: "Delivery and invoice information appears after production and Staff handover.", next: "requests" as const, action: "Open requests" }
       : workspaceId === "deposit-po"
         ? { title: "No confirmations awaiting evidence", body: "Accept a quotation to see the required Deposit and/or PO.", next: "quotations" as const, action: "Open quotations" }
         : { title: "No requests yet", body: "Start by submitting a manufacturing request and any supporting documents.", next: "requests" as const, action: "New request" };
@@ -106,7 +106,7 @@ export default function CustomerWorkspace({ workspaceId, navigate }: { workspace
           event.preventDefault();
           if (!details.trim() || uploads) return;
           const request: CustomerRequest = { id: crypto.randomUUID(), details: details.trim(), customerType, createdAt: new Date().toISOString(), status: "pending", attachments: requestFiles, quotations: [], rejections: 0 };
-          dispatch({ transform: (data) => ({ ...data, requests: [request, ...data.requests] }), message: "Demo request submitted. It is pending a Worker estimate." });
+          dispatch({ transform: (data) => ({ ...data, requests: [request, ...data.requests] }), message: "Demo request submitted. It is pending a Staff estimate." });
           selectRequest(request.id); setCreating(false); setDetails(""); setRequestFiles([]);
         }}>
           <div className="form-field"><label htmlFor="customer-type">Customer type</label><select id="customer-type" value={customerType} onChange={(event) => setCustomerType(event.target.value as CustomerType)}><option value="individual">Individual</option><option value="company">Company</option></select></div>
@@ -124,7 +124,7 @@ export default function CustomerWorkspace({ workspaceId, navigate }: { workspace
           <p className="record-id">Request ID: {selected.id}</p>
 
           {workspaceId === "requests" && <>
-            <dl className="detail-grid"><div><dt>Submitted</dt><dd>{date(selected.createdAt)}</dd></div><div><dt>Request status</dt><dd>{selected.status}</dd></div><div><dt>Production status</dt><dd>{selected.job?.status ?? "Not opened"}</dd></div><div><dt>Quotation</dt><dd>{quotation?.status ?? "Awaiting Worker estimate"}</dd></div></dl>
+            <dl className="detail-grid"><div><dt>Submitted</dt><dd>{date(selected.createdAt)}</dd></div><div><dt>Request status</dt><dd>{selected.status}</dd></div><div><dt>Production status</dt><dd>{selected.job?.status ?? "Not opened"}</dd></div><div><dt>Quotation</dt><dd>{quotation?.status ?? "Awaiting Staff estimate"}</dd></div></dl>
             <h3>Attached documents</h3><div className="attachment-list">{selected.attachments.length ? selected.attachments.map(fileLink) : <p className="text-muted">No attachments on this request.</p>}</div>
             {selected.depositProof && fileLink(selected.depositProof)}{selected.poProof && fileLink(selected.poProof)}
             {quotation && <button className="button-secondary" onClick={() => navigate("quotations")}>Open quotations</button>}
@@ -134,7 +134,7 @@ export default function CustomerWorkspace({ workspaceId, navigate }: { workspace
             <div className="price-summary"><span>Quoted price · no VAT</span><strong>{money(quotation.price)}</strong><span>Revision {quotation.revision} · {quotation.status}</span></div>
             <div className="terms-summary"><strong>Confirmation requirements</strong><p>{terms?.poRequired ? "Customer PO required" : "No PO required"} · {terms?.deposit ? `${money(terms.deposit)} Deposit (50%)` : "No Deposit required"}</p><p>Submit required evidence within 14 days after acceptance.</p></div>
             <p className="workflow-note">Customer rejections: <strong>{selected.rejections} / 6</strong>. Five allow revision; the sixth cancels the request.</p>
-            {quotation.status === "sent" && selected.status !== "canceled" && <div className="form-actions"><button className="button-primary" onClick={() => setPrompt({ title: "Accept this quotation?", body: `Accept ${money(quotation.price)} and start the 14-day Deposit/PO submission period?`, action: () => respond(selected.id, "approved", "Quotation approved. Continue to Deposit & PO to confirm the order.") })}>Accept quotation</button><button className="button-danger" onClick={() => setPrompt({ title: "Reject this quotation?", body: selected.rejections === 5 ? "This is the sixth rejection. The request will be canceled." : "Five rejections allow revision; the sixth cancels. A Worker must issue another quotation before you can respond again.", action: () => respond(selected.id, "rejected", selected.rejections === 5 ? "Sixth rejection recorded. The request is canceled." : "Quotation rejected. Waiting for a Worker revision.") })}>Reject quotation</button></div>}
+            {quotation.status === "sent" && selected.status !== "canceled" && <div className="form-actions"><button className="button-primary" onClick={() => setPrompt({ title: "Accept this quotation?", body: `Accept ${money(quotation.price)} and start the 14-day Deposit/PO submission period?`, action: () => respond(selected.id, "approved", "Quotation approved. Continue to Deposit & PO to confirm the order.") })}>Accept quotation</button><button className="button-danger" onClick={() => setPrompt({ title: "Reject this quotation?", body: selected.rejections === 5 ? "This is the sixth rejection. The request will be canceled." : "Five rejections allow revision; the sixth cancels. A Staff must issue another quotation before you can respond again.", action: () => respond(selected.id, "rejected", selected.rejections === 5 ? "Sixth rejection recorded. The request is canceled." : "Quotation rejected. Waiting for a Staff revision.") })}>Reject quotation</button></div>}
             {quotation.status === "approved" && <button className="button-primary" onClick={() => navigate("deposit-po")}>Continue to Deposit & PO</button>}
             <details className="revision-history"><summary>Quotation revision history ({selected.quotations.filter((item) => item.status !== "draft").length})</summary>{selected.quotations.filter((item) => item.status !== "draft").map((item) => <p key={item.id}>Revision {item.revision}<span>{money(item.price)}</span><Status>{item.status}</Status></p>)}</details>
           </>}

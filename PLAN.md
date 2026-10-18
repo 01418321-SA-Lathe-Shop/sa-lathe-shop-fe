@@ -138,3 +138,15 @@ Commit groups: exact evidence/contact types and validation tests; real Admin Wor
 - Invented API endpoints/contracts, routes, form fields, roles, notifications, or business rules.
 - A guessed money-rounding rule or invoice due-date policy; markup basis and the Deposit/PO deadline are confirmed.
 - Supplier login or unconfirmed Admin/master-data capabilities.
+
+## Design / workflow integration — 2026-10-16
+
+Owner authorized merging the saved orange design with the functional develop workflows.
+- Restored Landing, common Login/Register presentation, light/dark transitions and Small/Medium/Large UI presets.
+- Staff is the UI name for domain/API role Worker. UC2 and UC5–UC9 remain Staff duties. Admin manages Staff profiles and UC6 purchasing; no implicit inheritance.
+- Separate URLs under /staff, /customer and /admin replace the historical single-page panels. Root layout owns the shared demo provider so client navigation and role switching retain records and attached files.
+- Overview counts derive from shared data. Former placeholder request/payment/debtor paths redirect to the corresponding functional workspace.
+- Settings and account remain outside the scrolling sidebar region; mobile uses a drawer.
+- `/login` and `/register` keep the designed auth presentation while using the connected backend authentication and registration flow. Three clearly labeled local demo bypass buttons sit below the real form without granting live access.
+- Business validation is preserved, including demo-only assumptions. Both demo and backend quotation flows now use the confirmed rule: five rejections allow revision and the sixth cancels.
+- UI details and route inventory: DESIGN.md. Verification evidence: docs/08-design-workflow-integration.md.

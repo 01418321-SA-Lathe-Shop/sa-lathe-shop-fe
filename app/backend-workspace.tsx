@@ -1,14 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Icon, Logo, ThemeToggle } from "./appearance";
 import { BackendApi, type Account, type Customer, type Notification, type Page, type Worker } from "./backend-api";
 import { useCommand, useResource } from "./backend-hooks";
 import { LiveRequests } from "./backend-requests";
 import { formatBangkok } from "./demo-display";
+import { ROLES, type Role } from "./demo-access";
+import { setDemoRole } from "./demo-session";
 import { Field, Feedback, Paging, passwordError, text } from "./backend-ui";
+import { ROLE_LABELS, ROLE_ROOTS } from "./workspace-routes";
 
 type Session = { api: BackendApi; account: Account; expiresAt: string };
-export default function BackendWorkspace({ onDemo }: { onDemo: () => void }) {
+export default function BackendWorkspace({ initialRegister = false }: { initialRegister?: boolean }) {
   const [session, setSession] = useState<Session | null>(null);
   const [notice, setNotice] = useState("");
   const active = useRef<BackendApi | null>(null);
@@ -25,7 +31,7 @@ export default function BackendWorkspace({ onDemo }: { onDemo: () => void }) {
     return () => window.clearTimeout(timer);
   }, [session]);
 
-  if (!session) return <LiveLogin base={base} notice={notice} onDemo={onDemo} onLogin={async (username, password) => {
+  if (!session) return <LiveLogin base={base} notice={notice} initialRegister={initialRegister} onLogin={async (username, password) => {
     const api = new BackendApi(base, () => { setSession(null); setNotice("Session expired or revoked. Please sign in again."); });
     active.current?.close(); active.current = api;
     try {
@@ -57,12 +63,14 @@ export default function BackendWorkspace({ onDemo }: { onDemo: () => void }) {
   </div>;
 }
 
-function LiveLogin({ base, notice, onDemo, onLogin }: { base: string; notice: string; onDemo: () => void; onLogin: (username: string, password: string) => Promise<void> }) {
-  const [register, setRegister] = useState(false);
+function LiveLogin({ base, notice, initialRegister, onLogin }: { base: string; notice: string; initialRegister: boolean; onLogin: (username: string, password: string) => Promise<void> }) {
+  const router = useRouter();
+  const [register, setRegister] = useState(initialRegister);
   const [type, setType] = useState("individual");
   const [companyMode, setCompanyMode] = useState("new");
   const action = useCommand();
   const registrationApi = useRef<BackendApi | null>(null);
+  useEffect(() => setRegister(initialRegister), [initialRegister]);
   useEffect(() => () => registrationApi.current?.close(), []);
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); const form = event.currentTarget; const data = new FormData(form);
@@ -74,18 +82,31 @@ function LiveLogin({ base, notice, onDemo, onLogin }: { base: string; notice: st
         const invalid = passwordError(password); if (invalid) throw new Error(invalid);
         const api = new BackendApi(base); registrationApi.current?.close(); registrationApi.current = api;
         await api.call("/auth/register", "POST", { username: text(data, "username"), password, name: text(data, "name"), customer_type: type, ...(type === "company" ? companyMode === "new" ? { company_name: text(data, "company_name") } : { invitation: text(data, "invitation") } : {}) }, signal);
-        api.close(); setRegister(false);
+        api.close(); setRegister(false); router.replace("/login");
       } else { await onLogin(text(data, "username"), password); }
     }, register ? "Account created. Sign in with your username and password." : "");
   }
-  return <main className="live-login"><section className="workflow-form-panel"><span className="demo-badge">CONNECTED BACKEND</span><h1>{register ? "Register customer" : "Sign in to Lathe Shop"}</h1><p>API: {base}</p><p className="text-muted">Customer, Worker and Admin accounts use the same sign-in. No demo role grants live access.</p>{notice && <p role="status">{notice}</p>}
-    <form onSubmit={submit} aria-busy={action.busy}><fieldset disabled={action.busy} className="live-fields">
-      <Field label="Username"><input name="username" required minLength={3} maxLength={64} pattern="[A-Za-z0-9_.\-]+" autoComplete="username" /></Field>
-      <Field label="Password"><input name="password" type="password" required autoComplete={register ? "new-password" : "current-password"} /></Field>
-      {register && <><p>Passwords: at least 12 characters, at most 128 UTF-8 bytes.</p><Field label="Name"><input name="name" required maxLength={200} autoComplete="name" /></Field><Field label="Customer type"><select value={type} onChange={(e) => setType(e.target.value)}><option value="individual">Individual</option><option value="company">Company</option></select></Field>{type === "company" && <><Field label="Company membership"><select value={companyMode} onChange={(e) => setCompanyMode(e.target.value)}><option value="new">Create a new company</option><option value="join">Join by invitation</option></select></Field>{companyMode === "new" ? <Field label="Company name"><input name="company_name" required maxLength={200} /></Field> : <Field label="Private invitation"><input name="invitation" type="password" required autoComplete="off" /></Field>}<p>Company names do not grant membership or merge companies.</p></>}</>}
-      <button className="button-primary" type="submit">{register ? "Create customer account" : "Sign in"}</button></fieldset></form>
-    <Feedback {...action} /><div className="form-actions"><button disabled={action.busy} onClick={() => setRegister((value) => !value)}>{register ? "Back to sign in" : "Register customer"}</button><button disabled={action.busy} onClick={onDemo}>Explore separate demo</button></div>
-  </section></main>;
+  function enterDemo(role: Role) { setDemoRole(role); router.push(ROLE_ROOTS[role]); }
+  return <main className="login-page">
+    <section className="login-showcase"><Logo onClick={() => router.push("/")}/><div className="login-showcase-copy"><span className="hero-kicker"><i className="live-dot"/> LATHE SHOP CONTROL</span><h1>{register ? <>เริ่มต้นงานใหม่<br/>ให้เป็นระบบ</> : <>ทุกงานสำคัญ<br/>อยู่ในที่เดียว</>}</h1><p>จัดการงานผลิต ติดตามความคืบหน้า และตรวจสอบเอกสารได้จากบัญชีของคุณ</p></div><div className="login-machine" aria-hidden="true"><div className="machine-orbit orbit-one"/><div className="machine-orbit orbit-two"/><div className="machine-core"><span/><i/></div></div><div className="login-showcase-footer"><span>LATHE SHOP CONTROL</span><small>Bangkok · Thailand</small></div></section>
+    <section className="login-panel"><div className="auth-toolbar"><Link className="login-back" href="/">← กลับหน้าแรก</Link><ThemeToggle/></div>
+      <div className="login-card"><span className="eyebrow">{register ? "CREATE ACCOUNT" : "WELCOME BACK"}</span><h2>{register ? "สมัครบัญชี" : "เข้าสู่ระบบ"}</h2><p>{register ? "สร้างบัญชีลูกค้าเพื่อส่งคำขอผลิตและติดตามงาน" : "ลูกค้า Staff และ Admin ใช้หน้าเข้าสู่ระบบเดียวกัน"}</p>
+      {notice && <p className="workflow-success" role="status">{notice}</p>}
+      <form onSubmit={submit} aria-busy={action.busy}><fieldset disabled={action.busy} className="live-fields">
+        {register && <label className="login-field"><span>ชื่อผู้ติดต่อ</span><div><Icon name="file"/><input name="name" required maxLength={200} autoComplete="name" placeholder="ชื่อผู้ติดต่อ"/></div></label>}
+        <label className="login-field"><span>ชื่อผู้ใช้</span><div><Icon name="inbox"/><input name="username" required minLength={3} maxLength={64} pattern="[A-Za-z0-9_.\-]+" autoComplete="username" placeholder="username"/></div></label>
+        <label className="login-field"><span>รหัสผ่าน</span><div><Icon name="clock"/><input name="password" type="password" required autoComplete={register ? "new-password" : "current-password"} placeholder="กรอกรหัสผ่าน"/></div></label>
+        {register && <><small className="auth-help">อย่างน้อย 12 ตัวอักษร และไม่เกิน 128 ไบต์</small><label className="login-field"><span>ประเภทลูกค้า</span><div><select value={type} onChange={(event) => setType(event.target.value)}><option value="individual">บุคคลทั่วไป</option><option value="company">บริษัท</option></select></div></label>{type === "company" && <><label className="login-field"><span>การเข้าร่วมบริษัท</span><div><select value={companyMode} onChange={(event) => setCompanyMode(event.target.value)}><option value="new">สร้างบริษัทใหม่</option><option value="join">เข้าร่วมด้วยคำเชิญ</option></select></div></label>{companyMode === "new" ? <label className="login-field"><span>ชื่อบริษัท</span><div><input name="company_name" required maxLength={200}/></div></label> : <label className="login-field"><span>คำเชิญส่วนตัว</span><div><input name="invitation" type="password" required autoComplete="off"/></div></label>}</>}</>}
+        <button className="login-submit" type="submit">{register ? "สมัครบัญชี" : "เข้าสู่ระบบ"} <Icon name="arrow"/></button>
+      </fieldset></form>
+      <Feedback {...action}/><Link className="login-register-link" href={register ? "/login" : "/register"}>{register ? "มีบัญชีแล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครบัญชี"}</Link>
+      <details className="demo-bypass"><summary><span>บัญชีทดสอบ — ข้ามการเข้าสู่ระบบ</span><i aria-hidden="true"/></summary><div className="demo-bypass-content">
+        <div className="bypass-actions">{ROLES.map((role) => <button type="button" key={role} disabled={action.busy} onClick={() => enterDemo(role)}><Icon name={role === "Worker" ? "machine" : role === "Admin" ? "grid" : "file"}/><span><strong>ทดสอบ {ROLE_LABELS[role]}</strong><small>{role === "Worker" ? "งานผลิตและเอกสาร" : role === "Admin" ? "จัดการพนักงานและสั่งซื้อ" : "คำขอและใบเสนอราคา"}</small></span><Icon name="arrow"/></button>)}</div>
+        <p className="demo-context">บัญชีทดสอบไม่เชื่อมข้อมูลจริง และข้อมูลจะเริ่มใหม่เมื่อรีโหลดหน้า</p>
+      </div></details>
+      <span className="auth-api">Connected API · {base}</span></div>
+    </section>
+  </main>;
 }
 
 function Inbox({ api }: { api: BackendApi }) {

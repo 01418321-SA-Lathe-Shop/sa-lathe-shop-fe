@@ -22,6 +22,14 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Phase 7 now defaults to real login at `/`; the role-selectable demo is explicitly separate. Never fall back to demo records on API failure. Backend supports authentication and UC1–UC3 only; real UC4–UC9 actions stay unavailable. Five Customer quotation rejections allow revision; the sixth cancels. Required Worker email/phone support remains a backend gap; do not silently omit contacts from writes. Money is exact decimal strings, and int64 quantities must not lose JavaScript precision. Upload retries create fresh intents, never reuse failed completion state.
 - Before editing application code, follow the generated Next.js instructions above and consult the relevant local Next.js guide under `node_modules/next/dist/docs/`.
 
+## Design documentation maintenance
+
+- Read `DESIGN.md` before changing UI. It records the current visual specification; `docs/02-frontend.md` remains the source of truth for business workflows.
+- For every change to fonts, colors, dimensions, spacing, icons, themes, UI scale, components, layout, responsive behavior, interactions, or routes, update the affected prose/tables in `DESIGN.md` in the same work item before reporting completion.
+- Update the document's revision date and change log. Distinguish implemented behavior from proposals and known limitations; do not claim demo flows are production integrations.
+- Run `node scripts/sync-design.mjs` to refresh the source appendix, then `node scripts/sync-design.mjs --check` and `git diff --check`. The generator does not replace manually updating the specification prose.
+- Include `DESIGN.md` with the corresponding implementation changes when committing. Do not edit synced ChatGPT reference files under `sources/`.
+
 ## Commit and push workflow
 
 - Work on `develop` and push ongoing project commits to `origin/develop`. Verify the active branch before editing or committing; do not commit or push ongoing work to `main` unless the user explicitly requests it.
