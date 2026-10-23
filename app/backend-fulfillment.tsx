@@ -6,6 +6,7 @@ import { availableEvidenceKinds, evidencePayload, reviewReason } from "./backend
 import { useCommand, useResource } from "./backend-hooks";
 import { Feedback, Field, text } from "./backend-ui";
 import { formatBangkok } from "./demo-display";
+import { LiveMaterialPlan } from "./backend-material-plan";
 
 type ReviewAttempt = { outcome: "approved" | "rejected"; expected_version: number | string; reason?: string };
 
@@ -45,7 +46,7 @@ export function LiveFulfillment({ api, account, requestId, quotationId }: { api:
       {!state.evidence?.length && <p>No submitted evidence yet. A request drawing does not automatically count as a receipt or company PO.</p>}
       {state.evidence?.map((item) => <EvidenceRecord key={`${item.id}:${item.version}`} api={api} account={account} item={item} canReview={!state.job && !state.canceled_at && state.request_status !== "canceled"} onReviewed={() => saved("Review saved by the server. Job details below reflect the server fulfillment result.")} />)}
       <p className="workflow-note">The server returns the latest 100 evidence records. Submitted and reviewed records cannot be edited or deleted.</p>
-      {state.job ? <section className="live-section" aria-label="Opened job"><h4>Job opened · {state.job.status}</h4><p className="record-id">{state.job.id}</p><dl className="detail-grid"><div><dt>Actual approved deposit</dt><dd>{displayMoney(state.job.deposit_amount)}</dd></div><div><dt>Remaining job balance</dt><dd>{displayMoney(state.job.balance)}</dd></div><div><dt>Job opened (ICT)</dt><dd>{formatBangkok(state.job.created_at)}</dd></div><div><dt>Requested deadline (not a production promise)</dt><dd>{state.job.due_at ? formatBangkok(state.job.due_at) : "Not requested"}</dd></div></dl><p>Exactly one job is opened after all required approvals. Stock, purchasing, production and invoicing are not connected by this frontend phase.</p></section> : <p className="workflow-note">No queued job has been returned by the server. All required evidence approvals must succeed first.</p>}
+      {state.job ? <section className="live-section" aria-label="Opened job"><h4>Job opened · {state.job.status}</h4><p className="record-id">{state.job.id}</p><dl className="detail-grid"><div><dt>Actual approved deposit</dt><dd>{displayMoney(state.job.deposit_amount)}</dd></div><div><dt>Remaining job balance</dt><dd>{displayMoney(state.job.balance)}</dd></div><div><dt>Job opened (ICT)</dt><dd>{formatBangkok(state.job.created_at)}</dd></div><div><dt>Requested deadline (not a production promise)</dt><dd>{state.job.due_at ? formatBangkok(state.job.due_at) : "Not requested"}</dd></div></dl><p>Exactly one job is opened after all required approvals. Purchasing, production and invoicing are not connected by this frontend phase.</p>{account.role !== "customer" && <LiveMaterialPlan api={api} account={account} jobId={state.job.id} writable={state.job.status === "queued" && state.request_status === "ongoing"} />}</section> : <p className="workflow-note">No queued job has been returned by the server. All required evidence approvals must succeed first.</p>}
     </>}
   </section>;
 }
