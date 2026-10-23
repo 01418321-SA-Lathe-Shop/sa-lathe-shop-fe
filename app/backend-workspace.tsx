@@ -8,6 +8,7 @@ import { BackendApi, type Account, type Customer, type Notification, type Page }
 import { useCommand, useResource } from "./backend-hooks";
 import { LiveRequests } from "./backend-requests";
 import { LiveWorkers } from "./backend-workers";
+import { LiveInventory } from "./backend-inventory";
 import { formatBangkok } from "./demo-display";
 import { ROLES, type Role } from "./demo-access";
 import { setDemoRole } from "./demo-session";
@@ -44,7 +45,7 @@ export default function BackendWorkspace({ initialRegister = false }: { initialR
   }} />;
 
   const { api, account } = session;
-  const tabs = ["requests", "inbox", ...(account.role === "customer" ? ["memberships"] : []), ...(account.role === "admin" ? ["workers"] : [])];
+  const tabs = ["requests", "inbox", ...(account.role === "customer" ? ["memberships"] : ["materials"]), ...(account.role === "admin" ? ["workers"] : [])];
   return <div className="live-shell">
     <a className="skip-link" href="#live-main">Skip to workspace</a>
     <header className="live-header"><div><strong>Lathe Shop</strong><span className="demo-badge compact">Connected API · {account.role}</span></div><button disabled={logout.busy} onClick={() => void logout.run(async () => {
@@ -55,11 +56,12 @@ export default function BackendWorkspace({ initialRegister = false }: { initialR
     }, "")}>Sign out</button></header>
     <nav className="live-tabs" aria-label="Connected workspace">{tabs.map((name) => <button key={name} aria-current={tab === name ? "page" : undefined} onClick={() => { setTab(name); requestAnimationFrame(() => document.getElementById("live-title")?.focus()); }}>{name}</button>)}</nav>
     <main id="live-main" className="live-main" tabIndex={-1}><h1 id="live-title" tabIndex={-1}>{account.name} · {tab}</h1><p className="text-muted">Real backend records. Asia/Bangkok · THB · No VAT. Reload requires sign-in; no token is stored in browser storage.</p>
-      <div className="demo-notice"><p><strong>Connected scope: accounts, Worker contacts and UC1–UC4.</strong><span>Open an approved quotation to submit or review Deposit/PO evidence and see the resulting job. Approval is manual—not a bank transfer. Stock, procurement, production, delivery and invoice settlement are not connected in this frontend phase.</span></p></div>
+      <div className="demo-notice"><p><strong>Connected scope: accounts, Worker contacts and UC1–UC5.</strong><span>Open an approved quotation for Deposit/PO review and the resulting job’s material plan. Staff can search materials; Admin manages catalog and stock. Approval is manual—not a bank transfer. Procurement, production, delivery and invoice settlement are not connected in this frontend phase.</span></p></div>
       {tab === "requests" && <LiveRequests api={api} account={account} />}
       {tab === "inbox" && <Inbox api={api} />}
       {tab === "memberships" && <Memberships api={api} />}
       {tab === "workers" && account.role === "admin" && <LiveWorkers api={api} />}
+      {tab === "materials" && account.role !== "customer" && <LiveInventory api={api} account={account} />}
     </main>
   </div>;
 }

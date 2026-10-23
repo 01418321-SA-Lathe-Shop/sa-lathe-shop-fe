@@ -1,6 +1,6 @@
 # Lathe Shop Control — Design specification
 
-อัปเดตล่าสุด: 2026-10-19 · สถานะ: merged design + connected AUTH/UC1–UC3; Phase 8 UC4/contact integration in progress
+อัปเดตล่าสุด: 2026-10-23 · สถานะ: merged design + connected AUTH/UC1–UC5; real-stack frontend verification pending Docker
 
 เอกสารนี้ใช้ส่งต่องานให้ designer และ developer เพื่อสร้าง UI ให้ตรงกับระบบปัจจุบัน อ่านคู่กับ `docs/02-frontend.md` ซึ่งเป็นแหล่งอ้างอิง Business Flow และ permission ข้อมูลบนหน้าปัจจุบันหลายส่วนเป็น mock data และยังไม่ใช่หลักฐานว่า Backend หรือ UC1–UC9 ทำงานครบ
 
@@ -124,6 +124,8 @@ Record layout31%/1fr ยุบ1columnที่68.75rem Cards เลือกไ�
 
 Phase 8 extension (2026-10-19): connected Admin → Workers adds inline Create/Edit profiles with required name, email and phone alongside username/employee number. Existing account status/password controls stay real; legacy null contacts display as missing, not invented values. Editing loads the current profile from the API. Inputs reuse `.form-field` and semantic theme tokens; `.live-editor` uses divider-separated inline sections, not new modal/card layers. `.live-worker-row` separates records with a thin divider. New spacing uses rem so Small/Medium/Large continue to apply. Backend/API role remains `worker`; connected legacy English labels are retained in this scope.
 
+Phase 9 UC5 extension (2026-10-23): connected Staff/Admin navigation adds Materials. Search is submitted explicitly, paginated in groups of 20, and never falls back to demo records. Divider-separated material rows show exact six-place on-hand/reserved/available quantities with fixed base units; only Admin sees average costs and audit reasons. Open material expands history and, for Admin, inline rename/activation and stock controls. Stock corrections are absolute counts (also allowed for inactive materials); additions require an active material and unit cost. Every adjustment requires an audit reason and confirmation. An uncertain write freezes its exact key/version/payload and offers an explicit identical retry or reload, never automatic retry. Catalog creation is not idempotent, so recovery copy asks users to reload before repeating. Catalog forms use existing semantic tokens, rem spacing and wrapping action groups; no new routes, fonts or dependencies.
+
 UC4 extension appears inline under each approved connected quotation: Deposit/PO requirements, original deadline, upload-and-submit form for Customer, private evidence download, one manual review for Admin/Staff, rejection history and server-returned queued job. Keep amount/date controls labeled THB/Asia-Bangkok. File validation and staff approval are separate steps. Exact submission/review retry controls preserve immutable original payloads after uncertain responses; no automatic retries. Deadline/cancellation/current job come from backend, never demo fixtures. Evidence records use divider-separated `.live-evidence-record` rows and tabular numerals; the review checkbox uses `.live-review-confirm`. No new route, visual identity, icon library, font, or dependency is added.
 
 Connected mobile actions wrap by whole button (8rem flex basis) rather than splitting words. Scope notice separates heading/body with .5rem. Skip-to-workspace is hidden offscreen until keyboard focus. After an approved/sent/draft quote, no additional create-revision form is offered; existing drafts use Edit and new revisions require rejected history. This prevents irrelevant UC2 controls distracting from UC4 fulfillment.
@@ -209,6 +211,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 | Date | Change | Verification |
 | --- | --- | --- |
 | 2026-10-19 | Connect inline UC4 evidence submission/review and queued job display under approved quotations; preserve theme/scale tokens | Exact domain tests + build; real full-stack browser flow in Phase 8 handoff |
+| 2026-10-23 | Connect UC5 material search, role-filtered history, Admin catalog and exact audited stock adjustments | Exact UC5 domain tests; Phase 9 verification/handoff records actual runtime coverage |
 | 2026-10-19 | Add connected Worker contact create/edit and retain nullable legacy profiles; preserve upstream auth design/routes | Exact contact tests + build; browser verification in Phase 8 handoff |
 | 2026-10-19 | Preserve upstream designed auth/routes while merging Phase 8 exact evidence/contact primitives; no intentional visual redesign | Production build + 53 native tests; source appendix refreshed |
 | 2026-10-16 | Merge design with functional develop flows, Admin routes, Staff naming, shared provider, pinned sidebar และ workflow theme tokens | Verification: docs/08-design-workflow-integration.md |
@@ -997,6 +1000,12 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 }
 
 /* Connected backend surfaces share the same appearance tokens and UI scale. */
+.live-inventory-row { padding-block: 1.25rem; border-bottom: 1px solid var(--line); min-width: 0; overflow-wrap: anywhere; }
+.live-inventory-row dl { font-variant-numeric: tabular-nums; }
+.live-inventory-row h3, .live-inventory-row h5 { margin-bottom: .5rem; }
+.live-plan-line { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; padding-block: .75rem; border-bottom: 1px solid var(--line); }
+.live-plan-line .form-field { flex: 1 1 12rem; min-width: 0; }
+.live-plan-line .record-id { flex-basis: 100%; }
 .live-shell { min-height:100svh; background:var(--bg); }
 .live-header,.live-tabs { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; padding:1rem 5%; background:var(--surface); border-bottom:.0625rem solid var(--line); }
 .live-header { justify-content:space-between; }

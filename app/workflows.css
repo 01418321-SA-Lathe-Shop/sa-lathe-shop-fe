@@ -194,6 +194,12 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 }
 
 /* Connected backend surfaces share the same appearance tokens and UI scale. */
+.live-inventory-row { padding-block: 1.25rem; border-bottom: 1px solid var(--line); min-width: 0; overflow-wrap: anywhere; }
+.live-inventory-row dl { font-variant-numeric: tabular-nums; }
+.live-inventory-row h3, .live-inventory-row h5 { margin-bottom: .5rem; }
+.live-plan-line { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; padding-block: .75rem; border-bottom: 1px solid var(--line); }
+.live-plan-line .form-field { flex: 1 1 12rem; min-width: 0; }
+.live-plan-line .record-id { flex-basis: 100%; }
 .live-shell { min-height:100svh; background:var(--bg); }
 .live-header,.live-tabs { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; padding:1rem 5%; background:var(--surface); border-bottom:.0625rem solid var(--line); }
 .live-header { justify-content:space-between; }

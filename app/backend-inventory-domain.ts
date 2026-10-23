@@ -39,7 +39,7 @@ export function planLines(lines: PlanDraftLine[]): PlanDraftLine[] {
 export function stockFields(material: InventoryMaterial, mode: "addition" | "correction", quantity: string, unitCost: string, rawReason: string) {
   const amount = inventoryDecimal(quantity, mode === "addition");
   const reason = catalogName(rawReason, 2000);
-  if (!material.is_active) throw new Error("Reactivate the material before adding or correcting stock.");
+  if (!material.is_active && mode === "addition") throw new Error("Reactivate the material before adding stock.");
   if (mode === "correction" && decimalUnits(amount) < decimalUnits(inventoryDecimal(material.qty_reserved))) throw new Error("Counted stock cannot be below active reserved stock.");
   return { mode, quantity: amount, reason, ...(mode === "addition" ? { unit_cost: inventoryDecimal(unitCost) } : {}) };
 }

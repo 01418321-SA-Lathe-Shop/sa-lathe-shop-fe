@@ -30,6 +30,7 @@ test("absolute correction cannot undercut reservation; omits cost and permits un
   assert.deepEqual(stockFields(material,"correction","2.000001","999","count"),{mode:"correction",quantity:"2.000001",reason:"count"});
   assert.deepEqual(stockFields({...material,qty_reserved:"0.000000"},"correction","0","","zero"),{mode:"correction",quantity:"0.000000",reason:"zero"});
   assert.throws(() => stockFields({...material,is_active:false},"addition","1","1","reason"));
+  assert.deepEqual(stockFields({...material,is_active:false},"correction","3","","count"),{mode:"correction",quantity:"3.000000",reason:"count"});
 });
 test("catalog labels trim Unicode and reject invalid lengths and control lines", () => {
   assert.equal(catalogName(" เหล็ก S45C ",200),"เหล็ก S45C");
