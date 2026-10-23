@@ -116,6 +116,12 @@ Request the reads and actions listed in `docs/02-frontend.md` under “Needs fro
 
 ## Validation checklist
 
+### 9. Integrate live UC5 inventory — in progress (2026-10-23)
+
+Owner requested backend integration. Resume pending real UC4 verification if Docker becomes healthy, then connect live UC5: staff inventory search/read; Admin unit/material catalog and reasoned exact stock additions/count corrections; Worker queued-job full material plans, release and explicit reservation top-up. Backend UC1–UC9 is now implemented, but this frontend delivery is intentionally UC5, not a guessed implementation of all remaining phases. Read UC5.md and current material handler/view DTOs at backend 028dd88. Honor UC7 financial redaction: Workers receive quantities but not avg_cost, movement costs/private payload/reasons. No new dependencies/routes/folders or backend edits; preserve package edits.
+
+Groups: exact six-decimal types/validation/tests; catalog/stock UI; job plan/reservation UI; real or explicitly stubbed verification and handoff. Commands retain exact idempotency keys/payloads for explicit uncertain-response retry, reload current GET after replay, never auto-retry or treat reservation as consumption.
+
 ### 8. Connect Worker contacts and UC4 fulfillment — implementation done; full-stack verification pending
 
 Owner authorized the next frontend phase. Backend develop `ab0c224` now implements required Worker contacts and UC4 (also UC5/UC6, intentionally deferred to following frontend phases). Use AUTH.md/UC4.md and verified DTOs, no backend changes. Preserve existing `/` panels/design, dependencies, memory-only sessions and unrelated package edits.
