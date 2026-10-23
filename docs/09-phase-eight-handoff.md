@@ -1,5 +1,7 @@
 # Phase 8 — Worker contacts and UC4 fulfillment
 
+Historical Phase 8 record. Current connected scope/setup is superseded by `10-phase-nine-handoff.md`: UC5 frontend is implemented, backend UC1–UC9 exists, frontend UC6–UC9 is not connected. Real frontend UC4/UC5 verification remains pending Docker. Build/lint results below describe the earlier phase, not the current Next.js security-gated build.
+
 Status: **implementation delivered; real-backend verification pending Docker recovery**. Do not treat passing browser stubs as proof that the Go API, PostgreSQL or S3 worked in this phase.
 
 ## Scope and sources

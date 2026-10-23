@@ -116,11 +116,13 @@ Request the reads and actions listed in `docs/02-frontend.md` under “Needs fro
 
 ## Validation checklist
 
-### 9. Integrate live UC5 inventory — in progress (2026-10-23)
+### 9. Integrate live UC5 inventory — implementation delivered; full-stack verification pending (2026-10-23)
 
 Owner requested backend integration. Resume pending real UC4 verification if Docker becomes healthy, then connect live UC5: staff inventory search/read; Admin unit/material catalog and reasoned exact stock additions/count corrections; Worker queued-job full material plans, release and explicit reservation top-up. Backend UC1–UC9 is now implemented, but this frontend delivery is intentionally UC5, not a guessed implementation of all remaining phases. Read UC5.md and current material handler/view DTOs at backend 028dd88. Honor UC7 financial redaction: Workers receive quantities but not avg_cost, movement costs/private payload/reasons. No new dependencies/routes/folders or backend edits; preserve package edits.
 
 Groups: exact six-decimal types/validation/tests; catalog/stock UI; job plan/reservation UI; real or explicitly stubbed verification and handoff. Commands retain exact idempotency keys/payloads for explicit uncertain-response retry, reload current GET after replay, never auto-retry or treat reservation as consumption.
+
+Delivered/pushed: `37d4006` exact domain/tests; `909f670` catalog/stock; `2960f76` plans/reservations; `bd676fb` clipped nonfocused skip link. 58 native tests, TypeScript and changed-file lint pass. Contract-stubbed browser checks are UI-only; real UC4/UC5 checks remain blocked because Docker does not respond after normal startup. No Docker repair/reset/data change. Build compiles/prerenders but exits 1 on recurring Next.js security-upgrade gate; no upgrades authorized. Existing whole-project appearance.tsx lint error remains. See `docs/10-phase-nine-handoff.md`. Next frontend scope: UC6 Admin supplier ordering, then UC7 receiving, UC8 production, UC9 delivery/settlement; none is connected by this phase.
 
 ### 8. Connect Worker contacts and UC4 fulfillment — implementation done; full-stack verification pending
 
