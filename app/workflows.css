@@ -227,8 +227,8 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .live-worker-row .form-actions>button { flex:1 1 8rem; white-space:normal; overflow-wrap:normal; }
 .live-shell .demo-notice strong,.live-shell .demo-notice span { display:block; }
 .live-shell .demo-notice span { margin-top:.5rem; }
-.live-shell .skip-link { position:fixed; top:-10rem; left:1rem; z-index:60; background:var(--surface); color:var(--text); padding:.75rem 1rem; border:.0625rem solid var(--lime); }
-.live-shell .skip-link:focus { top:1rem; }
+.live-shell .skip-link { position:fixed; top:1rem; left:1rem; z-index:60; background:var(--surface); color:var(--text); padding:.75rem 1rem; border:.0625rem solid var(--lime); }
+.live-shell .skip-link:not(:focus) { width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 .live-shell :is(input,textarea,select) { caret-color:var(--lime); }
 .live-shell ::selection { color:var(--text); background:color-mix(in srgb,var(--lime) 25%,var(--surface)); }
 .fulfillment-section { font-variant-numeric:tabular-nums; }

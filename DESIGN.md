@@ -128,6 +128,8 @@ Phase 9 UC5 extension (2026-10-23): connected Staff/Admin navigation adds Materi
 
 Job-plan entry is inside the server-returned opened job under an approved quotation, not an invented job-list route. Staff/Admin see required/reserved/consumed/shortage quantities and server readiness; Customers never mount this panel. Only Staff on an ongoing request’s queued job gets the inline editor. Search adds distinct active materials, existing unknown/inactive IDs are preserved, quantities stay exact six-place strings. Save sends the whole desired list and confirms an empty release; explicit Recheck acts on the saved plan (not local edits). Uncertain commands freeze their original key/version/payload and offer identical retry. Reload/close warns before discarding local edits/retry. Admin sees the same plan read-only; costs are absent. Plan rows wrap into one column on narrow screens and use existing theme/scale tokens.
 
+Bounded Phase 9 visual QA: the connected skip link uses a clipped one-pixel nonfocused state, not a negative top offset that can appear inside full-page captures after scrolling. Keyboard focus restores the full link at 1rem from the top/left. No other visual redesign is included.
+
 UC4 extension appears inline under each approved connected quotation: Deposit/PO requirements, original deadline, upload-and-submit form for Customer, private evidence download, one manual review for Admin/Staff, rejection history and server-returned queued job. Keep amount/date controls labeled THB/Asia-Bangkok. File validation and staff approval are separate steps. Exact submission/review retry controls preserve immutable original payloads after uncertain responses; no automatic retries. Deadline/cancellation/current job come from backend, never demo fixtures. Evidence records use divider-separated `.live-evidence-record` rows and tabular numerals; the review checkbox uses `.live-review-confirm`. No new route, visual identity, icon library, font, or dependency is added.
 
 Connected mobile actions wrap by whole button (8rem flex basis) rather than splitting words. Scope notice separates heading/body with .5rem. Skip-to-workspace is hidden offscreen until keyboard focus. After an approved/sent/draft quote, no additional create-revision form is offered; existing drafts use Edit and new revisions require rejected history. This prevents irrelevant UC2 controls distracting from UC4 fulfillment.
@@ -1036,8 +1038,8 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .live-worker-row .form-actions>button { flex:1 1 8rem; white-space:normal; overflow-wrap:normal; }
 .live-shell .demo-notice strong,.live-shell .demo-notice span { display:block; }
 .live-shell .demo-notice span { margin-top:.5rem; }
-.live-shell .skip-link { position:fixed; top:-10rem; left:1rem; z-index:60; background:var(--surface); color:var(--text); padding:.75rem 1rem; border:.0625rem solid var(--lime); }
-.live-shell .skip-link:focus { top:1rem; }
+.live-shell .skip-link { position:fixed; top:1rem; left:1rem; z-index:60; background:var(--surface); color:var(--text); padding:.75rem 1rem; border:.0625rem solid var(--lime); }
+.live-shell .skip-link:not(:focus) { width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
 .live-shell :is(input,textarea,select) { caret-color:var(--lime); }
 .live-shell ::selection { color:var(--text); background:color-mix(in srgb,var(--lime) 25%,var(--surface)); }
 .fulfillment-section { font-variant-numeric:tabular-nums; }
