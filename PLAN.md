@@ -116,6 +116,12 @@ Request the reads and actions listed in `docs/02-frontend.md` under “Needs fro
 
 ## Validation checklist
 
+### 10. Designed shell on live/mock API and connected UC6–UC9 — implementation delivered; full-stack verification pending (2026-10-25)
+
+Owner direction: use `DESIGN.md` (from the UX/UI Figma) as the visual spec and finish the frontend before database/system integration, with mocks. Owner chose one designed shell for live and test use, test accounts on an in-browser contract mock (no new config key), and routes aligned to backend permissions (approved route list in `docs/11-phase-ten-handoff.md`).
+
+Groups (each pushed to `origin/develop`): `97692af` transport + contract mock (AUTH, UC1–UC9) with tests; `a5628d0` shell on the memory-only live/mock session, UC1–UC5 screens in role routes, new routes; `6913dbd` remove the fixture demo; `1ae70ce` UC6; `53bb6fa` UC7; `76f3793` UC8; `8ce9054` UC9; documentation handoff. 44 native tests + TypeScript pass; headless Chrome flows pass against the mock. Pending: real-stack verification (Docker), ESLint config/dependency mismatch and the Next.js security upgrade — both need owner approval.
+
 ### 9. Integrate live UC5 inventory — implementation delivered; full-stack verification pending (2026-10-23)
 
 Owner requested backend integration. Resume pending real UC4 verification if Docker becomes healthy, then connect live UC5: staff inventory search/read; Admin unit/material catalog and reasoned exact stock additions/count corrections; Worker queued-job full material plans, release and explicit reservation top-up. Backend UC1–UC9 is now implemented, but this frontend delivery is intentionally UC5, not a guessed implementation of all remaining phases. Read UC5.md and current material handler/view DTOs at backend 028dd88. Honor UC7 financial redaction: Workers receive quantities but not avg_cost, movement costs/private payload/reasons. No new dependencies/routes/folders or backend edits; preserve package edits.

@@ -1,6 +1,18 @@
 # Machine Shop Custom Manufacturing System — Frontend Guide
 
-## Current integration contract — Phase 9 (2026-10-23)
+## Current integration contract — Phase 10 (2026-10-25)
+
+This supersedes the Phase 9 scope below. The designed shell now runs on the real API client for AUTH and UC1–UC9, against backend `docs/UC1.md`–`UC9.md` and the Go DTOs at backend `develop` (UC9 `028dd88` and later). The fixture demo was removed. See `docs/11-phase-ten-handoff.md` for setup, mock accounts, the real-backend checklist and verification evidence.
+
+- Owner decisions (2026-10-24): `DESIGN.md` is the visual source; finish the frontend before database/system integration; one designed shell for live and test use; test accounts sign into an in-browser **contract mock** (explicit opt-in, never a fallback for live failures, no new config key); routes follow the backend's confirmed permissions (new Admin requests/materials/receiving/production/delivery-payment, Inbox for all roles, Customer memberships; Staff orders → receiving).
+- UC6 (Admin only): suppliers (optional plain email, 7–15 digit phone, versioned full replacement, no delete) and immutable supplier orders with exact six-place quantity/unit cost, half-up per-line THB totals, optional Asia/Bangkok expected time and job references; accept (optional note), reject/cancel (reason) per the UC6 state table.
+- UC7 (Staff + Admin): accepted orders, exact good/damaged receipts, replacement rows bounded by what the claim still owes, required supplier-contact note. Admin only: credit days once (0–36,500, no default), one full bank (proof required) or cash (proof optional) settlement after full receipt. Staff never receive finance fields.
+- UC8 (Staff act, Admin monitors): start only when the saved plan is nonempty and fully reserved at the current plan version; incremental actual use (own reservation first, extra/unplanned allowed from free stock); whole labor minutes; optional private JPEG/PNG photos; completion releases unused reservations without adding stock. Admin enters/revises actual labor cost; valuation/costs are Admin-only.
+- UC9: Admin credit days once; Staff/Admin issue the fixed invoice (job balance) and record whole-job shipments (self/third-party, receiver); scoped Customers accept (final) or return with a reason (same job reopens for free rework, invoice unchanged) and submit bank proof for amounts up to the balance; Admin records cash and approves/rejects proofs. Request closes only when the latest delivery is accepted and the invoice is fully paid. Staff never receive payments.
+- All UC6–UC9 commands send a UUID idempotency key and the current expected version; uncertain failures freeze the original key/payload for an explicit identical retry or a discard-and-reload, never automatic retry. Same-record reloads keep the last data visible; action forms render only from settled data.
+- Verification: 44 native tests and TypeScript pass; headless-Chrome checks against the mock pass for every role and UC flow. ESLint cannot load the committed `eslint-config-next@14` with the flat config; production build gate and real Go/PostgreSQL/S3 verification remain pending. No dependency was added or upgraded.
+
+## Historical integration contract — Phase 9 (2026-10-23)
 
 This supersedes historical scope statements below. Connected frontend implements AUTH and UC1–UC5, using backend `028dd88` and verified UC5 handler/service/PostgreSQL/role-filtered DTOs. Backend UC1–UC9 exists; frontend UC6–UC9 is still demo-only. Full-stack frontend UC4/UC5 verification remains pending Docker recovery. Exact setup/coverage: `docs/10-phase-nine-handoff.md`.
 
