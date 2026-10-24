@@ -14,8 +14,8 @@ export function Status({ value }: { value: string }) { return <span className={`
 
 // Shown after a write whose response was lost: the command may have committed.
 // The retry resends the frozen original key/payload; changed input needs a reload.
-export function RetryNote({ busy, onRetry, label, children }: { busy: boolean; onRetry: () => void; label: string; children?: ReactNode }) {
-  return <div className="workflow-note" role="status"><p>{children ?? "The response failed; the command may already have been saved. Reload to inspect the current state, or retry the identical original command. Changed input needs a new command after reloading."}</p><button type="button" disabled={busy} onClick={onRetry}>{label}</button></div>;
+export function RetryNote({ busy, onRetry, onDiscard, label, children }: { busy: boolean; onRetry: () => void; onDiscard?: () => void; label: string; children?: ReactNode }) {
+  return <div className="workflow-note" role="status"><p>{children ?? "The response failed; the command may already have been saved. Reload to inspect the current state, or retry the identical original command. Changed input needs a new command after reloading."}</p><div className="form-actions"><button type="button" disabled={busy} onClick={onRetry}>{label}</button>{onDiscard && <button type="button" disabled={busy} onClick={onDiscard}>Discard &amp; reload</button>}</div></div>;
 }
 
 export type ReadyFile = { id: string; file_name: string; content_type: string; byte_size: number; state: string };
