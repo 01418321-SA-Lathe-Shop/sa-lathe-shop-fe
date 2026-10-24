@@ -82,23 +82,30 @@ export function errorMessage(error: unknown): string {
   return error instanceof Error && error.name !== "TypeError" ? error.message : "Cannot reach the API or storage. Check the connection and allowed origins, then retry the read. A failed save may already have reached the server; reload before resubmitting.";
 }
 
+// The live transport is the browser fetch. The explicit in-browser mock backend
+// supplies its own fetch and a resolver for its private object links.
+export type Transport = { fetch: typeof fetch; objectFor?: (url: string) => Blob | undefined };
+const browserTransport: Transport = { fetch: (input, init) => fetch(input, init) };
+
 export class BackendApi {
   private base: string;
   private token = "";
   private controller = new AbortController();
   private onUnauthorized: () => void;
-  constructor(base: string, onUnauthorized: () => void = () => {}) {
+  private transport: Transport;
+  constructor(base: string, onUnauthorized: () => void = () => {}, transport: Transport = browserTransport) {
     const url = new URL(base);
     if (!/^https?:$/.test(url.protocol) || url.username || url.password || url.search || url.hash) throw new Error("Configure an HTTP(S) API base URL without credentials, query or fragment.");
-    this.base = base.replace(/\/$/, ""); this.onUnauthorized = onUnauthorized;
+    this.base = base.replace(/\/$/, ""); this.onUnauthorized = onUnauthorized; this.transport = transport;
   }
+  get origin() { return this.base; }
   close() { this.token = ""; this.controller.abort(); }
   async call<T>(path: string, method = "GET", body?: unknown, signal?: AbortSignal): Promise<T> {
     if (!path.startsWith("/") || path.startsWith("//") || path.includes("://")) throw new Error("Invalid API path.");
     const headers: Record<string, string> = { Accept: "application/json" };
     if (this.token) headers.Authorization = `Bearer ${this.token}`;
     if (body !== undefined) headers["Content-Type"] = "application/json";
-    const response = await fetch(`${this.base}${path}`, { method, headers, body: body === undefined ? undefined : wireJSON(body), cache: "no-store", credentials: "omit", redirect: "error", signal: signal ? AbortSignal.any([signal, this.controller.signal]) : this.controller.signal });
+    const response = await this.transport.fetch(`${this.base}${path}`, { method, headers, body: body === undefined ? undefined : wireJSON(body), cache: "no-store", credentials: "omit", redirect: "error", signal: signal ? AbortSignal.any([signal, this.controller.signal]) : this.controller.signal });
     if (!response.ok) {
       const envelope = await response.json().catch(() => null);
       if (response.status === 401 && this.token) { this.close(); this.onUnauthorized(); }
@@ -115,14 +122,32 @@ export class BackendApi {
   }
   async logout() { try { await this.call<void>("/auth/logout", "POST"); } finally { this.close(); } }
   async upload(requestId: string, file: File, signal?: AbortSignal): Promise<Attachment> {
+    return this.privateUpload(`/requests/${requestId}/uploads`, (id) => `/uploads/${id}/complete`, file, signal);
+  }
+  // Shared signed-upload protocol: intent -> PUT bytes -> server validation.
+  // Every call starts a fresh intent; failed completion is never reused.
+  async privateUpload<T = Attachment>(intentPath: string, completePath: (id: string) => string, file: File, signal?: AbortSignal, allowed: (type: string) => boolean = () => true): Promise<T> {
     const type = uploadType(file);
-    const link = await this.call<SignedLink>(`/requests/${requestId}/uploads`, "POST", { file_name: file.name, content_type: type, byte_size: file.size }, signal);
+    if (!allowed(type)) throw new Error("This upload accepts JPEG or PNG images only.");
+    const link = await this.call<SignedLink>(intentPath, "POST", { file_name: file.name, content_type: type, byte_size: file.size }, signal);
     const url = new URL(link.url);
     if (!/^https?:$/.test(url.protocol) || url.username || url.password || !link.attachment_id) throw new Error("Invalid storage upload link. Upload again.");
     const headers = new Headers(link.headers);
     headers.delete("Authorization"); // Never forward API credentials to object storage.
-    const response = await fetch(url, { method: "PUT", headers, body: file, credentials: "omit", redirect: "error", signal: signal ? AbortSignal.any([signal, this.controller.signal]) : this.controller.signal });
+    const response = await this.transport.fetch(url.href, { method: "PUT", headers, body: file, credentials: "omit", redirect: "error", signal: signal ? AbortSignal.any([signal, this.controller.signal]) : this.controller.signal });
     if (!response.ok) throw new Error("Storage upload failed. Upload again with a new upload intent.");
-    return this.call<Attachment>(`/uploads/${link.attachment_id}/complete`, "POST", undefined, signal);
+    return this.call<T>(completePath(link.attachment_id), "POST", undefined, signal);
+  }
+  // Requests a short-lived private link and opens it without keeping the URL in state.
+  async download(path: string, fileName?: string, signal?: AbortSignal): Promise<void> {
+    const link = await this.call<SignedLink>(path, "GET", undefined, signal);
+    const url = new URL(link.url);
+    if (!/^https?:$/.test(url.protocol) || url.username || url.password) throw new Error("Invalid private download link.");
+    const object = this.transport.objectFor?.(url.href);
+    const href = object ? URL.createObjectURL(object) : url.href;
+    const anchor = document.createElement("a"); anchor.href = href; anchor.rel = "noreferrer noopener"; anchor.referrerPolicy = "no-referrer";
+    if (fileName) anchor.download = fileName;
+    document.body.append(anchor); anchor.click(); anchor.remove();
+    if (object) window.setTimeout(() => URL.revokeObjectURL(href), 60000);
   }
 }
