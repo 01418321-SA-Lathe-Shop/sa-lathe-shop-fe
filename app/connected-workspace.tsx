@@ -38,7 +38,6 @@ export default function ConnectedWorkspace({ role, workspaceId, session }: { rol
     case "workers": return <LiveWorkers api={api} />;
     case "inbox": return <Inbox api={api} />;
     case "memberships": return <Memberships api={api} />;
-    default: return <section className="record-detail"><h2>{PAGE_LABELS[workspaceId]}</h2><p>The connected screen for this use case is being built.</p></section>;
   }
 }
 
