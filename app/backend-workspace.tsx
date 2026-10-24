@@ -4,68 +4,27 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon, Logo, ThemeToggle } from "./appearance";
-import { BackendApi, type Account, type Customer, type Notification, type Page } from "./backend-api";
+import { BackendApi, type Customer, type Notification, type Page } from "./backend-api";
 import { useCommand, useResource } from "./backend-hooks";
-import { LiveRequests } from "./backend-requests";
-import { LiveWorkers } from "./backend-workers";
-import { LiveInventory } from "./backend-inventory";
+import { useApiSession, type ApiMode } from "./api-session";
 import { formatBangkok } from "./demo-display";
-import { ROLES, type Role } from "./demo-access";
-import { setDemoRole } from "./demo-session";
+import { MOCK_LOGINS, type MockLogin } from "./mock-accounts";
+import { API_ROLES } from "./workspace-access";
 import { Field, Feedback, Paging, passwordError, text } from "./backend-ui";
-import { ROLE_LABELS, ROLE_ROOTS } from "./workspace-routes";
+import { ROLE_ROOTS } from "./workspace-routes";
 
-type Session = { api: BackendApi; account: Account; expiresAt: string };
+// Designed Login/Register page. Real sign-in uses the live API; the test-account
+// buttons sign into the explicit in-browser mock backend. Both open the same shell.
 export default function BackendWorkspace({ initialRegister = false }: { initialRegister?: boolean }) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [notice, setNotice] = useState("");
-  const active = useRef<BackendApi | null>(null);
-  const [tab, setTab] = useState("requests");
-  const logout = useCommand();
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
-
-  useEffect(() => () => active.current?.close(), []);
-  useEffect(() => {
-    if (!session) return;
-    const remaining = new Date(session.expiresAt).getTime() - Date.now();
-    const expire = () => { session.api.close(); setSession(null); setNotice("Session expired. Please sign in again."); };
-    const timer = window.setTimeout(expire, Math.max(0, remaining));
-    return () => window.clearTimeout(timer);
-  }, [session]);
-
-  if (!session) return <LiveLogin key={initialRegister ? "register" : "login"} base={base} notice={notice} initialRegister={initialRegister} onLogin={async (username, password) => {
-    const api = new BackendApi(base, () => { setSession(null); setNotice("Session expired or revoked. Please sign in again."); });
-    active.current?.close(); active.current = api;
-    try {
-      const login = await api.login(username, password);
-      const account = await api.call<Account>("/auth/me");
-      if (active.current !== api) return;
-      setTab("requests"); setNotice(""); setSession({ api, account, expiresAt: login.expires_at });
-    } catch (error) { api.close(); throw error; }
-  }} />;
-
-  const { api, account } = session;
-  const tabs = ["requests", "inbox", ...(account.role === "customer" ? ["memberships"] : ["materials"]), ...(account.role === "admin" ? ["workers"] : [])];
-  return <div className="live-shell">
-    <a className="skip-link" href="#live-main">Skip to workspace</a>
-    <header className="live-header"><div><strong>Lathe Shop</strong><span className="demo-badge compact">Connected API · {account.role}</span></div><button disabled={logout.busy} onClick={() => void logout.run(async () => {
-      let failed = false;
-      try { await api.logout(); } catch { failed = true; }
-      active.current = null; setSession(null);
-      setNotice(failed ? "Signed out locally. Server logout could not be confirmed; the remote session may remain valid until expiry." : "Signed out. Server session revoked.");
-    }, "")}>Sign out</button></header>
-    <nav className="live-tabs" aria-label="Connected workspace">{tabs.map((name) => <button key={name} aria-current={tab === name ? "page" : undefined} onClick={() => { setTab(name); requestAnimationFrame(() => document.getElementById("live-title")?.focus()); }}>{name}</button>)}</nav>
-    <main id="live-main" className="live-main" tabIndex={-1}><h1 id="live-title" tabIndex={-1}>{account.name} · {tab}</h1><p className="text-muted">Real backend records. Asia/Bangkok · THB · No VAT. Reload requires sign-in; no token is stored in browser storage.</p>
-      <div className="demo-notice"><p><strong>Connected scope: accounts, Worker contacts and UC1–UC5.</strong><span>Open an approved quotation for Deposit/PO review and the resulting job’s material plan. Staff can search materials; Admin manages catalog and stock. Approval is manual—not a bank transfer. Procurement, production, delivery and invoice settlement are not connected in this frontend phase.</span></p></div>
-      {tab === "requests" && <LiveRequests api={api} account={account} />}
-      {tab === "inbox" && <Inbox api={api} />}
-      {tab === "memberships" && <Memberships api={api} />}
-      {tab === "workers" && account.role === "admin" && <LiveWorkers api={api} />}
-      {tab === "materials" && account.role !== "customer" && <LiveInventory api={api} account={account} />}
-    </main>
-  </div>;
+  const router = useRouter();
+  const { signIn, notice, liveBase } = useApiSession();
+  async function enter(username: string, password: string, mode: ApiMode) {
+    const session = await signIn(username, password, mode);
+    router.push(ROLE_ROOTS[API_ROLES[session.account.role]]);
+  }
+  return <LiveLogin key={initialRegister ? "register" : "login"} base={liveBase} notice={notice} initialRegister={initialRegister} onLogin={(username, password) => enter(username, password, "live")} onMock={(login) => enter(login.username, login.password, "mock")} />;
 }
-function LiveLogin({ base, notice, initialRegister, onLogin }: { base: string; notice: string; initialRegister: boolean; onLogin: (username: string, password: string) => Promise<void> }) {
+function LiveLogin({ base, notice, initialRegister, onLogin, onMock }: { base: string; notice: string; initialRegister: boolean; onLogin: (username: string, password: string) => Promise<void>; onMock: (login: MockLogin) => Promise<void> }) {
   const router = useRouter();
   const [register, setRegister] = useState(initialRegister);
   const [type, setType] = useState("individual");
@@ -87,7 +46,6 @@ function LiveLogin({ base, notice, initialRegister, onLogin }: { base: string; n
       } else { await onLogin(text(data, "username"), password); }
     }, register ? "Account created. Sign in with your username and password." : "");
   }
-  function enterDemo(role: Role) { setDemoRole(role); router.push(ROLE_ROOTS[role]); }
   return <main className="login-page">
     <section className="login-showcase"><Logo onClick={() => router.push("/")}/><div className="login-showcase-copy"><span className="hero-kicker"><i className="live-dot"/> LATHE SHOP CONTROL</span><h1>{register ? <>เริ่มต้นงานใหม่<br/>ให้เป็นระบบ</> : <>ทุกงานสำคัญ<br/>อยู่ในที่เดียว</>}</h1><p>จัดการงานผลิต ติดตามความคืบหน้า และตรวจสอบเอกสารได้จากบัญชีของคุณ</p></div><div className="login-machine" aria-hidden="true"><div className="machine-orbit orbit-one"/><div className="machine-orbit orbit-two"/><div className="machine-core"><span/><i/></div></div><div className="login-showcase-footer"><span>LATHE SHOP CONTROL</span><small>Bangkok · Thailand</small></div></section>
     <section className="login-panel"><div className="auth-toolbar"><Link className="login-back" href="/">← กลับหน้าแรก</Link><ThemeToggle/></div>
@@ -101,23 +59,23 @@ function LiveLogin({ base, notice, initialRegister, onLogin }: { base: string; n
         <button className="login-submit" type="submit">{register ? "สมัครบัญชี" : "เข้าสู่ระบบ"} <Icon name="arrow"/></button>
       </fieldset></form>
       <Feedback {...action}/><Link className="login-register-link" href={register ? "/login" : "/register"}>{register ? "มีบัญชีแล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครบัญชี"}</Link>
-      <details className="demo-bypass"><summary><span>บัญชีทดสอบ — ข้ามการเข้าสู่ระบบ</span><i aria-hidden="true"/></summary><div className="demo-bypass-content">
-        <div className="bypass-actions">{ROLES.map((role) => <button type="button" key={role} disabled={action.busy} onClick={() => enterDemo(role)}><Icon name={role === "Worker" ? "machine" : role === "Admin" ? "grid" : "file"}/><span><strong>ทดสอบ {ROLE_LABELS[role]}</strong><small>{role === "Worker" ? "งานผลิตและเอกสาร" : role === "Admin" ? "จัดการพนักงานและสั่งซื้อ" : "คำขอและใบเสนอราคา"}</small></span><Icon name="arrow"/></button>)}</div>
-        <p className="demo-context">บัญชีทดสอบไม่เชื่อมข้อมูลจริง และข้อมูลจะเริ่มใหม่เมื่อรีโหลดหน้า</p>
+      <details className="demo-bypass"><summary><span>บัญชีทดสอบ — Mock backend</span><i aria-hidden="true"/></summary><div className="demo-bypass-content">
+        <div className="bypass-actions">{MOCK_LOGINS.map((login) => <button type="button" key={login.username} disabled={action.busy} onClick={() => void action.run(() => onMock(login), "")}><Icon name={login.role === "worker" ? "machine" : login.role === "admin" ? "grid" : "file"}/><span><strong>ทดสอบ {login.label}</strong><small>{login.detail}</small></span><Icon name="arrow"/></button>)}</div>
+        <p className="demo-context">ใช้ mock backend ที่จำลองสัญญา API ในเบราว์เซอร์ ไม่เชื่อมข้อมูลจริง ข้อมูลใช้ร่วมกันระหว่างบัญชีทดสอบ และเริ่มใหม่เมื่อรีโหลดหน้า</p>
       </div></details>
       <span className="auth-api">Connected API · {base}</span></div>
     </section>
   </main>;
 }
 
-function Inbox({ api }: { api: BackendApi }) {
+export function Inbox({ api }: { api: BackendApi }) {
   const [offset, setOffset] = useState(0); const resource = useResource<Page<Notification>>(api, `/notifications?limit=20&offset=${offset}`); const action = useCommand();
   return <section className="record-detail"><h2>Inbox</h2><button onClick={resource.reload}>Refresh inbox</button><Feedback busy={resource.loading} error={resource.error} />
     {resource.data && <>{!(resource.data.items?.length) && <p>No notifications on this page. New-request alerts arrive when the backend worker processes its outbox.</p>}{resource.data.items?.map((item) => <article className="supplier-order" key={item.id}><h3>{item.title}</h3><p>{formatBangkok(item.created_at)} · {item.read_at ? "Read" : "Unread"}</p>{!item.read_at && <button disabled={action.busy} onClick={() => void action.run(async (signal) => { await api.call(`/notifications/${item.id}/read`, "PATCH", undefined, signal); resource.reload(); }, "Marked as read.")}>Mark read</button>}</article>)}<Paging offset={offset} count={resource.data.items?.length ?? 0} busy={action.busy} setOffset={setOffset} /></>}<Feedback {...action} />
   </section>;
 }
 
-function Memberships({ api }: { api: BackendApi }) {
+export function Memberships({ api }: { api: BackendApi }) {
   const resource = useResource<{ items: Customer[] | null }>(api, "/customers"); const action = useCommand(); const [invitation, setInvitation] = useState("");
   return <section className="record-detail"><h2>Customer memberships</h2><button onClick={resource.reload}>Refresh memberships</button><Feedback busy={resource.loading} error={resource.error} />
     {resource.data?.items?.map((item) => <article className="supplier-order" key={item.id}><h3>{item.name}</h3><p>{item.customer_type} · {item.is_owner ? "Owner" : "Member"}</p><p className="record-id">{item.id}</p>{item.customer_type === "company" && item.is_owner && <button disabled={action.busy} onClick={() => { setInvitation(""); void action.run(async (signal) => { const result = await api.call<{ invitation: string }>(`/customers/${item.id}/invitations`, "POST", undefined, signal); setInvitation(result.invitation); }, "Invitation created. Share privately; one use, expires after 24 hours."); }}>Create private invitation</button>}</article>)}

@@ -5,15 +5,9 @@ import { createMockBackend, uuid, type Db, type Json, type MockAccount } from ".
 import { salesRoutes } from "./mock-routes-sales.ts";
 import { stockRoutes } from "./mock-routes-stock.ts";
 import { jobRoutes } from "./mock-routes-jobs.ts";
+import { MOCK_PASSWORD } from "./mock-accounts.ts";
 
-export type MockLogin = { username: string; password: string; role: "customer" | "worker" | "admin"; label: string; detail: string };
-export const MOCK_PASSWORD = "mock-password-2026";
-export const MOCK_LOGINS: MockLogin[] = [
-  { username: "nida.company", password: MOCK_PASSWORD, role: "customer", label: "Customer · บริษัท", detail: "Nida (owner) · Siam Precision Parts Co., Ltd." },
-  { username: "somchai", password: MOCK_PASSWORD, role: "customer", label: "Customer · บุคคล", detail: "Somchai Jaidee · individual" },
-  { username: "anan.staff", password: MOCK_PASSWORD, role: "worker", label: "Staff", detail: "Anan · lathe operator" },
-  { username: "pim.admin", password: MOCK_PASSWORD, role: "admin", label: "Admin", detail: "Pim · shop administrator" },
-];
+export { MOCK_LOGINS, MOCK_PASSWORD } from "./mock-accounts.ts";
 
 type Run = (username: string, method: string, path: string, body?: unknown) => Json;
 

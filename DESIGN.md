@@ -1,6 +1,6 @@
 # Lathe Shop Control — Design specification
 
-อัปเดตล่าสุด: 2026-10-23 · สถานะ: merged design + connected AUTH/UC1–UC5; real-stack frontend verification pending Docker
+อัปเดตล่าสุด: 2026-10-24 · สถานะ: designed shell ใช้ session จริงหรือ mock backend ตามสัญญา API; real-stack frontend verification pending Docker
 
 เอกสารนี้ใช้ส่งต่องานให้ designer และ developer เพื่อสร้าง UI ให้ตรงกับระบบปัจจุบัน อ่านคู่กับ `docs/02-frontend.md` ซึ่งเป็นแหล่งอ้างอิง Business Flow และ permission ข้อมูลบนหน้าปัจจุบันหลายส่วนเป็น mock data และยังไม่ใช่หลักฐานว่า Backend หรือ UC1–UC9 ทำงานครบ
 
@@ -14,7 +14,9 @@
 | `app/appearance.tsx` | Icons, Logo, theme/scale provider และ Settings |
 | `app/workspace-shell.tsx`, `app/workspace-routes.ts` | Shared role shell, permissions mapping และ URL |
 | `app/workflows.css` | Functional UC forms/tables และ role shell overrides |
-| `app/auth-gateway.tsx`, `app/backend-workspace.tsx` | Connected Login/Register ในดีไซน์หลัก และปุ่ม demo bypass ใต้ฟอร์ม |
+| `app/auth-gateway.tsx`, `app/backend-workspace.tsx` | Connected Login/Register ในดีไซน์หลัก และปุ่มบัญชีทดสอบ (mock backend) ใต้ฟอร์ม |
+| `app/api-session.tsx`, `app/connected-workspace.tsx`, `app/workspace-access.ts` | Memory-only session (live หรือ mock), เนื้อหาแต่ละหน้า และ role → route map |
+| `app/mock-*.ts` | In-browser mock backend ตามสัญญา API (dev/preview เท่านั้น) |
 | `app/layout.tsx` | Font loading, language และ provider |
 | `app/**/page.tsx` | Route จริง |
 | `docs/02-frontend.md` | Business rules, roles และ UC1–UC9 |
@@ -112,7 +114,9 @@ Settings และ Account อยู่นอกพื้นที่เลื�
 
 ### Topbar and controls
 
-Topbar แสดง role/current page และลิงก์เปลี่ยนบัญชีทดสอบชิดขวา Desktop สูง5.25rem; mobile สูงอย่างน้อย4.5rem ไม่มี search/notification ที่ยังไม่ทำงาน ปุ่มสร้างคำขออยู่ที่ Customer → คำขอผลิต ใช้ Link เปลี่ยนหน้าและ button สำหรับ action ทุก icon-only control มี accessible label
+Topbar แสดง role/current page, badge โหมด (`.api-mode-badge`: "Connected API" สี cyan หรือ "Mock backend" สี warning, pill radius, .6875rem uppercase) และปุ่มชิดขวา: โหมดจริงคือ "ออกจากระบบ"; โหมด mock คือ "สลับบัญชีทดสอบ" (`details.mock-switcher`) ที่เปิดเมนู `.mock-switcher-menu` (width min(22rem,100vw−2rem), radius1rem, shadow เดียวกับ Settings) แสดงบัญชีทดสอบสี่บัญชี, checkbox จำลอง response หายในคำสั่งเขียนครั้งถัดไป และปุ่มรีเซ็ตข้อมูล mock Desktop สูง5.25rem; mobile สูงอย่างน้อย4.5rem ไม่มี search ที่ยังไม่ทำงาน ปุ่มสร้างคำขออยู่ที่ Customer → คำขอผลิต ใช้ Link เปลี่ยนหน้าและ button สำหรับ action ทุก icon-only control มี accessible label
+
+Sidebar footer แสดงชื่อบัญชีจริงจาก `/auth/me`, initials เป็น avatar, บทบาท · username และปุ่มออกจากระบบ (revoke session ที่ server)
 
 ### Cards and tables
 
@@ -134,11 +138,11 @@ UC4 extension appears inline under each approved connected quotation: Deposit/PO
 
 Connected mobile actions wrap by whole button (8rem flex basis) rather than splitting words. Scope notice separates heading/body with .5rem. Skip-to-workspace is hidden offscreen until keyboard focus. After an approved/sent/draft quote, no additional create-revision form is offered; existing drafts use Edit and new revisions require rejected history. This prevents irrelevant UC2 controls distracting from UC4 fulfillment.
 
-Connected auth ใช้ดีไซน์ Login/Register หลักที่ `/login` และ `/register` ร่วมกับ backend เดียวกันสำหรับ Customer, Staff และ Admin โดย session อยู่ใน memory และไม่ fallback เข้า demo เมื่อ API ล้มเหลว ใต้ฟอร์มจริงมีส่วน "บัญชีทดสอบ — ข้ามการเข้าสู่ระบบ" พร้อมปุ่ม Customer/Staff/Admin สามปุ่ม
+Connected auth ใช้ดีไซน์ Login/Register หลักที่ `/login` และ `/register` ร่วมกับ backend เดียวกันสำหรับ Customer, Staff และ Admin โดย session อยู่ใน memory และไม่ fallback เข้า mock เมื่อ API ล้มเหลว เข้าสู่ระบบสำเร็จแล้วจะไปที่ภาพรวมของบทบาทใน designed shell ใต้ฟอร์มจริงมีส่วน "บัญชีทดสอบ — Mock backend" พร้อมปุ่มสี่ปุ่ม (ลูกค้าบริษัท, ลูกค้าบุคคล, Staff, Admin) ที่เข้าสู่ระบบผ่าน mock backend ในเบราว์เซอร์ (โหลดเมื่อกดครั้งแรกเท่านั้น) บัญชีทดสอบใช้ข้อมูล mock ชุดเดียวกันจนกว่าจะรีโหลดหรือรีเซ็ต
 
 Auth spacing ใช้ระยะจากช่องสุดท้ายถึงปุ่มหลัก `1.5rem`, จากปุ่มหลักถึงลิงก์สลับ Login/Register `1rem`, ก่อน divider ของ demo bypass `1.75rem` และระหว่างปุ่ม bypass `.75rem` เพื่อรักษาลำดับสายตาในทุก UI scale
 
-ส่วน "บัญชีทดสอบ — ข้ามการเข้าสู่ระบบ" ใช้ native `details/summary` และปิดเป็นค่าเริ่มต้น หัวข้อสูงอย่างน้อย `3.5rem` มี chevron หมุนเมื่อเปิด รองรับ keyboard และปิด transition เมื่อผู้ใช้ตั้งค่า reduced motion
+ส่วน "บัญชีทดสอบ — Mock backend" ใช้ native `details/summary` และปิดเป็นค่าเริ่มต้น หัวข้อสูงอย่างน้อย `3.5rem` มี chevron หมุนเมื่อเปิด รองรับ keyboard และปิด transition เมื่อผู้ใช้ตั้งค่า reduced motion
 
 UC forms มี validation, local attachment preparation/preview และ Upload again ตาม develop จำกัด100MB ยังไม่มี S3 upload จริง Input1rem, button min-height2.875rem, panel radius1rem, heading1.375rem, bodyอย่างน้อย.75rem สีพื้น/ขอบ/ข้อความใช้ semantic tokens ใน workflows.css Status badges มีสีแยก light/dark
 
@@ -157,14 +161,14 @@ Brand mark เป็น CSS square สีส้มหมุน45° พร้อ�
 | / | Landing |
 | /login, /register | ฟอร์มดีไซน์หลักที่เชื่อม sign-in / customer registration จริง พร้อม demo bypass ใต้ฟอร์ม |
 | /staff | Staff overview |
-| /staff/quotations, /staff/materials, /staff/orders, /staff/receiving, /staff/production, /staff/delivery-payment | UC2 และ UC5–UC9 |
+| /staff/quotations, /staff/materials, /staff/receiving, /staff/production, /staff/delivery-payment, /staff/inbox | UC1/UC2/UC4 review, UC5, UC7–UC9, การแจ้งเตือน |
 | /customer | Customer overview |
-| /customer/requests, /customer/quotations, /customer/deposit-po, /customer/delivery-payment | UC1 / UC3 / UC4 / UC9 |
-| /admin, /admin/workers, /admin/orders | Admin overview, จัดการ Staff และ UC6 |
+| /customer/requests, /customer/quotations, /customer/deposit-po, /customer/delivery-payment, /customer/inbox, /customer/memberships | UC1 / UC3 / UC4 / UC9, การแจ้งเตือน, บริษัทและคำเชิญ |
+| /admin, /admin/requests, /admin/workers, /admin/materials, /admin/orders, /admin/receiving, /admin/production, /admin/delivery-payment, /admin/inbox | Admin overview, UC1–UC4 read/review, จัดการ Staff, UC5 catalog/stock, UC6, UC7 finance, UC8 labor cost, UC9 terms/payments |
 
-Legacy redirects: /staff/requests → /staff/quotations; /staff/delivery, /staff/payments, /staff/debtors → /staff/delivery-payment; /customer/jobs → /customer/requests; /customer/documents → /customer/deposit-po; /customer/payments → /customer/delivery-payment
+Legacy redirects: /staff/orders → /staff/receiving (UC6 เป็นของ Admin เท่านั้นตาม backend UC6.md); /staff/requests → /staff/quotations; /staff/delivery, /staff/payments, /staff/debtors → /staff/delivery-payment; /customer/jobs → /customer/requests; /customer/documents → /customer/deposit-po; /customer/payments → /customer/delivery-payment
 
-Root layout ถือ shared demo provider จึงรักษา records และ File references ระหว่าง client navigation/role switch; reload ล้างตัวอย่าง Route guard ส่งผู้ไม่มี demo role ไป /login และผู้ผิดบทบาทไปภาพรวมของตน เป็นการแยก demo UI ไม่ใช่ production authorization Admin มีเพียงจัดการพนักงานและสั่งซื้อ Staff ไม่ได้สิทธิ์จัดการพนักงาน
+Root layout ถือ `ApiSessionProvider` (memory-only) จึงรักษา session ระหว่าง client navigation; reload หรือออกจากระบบจะล้าง session และข้อมูล mock Route guard ส่งผู้ไม่มี session ไป /login และผู้ผิดบทบาทไปภาพรวมของตน เป็นการจัดหน้า ไม่ใช่ authorization; backend ตรวจสิทธิ์ทุกคำสั่ง เมนูตามบทบาทสะท้อนสิทธิ์ที่ backend ยืนยัน: Admin มีคำขอ (อ่าน/ตรวจ UC4), พนักงาน, วัตถุดิบ, สั่งซื้อ UC6, รับเข้า (การเงิน), งานผลิต (ค่าแรง) และส่งมอบ/รับชำระ (terms/ตรวจการชำระ); Staff ไม่มีการจัดการพนักงานและไม่มี UC6
 
 ## Responsive contract
 
@@ -187,7 +191,8 @@ Root layout ถือ shared demo provider จึงรักษา records แ�
 - Theme ใช้ `startViewTransition` ถ้ารองรับ; 320ms ease-in-out, fallback transition250ms; reduced-motion ปิด animation
 - Navigation active สะท้อน path และรองรับ refresh/back/forward Settings radio checked เป็น semantic state; แต่ละ instance ใช้ useId แยก radio group เพื่อไม่ชนกับหน้าที่ Next เก็บไว้ใน cache; dialogใช้ Tab/Escape ตาม native behavior
 - หน้าใช้ `lang=th`; เงินบาท เวลา Asia/Bangkok ไม่มี VAT Key icon controls มี aria-label
-- Functional demo มี existing empty/error/success states และ native dialogs; full accessibility audit และ production auth/network behavior ยังรอ integration
+- ทุกหน้าใน shell ใช้ loading/error/empty/success states จาก request จริง (live หรือ mock) และ native confirm สำหรับคำสั่งที่ย้อนไม่ได้; full accessibility audit และการทดสอบกับ Go/PostgreSQL/S3 จริงยังรอ
+- ปุ่มที่ไม่มี class ภายใน `.live-workspace` ใช้รูปแบบ secondary (border `--line`, radius .75rem, พื้น `--surface`, hover ขอบส้ม) ปุ่มหลักใช้ `.button-primary` เดิม
 
 ## Handoff verification
 
@@ -214,6 +219,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-24 | Designed shell uses the memory-only live/mock session; connected UC1–UC5 screens move into role routes; new Admin/Inbox/Membership routes; mode badge and mock account switcher; Staff orders redirect | 68 native tests, TypeScript; headless Chrome shell navigation (no console errors, no horizontal overflow) |
 | 2026-10-19 | Connect inline UC4 evidence submission/review and queued job display under approved quotations; preserve theme/scale tokens | Exact domain tests + build; real full-stack browser flow in Phase 8 handoff |
 | 2026-10-23 | Connect UC5 material search, role-filtered history, Admin catalog and exact audited stock adjustments | Exact UC5 domain tests; Phase 9 verification/handoff records actual runtime coverage |
 | 2026-10-23 | Add job-linked saved plans, explicit reservation/release and role-aware readiness display | Worker-only queued plan writes; focused tests and Phase 9 browser checks |
@@ -1011,15 +1017,6 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .live-plan-line { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; padding-block: .75rem; border-bottom: 1px solid var(--line); }
 .live-plan-line .form-field { flex: 1 1 12rem; min-width: 0; }
 .live-plan-line .record-id { flex-basis: 100%; }
-.live-shell { min-height:100svh; background:var(--bg); }
-.live-header,.live-tabs { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; padding:1rem 5%; background:var(--surface); border-bottom:.0625rem solid var(--line); }
-.live-header { justify-content:space-between; }
-.live-header>div { display:flex; flex-wrap:wrap; align-items:center; gap:1rem; }
-.live-tabs button { text-transform:capitalize; padding:.625rem 1rem; border-radius:.5rem; }
-.live-tabs button[aria-current="page"] { background:color-mix(in srgb,var(--lime) 12%,var(--surface)); color:var(--lime); }
-.live-main { max-width:87.5rem; margin:auto; padding:1.75rem 5%; }
-.live-main>h1 { font-size:1.5625rem; margin-bottom:.75rem; overflow-wrap:anywhere; }
-.live-main .demo-notice { margin:1.25rem 0; }
 .live-fields { display:grid; gap:.875rem; border:0; padding:0; min-width:0; }
 .live-section { border-top:.0625rem solid var(--line); padding-top:1.375rem; margin-top:1.5rem; }
 .live-section h3,.live-section h4 { margin-bottom:.875rem; }
@@ -1027,27 +1024,41 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .workflow-error { font-size:.8125rem; color:var(--danger); background:color-mix(in srgb,var(--danger) 8%,var(--surface)); border:.0625rem solid var(--danger); padding:.875rem; border-radius:.5rem; margin:.875rem 0; line-height:1.7; overflow-wrap:anywhere; }
 .live-description,.private-invitation { white-space:pre-wrap; overflow-wrap:anywhere; }
 .private-invitation { display:block; user-select:all; }
-.live-shell button { min-height:2.75rem; padding:.5625rem .75rem; }
-.live-shell .form-actions { align-items:center; }
-.live-shell .record-detail,.live-shell .record-list-item { overflow-wrap:anywhere; }
+.live-workspace button { min-height:2.75rem; padding:.5625rem .75rem; }
+.live-workspace .form-actions { align-items:center; }
+.live-workspace .record-detail,.live-workspace .record-list-item { overflow-wrap:anywhere; }
 .live-editor { margin:1.5rem 0; padding:1.25rem 0; border-top:.0625rem solid var(--line); border-bottom:.0625rem solid var(--line); }
 .live-editor h3 { margin-bottom:1rem; font-size:1.125rem; }
 .live-worker-row { padding:1.25rem 0; border-bottom:.0625rem solid var(--line-soft); }
 .live-worker-row p,.live-editor p { line-height:1.7; font-size:.875rem; }
 .live-worker-row .detail-grid { background:transparent; }
 .live-worker-row .form-actions>button { flex:1 1 8rem; white-space:normal; overflow-wrap:normal; }
-.live-shell .demo-notice strong,.live-shell .demo-notice span { display:block; }
-.live-shell .demo-notice span { margin-top:.5rem; }
-.live-shell .skip-link { position:fixed; top:1rem; left:1rem; z-index:60; background:var(--surface); color:var(--text); padding:.75rem 1rem; border:.0625rem solid var(--lime); }
-.live-shell .skip-link:not(:focus) { width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
-.live-shell :is(input,textarea,select) { caret-color:var(--lime); }
-.live-shell ::selection { color:var(--text); background:color-mix(in srgb,var(--lime) 25%,var(--surface)); }
+.live-workspace :is(input,textarea,select) { caret-color:var(--lime); }
+.live-workspace ::selection { color:var(--text); background:color-mix(in srgb,var(--lime) 25%,var(--surface)); }
 .fulfillment-section { font-variant-numeric:tabular-nums; }
 .live-evidence-record { margin-top:1.25rem; padding:1.25rem 0; border-top:.0625rem solid var(--line-soft); }
 .live-evidence-record p { margin:.75rem 0; line-height:1.7; font-size:.875rem; overflow-wrap:anywhere; }
 .live-review-confirm { display:flex; align-items:start; gap:.75rem; line-height:1.6; }
 .live-review-confirm input { width:1.25rem; min-height:1.25rem; flex:none; margin-top:.1875rem; accent-color:var(--lime); }
-@media(max-width:37.5rem) { .live-main { padding:1.25rem .875rem; } .live-main .detail-grid { grid-template-columns:1fr; } .live-tabs { gap:.25rem; padding:.5rem; } }
+@media(max-width:37.5rem) { .live-workspace .detail-grid { grid-template-columns:1fr; } }
+
+/* Connected shell (2026-10-24): session mode badge and mock-only account switcher. */
+.integrated-topbar .api-mode-badge { margin-left:auto; padding:.3125rem .625rem; border:.0625rem solid var(--line); border-radius:62.4375rem; color:var(--muted); font-size:.6875rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
+.integrated-topbar .api-mode-badge.mock { color:var(--warning); border-color:color-mix(in srgb,var(--warning) 45%,var(--line)); }
+.integrated-topbar .api-mode-badge.live { color:var(--cyan); border-color:color-mix(in srgb,var(--cyan) 45%,var(--line)); }
+.integrated-topbar .api-mode-badge + .switch-account, .integrated-topbar .api-mode-badge + .mock-switcher { margin-left:.75rem; }
+.mock-switcher { position:relative; }
+.mock-switcher summary { list-style:none; cursor:pointer; }
+.mock-switcher summary::-webkit-details-marker { display:none; }
+.mock-switcher-menu { position:absolute; right:0; top:calc(100% + .5rem); z-index:30; width:min(22rem,calc(100vw - 2rem)); display:grid; gap:.5rem; padding:.75rem; border:.0625rem solid var(--line); border-radius:1rem; background:var(--surface); box-shadow:0 1.5rem 5.625rem #0004; }
+.mock-switcher-menu > button { display:grid; gap:.125rem; justify-items:start; text-align:left; min-height:3rem; padding:.625rem .75rem; border:.0625rem solid var(--line); border-radius:.75rem; background:var(--surface-2); color:var(--text); }
+.mock-switcher-menu > button[aria-current="true"] { border-color:var(--lime); }
+.mock-switcher-menu > button small { color:var(--muted); font-size:.75rem; }
+.mock-switcher-menu .mock-toggle { display:flex; gap:.625rem; align-items:start; font-size:.75rem; line-height:1.5; color:var(--muted); padding:.25rem .125rem; }
+.mock-switcher-menu .mock-toggle input { width:1.125rem; min-height:1.125rem; flex:none; accent-color:var(--lime); }
+.live-workspace button:not([class]) { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border:.0625rem solid var(--line); border-radius:.75rem; background:var(--surface); color:var(--text); font:inherit; font-size:.875rem; font-weight:600; cursor:pointer; }
+.live-workspace button:not([class]):hover:not(:disabled) { border-color:var(--lime); }
+@media(max-width:37.5rem) { .integrated-topbar .api-mode-badge { padding:.25rem .5rem; font-size:.5625rem; letter-spacing:.04em; } }
 ```
 
 ### B. Font loading and root layout — app/layout.tsx
@@ -1057,7 +1068,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppThemeProvider } from "./appearance";
-import { DemoWorkshopProvider } from "./workshop-context";
+import { ApiSessionProvider } from "./api-session";
 import { Suspense } from "react";
 import "./workflows.css";
 
@@ -1082,7 +1093,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="th"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col"><AppThemeProvider><Suspense fallback={<p role="status">กำลังเตรียมพื้นที่ทำงาน…</p>}><DemoWorkshopProvider>{children}</DemoWorkshopProvider></Suspense></AppThemeProvider></body>
+      <body className="min-h-full flex flex-col"><AppThemeProvider><Suspense fallback={<p role="status">กำลังเตรียมพื้นที่ทำงาน…</p>}><ApiSessionProvider>{children}</ApiSessionProvider></Suspense></AppThemeProvider></body>
     </html>
   );
 }
@@ -1106,13 +1117,21 @@ export
 
 ### D. Route file inventory
 
+- `app/admin/delivery-payment/page.tsx`
+- `app/admin/inbox/page.tsx`
+- `app/admin/materials/page.tsx`
 - `app/admin/orders/page.tsx`
 - `app/admin/page.tsx`
+- `app/admin/production/page.tsx`
+- `app/admin/receiving/page.tsx`
+- `app/admin/requests/page.tsx`
 - `app/admin/workers/page.tsx`
 - `app/customer/delivery-payment/page.tsx`
 - `app/customer/deposit-po/page.tsx`
 - `app/customer/documents/page.tsx`
+- `app/customer/inbox/page.tsx`
 - `app/customer/jobs/page.tsx`
+- `app/customer/memberships/page.tsx`
 - `app/customer/page.tsx`
 - `app/customer/payments/page.tsx`
 - `app/customer/quotations/page.tsx`
@@ -1123,6 +1142,7 @@ export
 - `app/staff/debtors/page.tsx`
 - `app/staff/delivery-payment/page.tsx`
 - `app/staff/delivery/page.tsx`
+- `app/staff/inbox/page.tsx`
 - `app/staff/materials/page.tsx`
 - `app/staff/orders/page.tsx`
 - `app/staff/page.tsx`

@@ -200,15 +200,6 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .live-plan-line { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; padding-block: .75rem; border-bottom: 1px solid var(--line); }
 .live-plan-line .form-field { flex: 1 1 12rem; min-width: 0; }
 .live-plan-line .record-id { flex-basis: 100%; }
-.live-shell { min-height:100svh; background:var(--bg); }
-.live-header,.live-tabs { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; padding:1rem 5%; background:var(--surface); border-bottom:.0625rem solid var(--line); }
-.live-header { justify-content:space-between; }
-.live-header>div { display:flex; flex-wrap:wrap; align-items:center; gap:1rem; }
-.live-tabs button { text-transform:capitalize; padding:.625rem 1rem; border-radius:.5rem; }
-.live-tabs button[aria-current="page"] { background:color-mix(in srgb,var(--lime) 12%,var(--surface)); color:var(--lime); }
-.live-main { max-width:87.5rem; margin:auto; padding:1.75rem 5%; }
-.live-main>h1 { font-size:1.5625rem; margin-bottom:.75rem; overflow-wrap:anywhere; }
-.live-main .demo-notice { margin:1.25rem 0; }
 .live-fields { display:grid; gap:.875rem; border:0; padding:0; min-width:0; }
 .live-section { border-top:.0625rem solid var(--line); padding-top:1.375rem; margin-top:1.5rem; }
 .live-section h3,.live-section h4 { margin-bottom:.875rem; }
@@ -216,24 +207,38 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .workflow-error { font-size:.8125rem; color:var(--danger); background:color-mix(in srgb,var(--danger) 8%,var(--surface)); border:.0625rem solid var(--danger); padding:.875rem; border-radius:.5rem; margin:.875rem 0; line-height:1.7; overflow-wrap:anywhere; }
 .live-description,.private-invitation { white-space:pre-wrap; overflow-wrap:anywhere; }
 .private-invitation { display:block; user-select:all; }
-.live-shell button { min-height:2.75rem; padding:.5625rem .75rem; }
-.live-shell .form-actions { align-items:center; }
-.live-shell .record-detail,.live-shell .record-list-item { overflow-wrap:anywhere; }
+.live-workspace button { min-height:2.75rem; padding:.5625rem .75rem; }
+.live-workspace .form-actions { align-items:center; }
+.live-workspace .record-detail,.live-workspace .record-list-item { overflow-wrap:anywhere; }
 .live-editor { margin:1.5rem 0; padding:1.25rem 0; border-top:.0625rem solid var(--line); border-bottom:.0625rem solid var(--line); }
 .live-editor h3 { margin-bottom:1rem; font-size:1.125rem; }
 .live-worker-row { padding:1.25rem 0; border-bottom:.0625rem solid var(--line-soft); }
 .live-worker-row p,.live-editor p { line-height:1.7; font-size:.875rem; }
 .live-worker-row .detail-grid { background:transparent; }
 .live-worker-row .form-actions>button { flex:1 1 8rem; white-space:normal; overflow-wrap:normal; }
-.live-shell .demo-notice strong,.live-shell .demo-notice span { display:block; }
-.live-shell .demo-notice span { margin-top:.5rem; }
-.live-shell .skip-link { position:fixed; top:1rem; left:1rem; z-index:60; background:var(--surface); color:var(--text); padding:.75rem 1rem; border:.0625rem solid var(--lime); }
-.live-shell .skip-link:not(:focus) { width:1px; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
-.live-shell :is(input,textarea,select) { caret-color:var(--lime); }
-.live-shell ::selection { color:var(--text); background:color-mix(in srgb,var(--lime) 25%,var(--surface)); }
+.live-workspace :is(input,textarea,select) { caret-color:var(--lime); }
+.live-workspace ::selection { color:var(--text); background:color-mix(in srgb,var(--lime) 25%,var(--surface)); }
 .fulfillment-section { font-variant-numeric:tabular-nums; }
 .live-evidence-record { margin-top:1.25rem; padding:1.25rem 0; border-top:.0625rem solid var(--line-soft); }
 .live-evidence-record p { margin:.75rem 0; line-height:1.7; font-size:.875rem; overflow-wrap:anywhere; }
 .live-review-confirm { display:flex; align-items:start; gap:.75rem; line-height:1.6; }
 .live-review-confirm input { width:1.25rem; min-height:1.25rem; flex:none; margin-top:.1875rem; accent-color:var(--lime); }
-@media(max-width:37.5rem) { .live-main { padding:1.25rem .875rem; } .live-main .detail-grid { grid-template-columns:1fr; } .live-tabs { gap:.25rem; padding:.5rem; } }
+@media(max-width:37.5rem) { .live-workspace .detail-grid { grid-template-columns:1fr; } }
+
+/* Connected shell (2026-10-24): session mode badge and mock-only account switcher. */
+.integrated-topbar .api-mode-badge { margin-left:auto; padding:.3125rem .625rem; border:.0625rem solid var(--line); border-radius:62.4375rem; color:var(--muted); font-size:.6875rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
+.integrated-topbar .api-mode-badge.mock { color:var(--warning); border-color:color-mix(in srgb,var(--warning) 45%,var(--line)); }
+.integrated-topbar .api-mode-badge.live { color:var(--cyan); border-color:color-mix(in srgb,var(--cyan) 45%,var(--line)); }
+.integrated-topbar .api-mode-badge + .switch-account, .integrated-topbar .api-mode-badge + .mock-switcher { margin-left:.75rem; }
+.mock-switcher { position:relative; }
+.mock-switcher summary { list-style:none; cursor:pointer; }
+.mock-switcher summary::-webkit-details-marker { display:none; }
+.mock-switcher-menu { position:absolute; right:0; top:calc(100% + .5rem); z-index:30; width:min(22rem,calc(100vw - 2rem)); display:grid; gap:.5rem; padding:.75rem; border:.0625rem solid var(--line); border-radius:1rem; background:var(--surface); box-shadow:0 1.5rem 5.625rem #0004; }
+.mock-switcher-menu > button { display:grid; gap:.125rem; justify-items:start; text-align:left; min-height:3rem; padding:.625rem .75rem; border:.0625rem solid var(--line); border-radius:.75rem; background:var(--surface-2); color:var(--text); }
+.mock-switcher-menu > button[aria-current="true"] { border-color:var(--lime); }
+.mock-switcher-menu > button small { color:var(--muted); font-size:.75rem; }
+.mock-switcher-menu .mock-toggle { display:flex; gap:.625rem; align-items:start; font-size:.75rem; line-height:1.5; color:var(--muted); padding:.25rem .125rem; }
+.mock-switcher-menu .mock-toggle input { width:1.125rem; min-height:1.125rem; flex:none; accent-color:var(--lime); }
+.live-workspace button:not([class]) { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border:.0625rem solid var(--line); border-radius:.75rem; background:var(--surface); color:var(--text); font:inherit; font-size:.875rem; font-weight:600; cursor:pointer; }
+.live-workspace button:not([class]):hover:not(:disabled) { border-color:var(--lime); }
+@media(max-width:37.5rem) { .integrated-topbar .api-mode-badge { padding:.25rem .5rem; font-size:.5625rem; letter-spacing:.04em; } }

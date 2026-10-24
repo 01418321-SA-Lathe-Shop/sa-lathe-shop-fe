@@ -7,15 +7,26 @@ import { Field, Feedback, Paging, text } from "./backend-ui";
 import { LiveQuotations } from "./backend-quotations";
 import { formatBangkok } from "./demo-display";
 
-export function LiveRequests({ api, account }: { api: BackendApi; account: Account }) {
+// "all" is the Staff/Admin record. Customer pages focus one step of the same
+// request record: details/files (UC1), quotations/decisions (UC3) or the
+// approved quotation's Deposit/PO fulfillment (UC4).
+export type RequestFocus = "all" | "request" | "quotations" | "fulfillment";
+const FOCUS_HINT: Record<RequestFocus, string> = {
+  all: "Open a record to view its files, quotation revisions, decisions and Deposit/PO fulfillment.",
+  request: "Open a request to view its details and private files. Quotations and Deposit/PO have their own pages.",
+  quotations: "Open a request to review sent quotations and your decision history.",
+  fulfillment: "Open a request with an accepted quotation to submit Deposit or company PO evidence.",
+};
+
+export function LiveRequests({ api, account, focus = "all" }: { api: BackendApi; account: Account; focus?: RequestFocus }) {
   const [offset, setOffset] = useState(0); const [selected, setSelected] = useState(""); const [creating, setCreating] = useState(false);
   const resource = useResource<Page<JobRequest>>(api, `/requests?limit=20&offset=${offset}`);
   function open(id: string) { setSelected(id); setCreating(false); }
-  return <section><div className="workflow-toolbar"><h2>{account.role === "customer" ? "Your requests" : "Shop request queue"}</h2><div className="form-actions"><button onClick={resource.reload}>Refresh requests</button>{account.role === "customer" && <button className="button-primary" onClick={() => setCreating((value) => !value)}>{creating ? "Cancel new request" : "New request"}</button>}</div></div>
+  return <section><div className="workflow-toolbar"><h2>{account.role === "customer" ? "Your requests" : "Shop request queue"}</h2><div className="form-actions"><button onClick={resource.reload}>Refresh requests</button>{account.role === "customer" && focus === "request" && <button className="button-primary" onClick={() => setCreating((value) => !value)}>{creating ? "Cancel new request" : "New request"}</button>}</div></div>
     <Feedback busy={resource.loading} error={resource.error} />
-    {creating && account.role === "customer" && <CreateRequest api={api} onCreated={(id) => { resource.reload(); open(id); }} />}
+    {creating && account.role === "customer" && focus === "request" && <CreateRequest api={api} onCreated={(id) => { resource.reload(); open(id); }} />}
     <div className="record-layout"><div className="record-list" aria-label="Request list">{resource.data && !resource.data.items?.length && <p>No requests on this page. Customers can create a request; staff can refresh when one arrives.</p>}{resource.data?.items?.map((item) => <button className={`record-list-item ${selected === item.id ? "selected" : ""}`} key={item.id} onClick={() => open(item.id)}><span>Request #{item.no_request}</span><strong>{item.description}</strong><span>{item.status} · Qty {item.qty}</span><span>{formatBangkok(item.created_at)}</span></button>)}{resource.data && <Paging offset={offset} count={resource.data.items?.length ?? 0} busy={resource.loading} setOffset={setOffset} />}</div>
-      {selected ? <RequestDetail key={selected} api={api} account={account} id={selected} onChanged={resource.reload} /> : <section className="record-detail"><h2>Select a request</h2><p>Open a record to view its files, quotation revisions and decisions.</p></section>}
+      {selected ? <RequestDetail key={selected} api={api} account={account} id={selected} focus={focus} onChanged={resource.reload} /> : <section className="record-detail"><h2>Select a request</h2><p>{FOCUS_HINT[focus]}</p></section>}
     </div>
   </section>;
 }
@@ -42,15 +53,15 @@ function CreateRequest({ api, onCreated }: { api: BackendApi; onCreated: (id: st
   </section>;
 }
 
-function RequestDetail({ api, account, id, onChanged }: { api: BackendApi; account: Account; id: string; onChanged: () => void }) {
+function RequestDetail({ api, account, id, focus, onChanged }: { api: BackendApi; account: Account; id: string; focus: RequestFocus; onChanged: () => void }) {
   const request = useResource<JobRequest>(api, `/requests/${id}`);
   function changed() { request.reload(); onChanged(); }
   return <section className="record-detail"><button onClick={changed}>Reload record</button><Feedback busy={request.loading} error={request.error} />{request.data && <>
     <h2>Request #{request.data.no_request}</h2><p className="record-id">{request.data.id}</p><p className="live-description">{request.data.description}</p><dl className="detail-grid"><div><dt>Status</dt><dd>{request.data.status}</dd></div><div><dt>Quantity</dt><dd>{request.data.qty}</dd></div><div><dt>Material specification</dt><dd>{request.data.material_spec || "Not provided"}</dd></div><div><dt>Requested deadline (ICT)</dt><dd>{request.data.deadline ? formatBangkok(request.data.deadline) : "Not requested"}</dd></div></dl>
     {request.data.status === "canceled" && <Refusal api={api} id={id} />}
-    <RequestFiles api={api} id={id} canUpload={account.role === "customer"} />
-    <LiveQuotations api={api} account={account} request={request.data} onChanged={changed} />
-    <DecisionHistory api={api} id={id} />
+    {(focus === "all" || focus === "request") && <RequestFiles api={api} id={id} canUpload={account.role === "customer" && focus === "request"} />}
+    {focus !== "request" && <LiveQuotations api={api} account={account} request={request.data} onChanged={changed} only={focus === "fulfillment" ? "fulfillment" : focus === "quotations" ? "quotations" : "all"} />}
+    {(focus === "all" || focus === "quotations") && <DecisionHistory api={api} id={id} />}
   </>}</section>;
 }
 

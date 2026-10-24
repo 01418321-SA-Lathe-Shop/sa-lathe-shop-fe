@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppThemeProvider } from "./appearance";
-import { DemoWorkshopProvider } from "./workshop-context";
+import { ApiSessionProvider } from "./api-session";
 import { Suspense } from "react";
 import "./workflows.css";
 
@@ -27,7 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="th"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col"><AppThemeProvider><Suspense fallback={<p role="status">กำลังเตรียมพื้นที่ทำงาน…</p>}><DemoWorkshopProvider>{children}</DemoWorkshopProvider></Suspense></AppThemeProvider></body>
+      <body className="min-h-full flex flex-col"><AppThemeProvider><Suspense fallback={<p role="status">กำลังเตรียมพื้นที่ทำงาน…</p>}><ApiSessionProvider>{children}</ApiSessionProvider></Suspense></AppThemeProvider></body>
     </html>
   );
 }
