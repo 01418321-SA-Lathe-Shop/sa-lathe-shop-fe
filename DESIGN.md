@@ -134,6 +134,8 @@ Job-plan entry is inside the server-returned opened job under an approved quotat
 
 Bounded Phase 9 visual QA: the connected skip link uses a clipped one-pixel nonfocused state, not a negative top offset that can appear inside full-page captures after scrolling. Keyboard focus restores the full link at 1rem from the top/left. No other visual redesign is included.
 
+UC6 connected screen (2026-10-24, Admin → สั่งซื้อวัตถุดิบ): the shared `.record-layout` lists supplier orders as `.record-list-item` cards (short `MO-` number, supplier, status + supplier-response badges, THB total) beside a `.record-detail` with a frozen supplier snapshot, `.detail-grid` facts, a `.workflow-table` of lines inside `.table-scroll`, immutability note and event history (`.payment-history`). Allowed responses come from the UC6 state table: accept (optional note, `.button-primary`), reject (required reason) and cancel (required reason, `.button-danger`); each opens an inline `.live-editor` form with a confirmation checkbox. "New supplier order" opens a `.workflow-form-panel` with active-supplier select, optional Asia/Bangkok expected time, optional job-reference checkboxes, `.live-plan-line` rows for exact quantity/unit cost with per-line and total THB previews (`.price-summary`, server total authoritative) and a reusable material search. A lost response shows `RetryNote` with "Retry identical order"; the frozen key prevents duplicates. Suppliers are managed below in divider rows with Active/Inactive badges, search, inline full-replacement edit and an add form. Status badges for backend values (accepted/received/resolved, ordered/in_progress/claimed, queued/partially_received/pending_claim/unpaid, cancelled) reuse the existing four colour families in both themes.
+
 UC4 extension appears inline under each approved connected quotation: Deposit/PO requirements, original deadline, upload-and-submit form for Customer, private evidence download, one manual review for Admin/Staff, rejection history and server-returned queued job. Keep amount/date controls labeled THB/Asia-Bangkok. File validation and staff approval are separate steps. Exact submission/review retry controls preserve immutable original payloads after uncertain responses; no automatic retries. Deadline/cancellation/current job come from backend, never demo fixtures. Evidence records use divider-separated `.live-evidence-record` rows and tabular numerals; the review checkbox uses `.live-review-confirm`. No new route, visual identity, icon library, font, or dependency is added.
 
 Connected mobile actions wrap by whole button (8rem flex basis) rather than splitting words. Scope notice separates heading/body with .5rem. Skip-to-workspace is hidden offscreen until keyboard focus. After an approved/sent/draft quote, no additional create-revision form is offered; existing drafts use Edit and new revisions require rejected history. This prevents irrelevant UC2 controls distracting from UC4 fulfillment.
@@ -219,6 +221,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-24 | Connect UC6 Admin supplier orders and suppliers; shared `Status`/`RetryNote` helpers; status colours for UC5–UC9 values | UC6 domain tests; headless Chrome: accept, lost-response identical retry (one order), exact 8.38 total, supplier validation, no overflow/console errors |
 | 2026-10-24 | Remove the unreachable fixture demo workspaces, demo role storage and demo dialogs; every shell page now reads the live or mock API | TypeScript + 31 native tests; design snapshot |
 | 2026-10-24 | Designed shell uses the memory-only live/mock session; connected UC1–UC5 screens move into role routes; new Admin/Inbox/Membership routes; mode badge and mock account switcher; Staff orders redirect | 68 native tests, TypeScript; headless Chrome shell navigation (no console errors, no horizontal overflow) |
 | 2026-10-19 | Connect inline UC4 evidence submission/review and queued job display under approved quotations; preserve theme/scale tokens | Exact domain tests + build; real full-stack browser flow in Phase 8 handoff |
@@ -1060,6 +1063,15 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .live-workspace button:not([class]) { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border:.0625rem solid var(--line); border-radius:.75rem; background:var(--surface); color:var(--text); font:inherit; font-size:.875rem; font-weight:600; cursor:pointer; }
 .live-workspace button:not([class]):hover:not(:disabled) { border-color:var(--lime); }
 @media(max-width:37.5rem) { .integrated-topbar .api-mode-badge { padding:.25rem .5rem; font-size:.5625rem; letter-spacing:.04em; } }
+/* UC5–UC9 backend status values reuse the existing four status colour families. */
+.status-accepted,.status-received,.status-resolved { background:#163e32; color:#a9edce; }
+.status-ordered,.status-in_progress,.status-claimed { background:#163846; color:#ace3f2; }
+.status-queued,.status-partially_received,.status-pending_claim,.status-unpaid { background:#45341b; color:#ffdc97; }
+.status-cancelled { background:#492626; color:#ffb5af; }
+[data-theme="light"] :is(.status-accepted,.status-received,.status-resolved) { background:#e0f1e8; color:#23553f; }
+[data-theme="light"] :is(.status-ordered,.status-in_progress,.status-claimed) { background:#deedf5; color:#24596d; }
+[data-theme="light"] :is(.status-queued,.status-partially_received,.status-pending_claim,.status-unpaid) { background:#fff0cd; color:#715119; }
+[data-theme="light"] .status-cancelled { background:#ffe5e1; color:#8d3229; }
 ```
 
 ### B. Font loading and root layout — app/layout.tsx

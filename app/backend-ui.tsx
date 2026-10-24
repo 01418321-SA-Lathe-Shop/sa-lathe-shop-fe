@@ -7,3 +7,11 @@ export function passwordError(password: string): string | undefined {
   if ([...password].length < 12 || new TextEncoder().encode(password).length > 128) return "Password needs at least 12 characters and at most 128 UTF-8 bytes (spaces are not trimmed).";
 }
 export function text(data: FormData, name: string) { return String(data.get(name) ?? ""); }
+
+export function Status({ value }: { value: string }) { return <span className={`record-status status-${value}`}>{value.replace(/_/g, " ")}</span>; }
+
+// Shown after a write whose response was lost: the command may have committed.
+// The retry resends the frozen original key/payload; changed input needs a reload.
+export function RetryNote({ busy, onRetry, label, children }: { busy: boolean; onRetry: () => void; label: string; children?: ReactNode }) {
+  return <div className="workflow-note" role="status"><p>{children ?? "The response failed; the command may already have been saved. Reload to inspect the current state, or retry the identical original command. Changed input needs a new command after reloading."}</p><button type="button" disabled={busy} onClick={onRetry}>{label}</button></div>;
+}

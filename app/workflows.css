@@ -242,3 +242,12 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .live-workspace button:not([class]) { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border:.0625rem solid var(--line); border-radius:.75rem; background:var(--surface); color:var(--text); font:inherit; font-size:.875rem; font-weight:600; cursor:pointer; }
 .live-workspace button:not([class]):hover:not(:disabled) { border-color:var(--lime); }
 @media(max-width:37.5rem) { .integrated-topbar .api-mode-badge { padding:.25rem .5rem; font-size:.5625rem; letter-spacing:.04em; } }
+/* UC5–UC9 backend status values reuse the existing four status colour families. */
+.status-accepted,.status-received,.status-resolved { background:#163e32; color:#a9edce; }
+.status-ordered,.status-in_progress,.status-claimed { background:#163846; color:#ace3f2; }
+.status-queued,.status-partially_received,.status-pending_claim,.status-unpaid { background:#45341b; color:#ffdc97; }
+.status-cancelled { background:#492626; color:#ffb5af; }
+[data-theme="light"] :is(.status-accepted,.status-received,.status-resolved) { background:#e0f1e8; color:#23553f; }
+[data-theme="light"] :is(.status-ordered,.status-in_progress,.status-claimed) { background:#deedf5; color:#24596d; }
+[data-theme="light"] :is(.status-queued,.status-partially_received,.status-pending_claim,.status-unpaid) { background:#fff0cd; color:#715119; }
+[data-theme="light"] .status-cancelled { background:#ffe5e1; color:#8d3229; }

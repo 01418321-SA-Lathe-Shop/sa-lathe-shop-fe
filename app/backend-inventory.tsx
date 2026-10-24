@@ -91,3 +91,14 @@ function StockForm({ api, material, onSaved }: { api: BackendApi; material: Inve
     <label><input type="checkbox" required /> I checked the quantity, unit and reason.</label><button className="button-primary">Confirm stock adjustment</button>
   </fieldset><Feedback {...action} />{attempt && !action.busy && <div className="workflow-note"><p>The result is uncertain. Refresh stock to inspect current balances. An identical retry preserves the original key, quantity, cost and version; it never adds a second adjustment if the first succeeded.</p><button type="button" onClick={() => void action.run((signal) => send(attempt, signal), "")}>Retry identical stock adjustment</button></div>}</form>;
 }
+
+// Literal name search used by forms that add material lines (UC6 orders, UC8 use).
+export function MaterialSearch({ api, disabled, isAdded, onAdd, label = "Find material" }: { api: BackendApi; disabled: boolean; isAdded: (id: string) => boolean; onAdd: (material: InventoryMaterial) => void; label?: string }) {
+  const [search, setSearch] = useState(""); const [offset, setOffset] = useState(0); const [error, setError] = useState("");
+  const catalog = useResource<Items<InventoryMaterial>>(api, `/materials?search=${encodeURIComponent(search)}&limit=20&offset=${offset}`);
+  return <div className="live-section">
+    <form className="workflow-toolbar" onSubmit={(event) => { event.preventDefault(); const term = text(new FormData(event.currentTarget), "search").trim(); if ([...term].length > 200 || term.includes("\0")) { setError("Search needs at most 200 characters without NUL."); return; } setError(""); setSearch(term); setOffset(0); }}><Field label={label}><input name="search" type="search" disabled={disabled} /></Field><button disabled={disabled}>Search materials</button></form>
+    <Feedback busy={catalog.loading} error={error || catalog.error} />
+    {catalog.data && <>{!catalog.data.items?.length && <p>No matching materials on this page.</p>}{catalog.data.items?.map((item) => <div className="live-inventory-row" key={item.id}><p>{item.name} · {item.unit_name} · {item.is_active ? "Active" : "Inactive"} · Available {inventoryDisplay(item.qty_available)}</p><button type="button" disabled={disabled || !item.is_active || isAdded(item.id)} onClick={() => onAdd(item)}>Add · {item.name}</button></div>)}<Paging offset={offset} count={catalog.data.items?.length ?? 0} busy={disabled || catalog.loading} setOffset={setOffset} /></>}
+  </div>;
+}
