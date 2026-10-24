@@ -140,13 +140,13 @@ Connected mobile actions wrap by whole button (8rem flex basis) rather than spli
 
 Connected auth ใช้ดีไซน์ Login/Register หลักที่ `/login` และ `/register` ร่วมกับ backend เดียวกันสำหรับ Customer, Staff และ Admin โดย session อยู่ใน memory และไม่ fallback เข้า mock เมื่อ API ล้มเหลว เข้าสู่ระบบสำเร็จแล้วจะไปที่ภาพรวมของบทบาทใน designed shell ใต้ฟอร์มจริงมีส่วน "บัญชีทดสอบ — Mock backend" พร้อมปุ่มสี่ปุ่ม (ลูกค้าบริษัท, ลูกค้าบุคคล, Staff, Admin) ที่เข้าสู่ระบบผ่าน mock backend ในเบราว์เซอร์ (โหลดเมื่อกดครั้งแรกเท่านั้น) บัญชีทดสอบใช้ข้อมูล mock ชุดเดียวกันจนกว่าจะรีโหลดหรือรีเซ็ต
 
-Auth spacing ใช้ระยะจากช่องสุดท้ายถึงปุ่มหลัก `1.5rem`, จากปุ่มหลักถึงลิงก์สลับ Login/Register `1rem`, ก่อน divider ของ demo bypass `1.75rem` และระหว่างปุ่ม bypass `.75rem` เพื่อรักษาลำดับสายตาในทุก UI scale
+Auth spacing ใช้ระยะจากช่องสุดท้ายถึงปุ่มหลัก `1.5rem`, จากปุ่มหลักถึงลิงก์สลับ Login/Register `1rem`, ก่อน divider ของส่วนบัญชีทดสอบ `1.75rem` และระหว่างปุ่ม bypass `.75rem` เพื่อรักษาลำดับสายตาในทุก UI scale
 
 ส่วน "บัญชีทดสอบ — Mock backend" ใช้ native `details/summary` และปิดเป็นค่าเริ่มต้น หัวข้อสูงอย่างน้อย `3.5rem` มี chevron หมุนเมื่อเปิด รองรับ keyboard และปิด transition เมื่อผู้ใช้ตั้งค่า reduced motion
 
-UC forms มี validation, local attachment preparation/preview และ Upload again ตาม develop จำกัด100MB ยังไม่มี S3 upload จริง Input1rem, button min-height2.875rem, panel radius1rem, heading1.375rem, bodyอย่างน้อย.75rem สีพื้น/ขอบ/ข้อความใช้ semantic tokens ใน workflows.css Status badges มีสีแยก light/dark
+UC forms ทุกหน้าเป็นฟอร์ม connected: ตรวจ input ฝั่ง client แล้วส่งให้ backend (หรือ mock) ตัดสิน ไฟล์ใช้ signed private upload จำกัด100MB และปุ่ม "Upload again" สร้าง intent ใหม่ (fixture demo เดิมถูกนำออกแล้ว) Input1rem, button min-height2.875rem, panel radius1rem, heading1.375rem, bodyอย่างน้อย.75rem สีพื้น/ขอบ/ข้อความใช้ semantic tokens ใน workflows.css Status badges มีสีแยก light/dark
 
-Settings ใช้ native dialog width min(32.5rem,100vw−2rem), max-height100dvh−2rem, overflow:auto ตัวเลือก radio มีกรอบปุ่ม min-height3.25rem สถานะปัจจุบันแสดงด้วยกรอบส้มและ checked state เท่านั้น Dialog ของ UC ใช้ demo-ui.tsx พร้อม Escape และคืน focus
+Settings ใช้ native dialog width min(32.5rem,100vw−2rem), max-height100dvh−2rem, overflow:auto ตัวเลือก radio มีกรอบปุ่ม min-height3.25rem สถานะปัจจุบันแสดงด้วยกรอบส้มและ checked state เท่านั้น คำสั่ง UC ที่ย้อนไม่ได้ใช้ native confirm หรือ checkbox ยืนยันในฟอร์ม inline ไม่มี modal UC แยก
 
 ### Icons and brand
 
@@ -159,7 +159,7 @@ Brand mark เป็น CSS square สีส้มหมุน45° พร้อ�
 | URL | Surface |
 | --- | --- |
 | / | Landing |
-| /login, /register | ฟอร์มดีไซน์หลักที่เชื่อม sign-in / customer registration จริง พร้อม demo bypass ใต้ฟอร์ม |
+| /login, /register | ฟอร์มดีไซน์หลักที่เชื่อม sign-in / customer registration จริง พร้อมบัญชีทดสอบ mock backend ใต้ฟอร์ม |
 | /staff | Staff overview |
 | /staff/quotations, /staff/materials, /staff/receiving, /staff/production, /staff/delivery-payment, /staff/inbox | UC1/UC2/UC4 review, UC5, UC7–UC9, การแจ้งเตือน |
 | /customer | Customer overview |
@@ -219,6 +219,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-24 | Remove the unreachable fixture demo workspaces, demo role storage and demo dialogs; every shell page now reads the live or mock API | TypeScript + 31 native tests; design snapshot |
 | 2026-10-24 | Designed shell uses the memory-only live/mock session; connected UC1–UC5 screens move into role routes; new Admin/Inbox/Membership routes; mode badge and mock account switcher; Staff orders redirect | 68 native tests, TypeScript; headless Chrome shell navigation (no console errors, no horizontal overflow) |
 | 2026-10-19 | Connect inline UC4 evidence submission/review and queued job display under approved quotations; preserve theme/scale tokens | Exact domain tests + build; real full-stack browser flow in Phase 8 handoff |
 | 2026-10-23 | Connect UC5 material search, role-filtered history, Admin catalog and exact audited stock adjustments | Exact UC5 domain tests; Phase 9 verification/handoff records actual runtime coverage |
