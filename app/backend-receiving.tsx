@@ -34,7 +34,8 @@ export function LiveReceiving({ api, account }: { api: BackendApi; account: Acco
 function ReceivingDetail({ api, account, id, onChanged }: { api: BackendApi; account: Account; id: string; onChanged: () => void }) {
   const resource = useResource<ReceivingState>(api, `/receiving/orders/${id}`);
   const [notice, setNotice] = useState("");
-  const state = resource.data;
+  // Forms render only from settled data so a landing reload cannot clear input.
+  const state = resource.data; const settled = !resource.loading;
   function saved(message: string) { setNotice(message); resource.reload(); onChanged(); }
   return <section className="record-detail"><button onClick={() => { setNotice(""); resource.reload(); }}>Reload order</button><Feedback busy={resource.loading} error={resource.error} message={notice} />
     {state && <>
@@ -42,14 +43,14 @@ function ReceivingDetail({ api, account, id, onChanged }: { api: BackendApi; acc
       <dl className="detail-grid"><div><dt>Supplier</dt><dd>{state.supplier_name}</dd></div><div><dt>Status</dt><dd><Status value={state.status} /></dd></div><div><dt>Fully received (ICT)</dt><dd>{state.full_received_at ? formatBangkok(state.full_received_at) : "Not yet"}</dd></div></dl>
       <div className="table-scroll"><table className="workflow-table"><thead><tr><th scope="col">Material</th><th scope="col">Ordered</th><th scope="col">Good received</th><th scope="col">Damaged (history)</th><th scope="col">Outstanding</th></tr></thead>
         <tbody>{state.lines?.map((line) => <tr key={line.material_id}><th scope="row">{line.material_name}</th><td>{inventoryDisplay(line.ordered)} {line.unit_name}</td><td>{inventoryDisplay(line.good)}</td><td>{inventoryDisplay(line.damaged)}</td><td>{inventoryDisplay(line.outstanding)}</td></tr>)}</tbody></table></div>
-      {state.status !== "received" && <ReceiptForm key={`receipt:${state.version}`} api={api} state={state} onSaved={() => saved("Receipt saved. Good units are now in stock; recheck job plans to reserve them.")} />}
+      {settled && state.status !== "received" && <ReceiptForm key={`receipt:${state.version}`} api={api} state={state} onSaved={() => saved("Receipt saved. Good units are now in stock; recheck job plans to reserve them.")} />}
       <h3>Damaged-goods claims</h3>
       {!state.claims?.length && <p>No damaged goods recorded.</p>}
-      {state.claims?.map((claim) => <ClaimRow key={`${claim.id}:${claim.status}`} api={api} state={state} claim={claim} onSaved={() => saved("Supplier contact recorded. Receive the replacement against this claim when it arrives.")} />)}
+      {state.claims?.map((claim) => <ClaimRow key={`${claim.id}:${claim.status}`} api={api} state={state} claim={claim} settled={settled} onSaved={() => saved("Supplier contact recorded. Receive the replacement against this claim when it arrives.")} />)}
       <h3>Receipts</h3>
       {!state.receipts?.length && <p>Nothing received yet.</p>}
       <ol className="payment-history">{state.receipts?.map((receipt) => <li key={receipt.id}><strong>{formatBangkok(receipt.created_at)}</strong>{receipt.note ? ` · ${receipt.note}` : ""}<br />{receipt.lines?.map((line) => `${name(state, line.material_id)?.material_name ?? line.material_id}: good ${inventoryDisplay(line.good)}, damaged ${inventoryDisplay(line.damaged)}${line.replacement_claim_id ? " (replacement)" : ""}`).join(" · ")}</li>)}</ol>
-      {account.role === "admin" && state.finance && <FinancePanel api={api} state={state} onSaved={saved} />}
+      {account.role === "admin" && settled && state.finance && <FinancePanel api={api} state={state} onSaved={saved} />}
     </>}
   </section>;
 }
@@ -78,14 +79,14 @@ function ReceiptForm({ api, state, onSaved }: { api: BackendApi; state: Receivin
   </form>;
 }
 
-function ClaimRow({ api, state, claim, onSaved }: { api: BackendApi; state: ReceivingState; claim: Claim; onSaved: () => void }) {
+function ClaimRow({ api, state, claim, settled, onSaved }: { api: BackendApi; state: ReceivingState; claim: Claim; settled: boolean; onSaved: () => void }) {
   const command = useCommand(); const [attempt, setAttempt] = useState<{ idempotency_key: string; expected_version: number | string; note: string } | null>(null);
   const line = name(state, claim.material_id);
   async function send(payload: NonNullable<typeof attempt>, signal: AbortSignal) { await api.call(`/receiving/orders/${state.order_id}/claims/${claim.id}/submit`, "POST", { ...payload, expected_version: BigInt(payload.expected_version) }, signal); onSaved(); }
   return <article className="live-evidence-record">
     <h4>{line?.material_name} · {inventoryDisplay(claim.quantity)} {line?.unit_name} damaged <Status value={claim.status} /></h4>
     <p>Replaced with good units: {inventoryDisplay(claim.replaced)} {line?.unit_name}{claim.claimed_at ? ` · Supplier contacted ${formatBangkok(claim.claimed_at)}` : ""}{claim.note ? ` · ${claim.note}` : ""}</p>
-    {claim.status === "pending_claim" && <form aria-busy={command.busy} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); void command.run(async (signal) => { const payload = { idempotency_key: crypto.randomUUID(), expected_version: state.version, note: claimNote(text(data, "note")) }; setAttempt(payload); await send(payload, signal); }, ""); }}>
+    {settled && claim.status === "pending_claim" && <form aria-busy={command.busy} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); void command.run(async (signal) => { const payload = { idempotency_key: crypto.randomUUID(), expected_version: state.version, note: claimNote(text(data, "note")) }; setAttempt(payload); await send(payload, signal); }, ""); }}>
       <fieldset className="live-fields" disabled={command.busy || Boolean(attempt)}><Field label="Supplier contact note (required)"><textarea name="note" required maxLength={2000} placeholder="e.g. Called sales, replacement promised for next delivery" /></Field><button type="submit">Record supplier contact</button></fieldset>
       <Feedback {...command} />{attempt && command.error && !command.busy && <RetryNote busy={command.busy} label="Retry identical claim" onRetry={() => void command.run((signal) => send(attempt, signal), "")} />}
     </form>}

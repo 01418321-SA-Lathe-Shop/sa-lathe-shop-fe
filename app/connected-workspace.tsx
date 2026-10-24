@@ -15,6 +15,7 @@ import { Inbox, Memberships } from "./backend-workspace";
 import { LiveProcurement } from "./backend-procurement";
 import { LiveReceiving } from "./backend-receiving";
 import { LiveProduction } from "./backend-production";
+import { LiveDelivery } from "./backend-delivery";
 import { formatBangkok } from "./demo-display";
 import { getWorkspaces, type Role, type WorkspaceId } from "./workspace-access";
 import { PAGE_LABELS, workspacePath } from "./workspace-routes";
@@ -33,6 +34,7 @@ export default function ConnectedWorkspace({ role, workspaceId, session }: { rol
     case "orders": return <LiveProcurement api={api} />;
     case "receiving": return <LiveReceiving api={api} account={account} />;
     case "production": return <LiveProduction api={api} account={account} />;
+    case "delivery-payment": return <LiveDelivery api={api} account={account} />;
     case "workers": return <LiveWorkers api={api} />;
     case "inbox": return <Inbox api={api} />;
     case "memberships": return <Memberships api={api} />;

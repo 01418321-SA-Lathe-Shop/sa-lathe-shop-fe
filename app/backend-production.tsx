@@ -36,7 +36,8 @@ export function LiveProduction({ api, account }: { api: BackendApi; account: Acc
 function ProductionDetail({ api, account, id, onChanged }: { api: BackendApi; account: Account; id: string; onChanged: () => void }) {
   const resource = useResource<ProductionState>(api, `/production/jobs/${id}`);
   const [notice, setNotice] = useState("");
-  const job = resource.data; const worker = account.role === "worker";
+  // Forms render only from settled data so a landing reload cannot clear input.
+  const job = resource.data; const settled = !resource.loading; const worker = account.role === "worker" && settled;
   function saved(message: string) { setNotice(message); resource.reload(); onChanged(); }
   return <section className="record-detail"><button onClick={() => { setNotice(""); resource.reload(); }}>Reload job</button><Feedback busy={resource.loading} error={resource.error} message={notice} />
     {job && <>
@@ -57,7 +58,7 @@ function ProductionDetail({ api, account, id, onChanged }: { api: BackendApi; ac
         <PhotoForm api={api} job={job} onSaved={() => saved("Photo validated and attached privately.")} />
         <CompleteJob api={api} job={job} onSaved={() => saved("Job completed. Unused reservations were released; physical stock did not change.")} />
       </>}
-      {account.role === "admin" && <AdminCost api={api} job={job} onSaved={() => saved("Actual labor cost saved.")} />}
+      {account.role === "admin" && settled && <AdminCost api={api} job={job} onSaved={() => saved("Actual labor cost saved.")} />}
       <History job={job} admin={account.role === "admin"} api={api} />
     </>}
   </section>;
