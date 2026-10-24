@@ -28,7 +28,7 @@ export function LiveProcurement({ api }: { api: BackendApi }) {
       <div className="record-layout"><div className="record-list" aria-label="Supplier order list">
         {orders.data && !orders.data.items?.length && <p>No supplier orders on this page.</p>}
         {orders.data?.items?.map((order) => <button key={order.id} className={`record-list-item ${selected === order.id ? "selected" : ""}`} onClick={() => { setSelected(order.id); setCreating(false); }}>
-          <span>{order.order_no.slice(0, 11)}… · {formatBangkok(order.created_at)}</span><strong>{order.supplier.name}</strong><span><Status value={order.status} /> <Status value={order.supplier_response} /></span><span>{displayMoney(order.total_amount)} · {order.lines?.length ?? 0} line(s)</span>
+          <span className="record-code">{order.order_no.slice(0, 11)}… · {formatBangkok(order.created_at)}</span><strong>{order.supplier.name}</strong><span><Status value={order.status} /> <Status value={order.supplier_response} /></span><span>{displayMoney(order.total_amount)} · {order.lines?.length ?? 0} line(s)</span>
         </button>)}
         {orders.data && <Paging offset={offset} count={orders.data.items?.length ?? 0} busy={orders.loading} setOffset={setOffset} />}
       </div>

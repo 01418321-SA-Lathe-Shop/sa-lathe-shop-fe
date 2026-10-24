@@ -251,3 +251,4 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 [data-theme="light"] :is(.status-ordered,.status-in_progress,.status-claimed) { background:#deedf5; color:#24596d; }
 [data-theme="light"] :is(.status-queued,.status-partially_received,.status-pending_claim,.status-unpaid) { background:#fff0cd; color:#715119; }
 [data-theme="light"] .status-cancelled { background:#ffe5e1; color:#8d3229; }
+.record-list-item > span.record-code { text-transform:none; overflow-wrap:anywhere; }
