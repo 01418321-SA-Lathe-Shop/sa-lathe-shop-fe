@@ -17,7 +17,7 @@ export function LiveReceiving({ api, account }: { api: BackendApi; account: Acco
   const orders = useResource<{ items: ReceivingSummary[] | null }>(api, `/receiving/orders?limit=20&offset=${offset}`);
   return <section>
     <div className="workflow-toolbar"><h2>Accepted supplier orders</h2><button onClick={orders.reload}>Refresh receiving</button></div>
-    <p className="workflow-note">Only good units enter usable stock (at the order's fixed unit cost). Damaged units stay outstanding until the supplier sends good replacements; there is no refund or write-off. New stock is never reserved automatically — recheck job plans afterwards.{account.role === "worker" ? " Supplier prices, credit terms and payment are handled by Admin." : ""}</p>
+    <p className="workflow-note">Only good units enter usable stock (at the order&apos;s fixed unit cost). Damaged units stay outstanding until the supplier sends good replacements; there is no refund or write-off. New stock is never reserved automatically — recheck job plans afterwards.{account.role === "worker" ? " Supplier prices, credit terms and payment are handled by Admin." : ""}</p>
     <Feedback busy={orders.loading} error={orders.error} />
     <div className="record-layout"><div className="record-list" aria-label="Receiving order list">
       {orders.data && !orders.data.items?.length && <p>No accepted supplier orders to receive.</p>}
@@ -64,7 +64,7 @@ function ReceiptForm({ api, state, onSaved }: { api: BackendApi; state: Receivin
   const update = (index: number, field: "good" | "damaged", value: string) => setRows((current) => current.map((row, i) => i === index ? { ...row, [field]: value } : row));
   return <form className="live-editor" aria-busy={command.busy} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); void command.run(async (signal) => { const payload = receiptPayload({ key: crypto.randomUUID(), version: state.version, note: text(data, "note"), lines: rows, claims: state.claims ?? [] }); setAttempt(payload); await send(payload, signal); }, ""); }}>
     <h3>Record a delivery</h3>
-    <p>Count what physically arrived in each material's base unit. Leave rows blank if nothing arrived. Original deliveries cannot exceed the ordered quantity.</p>
+    <p>Count what physically arrived in each material&apos;s base unit. Leave rows blank if nothing arrived. Original deliveries cannot exceed the ordered quantity.</p>
     <fieldset className="live-fields" disabled={frozen}>
       {rows.map((row, index) => { const line = name(state, row.material_id); const claim = claimed.find((c) => c.id === row.replacement_claim_id);
         return <div className="live-plan-line" key={`${row.material_id}:${row.replacement_claim_id ?? ""}`}><p className="record-id">{line?.material_name} · {claim ? `replacement for claim (still owed ${inventoryDisplay(claimOwed(claim))})` : `original delivery · outstanding ${inventoryDisplay(line?.outstanding ?? "")}`}</p>

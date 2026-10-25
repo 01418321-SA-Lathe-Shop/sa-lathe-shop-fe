@@ -83,7 +83,7 @@ function seedScenario(db: Db, run: Run) {
   };
   const production = (jobId: string) => run("anan.staff", "GET", `/production/jobs/${jobId}`);
   const start = (jobId: string) => { const p = production(jobId); return run("anan.staff", "POST", `/production/jobs/${jobId}/start`, { idempotency_key: key(), expected_version: p.version, expected_plan_version: p.material_plan_version }); };
-  const use = (jobId: string, lines: { material_id: string; quantity: string }[], note: string) => run("anan.staff", "POST", `/production/jobs/${jobId}/usage`, { idempotency_key: key(), expected_version: production(jobId).version, lines, note });
+  const consume = (jobId: string, lines: { material_id: string; quantity: string }[], note: string) => run("anan.staff", "POST", `/production/jobs/${jobId}/usage`, { idempotency_key: key(), expected_version: production(jobId).version, lines, note });
   const log = (jobId: string, minutes: number, note: string) => run("anan.staff", "POST", `/production/jobs/${jobId}/time`, { idempotency_key: key(), expected_version: production(jobId).version, minutes, note });
   const complete = (jobId: string) => run("anan.staff", "POST", `/production/jobs/${jobId}/complete`, { idempotency_key: key(), expected_version: production(jobId).version });
   const fulfillment = (jobId: string) => run("pim.admin", "GET", `/fulfillment/jobs/${jobId}`);
@@ -120,18 +120,18 @@ function seedScenario(db: Db, run: Run) {
   const r8 = request(companyUser, company, "Spindle adaptor flanges", "16", "Steel S45C", 10);
   const j8 = openJob(companyUser, r8, quote(r8, "3400", "4100", "12500"));
   savePlan(j8, [{ material_id: steel, quantity: "25" }, { material_id: bolts, quantity: "64" }]);
-  start(j8); use(j8, [{ material_id: steel, quantity: "10.5" }, { material_id: bolts, quantity: "32" }], "First 8 flanges turned"); log(j8, 210, "Rough and finish turning, first half");
+  start(j8); consume(j8, [{ material_id: steel, quantity: "10.5" }, { material_id: bolts, quantity: "32" }], "First 8 flanges turned"); log(j8, 210, "Rough and finish turning, first half");
   // R9 UC8 → UC9 — completed production, waiting for Admin credit terms and invoice.
   const r9 = request(person, individual, "Brass valve stems", "20", "Brass C3604 rod Ø20");
   const j9 = openJob(person, r9, quote(r9, "1800", "2000", "6400"));
   savePlan(j9, [{ material_id: brass, quantity: "3" }]);
-  start(j9); use(j9, [{ material_id: brass, quantity: "2.75" }], "All stems turned"); log(j9, 150, "Turning and threading"); complete(j9);
+  start(j9); consume(j9, [{ material_id: brass, quantity: "2.75" }], "All stems turned"); log(j9, 150, "Turning and threading"); complete(j9);
   run("pim.admin", "PUT", `/production/jobs/${j9}/labor-cost`, { idempotency_key: key(), expected_version: production(j9).version, amount: "1950.00" });
   // R10 UC9 — invoiced and shipped; Customer has a bank payment waiting for review.
   const r10 = request(companyUser, company, "Machined guide rails, second batch", "10", "Steel S45C", 7);
   const j10 = openJob(companyUser, r10, quote(r10, "2600", "2300", "8200"));
   savePlan(j10, [{ material_id: steel, quantity: "6" }]);
-  start(j10); use(j10, [{ material_id: steel, quantity: "6" }], "All rails machined"); log(j10, 300, "Milling and grinding"); complete(j10);
+  start(j10); consume(j10, [{ material_id: steel, quantity: "6" }], "All rails machined"); log(j10, 300, "Milling and grinding"); complete(j10);
   run("pim.admin", "PUT", `/fulfillment/jobs/${j10}/credit-terms`, { idempotency_key: key(), expected_version: fulfillment(j10).version, credit_days: 30 });
   run("anan.staff", "POST", `/fulfillment/jobs/${j10}/invoice`, { idempotency_key: key(), expected_version: fulfillment(j10).version });
   run("anan.staff", "POST", `/fulfillment/jobs/${j10}/deliveries`, { idempotency_key: key(), expected_version: fulfillment(j10).version, method: "third_party", receiver_name: "Nida Wongsuwan" });

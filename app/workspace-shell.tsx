@@ -71,7 +71,7 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
 // reset the data, or lose the next write response to exercise retry recovery.
 function MockSwitcher({ current }: { current: string }) {
   const router = useRouter();
-  const { signIn, mock, resetMock } = useApiSession();
+  const { signIn, mock, resetMock, setLoseNextResponse } = useApiSession();
   const [error, setError] = useState(""); const [busy, setBusy] = useState(false); const [lose, setLose] = useState(Boolean(mock?.loseNextResponse));
   async function choose(username: string, password: string) {
     setBusy(true); setError("");
@@ -81,7 +81,7 @@ function MockSwitcher({ current }: { current: string }) {
   }
   return <details className="mock-switcher" onToggle={() => setLose(Boolean(mock?.loseNextResponse))}><summary className="secondary-button switch-account">สลับบัญชีทดสอบ</summary><div className="mock-switcher-menu">
     {MOCK_LOGINS.map((login) => <button key={login.username} disabled={busy || login.username === current} aria-current={login.username === current ? "true" : undefined} onClick={() => void choose(login.username, login.password)}><strong>{login.label}</strong><small>{login.detail}</small></button>)}
-    <label className="mock-toggle"><input type="checkbox" checked={lose} onChange={(event) => { setLose(event.target.checked); if (mock) mock.loseNextResponse = event.target.checked; }} /> จำลอง response หายในคำสั่งเขียนครั้งถัดไป (บันทึกแล้วแต่ตอบกลับไม่ถึง)</label>
+    <label className="mock-toggle"><input type="checkbox" checked={lose} onChange={(event) => { setLose(event.target.checked); setLoseNextResponse(event.target.checked); }} /> จำลอง response หายในคำสั่งเขียนครั้งถัดไป (บันทึกแล้วแต่ตอบกลับไม่ถึง)</label>
     <button className="button-danger" disabled={busy} onClick={() => { resetMock(); router.push("/login"); }}>รีเซ็ตข้อมูล mock</button>
     {error && <p role="alert" className="workflow-error">{error}</p>}
   </div></details>;
