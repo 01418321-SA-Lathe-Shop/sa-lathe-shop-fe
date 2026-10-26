@@ -61,11 +61,11 @@ export function sampleProcess(time: number, cycle = 0) {
     armX, armY, gap, scrapX, scrapY,
     scrapVisible: t < processStages.melt.start,
     scrapOpacity: cycle > 0 ? clamp(t / processConfig.resetFade) : 1,
-    belt: cycle * (processDuration - processStages.feed.start) + Math.max(0, t - processStages.feed.start),
+    belt: cycle * (processDuration - processConfig.finalHold - processStages.feed.start) + Math.max(0, Math.min(t, processDuration - processConfig.finalHold) - processStages.feed.start),
     heat, melt, pour: Math.sin(clamp((melt - 0.2) / 0.65) * Math.PI),
     glow: 0.8 + feed * (1 - melt) * 1.6 + heat * 3,
     ingotX: reset ? 6.15 : mix(4.2, 6.15, output),
-    ingotOpacity, ingotHeat: reset ? 0 : 1 - output,
+    ingotOpacity, ingotHeat: reset ? 0 : 1 - output, ingotRotation: reset ? -0.15 : -0.15 * output,
     output,
   };
 }

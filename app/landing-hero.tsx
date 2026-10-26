@@ -3,20 +3,19 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Component, useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { introDuration, landingConfig } from "./landing-config";
-import type { LandingIntro } from "./landing-intro";
+import { landingConfig } from "./landing-config";
+import { processConfig, processDuration, type ProcessMotion } from "./process-config";
+import type { ProcessClock } from "./process-clock";
 import { Nav } from "./landing-nav";
 import { StatCards } from "./landing-stat-cards";
 
 const Scene = dynamic(() => import("./landing-scene"), { ssr: false });
-
 class SceneLoadBoundary extends Component<{ children: ReactNode; onError: () => void }, { failed: boolean }> {
   state = { failed: false };
   static getDerivedStateFromError() { return { failed: true }; }
   componentDidCatch() { this.props.onError(); }
   render() { return this.state.failed ? null : this.props.children; }
 }
-
 function useMedia(query: string) {
   const subscribe = useCallback((listener: () => void) => {
     const media = window.matchMedia(query);
@@ -28,57 +27,61 @@ function useMedia(query: string) {
 
 export function Hero() {
   const root = useRef<HTMLElement>(null);
-  const motion = useRef({ time: 0 });
-  const intro = useRef<LandingIntro | null>(null);
-  const done = useRef(false);
-  const [state, setState] = useState<"loading" | "playing" | "complete" | "failed">("loading");
-  const [ready, setReady] = useState(false);
-  const [visible, setVisible] = useState(true);
+  const motion = useRef<ProcessMotion>({ time: 0, cycle: 0, loop: processConfig.loop });
+  const clock = useRef<ProcessClock | null>(null);
+  const stateRef = useRef("loading");
+  const [state, setState] = useState<"loading" | "playing" | "paused" | "complete" | "failed">("loading");
+  const [loop, setLoop] = useState<boolean>(processConfig.loop);
+  const [ready, setReady] = useState(false), [visible, setVisible] = useState(true);
   const reduced = useMedia("(prefers-reduced-motion: reduce)");
   const mobile = useMedia("(max-width: 767px)");
   const onReady = useCallback(() => setReady(true), []);
   const onError = useCallback(() => {
-    done.current = true; intro.current?.dispose(); intro.current = null;
-    motion.current.time = introDuration;
-    setState("failed");
+    clock.current?.dispose(); clock.current = null;
+    stateRef.current = "failed"; setState("failed");
   }, []);
-  const complete = useCallback(() => { done.current = true; setState("complete"); }, []);
-  const skip = useCallback(() => {
-    done.current = true;
-    motion.current.time = introDuration;
-    intro.current?.finish();
-    setState("complete");
-  }, []);
-
+  const complete = useCallback(() => { stateRef.current = "complete"; setState("complete"); }, []);
+  const showFinal = useCallback(() => {
+    motion.current.time = processDuration;
+    clock.current?.finish();
+    complete();
+  }, [complete]);
+  const togglePlayback = () => {
+    if (state === "playing") { clock.current?.pause(); stateRef.current = "paused"; setState("paused"); }
+    else {
+      if (state === "complete") clock.current?.restart();
+      else clock.current?.resume();
+      stateRef.current = "playing"; setState("playing");
+    }
+  };
   useEffect(() => {
     if (!root.current) return;
     const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: 0.05 });
     observer.observe(root.current);
     return () => observer.disconnect();
   }, []);
-
   useEffect(() => {
-    if (!ready || reduced !== false || mobile === null || done.current) return;
+    if (!ready || reduced !== false) return;
     let cancelled = false;
-    import("./landing-intro").then(({ createLandingIntro }) => {
-      if (cancelled || done.current || !root.current) return;
-      setState("playing");
-      intro.current = createLandingIntro(root.current, motion.current, mobile, complete);
-      if (document.hidden || root.current.getBoundingClientRect().bottom < 0) intro.current.pause();
+    import("./process-clock").then(({ createProcessClock }) => {
+      if (cancelled || stateRef.current === "failed") return;
+      clock.current = createProcessClock(motion.current, complete);
+      if (stateRef.current === "complete") { clock.current.finish(); return; }
+      if (stateRef.current !== "paused") {
+        stateRef.current = "playing"; setState("playing");
+        if (!document.hidden && root.current && root.current.getBoundingClientRect().bottom > 0) clock.current.resume();
+      }
     }).catch(onError);
-    return () => { cancelled = true; intro.current?.dispose(); intro.current = null; };
-    // Visibility pauses the existing clock separately, never recreates the intro.
-  }, [ready, reduced, mobile, complete, onError]);
-
+    return () => { cancelled = true; clock.current?.dispose(); clock.current = null; };
+  }, [ready, reduced, complete, onError]);
   useEffect(() => {
     const sync = () => {
-      if (document.hidden || !visible) intro.current?.pause();
-      else intro.current?.resume();
+      if (document.hidden || !visible || state !== "playing") clock.current?.pause();
+      else clock.current?.resume();
     };
     sync(); document.addEventListener("visibilitychange", sync);
     return () => document.removeEventListener("visibilitychange", sync);
-  }, [visible]);
-
+  }, [visible, state]);
   useEffect(() => {
     if (ready || reduced !== false || state !== "loading") return;
     const timeout = window.setTimeout(onError, 10000);
@@ -86,31 +89,25 @@ export function Hero() {
   }, [ready, reduced, state, onError]);
 
   const staticMode = reduced === true || state === "failed";
-  const displayState = staticMode ? "static" : state;
-  return <section ref={root} className="cinematic-hero" data-state={displayState} aria-labelledby="cinematic-title"
-    onFocusCapture={event => { if ((event.target as HTMLElement).closest("[data-intro-focus]")) skip(); }}>
+  return <section ref={root} className="cinematic-hero" data-state={staticMode ? "static" : state} aria-labelledby="cinematic-title">
     <div className="cinematic-horizon" aria-hidden="true" />
-    <div className="cinematic-art" aria-hidden="true">
-      <picture className="cinematic-poster"><source media="(max-width: 767px)" srcSet="/landing-final-mobile.webp" /><img src="/landing-final-desktop.webp" alt="" width="1440" height="900" fetchPriority="high" /></picture>
-      {reduced === false && mobile !== null && state !== "failed" && !(state === "complete" && !ready) && <div className="cinematic-canvas" data-ready={ready}>
-        <SceneLoadBoundary onError={onError}><Scene motion={motion} mobile={mobile} playing={state === "playing"} visible={visible} onReady={onReady} onError={onError} /></SceneLoadBoundary>
+    <div className="cinematic-art" role="img" aria-label="Illustrative process: a robotic gripper places scrap on a conveyor, a furnace melts it, and a finished metal ingot emerges.">
+      <picture className="cinematic-poster"><source media="(max-width: 767px)" srcSet="/landing-final-mobile.webp" /><img src="/landing-final-desktop.webp" alt="" width="1440" height="320" fetchPriority="high" /></picture>
+      {reduced === false && mobile !== null && state !== "failed" && <div className="cinematic-canvas" data-ready={ready} aria-hidden="true">
+        <SceneLoadBoundary onError={onError}><Scene motion={motion} mobile={mobile} playing={state === "playing"} frameState={state} visible={visible} onReady={onReady} onError={onError} /></SceneLoadBoundary>
       </div>}
     </div>
     <Nav />
-    <div className="cinematic-copy">
-      <h1 id="cinematic-title" aria-label={landingConfig.headline.join(" ")}>{landingConfig.headline.map(line => <span className="cinematic-line" key={line} aria-hidden="true">{Array.from(line).map((letter, i) => <span data-letter key={i}>{letter === " " ? "\u00a0" : letter}</span>)}</span>)}</h1>
-    </div>
-    <div className="cinematic-description" data-reveal>
-      <p>{landingConfig.paragraph}</p>
-      <Link href="/register" className="cinematic-primary" data-intro-focus>Start a job <span aria-hidden="true">↗</span></Link>
-    </div>
-    <div className="cinematic-bottom-copy" data-reveal><p>Manufacturing, <br />from first request <br />to final delivery.</p><a href="#workflow" aria-label="Explore the manufacturing workflow" data-intro-focus>Explore below <span aria-hidden="true">↓</span></a></div>
+    <div className="cinematic-copy"><h1 id="cinematic-title">{landingConfig.headline.map(line => <span className="cinematic-line" key={line}>{line}</span>)}</h1></div>
+    <div className="cinematic-description"><p>{landingConfig.paragraph}</p><Link href="/register" className="cinematic-primary">Start a job <span aria-hidden="true">↗</span></Link></div>
+    <div className="cinematic-bottom-copy"><p>Manufacturing, <br />from first request <br />to final delivery.</p><a href="#workflow" aria-label="Explore the manufacturing workflow">Explore below <span aria-hidden="true">↓</span></a></div>
     <StatCards />
-    <div className="cinematic-captions" aria-hidden="true">{landingConfig.captions.map(text => <p key={text} data-caption>{text}</p>)}</div>
-    {!staticMode && state !== "complete" && <div className="cinematic-intro-controls">
-      {state === "loading" && <span role="status">Preparing the scene<span aria-hidden="true">…</span></span>}
-      <button type="button" onClick={skip}>Skip intro <span aria-hidden="true">↗</span></button>
+    {!staticMode && <div className="cinematic-intro-controls" aria-label="Animation controls">
+      {state === "loading" ? <span role="status">Loading 3D…</span> : <button type="button" onClick={togglePlayback}>{state === "playing" ? "Pause" : state === "complete" ? "Replay" : "Play"}</button>}
+      <button type="button" aria-pressed={loop} onClick={() => { motion.current.loop = !loop; setLoop(!loop); }}>Loop {loop ? "on" : "off"}</button>
+      <button type="button" onClick={showFinal} disabled={state === "complete"}>Show final frame</button>
     </div>}
-    <noscript><style>{`.cinematic-hero [data-reveal],.cinematic-hero .cinematic-copy,.cinematic-hero .cinematic-poster{opacity:1!important;filter:none!important}.cinematic-intro-controls{display:none!important}`}</style></noscript>
+    {state === "failed" && <p className="cinematic-scene-notice" role="status">3D unavailable. Showing the finished piece.</p>}
+    <noscript><style>{`.cinematic-hero .cinematic-poster{opacity:1!important;filter:none!important}.cinematic-intro-controls{display:none!important}`}</style></noscript>
   </section>;
 }

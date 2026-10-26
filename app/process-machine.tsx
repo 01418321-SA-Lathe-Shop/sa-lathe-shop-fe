@@ -3,13 +3,16 @@
 import { useMemo, useRef, type RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { bracketGeometry, seededRandom } from "./landing-geometry";
 import { processConfig, sampleProcess, type ProcessMotion } from "./process-config";
 
 type MotionProps = { motion: RefObject<ProcessMotion>; mobile: boolean };
 const steel = "#919b9e", casing = "#242a2c", orange = "#ff852e";
 function Box({ at, size, color = casing }: { at: [number, number, number]; size: [number, number, number]; color?: string }) {
-  return <mesh position={at}><boxGeometry args={size} /><meshStandardMaterial color={color} metalness={0.85} roughness={0.3} /></mesh>;
+  const [width, height, depth] = size;
+  const geometry = useMemo(() => new RoundedBoxGeometry(width, height, depth, 2, Math.min(0.045, width / 5, height / 5, depth / 5)), [width, height, depth]);
+  return <mesh position={at} geometry={geometry}><meshStandardMaterial color={color} metalness={0.85} roughness={0.3} /></mesh>;
 }
 function Joint({ at, radius = 0.22 }: { at: [number, number, number]; radius?: number }) {
   return <mesh position={at} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[radius, radius, 0.46, 24]} /><meshStandardMaterial color={steel} metalness={0.95} roughness={0.23} /></mesh>;
@@ -85,7 +88,7 @@ export function Conveyor({ motion, output = false }: { motion: RefObject<Process
     }
   });
   return <group>
-    <instancedMesh ref={rollers} args={[undefined, undefined, count]} frustumCulled={false}><cylinderGeometry args={[0.18, 0.18, 1.14, 16]} /><meshStandardMaterial color={steel} metalness={0.9} roughness={0.28} /></instancedMesh>
+    <instancedMesh ref={rollers} args={[undefined, undefined, count]} frustumCulled={false}><cylinderGeometry args={[0.18, 0.18, 1.14, 32]} /><meshStandardMaterial color={steel} metalness={0.9} roughness={0.32} /></instancedMesh>
     {!output && <instancedMesh ref={slats} args={[undefined, undefined, 36]} frustumCulled={false}><boxGeometry args={[0.11, 0.04, 1.06]} /><meshStandardMaterial color="#303334" metalness={0.45} roughness={0.7} /></instancedMesh>}
     {[-0.63, 0.63].map(z => <Box key={z} at={[start + length / 2, -0.96, z]} size={[length + 0.35, 0.22, 0.13]} />)}
     {[start + 0.25, start + length - 0.25].map(x => <Box key={x} at={[x, -1.2, 0]} size={[0.16, 0.48, 1.05]} />)}
@@ -114,7 +117,7 @@ export function ScrapAndIngot({ motion }: { motion: RefObject<ProcessMotion> }) 
     if (ingot.current && finishedMaterial.current) {
       ingot.current.visible = p.ingotOpacity > 0;
       ingot.current.position.set(p.ingotX, -0.4, 0);
-      ingot.current.rotation.y = -0.15 * p.output;
+      ingot.current.rotation.y = p.ingotRotation;
       finishedMaterial.current.color.copy(cold).lerp(hot, p.ingotHeat);
       finishedMaterial.current.emissiveIntensity = p.ingotHeat * 2;
       finishedMaterial.current.opacity = p.ingotOpacity;

@@ -20,11 +20,13 @@ test("output is cold and settled for the final 0.3 seconds", () => {
   const a = sampleProcess(4.7), b = sampleProcess(5);
   assert.equal(a.ingotX, b.ingotX); assert.equal(a.ingotHeat, 0);
   assert.equal(a.ingotOpacity, 1); assert.equal(b.ingotOpacity, 1);
+  assert.equal(a.belt, b.belt);
 });
 test("loop boundary preserves the ingot, arm and belt before fading the reset", () => {
   const end = sampleProcess(5, 0), next = sampleProcess(0, 1);
   assert.equal(end.armX, next.armX); assert.equal(end.armY, next.armY);
   assert.equal(end.ingotX, next.ingotX); assert.equal(end.ingotOpacity, next.ingotOpacity);
+  assert.equal(end.ingotRotation, next.ingotRotation);
   assert.equal(end.belt, next.belt);
   assert.equal(sampleProcess(0, 0).ingotOpacity, 0);
   assert.equal(sampleProcess(0.18, 1).ingotOpacity, 0);

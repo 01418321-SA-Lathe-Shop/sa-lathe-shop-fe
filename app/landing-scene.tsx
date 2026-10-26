@@ -4,15 +4,18 @@ import { Component, useEffect, useLayoutEffect, useRef, useSyncExternalStore, ty
 import { Canvas, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
-import { Machine, Sparks } from "./landing-machine";
-import { ScrapPile } from "./landing-scrap-pile";
-import { landingConfig, type LandingMotion } from "./landing-config";
+import { RobotArm, Conveyor, Furnace, ScrapAndIngot } from "./process-machine";
+import { DepthOfField } from "./process-effects";
+import { processConfig, type ProcessMotion } from "./process-config";
 
 // Three.js owns these mutable objects outside React's declarative state.
-function resizeCamera(camera: THREE.Camera, width: number, mobile: boolean) {
-  const orthographic = camera as THREE.OrthographicCamera;
-  orthographic.zoom = width / (mobile ? 10 : 16);
-  orthographic.updateProjectionMatrix();
+function resizeCamera(camera: THREE.Camera, width: number, height: number) {
+  const perspective = camera as THREE.PerspectiveCamera;
+  perspective.aspect = width / Math.max(1, height);
+  const worldHeight = Math.max(4.6, 17.2 / perspective.aspect);
+  perspective.fov = THREE.MathUtils.radToDeg(2 * Math.atan(worldHeight / 36));
+  perspective.lookAt(0, 0.1, 0);
+  perspective.updateProjectionMatrix();
 }
 function setEnvironment(scene: THREE.Scene, texture: THREE.Texture | null) {
   scene.environment = texture;
@@ -20,9 +23,10 @@ function setEnvironment(scene: THREE.Scene, texture: THREE.Texture | null) {
 }
 
 type SceneProps = {
-  motion: React.RefObject<LandingMotion>;
+  motion: React.RefObject<ProcessMotion>;
   mobile: boolean;
   playing: boolean;
+  frameState: string;
   visible: boolean;
   onReady: () => void;
   onError: () => void;
@@ -35,11 +39,11 @@ class SceneBoundary extends Component<{ children: ReactNode; onError: () => void
   render() { return this.state.failed ? null : this.props.children; }
 }
 
-function World({ motion, mobile, playing, onReady, onError }: SceneProps) {
+function World({ motion, mobile, playing, frameState, onReady, onError }: SceneProps) {
   const { gl, scene, camera, size, invalidate } = useThree();
   const ready = useRef(false);
   useLayoutEffect(() => {
-    resizeCamera(camera, size.width, mobile);
+    resizeCamera(camera, size.width, size.height);
     invalidate();
   }, [camera, size.width, size.height, mobile, invalidate]);
   useEffect(() => {
@@ -66,20 +70,19 @@ function World({ motion, mobile, playing, onReady, onError }: SceneProps) {
     // so completion/skip always paints the final pose before going idle.
     const frame = requestAnimationFrame(() => invalidate());
     return () => cancelAnimationFrame(frame);
-  }, [playing, invalidate]);
-  // Camera width is fixed in world units; keep the pile anchored to the viewport bottom.
-  const height = (mobile ? 10 : 16) * size.height / Math.max(1, size.width);
-  const floor = -height / 2 + 0.35;
+  }, [playing, frameState, invalidate]);
   return <>
-    <ambientLight intensity={0.3} />
-    <directionalLight position={[-6, 6, 8]} intensity={3.5} color="#dce5ec" />
-    <directionalLight position={[6, -3, 5]} intensity={5} color="#ff8c42" />
-    <pointLight position={[-3, floor + 0.4, 2]} intensity={28} color="#ff6c23" distance={12} decay={2} />
-    <Machine motion={motion} floor={floor} />
-    <ScrapPile motion={motion} mobile={mobile} floor={floor} />
-    <Sparks motion={motion} mobile={mobile} />
-    <mesh position={[0, floor - 0.5, -2]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[40, 12]} /><meshStandardMaterial color="#090a0a" metalness={0.6} roughness={0.5} /></mesh>
-    <fog attach="fog" args={[landingConfig.colors.background, 20, 40]} />
+    <ambientLight intensity={0.35} />
+    <directionalLight position={[-4, 7, 5]} intensity={3} color="#f1eee7" />
+    <directionalLight position={[5, 3, -4]} intensity={4} color="#ffe6d0" />
+    <pointLight position={[2, -0.5, 3]} intensity={15} color="#ff852e" distance={10} decay={2} />
+    <RobotArm motion={motion} mobile={mobile} />
+    <Conveyor motion={motion} /><Conveyor motion={motion} output />
+    <Furnace motion={motion} mobile={mobile} /><ScrapAndIngot motion={motion} />
+    <mesh position={[0, -1.48, -1]} rotation={[-Math.PI / 2, 0, 0]}><planeGeometry args={[24, 10]} /><shaderMaterial transparent depthWrite={false}
+      vertexShader="varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}"
+      fragmentShader="varying vec2 vUv;void main(){float a=smoothstep(0.0,0.25,vUv.x)*smoothstep(1.0,0.75,vUv.x)*sin(vUv.y*3.14159);gl_FragColor=vec4(0.008,0.009,0.009,a*0.75);}" /></mesh>
+    {(mobile ? processConfig.mobile : processConfig.desktop).depthOfField && <DepthOfField />}
   </>;
 }
 
@@ -90,9 +93,9 @@ function subscribeVisibility(callback: () => void) {
 
 export default function Scene(props: SceneProps) {
   const tabVisible = useSyncExternalStore(subscribeVisibility, () => !document.hidden, () => true);
-  const config = props.mobile ? landingConfig.mobile : landingConfig.desktop;
+  const config = props.mobile ? processConfig.mobile : processConfig.desktop;
   return <SceneBoundary onError={props.onError}>
-    <Canvas orthographic camera={{ position: [0, 0, 18], zoom: 80, near: 0.1, far: 60 }}
+    <Canvas camera={{ position: [0, 2.6, 18], fov: 20, near: 0.1, far: 60 }}
       dpr={[1, config.pixelRatio]} frameloop={props.playing && props.visible && tabVisible ? "always" : "demand"}
       gl={{ antialias: !props.mobile, alpha: true, powerPreference: "high-performance" }}
       fallback={<span>3D is unavailable. The finished material is shown as a still image.</span>} style={{ pointerEvents: "none" }}>

@@ -164,13 +164,13 @@ Brand mark เป็น CSS square สีส้มหมุน45° พร้อ�
 
 ### Cinematic public landing (2026-10-27)
 
-In progress: replace the one-shot machining scene with the owner's five-second scrap → conveyor → furnace → ingot loop. `process-config.ts` defines five cumulative stages (1.0/0.8/1.2/0.9/1.1s), including a 0.3s final hold. The new procedural arm, visible rollers, furnace, pour and cooling ingot are isolated from product workflows. Integration and visual verification follow in the next commit; the existing landing remains active until then.
+Only `/` changes. `app/landing.css` scopes a fixed dark `#060707` world without changing saved workspace appearance. Geist, product copy, actual auth links, logo/pill navigation, caption and two glass stats remain. Counts (9 workflows, 3 roles) are product facts, not recycling or delivery guarantees. The furnace sequence is an illustrative concept, not a statement of shop services. The desktop hero is at least47rem/100svh; the 3D band sits between47% from the top and20% from the bottom, below the headline. The camera is fixed near-side-on, slightly above the production line. No captions or text-reveal delays interrupt the five-step story.
 
-Only `/` changes. `app/landing.css` scopes a fixed dark `#060707` world without changing saved workspace appearance. Geist is retained; no new font or external model. Desktop uses a minimum 47rem/100svh stage: logo + three pill anchors + workspace link on top; headline left, paragraph/white registration CTA right; chrome/copper spindle center; offcuts along the bottom; caption left and exactly two glass statistics right. Stats use a dark translucent `#101414e8` base beneath the glass highlight so white scrap cannot wash out labels; the caption has a local dark underlay for the same reason. Statistics are factual platform counts (9 workflows, 3 roles), not recycling or delivery guarantees. Below-fold workflow/capabilities/footer retain product information with divider-led editorial styling. Settings remain in the footer.
+`landing-config.ts` owns public copy. `process-config.ts` owns cumulative durations: pickup1.0s → place0.8s → feed1.2s → melt0.9s → output1.1s, total5.0s on desktop AND mobile. The last0.3s is included in output and freezes the pose/belt. Arm movement uses cubic ease-in-out, belt travel is linear, ingot settling is cubic ease-out. On repeat, the previous ingot fades over the next cycle's first0.18s as fresh scrap fades in; arm, belt phase and final ingot rotation remain continuous. One GSAP clock drives mutable Three.js objects, not per-frame React updates. Local procedural geometry, reflection environment and lighting need no external model/HDR or API.
 
-`landing-config.ts` owns copy, colors, particle budgets, mobile speed and all nine stage duration/easing settings. One GSAP clock coordinates DOM text and procedural 3D: dim → captions/tumbling → settling → letter reveal → UI → machine entry → collet feed → processing → polished rod. Duration10.85s desktop, approximately5.97s mobile. No audio or autoplay loop. Metallic RoomEnvironment lighting is generated locally. No files are uploaded, fetched from model CDNs, or sent to backend by the animation.
+The robotic arm places a bent bracket onto visible rollers/slats; the box furnace hides it, brightens, pulses once, emits sparse sparks and a short molten stream into an exit mold; a beveled ingot slides out and cools to metallic gray. Desktop uses restrained depth-of-field and short gripper ghost trails (an inexpensive motion-blur approximation). Heat shimmer is a procedural warm wisp shader, not physical refraction. At <768px text stacks above a15rem scene; sparks reduce24→8, DPR1.5→1, DOF/trails are disabled. At ≤380px controls/caption/stats are separated vertically.
 
-At <768px the layout stacks, scene height27rem, main scrap/chip/spark counts drop from approximately36/80/48 to12/28/16 and DPR caps at1 rather than1.5. `prefers-reduced-motion` bypasses WebGL and reveals a still final frame; Skip intro and keyboard navigation reveal content immediately. Unavailable/lost WebGL retains real text/actions and final-frame artwork. The timeline and renderer pause offscreen/hidden and render on demand after completion. Generated transparent WebP stills contain only scene artwork; text remains semantic HTML. Preserve the global rem-based text-size preference; scoped dark styling does not rewrite it.
+Pause/Play, Loop on/off, Replay and Show final frame are native buttons with visible focus; Loop exposes aria-pressed. Loop-off finishes the current cycle. Controls sit centered below the scene, away from primary actions. Real text is visible immediately. Reduced motion bypasses Canvas and shows the final-frame poster; no-JavaScript does likewise. Lazy-load/context failures or10s initialization timeout show the still and a notice. Offscreen/hidden tabs pause the clock AND renderer; paused/finished scenes render only on demand, including paused→final changes. Final-frame WebPs contain only procedural scene artwork with embedded provenance. No audio, new dependencies or business workflow changes.
 
 ## Routes
 
@@ -238,6 +238,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-27 | Replace one-shot spindle intro with configurable five-second arm/conveyor/furnace/ingot loop, playback controls and lighter mobile rendering | Timing tests, type/lint and browser checks; current evidence in landing handoff |
 | 2026-10-27 | Keep no-JavaScript final artwork sharp as well as real text; correct scoped landing breakpoint summary | No-JS browser check; design documentation audit |
 | 2026-10-27 | Replace public landing with reference-led cinematic machining story, English factual copy, configurable single timeline, lighter mobile scene, Skip intro and static accessible fallback | Targeted lint/type checks and bounded browser inspection; final handoff records actual evidence |
 | 2026-10-27 | Add approved Three.js / React Three Fiber / GSAP procedural scene foundation and configurable 10.85s choreography; not mounted on homepage in this foundation commit | TypeScript and dependency audit; visual integration follows in a separate commit |
@@ -1112,12 +1113,12 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .cinematic-page button { cursor: pointer; }
 .cinematic-hero { position: relative; min-height: max(47rem, 100svh); isolation: isolate; overflow: hidden; background: #060707; }
 .cinematic-horizon { position: absolute; z-index: -1; inset: 0; background: radial-gradient(ellipse 60% 12% at 53% 104%, #ff7c22 0%, #d4561a99 25%, transparent 72%), linear-gradient(0deg, #15191b 0%, #0b0e10 14%, #060707 46%); }
-.cinematic-art { position: absolute; z-index: 0; inset: 0; pointer-events: none; }
+.cinematic-art { position: absolute; z-index: 0; inset: 47% 0 20%; pointer-events: none; }
 .cinematic-canvas { position: absolute; inset: 0; opacity: 0; transition: opacity .3s; }
 .cinematic-canvas[data-ready="true"] { opacity: 1; }
 .cinematic-canvas canvas { display: block; }
 .cinematic-poster { position: absolute; inset: 0; display: block; }
-.cinematic-poster img { width: 100%; height: 100%; object-fit: cover; }
+.cinematic-poster img { width: 100%; height: 100%; object-fit: contain; }
 .cinematic-hero:has(.cinematic-canvas[data-ready="true"]) .cinematic-poster { visibility: hidden; }
 .cinematic-hero[data-state="loading"] .cinematic-poster { opacity: .45; filter: blur(4px); }
 .cinematic-nav { position: relative; z-index: 3; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 2.75rem; padding: 2rem 4.5%; }
@@ -1135,7 +1136,6 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .cinematic-copy { position: absolute; z-index: 2; left: 4.5%; top: 23%; width: 48%; pointer-events: none; }
 .cinematic-copy h1 { margin: 0; font-size: clamp(3.25rem, 5.8vw, 6rem); line-height: 1.02; letter-spacing: -.04em; font-weight: 510; }
 .cinematic-line { display: block; white-space: nowrap; }
-.cinematic-line [data-letter] { display: inline-block; }
 .cinematic-description { position: absolute; z-index: 2; top: 25%; right: 4.5%; width: 19%; max-width: 19rem; }
 .cinematic-description p { margin: 0; color: #b6bbb8; font-size: .875rem; line-height: 1.7; text-wrap: pretty; }
 .cinematic-primary { margin-top: 2rem; min-height: 3rem; padding: .75rem 1.25rem; display: inline-flex; align-items: center; gap: 2.25rem; color: #121514 !important; background: #f3f3ef; border-radius: .375rem; font-size: .8125rem; font-weight: 600; transition: background .2s, transform .2s; }
@@ -1151,15 +1151,14 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .cinematic-stats dt { font-size: .75rem; color: #d2d6d3; }
 .cinematic-stats dd { display: flex; align-items: center; justify-content: space-between; margin: 0; font-size: 2rem; line-height: 1; font-weight: 500; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
 .cinematic-stats dd span { font-size: .875rem; color: #ffad6a; }
-.cinematic-captions { position: absolute; z-index: 4; inset: 0; display: grid; place-items: center; pointer-events: none; }
-.cinematic-captions p { position: absolute; margin: 0 1.5rem; text-align: center; opacity: 0; font-size: clamp(1rem, 1.6vw, 1.5rem); font-weight: 450; letter-spacing: -.025em; }
-.cinematic-intro-controls { position: absolute; z-index: 5; right: 4.5%; bottom: 11rem; display: flex; align-items: center; gap: 1rem; }
+.cinematic-intro-controls { position: absolute; z-index: 5; left: 50%; transform: translateX(-50%); bottom: 8%; display: flex; align-items: center; gap: .5rem; white-space: nowrap; }
 .cinematic-intro-controls > span { color: #b8bfbb; font-size: .6875rem; }
 .cinematic-intro-controls button { padding: .5rem .8rem; min-height: 2.75rem; border-radius: 999px; border: 1px solid #ffffff40; color: #f4f4f1; background: #0b0e0ecc; font-size: .75rem; }
 .cinematic-intro-controls button:hover { background: #272b29; }
 .cinematic-intro-controls button span { padding-left: .75rem; }
-.cinematic-hero[data-state="loading"] :is(.cinematic-copy, [data-reveal]) { opacity: .12; filter: blur(3px); }
-.cinematic-hero[data-state="static"] :is(.cinematic-copy, [data-reveal], [data-letter]) { opacity: 1 !important; filter: none !important; transform: none !important; }
+.cinematic-intro-controls button:disabled { opacity: .5; cursor: default; }
+.cinematic-intro-controls button[aria-pressed="true"] { border-color: #d28e58; color: #ffc99d; }
+.cinematic-scene-notice { position: absolute; left: 50%; transform: translateX(-50%); bottom: 8%; font-size: .75rem; color: #b8bfbb; }
 .cinematic-process, .cinematic-platform { max-width: 100rem; margin: 0 auto; padding: 8rem 4.5%; scroll-margin-top: 2rem; }
 .cinematic-process { display: grid; grid-template-columns: 1fr 1fr; gap: 8%; border-bottom: 1px solid #ffffff15; }
 .cinematic-page h2 { margin: 0; font-weight: 500; font-size: clamp(2.5rem, 4vw, 4.5rem); line-height: 1.05; letter-spacing: -.035em; }
@@ -1187,7 +1186,7 @@ button:disabled { opacity:.5; cursor:not-allowed; }
   .cinematic-stats > div { min-width: 8.25rem; padding: 1rem; }
 }
 @media (max-width: 767px) {
-  .cinematic-hero { min-height: 66rem; display: flex; flex-direction: column; }
+  .cinematic-hero { min-height: 57rem; display: flex; flex-direction: column; }
   .cinematic-nav { grid-template-columns: 1fr auto; padding: 1.5rem 1.25rem 0; gap: 1.25rem 1rem; }
   .cinematic-nav-pills { grid-row: 2; grid-column: 1 / -1; gap: .4rem; }
   .cinematic-nav-pills a { font-size: .6875rem; min-height: 2.75rem; padding-inline: .9rem; }
@@ -1200,7 +1199,7 @@ button:disabled { opacity:.5; cursor:not-allowed; }
   .cinematic-description { position: relative; top: auto; right: auto; width: auto; max-width: 27rem; margin: 1.5rem 1.25rem 0; }
   .cinematic-description p { font-size: .8125rem; max-width: 32ch; }
   .cinematic-primary { margin-top: 1.25rem; }
-  .cinematic-art { position: relative; inset: auto; height: 27rem; width: 100%; flex: none; order: 1; margin-top: 1.25rem; margin-bottom: 8.5rem; }
+  .cinematic-art { position: relative; inset: auto; height: 15rem; width: 100%; flex: none; order: 1; margin-top: 1.25rem; margin-bottom: 12rem; }
   .cinematic-bottom-copy { bottom: 2rem; left: 1.25rem; max-width: 35%; }
   .cinematic-bottom-copy p { font-size: .6875rem; }
   .cinematic-bottom-copy a { font-size: .625rem; margin-top: .75rem; gap: .4rem; }
@@ -1208,9 +1207,9 @@ button:disabled { opacity:.5; cursor:not-allowed; }
   .cinematic-stats > div { min-width: 5.4rem; max-width: 6.5rem; padding: .8rem; gap: .7rem; }
   .cinematic-stats dd { font-size: 1.75rem; }
   .cinematic-stats dt { font-size: .6875rem; max-width: 9ch; line-height: 1.4; }
-  .cinematic-intro-controls { right: 1.25rem; bottom: 11.5rem; }
-  .cinematic-intro-controls > span { display: none; }
-  .cinematic-captions { top: 27rem; bottom: 9rem; }
+  .cinematic-intro-controls { bottom: 10rem; gap: .35rem; }
+  .cinematic-intro-controls button { padding-inline: .65rem; font-size: .6875rem; }
+  .cinematic-scene-notice { bottom: 10rem; width: 90%; text-align: center; }
   .cinematic-process, .cinematic-platform { padding: 4.5rem 1.25rem; }
   .cinematic-process { grid-template-columns: 1fr; gap: 3rem; }
   .cinematic-capabilities { grid-template-columns: 1fr; gap: 2.5rem; margin-top: 3rem; }
@@ -1221,7 +1220,8 @@ button:disabled { opacity:.5; cursor:not-allowed; }
   .cinematic-nav { gap: 1rem .5rem; }
   .cinematic-workspace { gap: .4rem; padding-inline: .6rem; }
   .cinematic-workspace > span { display: none; }
-  .cinematic-art { margin-bottom: 13rem; }
+  .cinematic-art { margin-bottom: 17rem; }
+  .cinematic-intro-controls, .cinematic-scene-notice { bottom: 14rem; }
   .cinematic-bottom-copy { bottom: 9.5rem; max-width: calc(100% - 2.5rem); }
   .cinematic-bottom-copy p br { display: none; }
   .cinematic-bottom-copy a { margin-top: .2rem; }
@@ -1231,7 +1231,6 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 }
 @media (prefers-reduced-motion: reduce) {
   .cinematic-page *, .cinematic-page *::before, .cinematic-page *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-  .cinematic-hero :is(.cinematic-copy, [data-reveal], [data-letter]) { opacity: 1 !important; filter: none !important; transform: none !important; }
   .cinematic-hero .cinematic-poster { opacity: 1; filter: none; }
   .cinematic-intro-controls { display: none; }
 }
