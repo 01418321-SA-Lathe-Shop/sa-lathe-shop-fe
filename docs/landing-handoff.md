@@ -1,107 +1,158 @@
-# Cinematic landing handoff — 2026-10-27
+# Five-second scrap-to-ingot animation — handoff
 
-## Scope and defaults
+## Scope and chosen defaults
 
-Branch: `codex/cinematic-scrap-landing`, based on `develop` at `45118bb`. Only the public homepage is redesigned. No backend, auth, role permission, invoice/payment, stock, or UC1–UC9 behavior changes. Existing framework versions are retained; approved runtime additions are `three@0.186.1`, `@react-three/fiber@9.8.2`, `gsap@3.15.0`; development types `@types/three@0.186.0`. Exact installations are locked in `package-lock.json`.
+Implemented on `codex/cinematic-scrap-landing`, preserving the existing public landing and all connected UC1–UC9 workflows. The latest animation brief supersedes the earlier 10.85-second offcut/spindle intro.
 
-The owner supplied a10.87s reference video and approved the matching black/copper composition. Use Lathe Shop Control, English public copy, a polished rod as output, and factual9-workflow/3-role stats. The lathe processes one solid offcut; mixed scrap is visual staging, not a claim that the business melts chips into new bars. No recycled-content percentage or turnaround guarantee is invented. No audio or loop.
+- Format: React Three Fiber + Three.js, driven by GSAP; no new dependencies.
+- Fixed near-side-on camera, slightly above the conveyor.
+- Bent metal bracket → robotic gripper → left-to-right roller conveyor → box furnace → beveled ingot.
+- Near-black background, neutral metallic surfaces, warm orange/copper energy accents.
+- Illustrative compressed process, **not a claim that the shop offers melting/recycling services**.
+- No captions, sound or delayed headline: real page copy and links remain visible.
+- Loop defaults on. The controls are Pause/Play, Loop on/off, Replay and Show final frame.
 
-## Run and customize
+## Storyboard
 
-1. Use the existing project's Node/npm environment compatible with its installed Next.js release.
-2. Run `npm ci`, then `npm run dev` and open `http://localhost:3000`. Reuse an existing server for this checkout when present.
-3. Landing needs no API, models, secrets, or new environment variables. Login/registration targets the existing `/login` and `/register`; connected workflow setup remains in `docs/11-phase-ten-handoff.md`.
-4. For production: `npm run build`, then `npm start`. Never treat compilation alone as a successful build.
-5. Edit `landing-config.ts` for headline, paragraph, captions, statistics, scene palette, stage duration/easing, counts, pixel ratio and mobile speed. Navigation, CTA, footer and below-fold copy remain in their components; UI colors remain in `landing.css`. Headline DOM spans adapt automatically to the configured text.
+| Time | Step | Onscreen action |
+|---|---|---|
+| 0.0–1.0s | PICK UP | Gripper closes around a bent offcut and the two-link arm lifts it. |
+| 1.0–1.8s | PLACE | Arm transfers the offcut to the belt, opens and returns home. |
+| 1.8–3.0s | FEED | Moving slats/rollers carry it into the left furnace opening; the interior brightens. |
+| 3.0–3.9s | MELT | Scrap is hidden; warm glow pulses, sparse sparks and a heat-wisp shader accompany molten metal pouring into the exit mold. |
+| 3.9–5.0s | OUTPUT | Ingot moves onto the outfeed, cools orange→metal gray, settles by4.7s and holds through5.0s. |
 
-| Component/file | Responsibility |
+Arm movement uses cubic ease-in-out, conveyor travel is linear, output uses cubic ease-out. Durations are cumulative, so there are no gaps or competing timers. The final0.3s hold is **inside** output, not extra time.
+
+At the loop seam the arm is already home and the belt keeps its phase. The finished ingot retains its pose, then fades during the next cycle's first0.18s while fresh scrap fades in. This does not lengthen the five-second cycle. Loop-off lets the current cycle finish; Replay starts a new cycle. A paused scene can seek directly to its final frame.
+
+## Complete source map
+
+| File | Responsibility |
 |---|---|
-| `app/dashboard.tsx` | Server-rendered landing composition, factual below-fold workflow/capabilities and existing auth links |
-| `app/landing-hero.tsx` | Client-only scene boundary, media preferences, loading/skip/error handling, timeline lifecycle and real HTML content |
-| `app/landing-nav.tsx` / `landing-stat-cards.tsx` | Logo/working anchors/auth link;9 workflows and3 roles |
-| `app/landing-config.ts` | Shared public copy and choreography/render settings |
-| `app/landing-intro.ts` | One lazy-loaded GSAP timeline for DOM + mutable scene clock; explicit cleanup |
-| `app/landing-scene.tsx` | Lazy Canvas, local reflection environment, lights, resize, visibility and context-loss handling |
-| `app/landing-machine.tsx` | Procedural collet, spindle, orange coil, raw offcut, finished rod and pooled sparks |
-| `app/landing-scrap-pile.tsx` / `landing-geometry.ts` | Deterministic instanced metal shapes, chips, trajectories and reusable geometry |
-| `app/landing.css` | Scoped dark composition, responsive layouts, still fallback and accessibility states |
+| `app/process-config.ts` | Five durations, easing selections, final hold, reset fade, loop default, mobile/desktop budgets; pure deterministic pose sampler |
+| `app/process-clock.ts` | Lazy GSAP clock; pause/resume/restart/finish/dispose; cycle counting without per-frame React updates |
+| `app/process-machine.tsx` | RobotArm, Gripper, Conveyor, Furnace, ScrapAndIngot; procedural geometry, instanced rollers/slats/sparks, molten stream, cooling and heat wisps |
+| `app/process-effects.tsx` | Desktop-only restrained BokehPass depth of field, alpha-preserving composition and resource cleanup |
+| `app/process-config.test.ts` | Native timing, phase-boundary, final-hold and seam-continuity tests |
+| `app/landing-scene.tsx` | Lazy Canvas, fixed camera/framing, local RoomEnvironment, lighting, visibility and context-loss handling |
+| `app/landing-hero.tsx` | Real HTML content, playback controls, lifecycle, reduced-motion and static error boundaries |
+| `app/landing-geometry.ts` | Bent-bracket extrusion and seeded random generator |
+| `app/landing-config.ts` | Existing headline, paragraph and factual platform statistics |
+| `app/landing.css` | Existing dark page styling, bounded scene band and responsive controls |
+| `app/landing-nav.tsx`, `app/landing-stat-cards.tsx`, `app/dashboard.tsx` | Existing navigation, statistics and below-fold content; not rewritten by this animation change |
 
-### Timeline
+Obsolete `landing-intro.ts`, `landing-machine.tsx` and `landing-scrap-pile.tsx` were removed after the replacement was connected. Git history preserves them.
 
-| Stage | Start | Duration | Ease |
-|---|---:|---:|---|
-| dim |0.00s|0.35s|power2.out|
-| captions/tumble |0.35s|2.25s|power2.inOut|
-| settle |2.60s|0.75s|power3.out|
-| headline |3.35s|1.20s|power3.out|
-| ui |4.55s|0.60s|power2.out|
-| enter |5.15s|1.20s|power3.inOut|
-| feed |6.35s|1.35s|power2.inOut|
-| process |7.70s|1.55s|sine.inOut|
-| output |9.25s|1.60s|power3.out|
+## Run locally
 
-The master clock ends at10.85s; mobile scales the timeline by0.55 (about5.97s). No physics dependency: authored seeded trajectories make the pile repeatable. Reservations, material valuation and other backend data do not participate in this illustrative scene.
+From the frontend repository:
 
-## Assets and graceful failure
+```powershell
+npm ci
+npm run dev
+```
 
-No user-supplied files are needed. Offcuts, brackets, bar ends, bolt/nut-like pieces, shavings, machine and rod are procedural Three.js geometry. The existing CSS logo and Geist font remain. Reflection lighting uses a locally generated RoomEnvironment, not an external HDR/model CDN.
+Open `http://localhost:3000`. If dependencies are already installed and the dev server is running, just refresh the page. This animation needs no API, credentials, environment variables or external asset service. Existing login/registration continues to use the established application setup.
 
-| File | Origin / purpose |
+Production and checks:
+
+```powershell
+npm run build
+npm start
+node --experimental-strip-types --test app/process-config.test.ts
+node scripts/sync-design.mjs --check
+```
+
+Use the existing supported Node version. The native test runner may print the repository's existing module-type warning; do not change package module settings just to suppress it.
+
+## Tweak it
+
+Edit `app/process-config.ts`:
+
+```ts
+durations: { pickup: 1, place: 0.8, feed: 1.2, melt: 0.9, output: 1.1 },
+easing: { arm: "easeInOut", belt: "linear", output: "easeOut" },
+finalHold: 0.3,
+resetFade: 0.18,
+loop: true,
+```
+
+Each step has one duration value. All later starts/endpoints recalculate automatically. Keep durations positive, `finalHold < durations.output`, and `0 < resetFade < durations.pickup`. To retain the requested length, durations must total5.0. Tests intentionally assert the requested five-second timings; revise their expected values when deliberately changing the brief.
+
+- Public copy: `landing-config.ts`.
+- Machine geometry, colors, lighting details and paths: `process-machine.tsx`, `process-config.ts`, `landing-scene.tsx`.
+- Camera framing: `resizeCamera` in `landing-scene.tsx`.
+- Desktop/mobile budgets: `processConfig.desktop/mobile`.
+- For slower hardware, lower pixelRatio or set depthOfField/motionTrails tofalse.
+- Page styling: `landing.css`; do not change workspace tokens for this scene.
+- Regenerate both final-frame posters after changing geometry, lighting or camera framing.
+
+## Assets
+
+**You must provide: nothing.** No GLB, HDR, textures or paid models are required.
+
+Generated in code: arm links/joints/gripper, beveled furnace panels, rollers, slats, bracket, ingot, mold, molten stream, sparks, warm heat wisps, local reflection environment and lighting. Existing Geist font and CSS logo are retained.
+
+`public/landing-final-desktop.webp` and `public/landing-final-mobile.webp` are transparent captures of the actual final scene, with no text baked in. Embedded ImageDescription metadata records procedural origin, viewport and date. They are not frames copied from the reference video.
+
+To refresh posters: show the final frame, wait for the on-demand draw, hide page UI/horizon/poster and any development overlay, capture only `.cinematic-art` against transparency, then encode WebP and retain provenance metadata. Poster sizing uses contain so the full machine remains visible at other aspect ratios.
+
+## Accessibility, performance and honest limits
+
+- Mobile keeps the same5.0s story, reduces sparks24→8 and DPR cap1.5→1, and disables DOF/ghost trails.
+- Desktop DOF is deliberately restrained; the main production line stays readable.
+- Motion blur is a lightweight two-sample gripper ghost-trail approximation during fast transfer, not full physical velocity-buffer blur.
+- Heat shimmer uses animated translucent warm wisps, not scene-refracting fluid simulation.
+- Arm kinematics and all trajectories are authored; there is no physics or thermodynamic simulation.
+- Reduced motion skips mounting Canvas and shows the final frame; HTML text/actions remain usable.
+- No JavaScript also shows the final poster.
+- Lazy-load failure, lost/unavailable WebGL or initialization timeout falls back to the poster and an explanatory notice.
+- Offscreen/hidden tabs pause the GSAP clock and the render loop; paused/finished states render only on demand.
+- Loop toggle exposes aria-pressed; controls use native buttons, visible focus and minimum44px heights.
+
+## Verification — current loop, not the earlier intro
+
+| Check | Result |
 |---|---|
-| `public/landing-final-desktop.webp` | Original1440×900 transparent final-frame scene capture; no UI text baked in; approximately33KB |
-| `public/landing-final-mobile.webp` | Original390×432 transparent mobile scene capture; no UI text; approximately9KB |
+| Deterministic tests |4 pass: contiguous5s timeline, linear feed/hidden melt, final0.3s hold, loop pose/belt continuity |
+| TypeScript / targeted ESLint | Pass for changed animation/landing files |
+| Desktop1440×900 and mobile390×844 | No page errors or horizontal overflow; final and pickup states captured |
+| Playback | Multiple cycles stay playing; Pause freezes the canvas; paused→final changes the rendered pixels; Loop off completes; Replay works |
+| Browser frame intervals | Desktop1324 samples: median8.3ms/p958.6ms; mobile1325 samples: median8.3ms/p958.4ms |
+| Reduced motion320px | No Canvas; final poster loaded at opacity1; no overflow |
+| JavaScript disabled1280px | No Canvas; poster and primary link visible; no overflow |
+| WebGL unavailable | Still fallback and notice; workspace link navigates to/login |
+| Production build | Pass, exit0; all37 routes generated |
+| Design detector | One run on changed UI targets; exit0, no findings |
 
-Both WebP files embed ImageDescription provenance naming the original procedural scene, viewport and capture date. They were captured from these components, not copied from the reference video. A capture must isolate `.cinematic-art`, hide the poster/UI/horizon, keep transparent page backgrounds and encode only the scene. Regenerate the corresponding poster if changing model geometry, lighting, final pose or scene framing. A custom `.glb` model is optional future scope, not a required missing asset.
+The browser samples were taken with installed hardware-backed Chrome on this laptop. RAF intervals are not GPU frame-time measurements or a universal60fps guarantee. These checks do not reverify the unrelated Go/PostgreSQL/S3 workflows.
 
-- Reduced motion: real text and final artwork immediately; do not mount animated WebGL.
-- Skip before ready: stop mounting the scene and show the finished still; Skip while playing seeks the shared timeline and finishes the 3D pose.
-- Keyboard navigation: focusing a navigation/CTA link reveals content immediately without moving focus.
-- Missing JS: `<noscript>` restores readable content and the static artwork.
-- Failed/lost WebGL, failed lazy scene, or10s initialization timeout: static artwork and usable links remain. No unhandled application crash is intended.
-- Hidden tab/offscreen: pause the master clock and renderer. Finished pose: on-demand rendering rather than a permanent animation loop.
-- Small screens: stacked text above a27rem scene; approximately12 main scraps/28 chips/16 sparks instead of36/80/48, DPR capped at1 rather than1.5. Below380px, caption/stat layout changes to avoid collisions. Existing large-text preference is preserved; the public page stays dark without changing the saved workspace theme.
+## Changed files for this request
 
-## Verification evidence
+Added:
+- `app/process-config.ts`
+- `app/process-clock.ts`
+- `app/process-machine.tsx`
+- `app/process-effects.tsx`
+- `app/process-config.test.ts`
 
-The verification story is public route → local lazy scene/animation assets → finished composition → real auth/section navigation. There is no new API or database boundary to test.
-
-| Check | Evidence |
-|---|---|
-| TypeScript | Passed after component integration |
-| Targeted ESLint | Landing components and dashboard passed; final check recorded at handoff |
-| Design detector | Returned `[]` for changed landing targets |
-| Desktop1440×900 / mobile390×844 | Normal intro completes; canvas present; no page errors or horizontal overflow; final screenshots inspected |
-| GPU/frame sampling | Installed headless Chrome on Intel Iris Xe/D3D11; desktop1110 RAF samples median8.4ms / p9516.8ms; mobile701 median8.3ms / p959.6ms |
-| Reduced motion | Static poster loads, no Canvas, no Skip intro control |
-| Large text + saved Light |320px and1280px: no document overflow; text and mobile scene remain separated; cinematic page remains scoped dark |
-| Skip/loading and keyboard | Explicit Skip reveals content during delayed scene loading; keyboard focus reveals page; workspace link navigates to `/login` |
-| JavaScript disabled | Headline and CTA visible with static artwork |
-| WebGL unavailable | Forced null WebGL context reaches still fallback; zero page errors |
-| Production build | Passed: compile, TypeScript, all37 static routes and final optimization; exit0 |
-
-RAF sampling measures browser frame intervals in this environment, not a universal guarantee of GPU render time or60fps on every laptop. Hardware-backed Chrome was used for valid final captures; the initial software-rendered diagnostic captures were discarded as final evidence. No real Go/PostgreSQL/S3 regression claim is made by this landing-only work. Existing dev server was reused and not stopped.
-
-## Changed files
-
-- `package.json`, `package-lock.json`
-- `app/dashboard.tsx`
-- `app/landing-config.ts`, `app/landing-geometry.ts`, `app/landing-machine.tsx`, `app/landing-scrap-pile.tsx`, `app/landing-scene.tsx`
-- `app/landing-intro.ts`, `app/landing-nav.tsx`, `app/landing-stat-cards.tsx`, `app/landing-hero.tsx`, `app/landing.css`
+Updated:
+- `app/landing-hero.tsx`, `app/landing-scene.tsx`
+- `app/landing-config.ts`, `app/landing-geometry.ts`, `app/landing.css`
 - `public/landing-final-desktop.webp`, `public/landing-final-mobile.webp`
-- `DESIGN.md`, `scripts/sync-design.mjs`
-- `docs/02-frontend.md`, `docs/landing-surface.md`, `docs/landing-handoff.md`, `README.md`
+- `DESIGN.md`, `README.md`
+- `AGENTS.md` (Next.js regenerated its agent-feedback wording during the local server restart; project rules unchanged)
+- `docs/02-frontend.md`, `docs/landing-surface.md`, `docs/landing-handoff.md`
 
-## Commit groups and release boundary
+Removed (recoverable in Git):
+- `app/landing-intro.ts`, `app/landing-machine.tsx`, `app/landing-scrap-pile.tsx`
 
-1. `22d6d02` — procedural scene/configuration and approved dependencies; pushed independently.
-2. `2174370` — homepage/choreography/accessibility/posters + matching design specification; pushed independently.
-3. `17d80b7` — sharp no-JavaScript final artwork and corrected design summary; pushed independently.
-4. Final run/asset/verification handoff.
+## Commit and release boundary
 
-### Finish review
+First group: `3fb59fd` — deterministic clock/configuration, procedural machinery, depth-of-field and timing tests; pushed separately.
+Second group: `ef82af5` — verified player integration, controls, responsive scene, regenerated posters and removal of unused intro modules; pushed independently. The final group contains this run/tweak/verification handoff. Push normally to `origin/codex/cinematic-scrap-landing`. No merge, PR or deployment is included.
 
-The independent finish reviewer found one material issue: bright scrap behind the glass stat cards reduced label contrast. A dark translucent base was added, both viewports recaptured, and the reviewer scored that finding **resolved**, disposition **ship**, with worst-case contrast above8:1. This is a limited-scope verdict on that finding, not a claim of complete accessibility compliance. A separate read-only documentation audit confirmed scope/timing/assets and identified the obsolete breakpoint/build-result prose, corrected here and in `DESIGN.md`.
+The independent finish review found no process-scope visual blocker in the four desktop/mobile final/pickup captures. Its only requested change concerned a pre-existing missing PRODUCT.md; on reconsideration under the skill's narrow-refinement exception, that finding was scored resolved, disposition **ship**. This is a verdict on the scored finding, not a new whole-surface review or a claim that still screenshots verify every motion beat.
 
-The final no-JavaScript check also confirmed the poster is fully opaque, unblurred and loaded (`opacity:1`, `filter:none`, natural width1440). No development overlay is baked into either generated poster. Final targeted ESLint, design snapshot and whitespace checks passed. The production build was rerun after the final implementation correction; it includes TypeScript and all37 static routes.
-
-Use normal pushes to `origin/codex/cinematic-scrap-landing`. Do not merge to `develop`, alter `main`, create a PR or deploy without separate direction.
+A separate read-only documentation audit compared the process components, landing source/styles, DESIGN section/appendix, surface brief, this handoff, frontend guide, README and supplied screenshots. It identified the omitted generated AGENTS.md entry, now corrected, and reported no remaining factual mismatches. The existing design-document format and absent PRODUCT.md/sidecar were preserved, not migrated as part of this narrow change. The Impeccable motion guidance informed the single focal sequence, independent playback controls and reduced-motion/mobile safeguards.

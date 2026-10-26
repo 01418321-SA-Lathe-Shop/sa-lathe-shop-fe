@@ -2,9 +2,9 @@
 
 ## Public landing update — 2026-10-27
 
-The owner approved replacing `/` with a reference-led cinematic scrap/offcut → machining → polished rod story on `codex/cinematic-scrap-landing`, branched from `develop`. This is a visual metaphor for the existing platform, not a recycling-service claim or a new business process. Auth routes, API contracts, role screens, and UC1–UC9 remain unchanged. The public page is English; workspace language/settings remain unchanged.
+The owner approved the cinematic landing on `codex/cinematic-scrap-landing`, branched from `develop`, then replaced its animation with a five-second robotic pickup → conveyor → furnace → finished ingot loop. This is a visual metaphor for the existing platform, not a recycling-service claim or a new business process. Auth routes, API contracts, role screens, and UC1–UC9 remain unchanged. The public page is English; workspace language/settings remain unchanged.
 
-Approved additions: `three`, React-19-compatible `@react-three/fiber` major9, `gsap`, and development `@types/three`. Existing Next/React versions are retained. `app/landing-config.ts` holds public copy and the nine stage durations/easings. Procedural geometry needs no provided `.glb`; local final-frame WebP images provide reduced-motion/failed-WebGL fallback. Read `docs/landing-handoff.md` for components, run instructions, asset provenance and actual verification limits. This supersedes the historical CSS-only landing description, not any business workflow below.
+Previously approved dependencies remain: `three`, React-19-compatible `@react-three/fiber` major9, `gsap`, and development `@types/three`; this loop adds none. Existing Next/React versions are retained. `app/landing-config.ts` holds public copy; `app/process-config.ts` holds the five durations, easing choices, loop default and render budgets. Procedural geometry needs no provided `.glb`; local final-frame WebPs provide reduced-motion/failed-WebGL fallback. Pause/Play, Loop, Replay and Show final frame are independent of business navigation. Read `docs/landing-handoff.md` for components, run instructions, asset provenance and actual verification limits. This supersedes historical animation descriptions, not any business workflow below.
 
 ## Current integration contract — Phase 10 (2026-10-25)
 
