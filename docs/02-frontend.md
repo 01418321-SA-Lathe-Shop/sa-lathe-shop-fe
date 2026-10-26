@@ -1,5 +1,11 @@
 # Machine Shop Custom Manufacturing System — Frontend Guide
 
+## Public landing update — 2026-10-27
+
+The owner approved replacing `/` with a reference-led cinematic scrap/offcut → machining → polished rod story on `codex/cinematic-scrap-landing`, branched from `develop`. This is a visual metaphor for the existing platform, not a recycling-service claim or a new business process. Auth routes, API contracts, role screens, and UC1–UC9 remain unchanged. The public page is English; workspace language/settings remain unchanged.
+
+Approved additions: `three`, React-19-compatible `@react-three/fiber` major9, `gsap`, and development `@types/three`. Existing Next/React versions are retained. `app/landing-config.ts` holds public copy and the nine stage durations/easings. Procedural geometry needs no provided `.glb`; local final-frame WebP images provide reduced-motion/failed-WebGL fallback. Read `docs/landing-handoff.md` for components, run instructions, asset provenance and actual verification limits. This supersedes the historical CSS-only landing description, not any business workflow below.
+
 ## Current integration contract — Phase 10 (2026-10-25)
 
 This supersedes the Phase 9 scope below. The designed shell now runs on the real API client for AUTH and UC1–UC9, against backend `docs/UC1.md`–`UC9.md` and the Go DTOs at backend `develop` (UC9 `028dd88` and later). The fixture demo was removed. See `docs/11-phase-ten-handoff.md` for setup, mock accounts, the real-backend checklist and verification evidence.
