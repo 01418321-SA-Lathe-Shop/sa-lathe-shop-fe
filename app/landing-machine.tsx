@@ -25,8 +25,8 @@ export function Machine({ motion, floor }: { motion: React.RefObject<LandingMoti
   const ring = useRef<THREE.Group>(null);
   const glow = useRef<THREE.MeshStandardMaterial>(null);
   const light = useRef<THREE.PointLight>(null);
-  const coil = useMemo(coilGeometry, []);
-  const finished = useMemo(finishedRodGeometry, []);
+  const coil = useMemo(() => coilGeometry(), []);
+  const finished = useMemo(() => finishedRodGeometry(), []);
   useEffect(() => () => { coil.dispose(); finished.dispose(); }, [coil, finished]);
 
   useFrame(() => {
@@ -62,17 +62,17 @@ export function Machine({ motion, floor }: { motion: React.RefObject<LandingMoti
   return <>
     <group ref={head} position={[0.7, 10, -0.6]}>
       <Cylinder y={3.5} radius={0.16} height={6} color="#454e52" />
-      <Cylinder y={1.8} radius={0.46} height={2.3} color="#22282b" />
-      <Cylinder y={1.8} radius={0.47} height={1.35} color="#79858b" roughness={0.19} />
+      <Cylinder y={1.8} radius={0.46} height={2.3} color={landingConfig.colors.darkMetal} />
+      <Cylinder y={1.8} radius={0.47} height={1.35} color={landingConfig.colors.steel} roughness={0.19} />
       <Cylinder y={2.95} radius={0.59} height={0.16} color="#a4adb2" />
       <Cylinder y={0.66} radius={0.58} height={0.16} color="#a4adb2" />
       <Cylinder y={0.35} radius={0.46} height={0.48} color="#1a1e21" />
       <Cylinder y={0.02} radius={0.62} height={0.18} color="#596266" />
       <Cylinder y={-0.29} radius={0.45} height={0.44} color="#1c2124" />
-      <mesh position={[0.76, 0.5, 0]} geometry={coil}><meshStandardMaterial color="#db803e" metalness={0.88} roughness={0.23} /></mesh>
+      <mesh position={[0.76, 0.5, 0]} geometry={coil}><meshStandardMaterial color={landingConfig.colors.copper} metalness={0.88} roughness={0.23} /></mesh>
       <mesh position={[0, 1.8, 0.475]}><boxGeometry args={[0.055, 1.75, 0.018]} /><meshStandardMaterial color="#ffa455" emissive="#ff7623" emissiveIntensity={1.2} /></mesh>
       <group ref={ring} position={[0, -0.52, 0]}>
-        <mesh rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[0.46, 0.055, 8, 48]} /><meshStandardMaterial ref={glow} color="#e67a2d" emissive="#ff670d" metalness={0.8} roughness={0.25} /></mesh>
+        <mesh rotation={[Math.PI / 2, 0, 0]}><torusGeometry args={[0.46, 0.055, 8, 48]} /><meshStandardMaterial ref={glow} color={landingConfig.colors.orange} emissive={landingConfig.colors.orange} metalness={0.8} roughness={0.25} /></mesh>
         {[0, 1, 2, 3].map(i => <mesh key={i} position={[Math.cos(i * Math.PI / 2) * 0.45, 0, Math.sin(i * Math.PI / 2) * 0.45]}><boxGeometry args={[0.16, 0.13, 0.17]} /><meshStandardMaterial color="#9fa5a4" metalness={1} roughness={0.24} /></mesh>)}
       </group>
       <group ref={jaws}>{[0, 1, 2].map(i => <mesh key={i}><boxGeometry args={[0.18, 0.46, 0.17]} /><meshStandardMaterial color="#b1b6b5" metalness={0.98} roughness={0.24} /></mesh>)}</group>

@@ -33,6 +33,8 @@ const snapshot = [
   fence('css', read('app/globals.css')),
   '### A2. Shared workflow styles — app/workflows.css',
   fence('css', read('app/workflows.css')),
+  '### A3. Cinematic public landing — app/landing.css',
+  fence('css', read('app/landing.css')),
   '### B. Font loading and root layout — app/layout.tsx',
   fence('tsx', read('app/layout.tsx')),
   '### C. SVG geometry and brand markup — app/appearance.tsx',

@@ -3,8 +3,12 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
+import { gsap } from "gsap";
 import { landingConfig, landingStages, type LandingMotion } from "./landing-config";
 import { bracketGeometry, seededRandom } from "./landing-geometry";
+
+const tumbleEase = gsap.parseEase(landingStages.captions.ease);
+const settleEase = gsap.parseEase(landingStages.settle.ease);
 
 export function ScrapPile({ motion, floor, mobile }: { motion: React.RefObject<LandingMotion>; floor: number; mobile: boolean }) {
   const meshes = useRef<(THREE.InstancedMesh | null)[]>([]);
@@ -45,7 +49,9 @@ export function ScrapPile({ motion, floor, mobile }: { motion: React.RefObject<L
       if (!mesh) return;
       items.forEach((item, i) => {
         const p = THREE.MathUtils.clamp((t - landingStages.captions.start - item.delay) / (landingStages.settle.end - landingStages.captions.start - item.delay), 0, 1);
-        const fall = p * p * (3 - 2 * p);
+        const fall = t < landingStages.settle.start
+          ? 0.94 * tumbleEase(THREE.MathUtils.clamp((t - landingStages.captions.start - item.delay) / (landingStages.settle.start - landingStages.captions.start - item.delay), 0, 1))
+          : 0.94 + 0.06 * settleEase(THREE.MathUtils.clamp((t - landingStages.settle.start) / landingStages.settle.duration, 0, 1));
         const bounce = Math.sin(p * Math.PI * 5) * Math.pow(p, 4) * (1 - p) * 1.8;
         dummy.position.set(THREE.MathUtils.lerp(item.startX, item.x, fall), THREE.MathUtils.lerp(item.startY, floor + item.y, fall) + bounce, item.z);
         dummy.rotation.set(item.rx + item.spin * (1 - fall), item.ry + item.spin * (1 - fall), item.rz + item.spin * (1 - fall));

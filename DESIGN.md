@@ -28,8 +28,8 @@
 - Modern industrial dashboard: หัวเรื่องและตัวเลขใหญ่ การ์ดมุมมน เส้นขอบบาง และพื้นที่ว่างชัดเจน
 - สีแบรนด์คือส้มบน charcoal ใน Dark และส้มเข้มบนพื้นขาวอมครีมใน Light
 - ส้มใช้กับ primary action, selected state, progress และข้อมูลสำคัญ ส่วน cyan, violet, yellow และ red ใช้แยกชุดข้อมูล
-- Landing เน้น editorial headline กับ machine illustration ที่วาดด้วย CSS พื้นที่ทำงานเน้นรายการ ตาราง และสถานะ
-- Landing, navigation และ Settings เป็นภาษาไทย; functional UC forms จาก develop ยังเป็นภาษาอังกฤษ ชื่อแสดง Worker เปลี่ยนเป็น Staff โดยคง domain/API role เดิม
+- Landing ใช้ cinematic procedural WebGL machining scene ตาม reference video; พื้นที่ทำงานยังเน้นรายการ ตาราง และสถานะตามเดิม
+- Public Landing เป็นภาษาอังกฤษ (`lang="en"`); workspace navigation และ Settings เป็นภาษาไทย; functional UC forms ยังเป็นภาษาอังกฤษ ชื่อแสดง Worker เป็น Staff โดยคง domain/API role เดิม
 
 ## Typography
 
@@ -43,8 +43,8 @@ Geist และ Geist Mono โหลดจาก `next/font/google` ด้วย
 
 | Use | Medium size | Weight / behavior |
 | --- | --- | --- |
-| Landing hero | `clamp(3.625rem,6vw,5.75rem)` (58–92px) | 730, line-height .98, tracking -.072em |
-| Landing section | `clamp(2.625rem,4.5vw,4.125rem)` (42–66px) | line-height 1.02, tracking -.06em |
+| Landing hero | `clamp(3.25rem,5.8vw,6rem)` | 510, line-height 1.02, tracking -.04em; mobile `clamp(2rem,10.8vw,4.75rem)` |
+| Landing section | `clamp(2.5rem,4vw,4.5rem)` | 500, line-height 1.05, tracking -.035em |
 | Staff h1 | `clamp(2.25rem,3vw,3rem)` (36–48px) | 700, line-height 1.15 |
 | Customer / Admin h1 | ค่าเดียวกับ Staff h1 | 700 |
 | Login showcase h1 | `clamp(3.875rem,6.2vw,6.5rem)` (62–104px) | line-height .95 |
@@ -160,7 +160,15 @@ Settings ใช้ native dialog width min(32.5rem,100vw−2rem), max-height100d
 
 Icon เป็น inline SVG viewBox `0 0 24 24`, fill none, stroke currentColor, width1.8, round cap/join ขนาด default1.125rem ชุดชื่อ: grid, inbox, machine, truck, file, layers, wallet, clock, search, plus, arrow, bell, logout, close, sun, moon ค่า width/height SSR และ client ต้องตรงกัน
 
-Brand mark เป็น CSS square สีส้มหมุน45° พร้อมกากบาทเข้ม ขนาด2.0625rem; ใช้ข้อความ LATHE / SHOP CONTROL ไม่มี logo image file ภาพเครื่องจักร Landing เป็น CSS illustration
+Brand mark เป็น CSS square สีส้มหมุน45° พร้อมกากบาทเข้ม ขนาด2.0625rem; ใช้ข้อความ LATHE / SHOP CONTROL ไม่มี logo image file. Landing ใช้ mark เดิมย่อเป็น1.8rem/1.5rem และ procedural Three.js machine แทน CSS illustration.
+
+### Cinematic public landing (2026-10-27)
+
+Only `/` changes. `app/landing.css` scopes a fixed dark `#060707` world without changing saved workspace appearance. Geist is retained; no new font or external model. Desktop uses a minimum 47rem/100svh stage: logo + three pill anchors + workspace link on top; headline left, paragraph/white registration CTA right; chrome/copper spindle center; offcuts along the bottom; caption left and exactly two glass statistics right. Stats use a dark translucent `#101414e8` base beneath the glass highlight so white scrap cannot wash out labels; the caption has a local dark underlay for the same reason. Statistics are factual platform counts (9 workflows, 3 roles), not recycling or delivery guarantees. Below-fold workflow/capabilities/footer retain product information with divider-led editorial styling. Settings remain in the footer.
+
+`landing-config.ts` owns copy, colors, particle budgets, mobile speed and all nine stage duration/easing settings. One GSAP clock coordinates DOM text and procedural 3D: dim → captions/tumbling → settling → letter reveal → UI → machine entry → collet feed → processing → polished rod. Duration10.85s desktop, approximately5.97s mobile. No audio or autoplay loop. Metallic RoomEnvironment lighting is generated locally. No files are uploaded, fetched from model CDNs, or sent to backend by the animation.
+
+At <768px the layout stacks, scene height27rem, main scrap/chip/spark counts drop from approximately36/80/48 to12/28/16 and DPR caps at1 rather than1.5. `prefers-reduced-motion` bypasses WebGL and reveals a still final frame; Skip intro and keyboard navigation reveal content immediately. Unavailable/lost WebGL retains real text/actions and final-frame artwork. The timeline and renderer pause offscreen/hidden and render on demand after completion. Generated transparent WebP stills contain only scene artwork; text remains semantic HTML. Preserve the global rem-based text-size preference; scoped dark styling does not rewrite it.
 
 ## Routes
 
@@ -227,6 +235,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-27 | Replace public landing with reference-led cinematic machining story, English factual copy, configurable single timeline, lighter mobile scene, Skip intro and static accessible fallback | Targeted lint/type checks and bounded browser inspection; final handoff records actual evidence |
 | 2026-10-27 | Add approved Three.js / React Three Fiber / GSAP procedural scene foundation and configurable 10.85s choreography; not mounted on homepage in this foundation commit | TypeScript and dependency audit; visual integration follows in a separate commit |
 | 2026-10-24 | Connect UC9 delivery, invoice terms/issue, inspection with free rework, installment bank proof, cash and payment review; hide action forms while a record reloads | UC9 domain tests; headless Chrome end-to-end: terms → invoice → ship → return → rework complete → reship → accept → bank proof → Admin approval → request closed; no overflow/console errors |
 | 2026-10-24 | Connect UC8 production start/use/time/photos/completion and Admin labor cost; `useRetryableWrite`; same-record reloads keep the detail visible | UC8 domain tests; headless Chrome: start ready job, planned + unplanned use, minutes, photo, completion releases unused, Admin labor cost totals; no overflow/console errors |
@@ -1083,6 +1092,145 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 [data-theme="light"] :is(.status-queued,.status-partially_received,.status-pending_claim,.status-unpaid) { background:#fff0cd; color:#715119; }
 [data-theme="light"] .status-cancelled { background:#ffe5e1; color:#8d3229; }
 .record-list-item > span.record-code { text-transform:none; overflow-wrap:anywhere; }
+```
+
+### A3. Cinematic public landing — app/landing.css
+
+```css
+.cinematic-page {
+  --text: #f4f4f1; --muted: #a5aaa7; --lime: #ff923f; --bg: #060707;
+  --surface: #111313; --surface-2: #191c1c; --line: #343838;
+  color: var(--text); background: var(--bg); color-scheme: dark; overflow-x: clip;
+}
+.cinematic-page ::selection { color: #160e08; background: #ffb479; }
+.cinematic-page a { text-decoration: none; color: inherit; text-underline-offset: .25em; }
+.cinematic-page :is(a, button):focus-visible { outline: 2px solid #ffb16d; outline-offset: 5px; }
+.cinematic-page button { cursor: pointer; }
+.cinematic-hero { position: relative; min-height: max(47rem, 100svh); isolation: isolate; overflow: hidden; background: #060707; }
+.cinematic-horizon { position: absolute; z-index: -1; inset: 0; background: radial-gradient(ellipse 60% 12% at 53% 104%, #ff7c22 0%, #d4561a99 25%, transparent 72%), linear-gradient(0deg, #15191b 0%, #0b0e10 14%, #060707 46%); }
+.cinematic-art { position: absolute; z-index: 0; inset: 0; pointer-events: none; }
+.cinematic-canvas { position: absolute; inset: 0; opacity: 0; transition: opacity .3s; }
+.cinematic-canvas[data-ready="true"] { opacity: 1; }
+.cinematic-canvas canvas { display: block; }
+.cinematic-poster { position: absolute; inset: 0; display: block; }
+.cinematic-poster img { width: 100%; height: 100%; object-fit: cover; }
+.cinematic-hero:has(.cinematic-canvas[data-ready="true"]) .cinematic-poster { visibility: hidden; }
+.cinematic-hero[data-state="loading"] .cinematic-poster { opacity: .45; filter: blur(4px); }
+.cinematic-nav { position: relative; z-index: 3; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 2.75rem; padding: 2rem 4.5%; }
+.cinematic-brand { width: fit-content; }
+.cinematic-page .brand { padding: 0; }
+.cinematic-page .brand b { color: #f4f4f1; font-size: .875rem; }
+.cinematic-page .brand small { color: #b0b5b2; }
+.cinematic-page .brand-mark { width: 1.8rem; height: 1.8rem; box-shadow: none; border-radius: .3rem; }
+.cinematic-nav-pills { display: flex; gap: .4rem; justify-self: start; }
+.cinematic-nav-pills a { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0 1rem; border: 1px solid #ffffff18; border-radius: 999px; background: #ffffff08; font-size: .75rem; color: #c0c4c1; transition: background .2s, color .2s; }
+.cinematic-nav-pills a:hover { color: white; background: #ffffff16; }
+.cinematic-workspace { display: inline-flex; align-items: center; gap: 1.5rem; min-height: 2.75rem; padding: 0 1rem; border: 1px solid #ffffff30; border-radius: .5rem; font-size: .75rem; transition: background .2s; }
+.cinematic-workspace:hover { background: #ffffff12; }
+.cinematic-workspace span { font-size: 1rem; }
+.cinematic-copy { position: absolute; z-index: 2; left: 4.5%; top: 23%; width: 48%; pointer-events: none; }
+.cinematic-copy h1 { margin: 0; font-size: clamp(3.25rem, 5.8vw, 6rem); line-height: 1.02; letter-spacing: -.04em; font-weight: 510; }
+.cinematic-line { display: block; white-space: nowrap; }
+.cinematic-line [data-letter] { display: inline-block; }
+.cinematic-description { position: absolute; z-index: 2; top: 25%; right: 4.5%; width: 19%; max-width: 19rem; }
+.cinematic-description p { margin: 0; color: #b6bbb8; font-size: .875rem; line-height: 1.7; text-wrap: pretty; }
+.cinematic-primary { margin-top: 2rem; min-height: 3rem; padding: .75rem 1.25rem; display: inline-flex; align-items: center; gap: 2.25rem; color: #121514 !important; background: #f3f3ef; border-radius: .375rem; font-size: .8125rem; font-weight: 600; transition: background .2s, transform .2s; }
+.cinematic-primary:hover { background: #ffd1ad; transform: translateY(-2px); }
+.cinematic-primary span { font-size: 1.125rem; }
+.cinematic-bottom-copy { position: absolute; z-index: 2; bottom: 3.5rem; left: 4.5%; isolation: isolate; }
+.cinematic-bottom-copy::before { content: ""; position: absolute; z-index: -1; inset: -.75rem -2rem -.5rem -1rem; background: linear-gradient(90deg, #080a0aee 65%, #080a0a00); pointer-events: none; }
+.cinematic-bottom-copy p { margin: 0; font-size: .875rem; line-height: 1.3; letter-spacing: -.015em; }
+.cinematic-bottom-copy a { margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 1rem; min-height: 2.75rem; font-size: .6875rem; color: #c0c6c2; }
+.cinematic-bottom-copy a:hover { color: #ffb16d; }
+.cinematic-stats { position: absolute; z-index: 2; right: 4.5%; bottom: 3.5rem; display: flex; gap: .65rem; margin: 0; }
+.cinematic-stats > div { display: flex; flex-direction: column-reverse; justify-content: space-between; gap: .75rem; min-width: 10.25rem; padding: 1.1rem 1.2rem; border-radius: .75rem; background: linear-gradient(135deg, #ffffff0c, #ffffff03), #101414e8; backdrop-filter: blur(14px); box-shadow: 0 .75rem 2rem #0003; }
+.cinematic-stats dt { font-size: .75rem; color: #d2d6d3; }
+.cinematic-stats dd { display: flex; align-items: center; justify-content: space-between; margin: 0; font-size: 2rem; line-height: 1; font-weight: 500; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.cinematic-stats dd span { font-size: .875rem; color: #ffad6a; }
+.cinematic-captions { position: absolute; z-index: 4; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.cinematic-captions p { position: absolute; margin: 0 1.5rem; text-align: center; opacity: 0; font-size: clamp(1rem, 1.6vw, 1.5rem); font-weight: 450; letter-spacing: -.025em; }
+.cinematic-intro-controls { position: absolute; z-index: 5; right: 4.5%; bottom: 11rem; display: flex; align-items: center; gap: 1rem; }
+.cinematic-intro-controls > span { color: #b8bfbb; font-size: .6875rem; }
+.cinematic-intro-controls button { padding: .5rem .8rem; min-height: 2.75rem; border-radius: 999px; border: 1px solid #ffffff40; color: #f4f4f1; background: #0b0e0ecc; font-size: .75rem; }
+.cinematic-intro-controls button:hover { background: #272b29; }
+.cinematic-intro-controls button span { padding-left: .75rem; }
+.cinematic-hero[data-state="loading"] :is(.cinematic-copy, [data-reveal]) { opacity: .12; filter: blur(3px); }
+.cinematic-hero[data-state="static"] :is(.cinematic-copy, [data-reveal], [data-letter]) { opacity: 1 !important; filter: none !important; transform: none !important; }
+.cinematic-process, .cinematic-platform { max-width: 100rem; margin: 0 auto; padding: 8rem 4.5%; scroll-margin-top: 2rem; }
+.cinematic-process { display: grid; grid-template-columns: 1fr 1fr; gap: 8%; border-bottom: 1px solid #ffffff15; }
+.cinematic-page h2 { margin: 0; font-weight: 500; font-size: clamp(2.5rem, 4vw, 4.5rem); line-height: 1.05; letter-spacing: -.035em; }
+.cinematic-section-heading > p { margin: 2rem 0 0; color: var(--muted); font-size: .9375rem; line-height: 1.7; max-width: 25rem; }
+.cinematic-process-list { list-style: none; padding: 0; margin: 0; }
+.cinematic-process-list li { display: grid; grid-template-columns: 2.5rem 1fr; gap: 1rem; padding: 1.75rem 0; border-top: 1px solid #ffffff20; }
+.cinematic-process-list li:first-child { padding-top: 0; border-top: 0; }
+.cinematic-step-number { padding-top: .25rem; color: #ffad6a; font-size: .75rem; font-variant-numeric: tabular-nums; }
+.cinematic-process-list h3 { margin: 0; font-size: 1.25rem; font-weight: 500; letter-spacing: -.02em; }
+.cinematic-process-list p { margin: .75rem 0 0; max-width: 27rem; color: var(--muted); font-size: .875rem; line-height: 1.7; }
+.cinematic-capabilities { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3rem; margin-top: 4rem; }
+.cinematic-capabilities article { padding-top: 1.5rem; border-top: 1px solid #ffffff30; scroll-margin-top: 2rem; }
+.cinematic-capabilities h3 { margin: 0; font-weight: 500; font-size: 1.25rem; letter-spacing: -.02em; }
+.cinematic-capabilities p { margin: 1rem 0 2rem; color: var(--muted); font-size: .875rem; line-height: 1.7; max-width: 28rem; }
+.cinematic-capabilities article > span { color: #dba27b; font-size: .6875rem; }
+.cinematic-footer { max-width: 100rem; margin: 0 auto; padding: 2rem 4.5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2rem; border-top: 1px solid #ffffff20; }
+.cinematic-footer > p { color: var(--muted); font-size: .75rem; }
+.cinematic-footer > div { display: flex; gap: 1.5rem; align-items: center; }
+.cinematic-footer > div > a { display: inline-flex; gap: 1rem; align-items: center; min-height: 2.75rem; font-size: .8125rem; }
+.cinematic-footer .settings-trigger { background: transparent; color: #c6cbc8; border-color: #ffffff30; }
+@media (min-width: 768px) and (max-width: 1100px) {
+  .cinematic-nav { gap: 1.5rem; }
+  .cinematic-nav-pills a { padding-inline: .75rem; }
+  .cinematic-description { width: 23%; }
+  .cinematic-stats > div { min-width: 8.25rem; padding: 1rem; }
+}
+@media (max-width: 767px) {
+  .cinematic-hero { min-height: 66rem; display: flex; flex-direction: column; }
+  .cinematic-nav { grid-template-columns: 1fr auto; padding: 1.5rem 1.25rem 0; gap: 1.25rem 1rem; }
+  .cinematic-nav-pills { grid-row: 2; grid-column: 1 / -1; gap: .4rem; }
+  .cinematic-nav-pills a { font-size: .6875rem; min-height: 2.75rem; padding-inline: .9rem; }
+  .cinematic-workspace { padding-inline: .75rem; font-size: .6875rem; gap: .75rem; }
+  .cinematic-page .brand b { font-size: .75rem; }
+  .cinematic-page .brand small { font-size: .4375rem; }
+  .cinematic-page .brand-mark { width: 1.5rem; height: 1.5rem; }
+  .cinematic-copy { position: relative; left: auto; top: auto; width: auto; margin: 3rem 1.25rem 0; }
+  .cinematic-copy h1 { font-size: clamp(2rem, 10.8vw, 4.75rem); }
+  .cinematic-description { position: relative; top: auto; right: auto; width: auto; max-width: 27rem; margin: 1.5rem 1.25rem 0; }
+  .cinematic-description p { font-size: .8125rem; max-width: 32ch; }
+  .cinematic-primary { margin-top: 1.25rem; }
+  .cinematic-art { position: relative; inset: auto; height: 27rem; width: 100%; flex: none; order: 1; margin-top: 1.25rem; margin-bottom: 8.5rem; }
+  .cinematic-bottom-copy { bottom: 2rem; left: 1.25rem; max-width: 35%; }
+  .cinematic-bottom-copy p { font-size: .6875rem; }
+  .cinematic-bottom-copy a { font-size: .625rem; margin-top: .75rem; gap: .4rem; }
+  .cinematic-stats { right: 1.25rem; bottom: 2.5rem; gap: .4rem; }
+  .cinematic-stats > div { min-width: 5.4rem; max-width: 6.5rem; padding: .8rem; gap: .7rem; }
+  .cinematic-stats dd { font-size: 1.75rem; }
+  .cinematic-stats dt { font-size: .6875rem; max-width: 9ch; line-height: 1.4; }
+  .cinematic-intro-controls { right: 1.25rem; bottom: 11.5rem; }
+  .cinematic-intro-controls > span { display: none; }
+  .cinematic-captions { top: 27rem; bottom: 9rem; }
+  .cinematic-process, .cinematic-platform { padding: 4.5rem 1.25rem; }
+  .cinematic-process { grid-template-columns: 1fr; gap: 3rem; }
+  .cinematic-capabilities { grid-template-columns: 1fr; gap: 2.5rem; margin-top: 3rem; }
+  .cinematic-footer { padding: 2rem 1.25rem; gap: 1.5rem; }
+  .cinematic-footer > p { width: 100%; order: 3; margin: 0; }
+}
+@media (max-width: 380px) {
+  .cinematic-nav { gap: 1rem .5rem; }
+  .cinematic-workspace { gap: .4rem; padding-inline: .6rem; }
+  .cinematic-workspace > span { display: none; }
+  .cinematic-art { margin-bottom: 13rem; }
+  .cinematic-bottom-copy { bottom: 9.5rem; max-width: calc(100% - 2.5rem); }
+  .cinematic-bottom-copy p br { display: none; }
+  .cinematic-bottom-copy a { margin-top: .2rem; }
+  .cinematic-stats { left: 1.25rem; right: 1.25rem; }
+  .cinematic-stats > div { flex: 1; max-width: none; }
+  .cinematic-stats dt { max-width: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cinematic-page *, .cinematic-page *::before, .cinematic-page *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .cinematic-hero :is(.cinematic-copy, [data-reveal], [data-letter]) { opacity: 1 !important; filter: none !important; transform: none !important; }
+  .cinematic-hero .cinematic-poster { opacity: 1; filter: none; }
+  .cinematic-intro-controls { display: none; }
+}
 ```
 
 ### B. Font loading and root layout — app/layout.tsx

@@ -1,41 +1,30 @@
-"use client";
-import { useRouter } from "next/navigation";
-import { Logo, Icon, ThemeToggle } from "./appearance";
-function Landing({ enter, register }: { enter: () => void; register: () => void }) {
-  const workflow = ["ส่งแบบและรายละเอียด", "ประเมินราคา", "วางแผนและผลิต", "ส่งมอบและรับชำระ"];
-  return <main className="landing">
-    <nav className="landing-nav">
-      <Logo />
-      <div className="landing-links"><a href="#workflow">ขั้นตอนงาน</a><a href="#capabilities">ความสามารถ</a></div>
-      <div className="landing-nav-actions"><ThemeToggle/><button className="landing-register" onClick={register}>สมัครบัญชี</button><button className="primary-button landing-nav-cta" onClick={enter}>เข้าสู่ระบบ <Icon name="arrow"/></button></div>
-    </nav>
-    <section className="landing-hero" id="platform">
-      <div className="hero-copy">
-        <div className="hero-kicker"><i className="live-dot"/> ONE WORKFLOW. EVERY JOB.</div>
-        <h1>จัดการงานกลึง<br/><span>ครบทุกขั้นตอน</span><br/>ในที่เดียว</h1>
-        <p>เชื่อมต่อคำขอผลิต ใบเสนอราคา วัตถุดิบ และการชำระเงิน ให้ทีมงานและลูกค้าติดตามทุกงานได้อย่างชัดเจน</p>
-        <div className="hero-actions"><button className="hero-primary" onClick={enter}>เข้าสู่ระบบ <Icon name="arrow" size={20}/></button><a className="hero-secondary" href="#workflow">ดูขั้นตอนการทำงาน</a></div>
-        <div className="hero-proof"><div><strong>01</strong><span>ส่งรายละเอียด<br/>ในจุดเดียว</span></div><div><strong>02</strong><span>ติดตามสถานะ<br/>ได้ตลอดงาน</span></div><div><strong>03</strong><span>เอกสารและการชำระเงิน<br/>ครบในแต่ละงาน</span></div></div>
-      </div>
-      <div className="hero-visual" aria-label="ภาพรวมการติดตามงานผลิต">
-        <div className="machine-orbit orbit-one"/><div className="machine-orbit orbit-two"/><div className="machine-core"><span/><i/></div>
-        <div className="visual-label top-label"><i className="live-dot"/> LIVE SHOP FLOOR</div>
-        <div className="mock-dashboard">
-          <div className="mock-top"><div><span>ACTIVE JOB</span><strong>งานที่กำลังผลิต</strong></div><em>อัปเดตเมื่อสักครู่</em></div>
-          <div className="mock-job-focus"><div><span>JOB-2609-118</span><strong>เพลาขับ Ø45 × 320</strong><small>สยามแมชชีน · CNC-02</small></div><em>78%</em></div>
-          <div className="mock-progress"><i/></div>
-          <div className="mock-flow">{["รับคำขอ","เสนอราคา","ผลิต","ส่งมอบ"].map((step,index)=><div className={index<3?"done":""} key={step}><i>{index<3?"✓":index+1}</i><span>{step}</span></div>)}</div>
-        </div>
-      </div>
-    </section>
-    <section className="landing-workflow" id="workflow"><div className="section-heading"><span>FROM REQUEST TO REVENUE</span><h2>หนึ่งระบบ<br/>ตลอดทั้งงาน</h2><p>เชื่อมต่อข้อมูลตั้งแต่รับคำขอจนถึงส่งมอบ เพื่อให้ทุกฝ่ายติดตามขั้นตอนของงานได้อย่างต่อเนื่อง</p></div><div className="workflow-steps">{workflow.map((item,index)=><article key={item}><span>{String(index+1).padStart(2,"0")}</span><i/><h3>{item}</h3><p>{["ระบุรายละเอียดชิ้นงาน พร้อมแนบแบบและเอกสารประกอบ","ประเมินค่าวัสดุและค่าแรง พร้อมจัดทำใบเสนอราคา","ตรวจสอบวัตถุดิบ วางแผนการผลิต และบันทึกความคืบหน้า","จัดการส่งมอบ ออกใบแจ้งหนี้ และบันทึกการรับชำระ"][index]}</p></article>)}</div></section>
-    <section className="landing-capabilities" id="capabilities"><div className="capability-lead"><span className="eyebrow">BUILT FOR CUSTOM MANUFACTURING</span><h2>ดูแลงานผลิต<br/>ได้ครบทุกด้าน</h2></div><div className="capability-grid"><article><Icon name="machine" size={25}/><strong>ติดตามการผลิต</strong><p>ตรวจสอบคิวงาน สถานีผลิต กำหนดส่ง และความคืบหน้าของแต่ละงาน</p></article><article><Icon name="layers" size={25}/><strong>จัดการวัตถุดิบ</strong><p>ตรวจสอบยอดคงเหลือ ยอดจอง และปริมาณพร้อมใช้สำหรับวางแผนการผลิต</p></article><article><Icon name="wallet" size={25}/><strong>ติดตามการชำระเงิน</strong><p>ตรวจสอบเงินมัดจำ ใบแจ้งหนี้ ประวัติการชำระ และยอดคงเหลือของแต่ละงาน</p></article></div></section>
-    <footer className="landing-footer"><Logo/><p>LATHE SHOP CONTROL · ระบบจัดการงานผลิตตามสั่ง</p><button onClick={register}>เริ่มต้นใช้งาน <Icon name="arrow"/></button></footer>
-  </main>;
-}
+import Link from "next/link";
+import { Logo, ThemeToggle } from "./appearance";
+import { Hero } from "./landing-hero";
+import "./landing.css";
 
+const workflow = [
+  { title: "Start with the details.", text: "Submit a manufacturing request with drawings and supporting documents." },
+  { title: "Make the numbers clear.", text: "Review the quotation and confirm the deposit or purchase order required for your job." },
+  { title: "Bring the work together.", text: "Plan materials, reserve stock, purchase supplies, and follow production." },
+  { title: "Finish with confidence.", text: "Track delivery, inspection, invoices, and installment payments in the same workflow." },
+];
 
 export default function Dashboard() {
-  const router = useRouter();
-  return <Landing enter={() => router.push("/login")} register={() => router.push("/register")} />;
+  return <main className="cinematic-page" lang="en">
+    <Hero />
+    <section className="cinematic-process" id="workflow" aria-labelledby="process-title">
+      <div className="cinematic-section-heading"><h2 id="process-title">Every step.<br />Connected.</h2><p>One place for the people, materials, and decisions that move a custom job forward.</p></div>
+      <ol className="cinematic-process-list">{workflow.map((step, index) => <li key={step.title}><span className="cinematic-step-number">0{index + 1}</span><div><h3>{step.title}</h3><p>{step.text}</p></div></li>)}</ol>
+    </section>
+    <section className="cinematic-platform" id="capabilities" aria-labelledby="platform-title">
+      <h2 id="platform-title">The whole shop.<br />In one flow.</h2>
+      <div className="cinematic-capabilities">
+        <article><h3>Production, in view.</h3><p>Follow job progress, record actual material use and labor time, and keep production photos with the work.</p><span>From plan to finished work</span></article>
+        <article id="materials"><h3>Materials, accounted for.</h3><p>Search inventory, see available and reserved quantities, and connect supplier orders with receiving and claims.</p><span>From stock to shop floor</span></article>
+        <article><h3>Payments, made clear.</h3><p>Keep quotation terms, deposits, invoices, payment evidence, and outstanding balances connected to each job.</p><span>From quotation to collection</span></article>
+      </div>
+    </section>
+    <footer className="cinematic-footer"><Link href="/" aria-label="Lathe Shop Control home"><Logo /></Link><p>Custom work. One connected workflow.</p><div><ThemeToggle /><Link href="/register">Start a job <span aria-hidden="true">↗</span></Link></div></footer>
+  </main>;
 }

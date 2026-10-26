@@ -6,7 +6,18 @@ import * as THREE from "three";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import { Machine, Sparks } from "./landing-machine";
 import { ScrapPile } from "./landing-scrap-pile";
-import { introDuration, landingConfig, type LandingMotion } from "./landing-config";
+import { landingConfig, type LandingMotion } from "./landing-config";
+
+// Three.js owns these mutable objects outside React's declarative state.
+function resizeCamera(camera: THREE.Camera, width: number, mobile: boolean) {
+  const orthographic = camera as THREE.OrthographicCamera;
+  orthographic.zoom = width / (mobile ? 10 : 16);
+  orthographic.updateProjectionMatrix();
+}
+function setEnvironment(scene: THREE.Scene, texture: THREE.Texture | null) {
+  scene.environment = texture;
+  scene.environmentIntensity = 1.6;
+}
 
 type SceneProps = {
   motion: React.RefObject<LandingMotion>;
@@ -24,26 +35,18 @@ class SceneBoundary extends Component<{ children: ReactNode; onError: () => void
   render() { return this.state.failed ? null : this.props.children; }
 }
 
-function Unavailable({ onError }: { onError: () => void }) {
-  useEffect(() => { onError(); }, [onError]);
-  return null;
-}
-
 function World({ motion, mobile, playing, onReady, onError }: SceneProps) {
   const { gl, scene, camera, size, invalidate } = useThree();
   const ready = useRef(false);
   useLayoutEffect(() => {
-    const orthographic = camera as THREE.OrthographicCamera;
-    orthographic.zoom = size.width / (mobile ? 10 : 16);
-    orthographic.updateProjectionMatrix();
+    resizeCamera(camera, size.width, mobile);
     invalidate();
   }, [camera, size.width, size.height, mobile, invalidate]);
   useEffect(() => {
     const generator = new THREE.PMREMGenerator(gl);
     const room = new RoomEnvironment();
     const environment = generator.fromScene(room, 0.04);
-    scene.environment = environment.texture;
-    scene.environmentIntensity = 1.6;
+    setEnvironment(scene, environment.texture);
     room.dispose(); generator.dispose();
     const lost = (event: Event) => { event.preventDefault(); onError(); };
     gl.domElement.addEventListener("webglcontextlost", lost);
@@ -54,14 +57,16 @@ function World({ motion, mobile, playing, onReady, onError }: SceneProps) {
     return () => {
       cancelAnimationFrame(frame);
       gl.domElement.removeEventListener("webglcontextlost", lost);
-      scene.environment = null;
+      setEnvironment(scene, null);
       environment.dispose();
     };
   }, [gl, scene, onReady, onError, invalidate]);
   useEffect(() => {
-    if (!playing) motion.current.time = introDuration;
-    invalidate();
-  }, [playing, motion, invalidate]);
+    // Canvas reconfigures its render loop asynchronously. Invalidate afterwards,
+    // so completion/skip always paints the final pose before going idle.
+    const frame = requestAnimationFrame(() => invalidate());
+    return () => cancelAnimationFrame(frame);
+  }, [playing, invalidate]);
   // Camera width is fixed in world units; keep the pile anchored to the viewport bottom.
   const height = (mobile ? 10 : 16) * size.height / Math.max(1, size.width);
   const floor = -height / 2 + 0.35;
@@ -90,7 +95,7 @@ export default function Scene(props: SceneProps) {
     <Canvas orthographic camera={{ position: [0, 0, 18], zoom: 80, near: 0.1, far: 60 }}
       dpr={[1, config.pixelRatio]} frameloop={props.playing && props.visible && tabVisible ? "always" : "demand"}
       gl={{ antialias: !props.mobile, alpha: true, powerPreference: "high-performance" }}
-      fallback={<Unavailable onError={props.onError} />} style={{ pointerEvents: "none" }}>
+      fallback={<span>3D is unavailable. The finished material is shown as a still image.</span>} style={{ pointerEvents: "none" }}>
       <World {...props} />
     </Canvas>
   </SceneBoundary>;
