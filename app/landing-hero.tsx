@@ -111,6 +111,6 @@ export function Hero() {
       {state === "loading" && <span role="status">Preparing the scene<span aria-hidden="true">…</span></span>}
       <button type="button" onClick={skip}>Skip intro <span aria-hidden="true">↗</span></button>
     </div>}
-    <noscript><style>{`.cinematic-hero [data-reveal],.cinematic-hero .cinematic-copy{opacity:1!important;filter:none!important}.cinematic-intro-controls{display:none!important}`}</style></noscript>
+    <noscript><style>{`.cinematic-hero [data-reveal],.cinematic-hero .cinematic-copy,.cinematic-hero .cinematic-poster{opacity:1!important;filter:none!important}.cinematic-intro-controls{display:none!important}`}</style></noscript>
   </section>;
 }

@@ -196,7 +196,8 @@ Root layout ถือ `ApiSessionProvider` (memory-only) จึงรักษ�
 | ≤68.75rem | Record layout1column |
 | ≤600px | Cards/forms1column; tables scroll horizontally |
 | ≤73.75rem / ≤51.25rem | Auth narrower columns / single column |
-| ≤70rem / ≤47.5rem | Landing hero / workflow becomes single column |
+| ≤767px | Public landing hero, workflow and capabilities stack; lighter 27rem scene |
+| ≤380px | Public landing caption sits above full-width stat cards to avoid overlap |
 
 ทดสอบ Large แยกจาก breakpoint เพราะ rem media queries อิง browser initial font size
 
@@ -206,7 +207,7 @@ Root layout ถือ `ApiSessionProvider` (memory-only) จึงรักษ�
 - ค่าเริ่ม state dark/medium แล้วอ่าน storage/system preference หลัง mount เพื่อไม่ให้ SSR/client markup ต่างกัน
 - Theme ใช้ `startViewTransition` ถ้ารองรับ; 320ms ease-in-out, fallback transition250ms; reduced-motion ปิด animation
 - Navigation active สะท้อน path และรองรับ refresh/back/forward Settings radio checked เป็น semantic state; แต่ละ instance ใช้ useId แยก radio group เพื่อไม่ชนกับหน้าที่ Next เก็บไว้ใน cache; dialogใช้ Tab/Escape ตาม native behavior
-- หน้าใช้ `lang=th`; เงินบาท เวลา Asia/Bangkok ไม่มี VAT Key icon controls มี aria-label
+- Root/workspace ใช้ `lang=th`; public landing overrides เป็น `lang=en`; เงินบาท เวลา Asia/Bangkok ไม่มี VAT Key icon controls มี aria-label
 - ทุกหน้าใน shell ใช้ loading/error/empty/success states จาก request จริง (live หรือ mock) และ native confirm สำหรับคำสั่งที่ย้อนไม่ได้; full accessibility audit และการทดสอบกับ Go/PostgreSQL/S3 จริงยังรอ
 - ปุ่มที่ไม่มี class ภายใน `.live-workspace` ใช้รูปแบบ secondary (border `--line`, radius .75rem, พื้น `--surface`, hover ขอบส้ม) ปุ่มหลักใช้ `.button-primary` เดิม
 
@@ -235,6 +236,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-27 | Keep no-JavaScript final artwork sharp as well as real text; correct scoped landing breakpoint summary | No-JS browser check; design documentation audit |
 | 2026-10-27 | Replace public landing with reference-led cinematic machining story, English factual copy, configurable single timeline, lighter mobile scene, Skip intro and static accessible fallback | Targeted lint/type checks and bounded browser inspection; final handoff records actual evidence |
 | 2026-10-27 | Add approved Three.js / React Three Fiber / GSAP procedural scene foundation and configurable 10.85s choreography; not mounted on homepage in this foundation commit | TypeScript and dependency audit; visual integration follows in a separate commit |
 | 2026-10-24 | Connect UC9 delivery, invoice terms/issue, inspection with free rework, installment bank proof, cash and payment review; hide action forms while a record reloads | UC9 domain tests; headless Chrome end-to-end: terms → invoice → ship → return → rework complete → reship → accept → bank proof → Admin approval → request closed; no overflow/console errors |
