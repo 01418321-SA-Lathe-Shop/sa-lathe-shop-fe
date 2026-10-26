@@ -1,6 +1,6 @@
 # Lathe Shop Control — Design specification
 
-อัปเดตล่าสุด: 2026-10-24 · สถานะ: designed shell ใช้ session จริงหรือ mock backend ตามสัญญา API; real-stack frontend verification pending Docker
+อัปเดตล่าสุด: 2026-10-27 · สถานะ: designed shell ใช้ session จริงหรือ mock backend ตามสัญญา API; cinematic landing implementation on feature branch; real-stack frontend verification pending Docker
 
 เอกสารนี้ใช้ส่งต่องานให้ designer และ developer เพื่อสร้าง UI ให้ตรงกับระบบปัจจุบัน อ่านคู่กับ `docs/02-frontend.md` ซึ่งเป็นแหล่งอ้างอิง Business Flow และ permission ข้อมูลบนหน้าปัจจุบันหลายส่วนเป็น mock data และยังไม่ใช่หลักฐานว่า Backend หรือ UC1–UC9 ทำงานครบ
 
@@ -227,6 +227,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-27 | Add approved Three.js / React Three Fiber / GSAP procedural scene foundation and configurable 10.85s choreography; not mounted on homepage in this foundation commit | TypeScript and dependency audit; visual integration follows in a separate commit |
 | 2026-10-24 | Connect UC9 delivery, invoice terms/issue, inspection with free rework, installment bank proof, cash and payment review; hide action forms while a record reloads | UC9 domain tests; headless Chrome end-to-end: terms → invoice → ship → return → rework complete → reship → accept → bank proof → Admin approval → request closed; no overflow/console errors |
 | 2026-10-24 | Connect UC8 production start/use/time/photos/completion and Admin labor cost; `useRetryableWrite`; same-record reloads keep the detail visible | UC8 domain tests; headless Chrome: start ready job, planned + unplanned use, minutes, photo, completion releases unused, Admin labor cost totals; no overflow/console errors |
 | 2026-10-24 | Connect UC7 receiving, replacement claims and Admin supplier settlement; shared `PrivateUpload`; `.record-code` list identifiers | UC7 domain tests; headless Chrome: Staff claim + replacement + full receipt (no finance shown), Admin credit days + bank proof required + paid; no overflow/console errors |
