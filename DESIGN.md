@@ -120,7 +120,9 @@ Noto Sans Thai is self-hosted through Next/font for Customer only, with a sans-s
 
 ## Layout
 
-On desktop (>1020px), Customer navigation docks on the left as a 17rem persistent sidebar drawer, with the main workspace stage offset (`margin-left: 17rem`) and capped reading width of 1180px with 32px padding. The desktop stage features a 64px slim topbar with mode indicators, mock controls, and notification access. On mobile (≤1020px), the sidebar is hidden, the stage margin is reset, and the sticky top navbar (`.cust-navbar`) with logo, notifications, and menu toggle takes over. At 700px, content side padding becomes 16px, multi-column task layouts stack, notification dialogs become full-screen sheets, and quotation decisions sit above the safe-area edge with reserved content space.
+On desktop (>1024px), Customer navigation docks on the left as a 17rem persistent sidebar drawer (width: 17rem; height: 100dvh), with the main workspace stage offset (margin-left: 17rem; width: calc(100% - 17rem); max-width: calc(100% - 17rem)). Content spans the full available width with fluid side padding (clamp(1.25rem, 2.5vw, 2.5rem)), eliminating artificial max-width constraints on wide viewports (1280px, 1440px, 1920px, and 2560px ultrawide). Dashboards, request lists, quotations, invoices, and job tracking expand to fill the full stage. Forms and single-column steps maintain an ergonomic readable maximum width (clamp(540px, 60vw, 760px)) or use a balanced 2-column layout with a sticky summary panel. The desktop stage features a sticky 64px topbar with fluid padding, mode indicators, mock controls, and notification access.
+
+On tablet/mobile (≤1024px), the desktop sidebar is hidden, the stage margin is reset (width: 100%), and the sticky top navbar (.cust-navbar) with logo, notifications, and menu toggle takes over. At tablet breakpoint (≤880px), multi-column task layouts stack into single columns with fluid gaps, sticky side summaries unstick to inline/top order, and filter toolbars wrap responsively. On mobile (≤640px), content padding becomes 1rem (16px), request rows convert into stacked card records, buttons and actions take full width, notification dialogs become full-screen sheets (100dvh), and quotation decisions sit above the safe-area edge with reserved content space.
 
 Overview prioritizes attention and recent work; requests use rows and document details; quotations use a price/decision rail; Deposit/PO uses an evidence checklist; jobs use a timeline; receipt uses a focused decision form; invoices prioritize balance; account/settings use split task layouts. These are Customer surface patterns, not prescriptions for Landing or Staff.
 
@@ -212,6 +214,16 @@ Compact status badges pair a written status with a colored dot. Their color is s
 - Customer shell is keyed by account ID so a mock-account switch destroys prior customer data/forms, notification dialog and transient file/retry state. Staff/Admin and public/auth surfaces are unchanged. The old shared customer forms are no longer mounted by the new Customer workspace.
 - Read-all notification failures reconcile confirmed successful reads with the local unread collection and count; failed items remain actionable. No unsupported bulk endpoint or optimistic all-read claim is added.
 - Active navigation follows the actual path rather than treating nested job/payment pages as Overview. Related original-request/quotation links are stacked with an 8px gap and independent touch targets.
+
+## Customer responsive full-width layout — batch 4 (2026-10-27)
+
+- Customer layout is fully responsive and full-width across all supported viewports (360px, 390px, 768px, 1024px, 1280px, 1440px, 1920px, 2560px).
+- Replaced rigid 1180px and 1280px containers on .cust-main, .cust-footer, .cust-nav-inner, and .cust-environment with width: 100%; max-width: 100% and fluid padding clamp(1rem, 2.5vw, 2.5rem).
+- Replaced 100vh with 100dvh for all full-height containers (.cust-stage, .cust-main, .cust-mobile-menu, .cust-notification-dialog).
+- Multi-column grids (.cust-overview-grid, .cust-detail-grid, .cust-quotation-layout, .cust-wizard-grid, .cust-payment-layout, .cust-job-detail, .cust-inspection-layout, .cust-account-layout, .cust-settings-layout) now collapse to single columns at tablet breakpoint (≤880px), eliminating column cramping on 768px portrait tablets.
+- Grid and flex children enforce min-width: 0 to prevent horizontal content overflow. Media elements (img, ideo, canvas) enforce max-width: 100%; height: auto.
+- Forms and single-column steps retain readable bounds (clamp(540px, 60vw, 760px)) or 2-column layouts with summary panels on wide viewports.
+- Touch targets on interactive elements (sidebar links, footer buttons, tabs, pagination) are maintained at >=44px. Zero horizontal scroll across all screen widths.
 
 ## Visual direction
 
@@ -1245,7 +1257,7 @@ src/features/workspace/workspace.module.css
   --cust-blue: #69d5d6;
   --cust-green: #52c480;
   --cust-red: #ef786f;
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--cust-bg);
   color: var(--cust-ink);
   font: 400 1rem/1.65 var(--font-customer-thai), sans-serif;
@@ -1280,6 +1292,7 @@ src/features/workspace/workspace.module.css
   color-scheme: light;
 }
 .root *, .root *::before, .root *::after { box-sizing: border-box; }
+.root :global(img), .root :global(video), .root :global(canvas) { max-width: 100%; height: auto; }
 .root :global(::selection) { background: #ffb479; color: #160e08; }
 .root :global(h1), .root :global(h2), .root :global(h3), .root :global(p) { margin: 0; }
 .root :global(h1) { font-size: 1.75rem; line-height: 1.4; font-weight: 700; letter-spacing: -.02em; }
@@ -1314,24 +1327,24 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-sidebar-space strong) { color: var(--cust-ink); font-size: 0.8125rem; font-weight: 650; }
 .root :global(.cust-sidebar-nav) { display: flex; flex-direction: column; gap: 0.25rem; }
 .root :global(.cust-sidebar-label) { display: block; padding: 0.875rem 0.625rem 0.375rem; color: var(--cust-muted); font-size: 0.6875rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
-.root :global(.cust-sidebar-nav a), .root :global(.cust-mobile-menu nav a) { width: 100%; min-height: 42px; padding: 0 0.6875rem; display: grid; grid-template-columns: 2rem 1fr; align-items: center; gap: 0.5rem; border: 1px solid transparent; border-radius: 0.625rem; background: transparent; color: var(--cust-muted); text-decoration: none; font-size: 0.875rem; font-weight: 550; transition: background .2s, color .2s, border-color .2s; }
+.root :global(.cust-sidebar-nav a), .root :global(.cust-mobile-menu nav a) { width: 100%; min-height: 44px; padding: 0 0.6875rem; display: grid; grid-template-columns: 2rem 1fr; align-items: center; gap: 0.5rem; border: 1px solid transparent; border-radius: 0.625rem; background: transparent; color: var(--cust-muted); text-decoration: none; font-size: 0.875rem; font-weight: 550; transition: background .2s, color .2s, border-color .2s; }
 .root :global(.cust-sidebar-nav a:hover), .root :global(.cust-mobile-menu nav a:hover) { color: var(--cust-ink); background: var(--cust-surface-2); text-decoration: none; }
 .root :global(.cust-sidebar-nav a[aria-current="page"]), .root :global(.cust-mobile-menu nav a[aria-current="page"]) { color: var(--cust-ink); border-color: var(--cust-line); background: var(--cust-tint); font-weight: 700; }
 .root :global(.cust-sidebar-nav a[aria-current="page"] .cust-nav-icon), .root :global(.cust-mobile-menu nav a[aria-current="page"] .cust-nav-icon) { color: var(--cust-accent); }
 .root :global(.cust-nav-icon) { display: grid; place-items: center; width: 1.75rem; height: 1.75rem; border-radius: 0.375rem; color: var(--cust-muted); }
-.root :global(.cust-sidebar-footer) { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--cust-line); display: grid; grid-template-columns: 2.25rem 1fr 2rem; align-items: center; gap: 0.625rem; }
+.root :global(.cust-sidebar-footer) { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--cust-line); display: grid; grid-template-columns: 2.25rem 1fr 2.75rem; align-items: center; gap: 0.625rem; }
 .root :global(.cust-sidebar-footer .cust-avatar) { width: 2.25rem; height: 2.25rem; font-size: 0.8125rem; }
 .root :global(.cust-sidebar-footer > div) { min-width: 0; display: flex; flex-direction: column; }
 .root :global(.cust-sidebar-footer strong) { font-size: 0.8125rem; color: var(--cust-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .root :global(.cust-sidebar-footer span) { font-size: 0.6875rem; color: var(--cust-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.root :global(.cust-sidebar-footer button) { min-height: 36px; width: 36px; padding: 0; display: grid; place-items: center; background: transparent; border: 1px solid transparent; border-radius: 0.5rem; color: var(--cust-muted); }
+.root :global(.cust-sidebar-footer button) { min-height: 44px; width: 44px; padding: 0; display: grid; place-items: center; background: transparent; border: 1px solid transparent; border-radius: 0.5rem; color: var(--cust-muted); }
 .root :global(.cust-sidebar-footer button:hover) { color: var(--cust-red); border-color: var(--cust-line); background: var(--cust-surface-2); }
-.root :global(.cust-stage) { min-height: 100vh; margin-left: 17rem; display: flex; flex-direction: column; }
-.root :global(.cust-topbar) { position: sticky; top: 0; z-index: 20; height: 64px; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; background: rgba(17, 19, 19, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--cust-line); }
-.root :global(.cust-topbar-env) { display: flex; align-items: center; gap: 16px; font-size: .8125rem; color: var(--cust-muted); }
-.root :global(.cust-topbar-actions) { display: flex; align-items: center; gap: 16px; }
+.root :global(.cust-stage) { min-height: 100dvh; margin-left: 17rem; width: calc(100% - 17rem); max-width: calc(100% - 17rem); min-width: 0; display: flex; flex-direction: column; }
+.root :global(.cust-topbar) { position: sticky; top: 0; z-index: 20; height: 64px; width: 100%; padding: 0 clamp(1rem, 2.5vw, 2.5rem); display: flex; align-items: center; justify-content: space-between; background: rgba(17, 19, 19, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-topbar-env) { display: flex; align-items: center; gap: 16px; font-size: .8125rem; color: var(--cust-muted); min-width: 0; flex-wrap: wrap; }
+.root :global(.cust-topbar-actions) { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
 .root :global(.cust-navbar) { display: none; }
-.root :global(.cust-nav-inner) { max-width: 1280px; margin: auto; padding: 0 32px; min-height: 72px; display: flex; align-items: center; justify-content: space-between; }
+.root :global(.cust-nav-inner) { width: 100%; max-width: 100%; margin: 0; padding: 0 clamp(1rem, 2.5vw, 2.5rem); min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .root :global(.brand) { flex-shrink: 0; width: auto; cursor: pointer; border: 0; padding: 0; background: transparent; color: var(--cust-ink); display: inline-flex; align-items: center; gap: 0.6875rem; font-family: var(--font-geist-sans), sans-serif; }
 .root :global(.brand b) { color: var(--cust-ink); font-size: 1rem; letter-spacing: .18em; }
 .root :global(.brand small) { color: var(--cust-muted); font-size: 0.5rem; letter-spacing: .2em; display: block; }
@@ -1353,15 +1366,15 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-mobile-user small) { color: var(--cust-muted); font-size: 0.8125rem; }
 .root :global(.cust-mobile-actions) { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--cust-line); }
 .root :global(.cust-mobile-actions button) { width: 100%; }
-.root :global(.cust-main) { max-width: 1180px; margin: auto; min-height: calc(100vh - 260px); padding: 36px 32px 64px; }
+.root :global(.cust-main) { width: 100%; max-width: 100%; box-sizing: border-box; min-height: calc(100dvh - 180px); padding: clamp(1.25rem, 2.5vw, 2.5rem) clamp(1rem, 2.5vw, 2.5rem) 4rem; margin: 0; }
 .root :global(.cust-heading) { margin-bottom: 32px; }
 .root :global(.cust-heading > div) { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .root :global(.cust-heading p) { margin-top: 8px; color: var(--cust-muted); max-width: 65ch; }
 .root :global(.cust-back) { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-bottom: 12px; }
 .root :global(.cust-back svg) { transform: rotate(180deg); }
-.root :global(.cust-overview-grid) { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 48px; }
+.root :global(.cust-overview-grid) { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: clamp(1.5rem, 2.5vw, 3rem); align-items: start; }
 .root :global(.cust-overview-grid > section > h2) { margin-bottom: 16px; }
-.root :global(.cust-attention) { background: var(--cust-surface); padding: 32px; border: 1px solid var(--cust-line); border-radius: 16px; }
+.root :global(.cust-attention) { background: var(--cust-surface); padding: clamp(1.25rem, 2vw, 2rem); border: 1px solid var(--cust-line); border-radius: 16px; }
 .root :global(.cust-label) { display: inline-flex; align-items: center; gap: 8px; font-size: .875rem; color: var(--cust-accent); }
 .root :global(.cust-attention h3) { font-size: 1.5rem; margin-top: 16px; overflow-wrap: anywhere; }
 .root :global(.cust-attention > p) { margin-top: 12px; }
@@ -1373,7 +1386,7 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-action-row > svg) { margin-top: 5px; flex-shrink: 0; color: var(--cust-accent); }
 .root :global(.cust-action-row p) { color: var(--cust-muted); margin: 4px 0; overflow-wrap: anywhere; }
 .root :global(.cust-action-row a) { display: inline-flex; gap: 8px; align-items: center; min-height: 44px; }
-.root :global(.cust-toolbar) { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.root :global(.cust-toolbar) { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .root :global(.cust-recent-row) { display: grid; gap: 12px; padding: 24px 0; border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-recent-row a) { display: block; color: var(--cust-ink); overflow-wrap: anywhere; }
 .root :global(.cust-recent-row a > *) { display: block; }
@@ -1393,16 +1406,16 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-empty > a) { margin-top: 20px; }
 .root :global(.cust-loading) { padding: 16px 0; color: var(--cust-muted); display: flex; align-items: center; gap: 12px; }
 .root :global(.cust-loading > span) { width: 48px; height: 8px; border-radius: 4px; background: var(--cust-line); }
-.root :global(.cust-tabs) { display: flex; gap: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--cust-line); overflow-x: auto; }
+.root :global(.cust-tabs) { display: flex; gap: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--cust-line); overflow-x: auto; scrollbar-width: thin; }
 .root :global(.cust-tabs > a), .root :global(.cust-tabs > button) { display: flex; align-items: center; min-height: 48px; padding: 8px 0; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; white-space: nowrap; color: var(--cust-muted); }
 .root :global(.cust-tabs [aria-current="page"]), .root :global(.cust-tabs [aria-pressed="true"]) { color: var(--cust-accent); border-bottom-color: var(--cust-accent); font-weight: 650; }
-.root :global(.cust-notification-dialog) { margin: 92px 32px 0 auto; padding: 0; border: 1px solid var(--cust-line); border-radius: 14px; width: min(430px, calc(100vw - 32px)); max-height: calc(100dvh - 116px); color: var(--cust-ink); background: var(--cust-surface); }
+.root :global(.cust-notification-dialog) { margin: 92px clamp(1rem, 2.5vw, 2.5rem) 0 auto; padding: 0; border: 1px solid var(--cust-line); border-radius: 14px; width: min(430px, calc(100% - 2rem)); max-width: 92vw; max-height: calc(100dvh - 116px); color: var(--cust-ink); background: var(--cust-surface); }
 .root :global(.cust-notification-dialog::backdrop) { background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(4px); }
 .root :global(.cust-inbox-panel) { display: flex; flex-direction: column; padding: 20px; max-height: calc(100dvh - 116px); }
 .root :global(.cust-inbox-panel .cust-toolbar) { gap: 8px; }
 .root :global(.cust-inbox-panel > .cust-small) { margin: 12px 0; }
 .root :global(.cust-notification-scroll) { min-height: 0; max-height: 52dvh; overflow-y: auto; scrollbar-color: var(--cust-muted) var(--cust-bg); }
-.root :global(.cust-notification-page) { max-width: 800px; margin: auto; }
+.root :global(.cust-notification-page) { width: 100%; max-width: min(100%, 880px); margin: 0 auto; }
 .root :global(.cust-notification-page .cust-notification-scroll) { max-height: none; }
 .root :global(.cust-group-title) { font-size: .875rem; color: var(--cust-muted); padding: 20px 4px 8px; }
 .root :global(.cust-notification) { display: flex; gap: 12px; padding: 16px 8px; border-bottom: 1px solid var(--cust-line); }
@@ -1421,11 +1434,11 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-inbox-footer) { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-top: 1px solid var(--cust-line); margin-top: 16px; }
 .root :global(.cust-inbox-panel > .cust-toolbar), .root :global(.cust-inbox-panel > .cust-tabs), .root :global(.cust-inbox-footer), .root :global(.cust-notification-help) { flex-shrink: 0; }
 .root :global(.cust-notification-help summary) { display: flex; align-items: center; color: var(--cust-muted); font-size: .875rem; }
-.root :global(.cust-mobile-menu) { inset: 0 0 0 auto; margin: 0; width: min(375px, 100vw); height: 100dvh; max-height: 100dvh; max-width: 100vw; border: 0; padding: 24px; background: var(--cust-surface); color: var(--cust-ink); }
+.root :global(.cust-mobile-menu) { inset: 0 0 0 auto; margin: 0; width: min(375px, 100%); height: 100dvh; max-height: 100dvh; max-width: 100%; border: 0; padding: 24px; background: var(--cust-surface); color: var(--cust-ink); }
 .root :global(.cust-mobile-menu::backdrop) { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
 .root :global(.cust-mobile-menu nav a), .root :global(.cust-mobile-menu nav button) { display: flex; align-items: center; width: 100%; min-height: 48px; padding: 8px 0; color: var(--cust-ink); border: 0; }
 .root :global(.cust-mobile-menu h3) { margin-top: 24px; font-size: .875rem; color: var(--cust-muted); }
-.root :global(.cust-footer) { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; padding: 24px 32px; max-width: 1180px; margin: auto; border-top: 1px solid var(--cust-line); color: var(--cust-muted); font-size: .875rem; }
+.root :global(.cust-footer) { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; padding: 1.5rem clamp(1rem, 2.5vw, 2.5rem); width: 100%; max-width: 100%; box-sizing: border-box; margin: auto 0 0 0; border-top: 1px solid var(--cust-line); color: var(--cust-muted); font-size: .875rem; }
 .root :global(.cust-field) { display: grid; gap: 8px; margin-bottom: 20px; font-weight: 550; }
 .root :global(.cust-field small) { font-weight: 400; font-size: .875rem; }
 .root :global(.cust-actions) { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 24px; }
@@ -1439,22 +1452,22 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-filters) { display: grid; grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr) auto; align-items: end; gap: 16px; margin-bottom: 24px; }
 .root :global(.cust-filters .cust-field) { margin: 0; }
 .root :global(.cust-filter-result) { margin: 16px 0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-.root :global(.cust-request-head), .root :global(.cust-request-row) { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 170px; gap: 24px; }
+.root :global(.cust-request-head), .root :global(.cust-request-row) { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(150px, auto); gap: clamp(1rem, 1.5vw, 1.5rem); align-items: center; }
 .root :global(.cust-request-head) { padding: 16px 0; font-size: .875rem; color: var(--cust-muted); border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-request-row) { padding: 24px 0; border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-request-row time) { font-size: .875rem; color: var(--cust-muted); }
 .root :global(.cust-request-row p) { margin-top: 8px; }
 .root :global(.cust-record-title) { display: grid; color: var(--cust-ink); gap: 4px; overflow-wrap: anywhere; }
 .root :global(.cust-record-title small) { font-size: .875rem; }
-.root :global(.cust-document), .root :global(.cust-form-surface) { background: var(--cust-surface); border: 1px solid var(--cust-line); padding: 32px; border-radius: 12px; min-width: 0; }
+.root :global(.cust-document), .root :global(.cust-form-surface) { background: var(--cust-surface); border: 1px solid var(--cust-line); padding: clamp(1.25rem, 2vw, 2rem); border-radius: 12px; min-width: 0; }
 .root :global(.cust-document > h2), .root :global(.cust-form-surface > h2) { margin-bottom: 24px; }
 .root :global(.cust-definition) { margin: 24px 0; }
-.root :global(.cust-definition > div) { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-definition > div) { display: grid; grid-template-columns: minmax(120px, 180px) minmax(0, 1fr); gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-definition dt) { color: var(--cust-muted); }
 .root :global(.cust-definition dd) { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
 .root :global(.cust-definition dd small) { display: block; }
-.root :global(.cust-detail-grid), .root :global(.cust-quotation-layout) { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 32px; align-items: start; }
-.root :global(.cust-side-summary) { padding: 24px; background: var(--cust-surface); border: 1px solid var(--cust-line); border-radius: 12px; position: sticky; top: 104px; }
+.root :global(.cust-detail-grid), .root :global(.cust-quotation-layout) { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 440px); gap: clamp(1.5rem, 2vw, 2.5rem); align-items: start; }
+.root :global(.cust-side-summary) { padding: clamp(1.25rem, 2vw, 1.5rem); background: var(--cust-surface); border: 1px solid var(--cust-line); border-radius: 12px; position: sticky; top: 104px; }
 .root :global(.cust-side-summary .cust-definition > div) { grid-template-columns: 1fr; gap: 4px; }
 .root :global(.cust-side-summary > *) + :global(*) { margin-top: 16px; }
 .root :global(.cust-file-row), .root :global(.cust-file-list li) { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--cust-line); }
@@ -1462,20 +1475,20 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-file-row small), .root :global(.cust-file-list small) { display: block; }
 .root :global(.cust-history-row) { padding: 16px 0; border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-history-row p) { margin: 6px 0; overflow-wrap: anywhere; }
-.root :global(.cust-stepper) { display: flex; list-style: none; padding: 0; margin: 0 0 32px; gap: 24px; }
-.root :global(.cust-stepper li) { display: flex; align-items: center; gap: 8px; color: var(--cust-muted); }
+.root :global(.cust-stepper) { display: flex; list-style: none; padding: 0; margin: 0 0 32px; gap: clamp(12px, 2vw, 24px); overflow-x: auto; scrollbar-width: none; }
+.root :global(.cust-stepper li) { display: flex; align-items: center; gap: 8px; color: var(--cust-muted); flex-shrink: 0; }
 .root :global(.cust-stepper span) { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: var(--cust-surface); border: 1px solid var(--cust-line); }
 .root :global(.cust-stepper [aria-current="step"]) { color: var(--cust-accent); font-weight: 650; }
 .root :global(.cust-stepper [aria-current="step"] span) { background: var(--cust-accent); color: #121514; border: 0; font-weight: 700; }
 .root :global(.cust-stepper .done span) { border-color: var(--cust-green); color: var(--cust-green); }
-.root :global(.cust-wizard-grid) { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.root :global(.cust-wizard-grid) { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(300px, 420px); gap: clamp(1.5rem, 2.5vw, 2.5rem); align-items: start; }
 .root :global(.cust-wizard-summary) { padding: 24px 0; position: sticky; top: 104px; }
 .root :global(.cust-file-list) { padding: 0; list-style: none; }
-.root :global(.cust-document-row) { display: flex; justify-content: space-between; align-items: center; gap: 32px; padding: 28px 0; border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-document-row) { display: flex; justify-content: space-between; align-items: center; gap: clamp(1rem, 2vw, 2rem); padding: 28px 0; border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-document-row h2) { margin: 8px 0 12px; overflow-wrap: anywhere; }
 .root :global(.cust-document-action) { flex-shrink: 0; text-align: right; }
 .root :global(.cust-list-price) { display: block; font-size: 1.5rem; }
-.root :global(.cust-price-panel) { background: var(--cust-surface); border: 1px solid var(--cust-line); padding: 32px; border-radius: 12px; position: sticky; top: 104px; }
+.root :global(.cust-price-panel) { background: var(--cust-surface); border: 1px solid var(--cust-line); padding: clamp(1.25rem, 2vw, 2rem); border-radius: 12px; position: sticky; top: 104px; }
 .root :global(.cust-price-panel > p) { margin-top: 16px; }
 .root :global(.cust-price-panel > section) { margin: 24px 0; padding-top: 24px; border-top: 1px solid var(--cust-line); }
 .root :global(.cust-hero-price) { display: block; font-size: clamp(1.5rem, 2.5vw, 2rem); margin-top: 8px; font-weight: 650; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
@@ -1483,19 +1496,19 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-terms-list li) { margin: 10px 0; }
 .root :global(.cust-decision-bar) { display: grid; gap: 12px; margin-top: 24px; }
 .root :global(.cust-preserve) { white-space: pre-wrap; overflow-wrap: anywhere; }
-.root :global(.cust-payment-layout) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 32px; align-items: start; }
+.root :global(.cust-payment-layout) { display: grid; grid-template-columns: minmax(320px, 440px) minmax(0, 1.5fr); gap: clamp(1.5rem, 2vw, 2.5rem); align-items: start; }
 .root :global(.cust-checklist) { list-style: none; padding: 0; margin: 20px 0; }
 .root :global(.cust-checklist li) { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-upload) { padding: 24px; border: 1px dashed var(--cust-line); border-radius: 12px; margin: 24px 0; background: var(--cust-surface-2); }
 .root :global(.cust-upload .cust-field) { margin-top: 16px; }
 .root :global(.cust-upload > button) { margin-top: 16px; }
 .root :global(.cust-upload input) { max-width: 100%; padding: 8px; font-size: .875rem; }
-.root :global(.cust-list-filter) { max-width: 320px; }
-.root :global(.cust-job-row) { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 32px; padding: 28px 0; border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-list-filter) { width: 100%; max-width: min(100%, 360px); }
+.root :global(.cust-job-row) { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: clamp(1.5rem, 2vw, 2rem); padding: 28px 0; border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-job-row h2) { margin: 8px 0 12px; overflow-wrap: anywhere; }
 .root :global(.cust-job-row p) { margin-top: 8px; }
 .root :global(.cust-job-action) { text-align: right; align-self: center; }
-.root :global(.cust-job-detail) { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.root :global(.cust-job-detail) { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 440px); gap: clamp(1.5rem, 2.5vw, 2.5rem); align-items: start; }
 .root :global(.cust-job-summary) { display: grid; gap: 32px; }
 .root :global(.cust-job-summary > section) { padding-bottom: 24px; border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-job-summary p), .root :global(.cust-job-summary .cust-badge), .root :global(.cust-job-summary .cust-primary) { margin-top: 12px; }
@@ -1507,74 +1520,117 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-timeline .done) { color: var(--cust-green); }
 .root :global(.cust-timeline .current .cust-timeline-point) { background: var(--cust-tint); border-color: var(--cust-accent); }
 .root :global(.cust-timeline p) { font-size: .875rem; margin-top: 4px; }
-.root :global(.cust-inspection-layout) { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.root :global(.cust-inspection-layout) { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(300px, 420px); gap: clamp(1.5rem, 2.5vw, 2.5rem); align-items: start; }
 .root :global(.cust-inspection-decision) { padding: 24px 0; }
 .root :global(.cust-inspection-decision p) { margin: 12px 0; }
 .root :global(.cust-inspection-decision .cust-primary), .root :global(.cust-inspection-decision .cust-danger) { display: flex; width: 100%; margin-top: 24px; }
 .root :global(.cust-inspection-decision fieldset > .cust-link) { margin-top: 12px; }
 .root :global(.cust-invoice-summary > .cust-hero-price) { margin: 8px 0 24px; }
 .root :global(.cust-invoice-summary > h2) { margin-top: 16px; }
-.root :global(.cust-account-layout) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr); gap: 64px; }
+.root :global(.cust-account-layout) { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1.8fr); gap: clamp(1.5rem, 3.5vw, 4rem); align-items: start; }
 .root :global(.cust-account-profile) { padding: 24px 0; }
 .root :global(.cust-profile-avatar) { width: 72px; height: 72px; display: grid; place-items: center; font-size: 1.75rem; background: var(--cust-tint); color: var(--cust-accent); border-radius: 50%; margin-bottom: 16px; }
 .root :global(.cust-membership) { padding: 24px 0; border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-membership p) { color: var(--cust-muted); margin-top: 8px; }
-.root :global(.cust-narrow) { max-width: 620px; margin: auto; }
+.root :global(.cust-narrow) { width: 100%; max-width: min(100%, 720px); margin: 0; }
 .root :global(.cust-narrow > p), .root :global(.cust-narrow > button) { margin-top: 20px; }
 .root :global(.cust-secret) { padding: 24px; background: var(--cust-surface-2); border: 1px dashed var(--cust-line); border-radius: 10px; margin: 24px 0; }
 .root :global(.cust-secret output) { display: block; overflow-wrap: anywhere; margin-top: 16px; user-select: all; }
-.root :global(.cust-settings-layout) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; }
+.root :global(.cust-settings-layout) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.5rem, 3vw, 3rem); align-items: start; }
 .root :global(.cust-preference) { padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-preference legend) { font-size: 1.25rem; margin-bottom: 16px; font-weight: 650; }
 .root :global(.cust-preference label) { display: flex; align-items: center; gap: 12px; min-height: 48px; cursor: pointer; }
-.root :global(.cust-settings-preview) { padding: 32px; background: var(--cust-surface); border: 1px solid var(--cust-line); border-radius: 12px; }
+.root :global(.cust-settings-preview) { padding: clamp(1.25rem, 2vw, 2rem); background: var(--cust-surface); border: 1px solid var(--cust-line); border-radius: 12px; }
 .root :global(.cust-settings-preview h3) { margin-top: 24px; }
 .root :global(.cust-settings-preview p), .root :global(.cust-settings-preview .cust-badge) { margin-top: 16px; }
-@media (max-width: 1020px) {
+
+.root :global(.cust-overview-grid > *),
+.root :global(.cust-detail-grid > *),
+.root :global(.cust-quotation-layout > *),
+.root :global(.cust-wizard-grid > *),
+.root :global(.cust-payment-layout > *),
+.root :global(.cust-job-row > *),
+.root :global(.cust-job-detail > *),
+.root :global(.cust-inspection-layout > *),
+.root :global(.cust-account-layout > *),
+.root :global(.cust-settings-layout > *),
+.root :global(.cust-filters > *),
+.root :global(.cust-request-row > *),
+.root :global(.cust-document-row > *) {
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
   .root :global(.cust-sidebar) { display: none; }
   .root :global(.cust-topbar) { display: none; }
-  .root :global(.cust-stage) { margin-left: 0; }
-  .root :global(.cust-navbar) { display: block; position: sticky; top: 0; z-index: 30; background: var(--cust-surface); border-bottom: 1px solid var(--cust-line); }
-  .root :global(.cust-nav-inner) { padding: 0 24px; min-height: 72px; }
+  .root :global(.cust-stage) { margin-left: 0; width: 100%; max-width: 100%; }
+  .root :global(.cust-navbar) { display: block; position: sticky; top: 0; z-index: 30; width: 100%; background: var(--cust-surface); border-bottom: 1px solid var(--cust-line); }
+  .root :global(.cust-nav-inner) { width: 100%; max-width: 100%; padding: 0 clamp(1rem, 2.5vw, 2.5rem); min-height: 72px; }
   .root :global(.cust-nav-actions) { margin-left: auto; gap: 12px; }
   .root :global(.cust-menu-toggle) { display: grid; place-items: center; width: 44px; height: 44px; padding: 8px; border: 1px solid var(--cust-line); border-radius: 8px; background: var(--cust-surface-2); color: var(--cust-ink); }
-  .root :global(.cust-environment) { display: flex; align-items: center; gap: 16px; max-width: 1280px; margin: auto; padding: 12px 24px 0; font-size: .8125rem; color: var(--cust-muted); }
+  .root :global(.cust-environment) { display: flex; align-items: center; gap: 16px; width: 100%; max-width: 100%; margin: 0; padding: 12px clamp(1rem, 2.5vw, 2.5rem) 0; font-size: .8125rem; color: var(--cust-muted); }
 }
-@media (max-width: 700px) {
-  .root :global(.cust-nav-inner) { min-height: 68px; padding: 0 16px; }
-  .root :global(.cust-environment) { padding: 12px 16px 0; align-items: flex-start; gap: 8px; }
+
+@media (max-width: 880px) {
+  .root :global(.cust-overview-grid) { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .root :global(.cust-detail-grid),
+  .root :global(.cust-quotation-layout),
+  .root :global(.cust-wizard-grid),
+  .root :global(.cust-payment-layout),
+  .root :global(.cust-job-detail),
+  .root :global(.cust-inspection-layout),
+  .root :global(.cust-account-layout),
+  .root :global(.cust-settings-layout) {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+  .root :global(.cust-detail-grid > .cust-side-summary),
+  .root :global(.cust-quotation-layout > .cust-price-panel) {
+    grid-row: 1;
+    position: static;
+  }
+  .root :global(.cust-wizard-summary),
+  .root :global(.cust-price-panel),
+  .root :global(.cust-side-summary) {
+    position: static;
+  }
+  .root :global(.cust-job-row) { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .root :global(.cust-job-action) { text-align: left; }
+  .root :global(.cust-filters) { grid-template-columns: minmax(0, 1fr) minmax(160px, auto) auto; }
+}
+
+@media (max-width: 640px) {
+  .root :global(.cust-nav-inner) { min-height: 64px; padding: 0 1rem; }
+  .root :global(.cust-environment) { padding: 8px 1rem 0; flex-direction: column; align-items: flex-start; gap: 6px; }
   .root :global(.cust-environment .mock-switcher summary) { max-width: 128px; font-size: .75rem; }
-  .root :global(.cust-main) { padding: 24px 16px 40px; }
+  .root :global(.cust-main) { padding: 1.25rem 1rem 2.5rem; }
   .root :global(.cust-heading > div) { align-items: flex-start; flex-direction: column; gap: 16px; }
   .root :global(.cust-heading > div > .cust-primary) { width: 100%; }
-  .root :global(.cust-overview-grid) { grid-template-columns: minmax(0, 1fr); gap: 40px; }
-  .root :global(.cust-attention) { padding: 24px; }
+  .root :global(.cust-attention) { padding: 1.25rem; }
   .root :global(.cust-attention .cust-primary) { width: 100%; }
-  .root :global(.cust-page-end) { align-items: flex-start; flex-direction: column; }
-  .root :global(.cust-footer) { padding: 24px 16px; flex-direction: column; }
-  .root :global(.cust-notification-dialog) { inset: 0; margin: 0; width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
-  .root :global(.cust-inbox-panel) { padding: 16px; max-height: 100dvh; height: 100dvh; }
-  .root :global(.cust-inbox-panel .cust-notification-scroll) { max-height: calc(100dvh - 320px); }
-  .root :global(.cust-tabs) { gap: 20px; }
-  .root :global(.cust-filters) { grid-template-columns: 1fr; }
+  .root :global(.cust-page-end) { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .root :global(.cust-footer) { padding: 1.5rem 1rem; flex-direction: column; }
+  .root :global(.cust-notification-dialog) { inset: 0; margin: 0; width: 100%; max-width: 100%; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
+  .root :global(.cust-inbox-panel) { padding: 1rem; max-height: 100dvh; height: 100dvh; }
+  .root :global(.cust-inbox-panel .cust-notification-scroll) { max-height: calc(100dvh - 280px); }
+  .root :global(.cust-tabs) { gap: 16px; }
+  .root :global(.cust-filters) { grid-template-columns: 1fr; gap: 12px; }
+  .root :global(.cust-filters .cust-primary) { width: 100%; }
   .root :global(.cust-request-head) { display: none; }
-  .root :global(.cust-request-row) { grid-template-columns: 1fr; gap: 12px; }
-  .root :global(.cust-detail-grid), .root :global(.cust-quotation-layout), .root :global(.cust-wizard-grid), .root :global(.cust-payment-layout) { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-  .root :global(.cust-document), .root :global(.cust-form-surface), .root :global(.cust-price-panel), .root :global(.cust-side-summary) { padding: 20px; position: static; }
-  .root :global(.cust-detail-grid > .cust-side-summary), .root :global(.cust-quotation-layout > .cust-price-panel) { grid-row: 1; }
+  .root :global(.cust-request-row) { grid-template-columns: 1fr; gap: 12px; padding: 18px 0; }
+  .root :global(.cust-document), .root :global(.cust-form-surface), .root :global(.cust-price-panel), .root :global(.cust-side-summary) { padding: 1.25rem; }
   .root :global(.cust-definition > div) { grid-template-columns: 1fr; gap: 4px; }
-  .root :global(.cust-stepper) { gap: 8px; justify-content: space-between; }
-  .root :global(.cust-stepper li) { flex-direction: column; font-size: .8125rem; gap: 6px; }
-  .root :global(.cust-wizard-summary) { position: static; padding: 16px 0; border-top: 1px solid var(--cust-line); }
-  .root :global(.cust-wizard-grid .cust-actions .cust-primary) { flex: 1; }
-  .root :global(.cust-document-row) { align-items: stretch; flex-direction: column; gap: 16px; }
+  .root :global(.cust-stepper) { gap: 6px; justify-content: space-between; }
+  .root :global(.cust-stepper li) { flex-direction: column; font-size: .75rem; gap: 4px; text-align: center; }
+  .root :global(.cust-wizard-summary) { padding: 16px 0; border-top: 1px solid var(--cust-line); }
+  .root :global(.cust-wizard-grid .cust-actions .cust-primary) { flex: 1; width: 100%; }
+  .root :global(.cust-document-row) { align-items: stretch; flex-direction: column; gap: 16px; padding: 20px 0; }
   .root :global(.cust-document-action) { text-align: left; }
-  .root :global(.cust-decision-bar) { position: fixed; bottom: 0; left: 0; right: 0; z-index: 20; background: var(--cust-surface); padding: 12px 16px max(12px, env(safe-area-inset-bottom)); border-top: 1px solid var(--cust-line); gap: 4px; }
+  .root :global(.cust-decision-bar) { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 100%; box-sizing: border-box; z-index: 20; background: var(--cust-surface); padding: 12px 16px max(12px, env(safe-area-inset-bottom)); border-top: 1px solid var(--cust-line); gap: 6px; }
   .root :global(.cust-main:has(.cust-decision-bar)) { padding-bottom: 180px; }
-  .root :global(.cust-job-row), .root :global(.cust-job-detail), .root :global(.cust-inspection-layout), .root :global(.cust-account-layout), .root :global(.cust-settings-layout) { grid-template-columns: minmax(0, 1fr); gap: 24px; }
-  .root :global(.cust-job-action) { text-align: left; }
   .root :global(.cust-inspection-decision), .root :global(.cust-account-profile), .root :global(.cust-settings-preview) { padding: 16px 0; }
 }
+
 @media (prefers-reduced-motion: reduce) { .root *, .root *::before, .root *::after { scroll-behavior: auto; transition: none; animation: none; } }
 .root :global(.cust-related-links) { display: grid; justify-items: start; gap: 8px; }
 ```
