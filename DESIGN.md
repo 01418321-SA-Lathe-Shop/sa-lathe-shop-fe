@@ -206,7 +206,7 @@ Root layout ถือ `ApiSessionProvider` (memory-only) จึงรักษ�
 ## State, motion and accessibility
 
 - `localStorage`: `lathe-theme` light/dark และ `lathe-ui-size` small/medium/large; อ่าน legacy `lathe-text-size` ได้
-- ค่าเริ่ม state dark/medium แล้วอ่าน storage/system preference หลัง mount เพื่อไม่ให้ SSR/client markup ต่างกัน
+- ใช้ `useSyncExternalStore` อ่าน browser preferences โดย server/hydration snapshot เป็น dark/medium เพื่อไม่ให้ SSR/client markup ต่างกัน; effect ซิงก์เฉพาะ document attributes ไม่เรียก setState; อ่าน legacy size key และใช้งานในหน้าปัจจุบันได้เมื่อ storage ถูกบล็อก
 - Theme ใช้ `startViewTransition` ถ้ารองรับ; 320ms ease-in-out, fallback transition250ms; reduced-motion ปิด animation
 - Navigation active สะท้อน path และรองรับ refresh/back/forward Settings radio checked เป็น semantic state; แต่ละ instance ใช้ useId แยก radio group เพื่อไม่ชนกับหน้าที่ Next เก็บไว้ใน cache; dialogใช้ Tab/Escape ตาม native behavior
 - Root/workspace และ public landing ใช้ `lang=th`; landing แปลข้อความเป็นไทยแล้ว ส่วน functional UC forms คงเดิม; เงินบาท เวลา Asia/Bangkok ไม่มี VAT Key icon controls มี aria-label
@@ -238,6 +238,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-27 | แก้ preference hydration ด้วย external-store subscription แทน setState ใน effect; คง Settings, theme transition และ scale เดิม | Preference unit tests; full lint, TypeScript และ browser regression checks |
 | 2026-10-27 | Thai landing with self-hosted Noto Sans Thai; remove action bar, retain scene tap/keyboard pause; add brushed metals, mechanical details, soft shadows and refined arm/conveyor motion |5 timing tests; type/lint/build; desktop/mobile, Thai font, no toolbar, offscreen and fallback checks |
 | 2026-10-27 | Replace one-shot spindle intro with configurable five-second arm/conveyor/furnace/ingot loop, playback controls and lighter mobile rendering | Timing tests, type/lint and browser checks; current evidence in landing handoff |
 | 2026-10-27 | Keep no-JavaScript final artwork sharp as well as real text; correct scoped landing breakpoint summary | No-JS browser check; design documentation audit |

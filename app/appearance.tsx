@@ -1,8 +1,7 @@
 "use client";
-import { createContext, useContext, useEffect, useId, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useId, useRef, useSyncExternalStore } from "react";
 import { flushSync } from "react-dom";
-type Theme = "dark" | "light";
-type UiSize = "small" | "medium" | "large";
+import { getServerTheme, getServerUiSize, getTheme, getUiSize, saveTheme, saveUiSize, subscribeAppearance, type Theme, type UiSize } from "./appearance-preferences";
 const ThemeContext = createContext<{ theme: Theme; onTheme: (theme: Theme) => void; uiSize: UiSize; onUiSize: (size: UiSize) => void }>({ theme: "dark", onTheme: () => {}, uiSize: "medium", onUiSize: () => {} });
 type IconName = "grid" | "inbox" | "machine" | "truck" | "file" | "layers" | "wallet" | "clock" | "search" | "plus" | "arrow" | "bell" | "logout" | "close" | "sun" | "moon";
 
@@ -17,7 +16,11 @@ export function Logo({ onClick }: { onClick?: () => void }) {
 }
 
 export function ThemeToggle() {
-  const { theme, onTheme, uiSize, onUiSize } = useContext(ThemeContext);
+  const { onTheme, onUiSize } = useContext(ThemeContext);
+  // This subtree can hydrate after the provider (inside the auth Suspense boundary).
+  // Its own server snapshots keep the controlled radios in sync during hydration.
+  const theme = useSyncExternalStore(subscribeAppearance, getTheme, getServerTheme);
+  const uiSize = useSyncExternalStore(subscribeAppearance, getUiSize, getServerUiSize);
   const preferenceId = useId();
   const dialog = useRef<HTMLDialogElement>(null);
   return <>
@@ -35,25 +38,16 @@ export function ThemeToggle() {
 }
 
 export function AppThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme,setTheme]=useState<Theme>("dark");
-  const [uiSize,setUiSize]=useState<UiSize>("medium");
+  const theme = useSyncExternalStore(subscribeAppearance, getTheme, getServerTheme);
+  const uiSize = useSyncExternalStore(subscribeAppearance, getUiSize, getServerUiSize);
   useEffect(()=>{
-    let saved: string | null = null;
-    let savedSize: string | null = null;
-    try { saved=window.localStorage.getItem("lathe-theme"); savedSize=window.localStorage.getItem("lathe-ui-size") ?? window.localStorage.getItem("lathe-text-size"); } catch { /* Preferences still work when storage is unavailable. */ }
-    const next: Theme=saved==="light"||saved==="dark"?saved:(window.matchMedia("(prefers-color-scheme: light)").matches?"light":"dark");
-    setTheme(next);
-    document.documentElement.dataset.theme=next;
-    const size = savedSize === "small" || savedSize === "large" ? savedSize : "medium";
-    setUiSize(size);
-    document.documentElement.dataset.uiSize=size;
-  },[]); // eslint-disable-line react-hooks/exhaustive-deps
+    document.documentElement.dataset.theme=theme;
+    document.documentElement.dataset.uiSize=uiSize;
+  },[theme,uiSize]);
   const changeTheme = (next: Theme) => {
     if (next === theme) return;
     const update = () => {
-      flushSync(() => setTheme(next));
-      document.documentElement.dataset.theme = next;
-      try { window.localStorage.setItem("lathe-theme", next); } catch { /* Keep the in-memory preference. */ }
+      flushSync(() => saveTheme(next));
     };
     if (document.startViewTransition && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       document.startViewTransition(update);
@@ -62,9 +56,7 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
     }
   };
   const changeUiSize = (size: UiSize) => {
-    setUiSize(size);
-    document.documentElement.dataset.uiSize=size;
-    try { window.localStorage.setItem("lathe-ui-size", size); } catch { /* Keep the in-memory preference. */ }
+    saveUiSize(size);
   };
   return <ThemeContext.Provider value={{ theme, onTheme: changeTheme, uiSize, onUiSize: changeUiSize }}><div className="theme-root" data-theme={theme}>{children}</div></ThemeContext.Provider>;
 }
