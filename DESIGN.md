@@ -5,6 +5,7 @@ colors:
   customer-action: "#ff923f"
   customer-action-hover: "#ffaa66"
   customer-background: "#060707"
+  customer-drawer: "#060707"
   customer-surface: "#111313"
   customer-surface-2: "#191c1c"
   customer-ink: "#f4f4f1"
@@ -86,7 +87,7 @@ components:
 
 **Creative North Star: "Dark Industrial Customer Workspace"**
 
-The Customer portal uses the same dark industrial palette as the cinematic landing page: deep obsidian background (`#060707`), dark metal surfaces (`#111313` / `#191c1c`), precise boundary lines (`#343838`), glowing burnt-orange action accents (`#ff923f`, hover `#ffaa66`), and high-legibility light text (`#f4f4f1`, muted `#a5aaa7`).
+The Customer portal uses the same dark industrial palette as the cinematic landing page: deep obsidian background (`#060707`) shared by both the main workspace and navigation drawer, dark metal surfaces (`#111313` / `#191c1c`), precise boundary lines (`#343838`), glowing burnt-orange action accents (`#ff923f`, hover `#ffaa66`), and high-legibility light text (`#f4f4f1`, muted `#a5aaa7`).
 
 The frontmatter and the eight canonical sections here apply only to the authenticated Customer surface. Staff, Admin, Landing and Auth retain their existing visual systems and specifications below. Source authority is `src/features/customer/customer.module.css` and `customer-shell.tsx`; the frontmatter records reused light-theme primitives, while the stylesheet remains authoritative for dark overrides and complete component states.
 
@@ -110,7 +111,7 @@ Information Blue identifies focus, information and informational statuses. Works
 
 ### Neutral
 
-Paper White surfaces sit on a softened workshop background. Charcoal Ink leads; Quiet Gray supports metadata; the Divider tone separates records. The Customer dark variant uses explicit local overrides, not the legacy workspace palette. Filled primary/danger buttons retain their dark backgrounds and white labels in both themes.
+The main canvas and drawer navigation (`.cust-sidebar` and `.cust-mobile-menu`) share the deep obsidian `#060707` tone, matching the cinematic landing page background. Dark metal surfaces (`#111313`) and elevated slabs (`#191c1c`) form cards, panels, and document containers. Titanium white (`#f4f4f1`) leads for primary copy; quiet alloy gray (`#a5aaa7`) supports metadata; milled boundary lines (`#343838`) separate records and rails. The Customer dark palette is directly drawn from the cinematic landing page.
 
 **The Surface Scope Rule.** Customer tokens must not replace Staff, Admin, Landing or Auth tokens.
 
@@ -120,7 +121,9 @@ Noto Sans Thai is self-hosted through Next/font for Customer only, with a sans-s
 
 ## Layout
 
-On desktop (>1024px), Customer navigation docks on the left as a 17rem persistent sidebar drawer (width: 17rem; height: 100dvh), with the main workspace stage offset (margin-left: 17rem; width: calc(100% - 17rem); max-width: calc(100% - 17rem)). Content spans the full available width with fluid side padding (clamp(1.25rem, 2.5vw, 2.5rem)), eliminating artificial max-width constraints on wide viewports (1280px, 1440px, 1920px, and 2560px ultrawide). Dashboards, request lists, quotations, invoices, and job tracking expand to fill the full stage. Forms and single-column steps maintain an ergonomic readable maximum width (clamp(540px, 60vw, 760px)) or use a balanced 2-column layout with a sticky summary panel. The desktop stage features a sticky 64px topbar with fluid padding, mode indicators, mock controls, and notification access.
+On desktop (>1024px), Customer navigation docks on the left as a 17rem persistent sidebar drawer (`width: 17rem; height: 100dvh; background: #060707`), sharing the obsidian background with the workspace stage offset (`margin-left: 17rem; width: calc(100% - 17rem); max-width: calc(100% - 17rem)`). Content spans the full available width with fluid side padding (`clamp(1.25rem, 2.5vw, 2.5rem)`), eliminating artificial max-width constraints on wide viewports (1280px, 1440px, 1920px, and 2560px ultrawide). Dashboards, request lists, quotations, invoices, and job tracking expand to fill the full stage. Forms and single-column steps maintain an ergonomic readable maximum width (`clamp(540px, 60vw, 760px)`) or use a balanced 2-column layout with a sticky summary panel. The desktop stage features a sticky 64px topbar with fluid padding, mode indicators, mock controls, and notification access.
+
+On tablet/mobile (≤1024px), the desktop sidebar is hidden, the stage margin is reset (`width: 100%`), and the sticky top navbar (`.cust-navbar`, background `#060707`) with logo, notifications, and menu toggle takes over. The mobile drawer dialog (`.cust-mobile-menu`) uses the same `#060707` background as the canvas. At tablet breakpoint (≤880px), multi-column task layouts stack into single columns with fluid gaps, sticky side summaries unstick to inline/top order, and filter toolbars wrap responsively. On mobile (≤640px), content padding becomes 1rem (16px), request rows convert into stacked card records, buttons and actions take full width, notification dialogs become full-screen sheets (`100dvh`), and quotation decisions sit above the safe-area edge with reserved content space.
 
 On tablet/mobile (≤1024px), the desktop sidebar is hidden, the stage margin is reset (width: 100%), and the sticky top navbar (.cust-navbar) with logo, notifications, and menu toggle takes over. At tablet breakpoint (≤880px), multi-column task layouts stack into single columns with fluid gaps, sticky side summaries unstick to inline/top order, and filter toolbars wrap responsively. On mobile (≤640px), content padding becomes 1rem (16px), request rows convert into stacked card records, buttons and actions take full width, notification dialogs become full-screen sheets (100dvh), and quotation decisions sit above the safe-area edge with reserved content space.
 
@@ -150,7 +153,7 @@ Document/form surfaces use the frontmatter document padding and corner treatment
 
 ### Navigation
 
-Desktop navigation uses a persistent 17rem left sidebar drawer with categorized sections (Workspace, งานของฉัน, เอกสารและการชำระเงิน, บัญชี), icons (`grid`, `file`, `machine`, `clock`, `layers`, `wallet`, `inbox`, `sun`), active page highlighting, and a user footer with avatar, name, and logout. Mobile navigation (≤1020px) retains the sticky top navbar header and `<dialog className="cust-mobile-menu">` slide-out drawer. All links use client navigation to retain the memory-only session; the mobile dialog closes on link navigation.
+Desktop navigation uses a persistent 17rem left sidebar drawer with background `#060707` matching the main background canvas, categorized sections (Workspace, งานของฉัน, เอกสารและการชำระเงิน, บัญชี), icons (`grid`, `file`, `machine`, `clock`, `layers`, `wallet`, `inbox`, `sun`), active page highlighting, and a user footer with avatar, name, and logout. Mobile navigation (≤1024px) retains the sticky top navbar header (`#060707`) and `<dialog className="cust-mobile-menu">` slide-out drawer (`#060707`). All links use client navigation to retain the memory-only session; the mobile dialog closes on link navigation.
 
 ### Chips
 
@@ -225,6 +228,12 @@ Compact status badges pair a written status with a colored dot. Their color is s
 - Forms and single-column steps retain readable bounds (clamp(540px, 60vw, 760px)) or 2-column layouts with summary panels on wide viewports.
 - Touch targets on interactive elements (sidebar links, footer buttons, tabs, pagination) are maintained at >=44px. Zero horizontal scroll across all screen widths.
 
+
+## Customer drawer background and landing color alignment — batch 5 (2026-10-27)
+
+- Drawer background (`.cust-sidebar` and `.cust-mobile-menu`) updated to `var(--cust-bg)` (`#060707`), perfectly matching the main workspace background canvas and landing page obsidian color.
+- Topbar (`.cust-topbar`) backdrop tint updated to `rgba(6, 7, 7, 0.85)` and mobile navbar (`.cust-navbar`) background unified with `var(--cust-bg)`.
+- Reaffirmed main color tokens strictly matching the cinematic landing page: `#060707` background and drawer, `#111313` card surfaces, `#191c1c` elevated slabs/hover states, `#343838` milled boundaries, and `#ff923f` burnt-orange action highlights.
 ## Visual direction
 
 Private-file viewing correction (2026-10-27): files without a download filename
@@ -1320,7 +1329,7 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-small) { font-size: .875rem; }
 .root :global(.cust-skip) { position: fixed; top: -100px; left: 16px; z-index: 100; background: var(--cust-surface); padding: 12px; }
 .root :global(.cust-skip:focus) { top: 8px; }
-.root :global(.cust-sidebar) { position: fixed; inset: 0 auto 0 0; z-index: 25; width: 17rem; height: 100dvh; padding: 1.5rem 1.125rem 1.25rem; display: flex; flex-direction: column; background: var(--cust-surface); border-right: 1px solid var(--cust-line); }
+.root :global(.cust-sidebar) { position: fixed; inset: 0 auto 0 0; z-index: 25; width: 17rem; height: 100dvh; padding: 1.5rem 1.125rem 1.25rem; display: flex; flex-direction: column; background: var(--cust-bg); border-right: 1px solid var(--cust-line); }
 .root :global(.cust-sidebar-scroll) { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--cust-line) transparent; }
 .root :global(.cust-sidebar-space) { margin: 1.25rem 0 1rem; padding: 0.75rem 0.875rem; display: flex; flex-direction: column; gap: 0.25rem; border: 1px solid var(--cust-line); border-radius: 0.75rem; background: var(--cust-surface-2); }
 .root :global(.cust-sidebar-space span) { color: var(--cust-accent); font-size: 0.625rem; font-weight: 700; letter-spacing: .16em; }
@@ -1340,7 +1349,7 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-sidebar-footer button) { min-height: 44px; width: 44px; padding: 0; display: grid; place-items: center; background: transparent; border: 1px solid transparent; border-radius: 0.5rem; color: var(--cust-muted); }
 .root :global(.cust-sidebar-footer button:hover) { color: var(--cust-red); border-color: var(--cust-line); background: var(--cust-surface-2); }
 .root :global(.cust-stage) { min-height: 100dvh; margin-left: 17rem; width: calc(100% - 17rem); max-width: calc(100% - 17rem); min-width: 0; display: flex; flex-direction: column; }
-.root :global(.cust-topbar) { position: sticky; top: 0; z-index: 20; height: 64px; width: 100%; padding: 0 clamp(1rem, 2.5vw, 2.5rem); display: flex; align-items: center; justify-content: space-between; background: rgba(17, 19, 19, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-topbar) { position: sticky; top: 0; z-index: 20; height: 64px; width: 100%; padding: 0 clamp(1rem, 2.5vw, 2.5rem); display: flex; align-items: center; justify-content: space-between; background: rgba(6, 7, 7, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-topbar-env) { display: flex; align-items: center; gap: 16px; font-size: .8125rem; color: var(--cust-muted); min-width: 0; flex-wrap: wrap; }
 .root :global(.cust-topbar-actions) { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
 .root :global(.cust-navbar) { display: none; }
@@ -1434,7 +1443,7 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-inbox-footer) { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-top: 1px solid var(--cust-line); margin-top: 16px; }
 .root :global(.cust-inbox-panel > .cust-toolbar), .root :global(.cust-inbox-panel > .cust-tabs), .root :global(.cust-inbox-footer), .root :global(.cust-notification-help) { flex-shrink: 0; }
 .root :global(.cust-notification-help summary) { display: flex; align-items: center; color: var(--cust-muted); font-size: .875rem; }
-.root :global(.cust-mobile-menu) { inset: 0 0 0 auto; margin: 0; width: min(375px, 100%); height: 100dvh; max-height: 100dvh; max-width: 100%; border: 0; padding: 24px; background: var(--cust-surface); color: var(--cust-ink); }
+.root :global(.cust-mobile-menu) { inset: 0 0 0 auto; margin: 0; width: min(375px, 100%); height: 100dvh; max-height: 100dvh; max-width: 100%; border: 0; padding: 24px; background: var(--cust-bg); color: var(--cust-ink); }
 .root :global(.cust-mobile-menu::backdrop) { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
 .root :global(.cust-mobile-menu nav a), .root :global(.cust-mobile-menu nav button) { display: flex; align-items: center; width: 100%; min-height: 48px; padding: 8px 0; color: var(--cust-ink); border: 0; }
 .root :global(.cust-mobile-menu h3) { margin-top: 24px; font-size: .875rem; color: var(--cust-muted); }
@@ -1564,7 +1573,7 @@ src/features/workspace/workspace.module.css
   .root :global(.cust-sidebar) { display: none; }
   .root :global(.cust-topbar) { display: none; }
   .root :global(.cust-stage) { margin-left: 0; width: 100%; max-width: 100%; }
-  .root :global(.cust-navbar) { display: block; position: sticky; top: 0; z-index: 30; width: 100%; background: var(--cust-surface); border-bottom: 1px solid var(--cust-line); }
+  .root :global(.cust-navbar) { display: block; position: sticky; top: 0; z-index: 30; width: 100%; background: var(--cust-bg); border-bottom: 1px solid var(--cust-line); }
   .root :global(.cust-nav-inner) { width: 100%; max-width: 100%; padding: 0 clamp(1rem, 2.5vw, 2.5rem); min-height: 72px; }
   .root :global(.cust-nav-actions) { margin-left: auto; gap: 12px; }
   .root :global(.cust-menu-toggle) { display: grid; place-items: center; width: 44px; height: 44px; padding: 8px; border: 1px solid var(--cust-line); border-radius: 8px; background: var(--cust-surface-2); color: var(--cust-ink); }
