@@ -1,10 +1,10 @@
 // Seeded mock scenario: one request at each workflow stage (UC1 → UC9),
 // created through the mock's own endpoints so every record stays consistent.
 // All names and figures are fictional sample data.
-import { createMockBackend, uuid, type Db, type Json, type MockAccount } from "./mock-backend.ts";
-import { salesRoutes } from "./mock-routes-sales.ts";
-import { stockRoutes } from "./mock-routes-stock.ts";
-import { jobRoutes } from "./mock-routes-jobs.ts";
+import { createMockBackend, uuid, type Db, type Json, type MockAccount } from "../core/mock-backend.ts";
+import { salesRoutes } from "../routes/mock-routes-sales.ts";
+import { stockRoutes } from "../routes/mock-routes-stock.ts";
+import { jobRoutes } from "../routes/mock-routes-jobs.ts";
 import { MOCK_PASSWORD } from "./mock-accounts.ts";
 
 export { MOCK_LOGINS, MOCK_PASSWORD } from "./mock-accounts.ts";

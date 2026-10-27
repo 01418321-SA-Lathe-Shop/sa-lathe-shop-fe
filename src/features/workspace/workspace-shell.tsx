@@ -9,7 +9,7 @@ import { Icon, Logo } from "../../components/appearance/icons";
 import { useApiSession } from "../auth/api-session";
 import { API_ROLES, canAccessWorkspace, getWorkspaces, type Role, type WorkspaceId } from "./workspace-access";
 import { PAGE_LABELS, ROLE_LABELS, ROLE_ROOTS, workspacePath } from "./workspace-routes";
-import { MOCK_LOGINS } from "../../../app/mock-accounts";
+import { MOCK_LOGINS } from "../../mocks/data/mock-accounts";
 import ConnectedWorkspace from "./connected-workspace";
 
 import { workspaceIcons as icons } from "./workspace-icons";

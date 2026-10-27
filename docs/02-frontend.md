@@ -1,5 +1,13 @@
 # Machine Shop Custom Manufacturing System — Frontend Guide
 
+## Source organization update — 2026-10-27
+
+App Router routes remain under `app/`; non-route code is organized under `src/features/`,
+`src/components/`, `src/hooks/` and `src/lib/`. The explicit contract mock lives under
+`src/mocks/` (core transport, fictional data, and domain route modules). Native tests
+mirror these owners under `tests/`; run `npm test`. Historical source paths below
+describe their original phase; current workflows and backend contracts are unchanged.
+
 ## Public landing update — 2026-10-27
 
 The owner approved the cinematic landing on `codex/cinematic-scrap-landing`, branched from `develop`, then replaced its animation with a five-second robotic pickup → conveyor → furnace → finished ingot loop. The latest refinement adds mechanical detail, brushed surfaces and soft shadows, translates the public page to Thai, and removes the visible playback bar. This remains an illustrative metaphor, not a recycling-service claim or a new business process. Auth routes, API contracts, role screens, and UC1–UC9 remain unchanged. Workspace language/settings remain unchanged.

@@ -3,7 +3,7 @@
 // Go/PostgreSQL/S3 stack is available. It is an explicit opt-in transport,
 // never a fallback after a live API failure, and it is not business authority:
 // the backend remains the source of truth for every rule mirrored here.
-import { parseApiJSON, type Transport } from "../src/lib/api/backend-api.ts";
+import { parseApiJSON, type Transport } from "../../lib/api/backend-api.ts";
 import { DecimalError } from "./mock-decimal.ts";
 
 export type Role = "customer" | "worker" | "admin";

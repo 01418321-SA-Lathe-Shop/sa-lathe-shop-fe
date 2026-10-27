@@ -6,7 +6,7 @@ import { useEffect,useRef,useState,type FormEvent } from "react";
 import { ThemeToggle } from "../../components/appearance/appearance";
 import { Icon,Logo } from "../../components/appearance/icons";
 
-import { MOCK_LOGINS,type MockLogin } from "../../../app/mock-accounts";
+import { MOCK_LOGINS,type MockLogin } from "../../mocks/data/mock-accounts";
 import { Feedback,passwordError,text } from "../../components/ui/backend-ui";
 import { useCommand } from "../../hooks/backend-hooks";
 import { BackendApi } from "../../lib/api/backend-api";
