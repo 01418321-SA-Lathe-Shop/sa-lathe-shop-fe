@@ -53,7 +53,7 @@ export function CustomerNotifications({ api, panel = false, onClose, revision = 
   </section>;
 }
 
-export function NotificationBell({ api, beforeOpen }: { api: BackendApi; beforeOpen: () => void }) {
+export function NotificationBell({ api, beforeOpen }: { api: BackendApi; beforeOpen?: () => void }) {
   const resource = useCollection<Notification>(api, "/notifications"); const [open, setOpen] = useState(false); const [revision, setRevision] = useState(0);
   const reload = resource.reload;
   const dialog = useRef<HTMLDialogElement>(null); const bell = useRef<HTMLButtonElement>(null);
@@ -63,7 +63,7 @@ export function NotificationBell({ api, beforeOpen }: { api: BackendApi; beforeO
   }, [reload]);
   const badge = resource.data && !resource.error ? unreadCount(resource.data.items, resource.data.complete) : "";
   function close() { dialog.current?.close(); setOpen(false); resource.reload(); bell.current?.focus(); }
-  return <><button ref={bell} className="cust-bell" aria-label={`การแจ้งเตือน${badge ? resource.data?.complete ? ` · ${badge} ยังไม่อ่าน` : " · ยังตรวจจำนวนไม่ครบ" : ""}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { beforeOpen(); setRevision(revision + 1); setOpen(true); dialog.current?.showModal(); }}><Icon name="bell" size={22} />{badge && <span>{badge}</span>}</button>
+  return <><button ref={bell} className="cust-bell" aria-label={`การแจ้งเตือน${badge ? resource.data?.complete ? ` · ${badge} ยังไม่อ่าน` : " · ยังตรวจจำนวนไม่ครบ" : ""}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { beforeOpen?.(); setRevision(revision + 1); setOpen(true); dialog.current?.showModal(); }}><Icon name="bell" size={22} />{badge && <span>{badge}</span>}</button>
     <dialog ref={dialog} className="cust-notification-dialog" aria-label="การแจ้งเตือน" onCancel={() => { setOpen(false); resource.reload(); }} onClick={(event) => { if (event.target === event.currentTarget) { const rect = event.currentTarget.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) close(); } }}>
       {open && <CustomerNotifications key={revision} api={api} panel revision={revision} onClose={close} />}
     </dialog>
