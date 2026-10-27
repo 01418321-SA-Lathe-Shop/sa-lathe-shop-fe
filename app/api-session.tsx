@@ -18,6 +18,7 @@ type SessionContext = {
   signIn: (username: string, password: string, mode: ApiMode) => Promise<ApiSession>;
   signOut: () => Promise<string>;
   resetMock: () => void;
+  setLoseNextResponse: (value: boolean) => void;
 };
 
 const Context = createContext<SessionContext | null>(null);
@@ -70,7 +71,9 @@ export function ApiSessionProvider({ children }: { children: ReactNode }) {
     mockRef.current = null; setMock(null); setNotice("Mock data reset. Choose a test account to start again.");
   }, [session]);
 
-  const value = useMemo(() => ({ session, notice, liveBase: LIVE_BASE, mock, signIn, signOut, resetMock }), [session, notice, mock, signIn, signOut, resetMock]);
+  // Mock controls change the backend object here, not through hook output.
+  const setLoseNextResponse = useCallback((value: boolean) => { if (mockRef.current) mockRef.current.loseNextResponse = value; }, []);
+  const value = useMemo(() => ({ session, notice, liveBase: LIVE_BASE, mock, signIn, signOut, resetMock, setLoseNextResponse }), [session, notice, mock, signIn, signOut, resetMock, setLoseNextResponse]);
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 

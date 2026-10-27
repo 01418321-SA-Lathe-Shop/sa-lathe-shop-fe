@@ -89,7 +89,7 @@ function UsageForm({ api, job, onSaved }: { api: BackendApi; job: ProductionStat
   const write = useRetryableWrite(api, onSaved); const [adding, setAdding] = useState(false);
   return <Section title="Record actual material use">
     <form aria-busy={write.busy} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); write.submit(`/production/jobs/${job.job_id}/usage`, "POST", () => usagePayload({ idempotency_key: crypto.randomUUID(), expected_version: job.version }, text(data, "note"), rows), ""); }}>
-      <p>Enter only what was used since the last entry. This job's reservation is used first, then free stock; other jobs' reservations stay protected. Inactive materials can use only what this job already reserved.</p>
+      <p>Enter only what was used since the last entry. This job&apos;s reservation is used first, then free stock; other jobs&apos; reservations stay protected. Inactive materials can use only what this job already reserved.</p>
       <fieldset className="live-fields" disabled={write.frozen}>
         {rows.map((row, index) => <Field key={row.material_id} label={`Used now · ${row.label}`}><input inputMode="decimal" value={row.quantity} onChange={(event) => setRows((current) => current.map((value, i) => i === index ? { ...value, quantity: event.target.value } : value))} /></Field>)}
         <Field label="Usage note (optional)"><textarea name="note" maxLength={2000} /></Field>
@@ -106,7 +106,7 @@ function TimeForm({ api, job, onSaved }: { api: BackendApi; job: ProductionState
   return <Section title="Record labor minutes">
     <form aria-busy={write.busy} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); write.submit(`/production/jobs/${job.job_id}/time`, "POST", () => timePayload({ idempotency_key: crypto.randomUUID(), expected_version: job.version }, text(data, "minutes"), text(data, "note")), ""); }}>
       <fieldset className="live-fields" disabled={write.frozen}><Field label="Minutes worked (whole number)"><input name="minutes" required inputMode="numeric" /></Field><Field label="Time note (optional)"><input name="note" maxLength={2000} /></Field><button type="submit">Add labor minutes</button></fieldset>
-      <p>Minutes are added to the job's total; this is not a stopwatch and no hourly rate is applied.</p>
+      <p>Minutes are added to the job&apos;s total; this is not a stopwatch and no hourly rate is applied.</p>
     </form>
     <Feedback error={write.error} />{write.uncertain && <RetryNote busy={write.busy} label="Retry identical time entry" onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(); }} />}
   </Section>;

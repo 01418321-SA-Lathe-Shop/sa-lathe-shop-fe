@@ -29,8 +29,8 @@ The owner asked to finish the frontend before database/system integration, using
 ## Run the preview (no Docker needed)
 
 ```powershell
-npm ci --legacy-peer-deps   # first time; installs package-lock.json as-is (see Known issues)
-npm run dev                 # retry once if Next.js stops at its security-upgrade notice
+npm ci        # first time
+npm run dev
 ```
 
 Open http://localhost:3000/login → expand **บัญชีทดสอบ — Mock backend** → pick an account. All four accounts share one mock dataset until reload. In the shell, **สลับบัญชีทดสอบ** switches accounts without losing data, can simulate a lost response on the next write (to see "Retry identical …"), and can reset the data.
@@ -62,14 +62,13 @@ No UI rewrite is needed; the same components already call the real endpoints.
 | TypeScript (`next typegen` + `tsc --noEmit`) | Passed |
 | Headless Chrome (CDP, local script, no new dependency) against `next dev` + mock | Passed with **no console errors** and **no horizontal overflow**: shell navigation for every role; live login with no backend shows an error and does not fall back; route guard; 390 px mobile; UC1→UC5 full flow; UC6 accept + lost-response identical retry creates exactly one order (exact 8.38 total); UC7 claim → replacement → full receipt → Admin credit days → bank proof required → paid; UC8 start → planned/unplanned use → minutes → photo → complete (unused released) → Admin labor cost; UC9 terms → invoice → ship → return for rework → re-complete → reship → accept → bank proof → approval → request closed |
 | `DESIGN.md` | Prose + change log updated per group; `sync-design.mjs --check` and `git diff --check` pass |
-| ESLint | **Not run**: `eslint-config-next@^14` in `package.json` cannot load with the flat config (`ERR_MODULE_NOT_FOUND .../core-web-vitals`). Fixing it needs a dependency change (owner approval) |
-| Production build | Not re-run; Phase 9 recorded that `next build` exits 1 on the Next.js security-upgrade gate. `next dev` shows the same upgrade notice |
+| ESLint | Update 2026-10-26: after the Next.js 16.4.3 / eslint-config-next 16.4.3 upgrade, ESLint runs; Phase 10 findings were fixed (`7866970`). Only the pre-existing `appearance.tsx` set-state-in-effect error (and its unused-directive warning) remains |
+| Production build | Update 2026-10-26: `next build` exits 0 on Next.js 16.4.3 (`3e583fb`); browser regression re-run on 16.4.3 passed |
 | Real browser → Go → PostgreSQL/S3 | **Pending** (Docker engine not running on this machine) |
 
 ## Known issues and open items
 
-- `npm ci` without `--legacy-peer-deps` fails on the existing eslint peer conflict; nothing was upgraded.
-- Next.js 16.4.0 is flagged by the Next.js CLI's security advisory; an upgrade needs owner approval.
+- Resolved 2026-10-26 with owner approval: Next.js 16.4.0 → 16.4.3 security upgrade and matching eslint-config-next; plain `npm ci` works. Deployment guide: `docs/12-deploy-vercel-railway.md`.
 - The UC1–UC5 screens from Phases 7–9 keep their English labels (unchanged); new UC6–UC9 screens follow the same style.
 - Plans and production show material IDs where the backend DTO has no names (UC5 plan). The production list shows request codes; the detail fetches the request label.
 - Customer request/quotation/deposit pages are focused views of the same request record (no invented list endpoints).
