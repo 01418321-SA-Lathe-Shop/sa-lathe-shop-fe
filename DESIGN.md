@@ -149,7 +149,7 @@ Connected mobile actions wrap by whole button (8rem flex basis) rather than spli
 
 Connected auth ใช้ดีไซน์ Login/Register หลักที่ `/login` และ `/register` ร่วมกับ backend เดียวกันสำหรับ Customer, Staff และ Admin โดย session อยู่ใน memory และไม่ fallback เข้า mock เมื่อ API ล้มเหลว เข้าสู่ระบบสำเร็จแล้วจะไปที่ภาพรวมของบทบาทใน designed shell ใต้ฟอร์มจริงมีส่วน "บัญชีทดสอบ — Mock backend" พร้อมปุ่มสี่ปุ่ม (ลูกค้าบริษัท, ลูกค้าบุคคล, Staff, Admin) ที่เข้าสู่ระบบผ่าน mock backend ในเบราว์เซอร์ (โหลดเมื่อกดครั้งแรกเท่านั้น) บัญชีทดสอบใช้ข้อมูล mock ชุดเดียวกันจนกว่าจะรีโหลดหรือรีเซ็ต
 
-Auth spacing ใช้ระยะจากช่องสุดท้ายถึงปุ่มหลัก `1.5rem`, จากปุ่มหลักถึงลิงก์สลับ Login/Register `1rem`, ก่อน divider ของส่วนบัญชีทดสอบ `1.75rem` และระหว่างปุ่ม bypass `.75rem` เพื่อรักษาลำดับสายตาในทุก UI scale
+Auth spacing ใช้ระยะจากช่องสุดท้ายถึงปุ่มหลัก `1.5rem`, จากปุ่มหลักถึงลิงก์สลับ Login/Register `1rem`, ก่อน divider ของส่วนบัญชีทดสอบ `1.75rem` และระหว่างปุ่ม bypass `.75rem` เพื่อรักษาลำดับสายตาในทุก UI scale ช่องกรอกข้อมูลใน `.login-field` แสดงสถานะโฟกัสที่กรอบนอกมน (`.login-field > div:focus-within`) ด้วยสีส้มและ soft glow ring; คอนโทรลภายใน (`input`, `select`) ปิด outline บน `:focus` และ `:focus-visible` เพื่อป้องกันกรอบเหลี่ยมทับซ้อนภายในกรอบมน
 
 ส่วน "บัญชีทดสอบ — Mock backend" ใช้ native `details/summary` และปิดเป็นค่าเริ่มต้น หัวข้อสูงอย่างน้อย `3.5rem` มี chevron หมุนเมื่อเปิด รองรับ keyboard และปิด transition เมื่อผู้ใช้ตั้งค่า reduced motion
 
@@ -239,6 +239,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-27 | ปิด redundant inner outline บน `:is(input, select):focus-visible` ใน `.login-field` เพื่อให้โฟกัสแสดงที่กรอบนอกมน `.login-field > div:focus-within` เท่านั้น | ตรวจสอบ visual rendering ในเบราว์เซอร์ทั้ง Dark และ Light mode, snapshot check และ native tests |
 | 2026-10-27 | เหลือ global stylesheet ไฟล์เดียว; ย้าย appearance/auth/workspace เป็น CSS Modules; ลบ selector ที่ไม่พบ required class ใน source literals/dynamic prefixes และเก็บ selector กำกวมไว้; audit ใน docs/refactor/css-cleanup.json | Native tests, lint, TypeScript, build, routes และ desktop/mobile baseline comparison |
 | 2026-10-27 | จัด UC screens/domain logic ตาม feature; shared forms ใช้ CSS Module scoped ที่ theme provider; จำกัด Tailwind loader ไม่ให้แปลง CSS Modules โดยไม่เพิ่ม dependency | Native tests, lint, TypeScript, build และ route inventory เดิม |
 | 2026-10-27 | ย้าย landing เป็น feature; แยก robot arm, conveyor, furnace, workpiece และ primitives; CSS Module ใช้ local owner กับ zero-specificity scope เพื่อคง cascade เดิม; ลบเฉพาะ SVG starter 5 ไฟล์ที่อนุมัติ | Timing tests, lint, TypeScript, build; รูปแบบและ public image URLs เดิม |
@@ -460,6 +461,8 @@ src/features/auth/auth.module.css
 :where(.scope) :global(.login-field) > div { height: 3.5rem; padding: 0 1rem; display: flex; align-items: center; gap: 0.75rem; border: 0.0625rem solid #303532; border-radius: 0.75rem; background: #111412; color: #6f7771; }
 :where(.scope) :global(.login-field) > div:focus-within { border-color: #a55d28; box-shadow: 0 0 0 0.1875rem rgba(255,155,69,.07); }
 :where(.scope) :global(.login-field) input { width: 100%; height: 100%; border: 0; outline: 0; background: transparent; color: #d8ddd9; font: inherit; font-size: 0.8125rem; }
+:where(.scope) :global(.login-field) :is(input, select):focus,
+:where(.scope) :global(.login-field) :is(input, select):focus-visible { outline: none; }
 :where(.scope) :global(.login-submit) { width: 100%; height: 3.5rem; padding: 0 1.125rem; display: flex; align-items: center; justify-content: center; gap: 0.6875rem; border: 0.0625rem solid #ffc184; border-radius: 0.8125rem; background: var(--lime); color: #21150c; font-size: 0.8125rem; font-weight: 700; cursor: pointer; }
 :where(.scope) :global(.login-register-link) { width:100%; margin-top:1.0625rem; border:0; background:transparent; color:#747c75; font-size: 0.625rem; cursor:pointer }:where(.scope) :global(.login-register-link) strong { margin-left:0.25rem;color:var(--lime);font-weight:650 }
 :where(.scope) :global(.bypass-actions) { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem; }:where(.scope) :global(.bypass-actions) > button { min-height: 4.75rem; padding: 0 0.875rem; display: grid; grid-template-columns: 1.5rem 1fr 1rem; align-items: center; gap: 0.625rem; border: 0.0625rem solid #343936; border-radius: 0.75rem; background: #111412; color: #747c75; text-align: left; cursor: pointer; transition: border-color .2s,background .2s,transform .2s; }:where(.scope) :global(.bypass-actions) > button:hover{border-color:#8b5126;background:#211914;transform:translateY(-0.0625rem)}:where(.scope) :global(.bypass-actions) > button>span{display:flex;flex-direction:column;gap:0.25rem}:where(.scope) :global(.bypass-actions) strong{color:#c5cbc6;font-size: 0.6875rem}:where(.scope) :global(.bypass-actions) small{color:#626a63;font-size: 0.4375rem;line-height:1.4}:where(.scope) :global(.bypass-actions) button>:global(.icon):last-child{width:0.875rem;height:0.875rem}
@@ -809,6 +812,8 @@ src/features/workspace/workspace.module.css
 :where(.scope) :global(.demo-bypass-content) { padding:0 0 1rem; }
 :where(.scope) :global(.demo-bypass) :global(.demo-context) { margin-bottom:0; }
 :where(.scope) :global(.login-field) select { width:100%; border:0; outline:0; background:transparent; color:var(--text); font:inherit; font-size:.8125rem; }
+:where(.scope) :global(.login-field) select:focus,
+:where(.scope) :global(.login-field) select:focus-visible { outline: 0; }
 :where(.scope) :global(.auth-help), :where(.scope) :global(.auth-api) { display:block; color:var(--muted); font-size:.6875rem; line-height:1.6; }
 :where(.scope) :global(.auth-help) { margin:.625rem 0 0; }
 :where(.scope) :global(.auth-api) { margin-top:1rem; text-align:center; opacity:.7; }

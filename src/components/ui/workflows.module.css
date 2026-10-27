@@ -168,6 +168,8 @@
 :where(.scope) :global(.demo-bypass-content) { padding:0 0 1rem; }
 :where(.scope) :global(.demo-bypass) :global(.demo-context) { margin-bottom:0; }
 :where(.scope) :global(.login-field) select { width:100%; border:0; outline:0; background:transparent; color:var(--text); font:inherit; font-size:.8125rem; }
+:where(.scope) :global(.login-field) select:focus,
+:where(.scope) :global(.login-field) select:focus-visible { outline: 0; }
 :where(.scope) :global(.auth-help), :where(.scope) :global(.auth-api) { display:block; color:var(--muted); font-size:.6875rem; line-height:1.6; }
 :where(.scope) :global(.auth-help) { margin:.625rem 0 0; }
 :where(.scope) :global(.auth-api) { margin-top:1rem; text-align:center; opacity:.7; }
