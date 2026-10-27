@@ -1,7 +1,7 @@
 // UC6 supplier orders (backend UC6.md). Quantities/unit costs are exact
 // NUMERIC(18,6) strings; each line rounds half-up to two THB decimals, then sums.
-import { inventoryDecimal } from "./backend-inventory-domain.ts";
-import { bangkokInstant } from "./backend-fulfillment-domain.ts";
+import { inventoryDecimal } from "../inventory/inventory-domain.ts";
+import { bangkokInstant } from "../fulfillment/fulfillment-domain.ts";
 
 export type Supplier = { id: string; name: string; email: string; phone: string; is_active: boolean; version: number | string };
 export type OrderLine = { material_id: string; material_name: string; unit_id: string; unit_name: string; quantity: string; unit_cost: string; total_amount: string };

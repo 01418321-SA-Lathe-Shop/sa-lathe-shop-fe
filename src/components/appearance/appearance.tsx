@@ -1,5 +1,6 @@
 "use client";
 import { Icon } from "./icons";
+import workflowStyles from "../ui/workflows.module.css";
 import { createContext,useContext,useEffect,useId,useRef,useSyncExternalStore } from "react";
 import { flushSync } from "react-dom";
 import { getServerTheme,getServerUiSize,getTheme,getUiSize,saveTheme,saveUiSize,subscribeAppearance,type Theme,type UiSize } from "./appearance-preferences";
@@ -48,5 +49,5 @@ export function AppThemeProvider({ children }: { children: React.ReactNode }) {
   const changeUiSize = (size: UiSize) => {
     saveUiSize(size);
   };
-  return <ThemeContext.Provider value={{ theme, onTheme: changeTheme, uiSize, onUiSize: changeUiSize }}><div className="theme-root" data-theme={theme}>{children}</div></ThemeContext.Provider>;
+  return <ThemeContext.Provider value={{ theme, onTheme: changeTheme, uiSize, onUiSize: changeUiSize }}><div className={`theme-root ${workflowStyles.scope}`} data-theme={theme}>{children}</div></ThemeContext.Provider>;
 }

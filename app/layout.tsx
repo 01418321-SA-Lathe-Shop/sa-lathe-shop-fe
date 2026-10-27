@@ -4,7 +4,6 @@ import "./globals.css";
 import { AppThemeProvider } from "../src/components/appearance/appearance";
 import { ApiSessionProvider } from "../src/features/auth/api-session";
 import { Suspense } from "react";
-import "./workflows.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

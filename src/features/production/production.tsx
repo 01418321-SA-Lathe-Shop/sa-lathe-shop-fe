@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { BackendApi, displayMoney, type Account, type JobRequest } from "../src/lib/api/backend-api";
-import { useCommand, useResource, useRetryableWrite } from "../src/hooks/backend-hooks";
-import { inventoryDisplay, type InventoryPlan } from "./backend-inventory-domain";
-import { MaterialSearch } from "./backend-inventory";
-import { formatMinutes, laborPayload, timePayload, usagePayload, type ProductionState, type UsageDraft } from "./backend-production-domain";
-import { Feedback, Field, Paging, PrivateUpload, RetryNote, Status, text, type ReadyFile } from "../src/components/ui/backend-ui";
-import { formatBangkok } from "../src/lib/formatting/display";
-import type { ProductionSummary } from "../src/features/workspace/connected-workspace";
+import { BackendApi, displayMoney, type Account, type JobRequest } from "../../lib/api/backend-api";
+import { useCommand, useResource, useRetryableWrite } from "../../hooks/backend-hooks";
+import { inventoryDisplay, type InventoryPlan } from "../inventory/inventory-domain";
+import { MaterialSearch } from "../inventory/inventory";
+import { formatMinutes, laborPayload, timePayload, usagePayload, type ProductionState, type UsageDraft } from "./production-domain";
+import { Feedback, Field, Paging, PrivateUpload, RetryNote, Status, text, type ReadyFile } from "../../components/ui/backend-ui";
+import { formatBangkok } from "../../lib/formatting/display";
+import type { ProductionSummary } from "../workspace/connected-workspace";
 
 const short = (id: string) => id.slice(0, 8);
 

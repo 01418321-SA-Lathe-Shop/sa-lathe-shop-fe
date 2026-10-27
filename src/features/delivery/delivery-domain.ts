@@ -1,6 +1,6 @@
 // UC9 delivery, invoice, installments and free rework (backend UC9.md).
-import { moneyInput } from "../src/lib/api/backend-api.ts";
-import { bangkokInstant } from "./backend-fulfillment-domain.ts";
+import { moneyInput } from "../../lib/api/backend-api.ts";
+import { bangkokInstant } from "../fulfillment/fulfillment-domain.ts";
 
 export type Invoice = { id: string; number: string; amount: string; paid: string; balance: string; status: "unpaid" | "partial" | "paid"; credit_days: number; issued_at: string; due_at: string };
 export type Shipment = { id: string; cycle: number; method: "self" | "third_party"; receiver_name: string; status: "shipping" | "delivered" | "returned"; shipped_at: string; decided_at?: string; decided_by?: string; reason: string };

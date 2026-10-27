@@ -1,4 +1,4 @@
-import type { EvidenceSubmission, Fulfillment, Terms } from "../src/lib/api/backend-api";
+import type { EvidenceSubmission, Fulfillment, Terms } from "../../lib/api/backend-api";
 
 function satang(value: string): bigint {
   if (!/^\d{1,16}(?:\.\d{1,2})?$/.test(value)) throw new Error("Enter a nonnegative THB amount with at most two decimal places.");

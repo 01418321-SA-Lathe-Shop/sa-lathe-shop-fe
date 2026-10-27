@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { type Account, BackendApi } from "../src/lib/api/backend-api";
-import { useCommand, useResource } from "../src/hooks/backend-hooks";
-import { inventoryDisplay, planLines, type InventoryMaterial, type InventoryPlan, type PlanDraftLine } from "./backend-inventory-domain";
-import { Field, Feedback, Paging, text } from "../src/components/ui/backend-ui";
+import { type Account, BackendApi } from "../../lib/api/backend-api";
+import { useCommand, useResource } from "../../hooks/backend-hooks";
+import { inventoryDisplay, planLines, type InventoryMaterial, type InventoryPlan, type PlanDraftLine } from "./inventory-domain";
+import { Field, Feedback, Paging, text } from "../../components/ui/backend-ui";
 
 type PlanAttempt = { mode: "save" | "reserve"; idempotency_key: string; expected_version: number | string; lines?: PlanDraftLine[] };
 

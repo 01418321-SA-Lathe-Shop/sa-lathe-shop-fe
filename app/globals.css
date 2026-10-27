@@ -565,3 +565,6 @@ html[data-theme="light"], .theme-root[data-theme="light"] {
   .sidebar-theme .theme-toggle span { display: inline; }
   .theme-toggle span { display: none; }
 }
+
+/* Shared workflow token aliases. */
+:root { --foreground: var(--text); --border: var(--line); --accent: var(--lime); }

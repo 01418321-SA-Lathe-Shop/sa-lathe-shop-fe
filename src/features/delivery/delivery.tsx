@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { BackendApi, displayMoney, type Account } from "../src/lib/api/backend-api";
-import { useCommand, useResource, useRetryableWrite } from "../src/hooks/backend-hooks";
-import { availableActions, inspectPayload, paymentPayload, reviewPayload, shipPayload, type FulfillmentJob, type Payment } from "./backend-delivery-domain";
-import { creditDays } from "./backend-receiving-domain";
-import { RequestLabel } from "./backend-production";
-import { Feedback, Field, Paging, PrivateUpload, RetryNote, Status, text, type ReadyFile } from "../src/components/ui/backend-ui";
-import { formatBangkok } from "../src/lib/formatting/display";
+import { BackendApi, displayMoney, type Account } from "../../lib/api/backend-api";
+import { useCommand, useResource, useRetryableWrite } from "../../hooks/backend-hooks";
+import { availableActions, inspectPayload, paymentPayload, reviewPayload, shipPayload, type FulfillmentJob, type Payment } from "./delivery-domain";
+import { creditDays } from "../receiving/receiving-domain";
+import { RequestLabel } from "../production/production";
+import { Feedback, Field, Paging, PrivateUpload, RetryNote, Status, text, type ReadyFile } from "../../components/ui/backend-ui";
+import { formatBangkok } from "../../lib/formatting/display";
 
 const short = (id: string) => id.slice(0, 8);
 const command = (state: FulfillmentJob) => ({ idempotency_key: crypto.randomUUID(), expected_version: state.version });

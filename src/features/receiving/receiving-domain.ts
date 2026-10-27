@@ -1,6 +1,6 @@
 // UC7 receiving, replacement claims and supplier settlement (backend UC7.md).
-import { inventoryDecimal } from "./backend-inventory-domain.ts";
-import { bangkokInstant } from "./backend-fulfillment-domain.ts";
+import { inventoryDecimal } from "../inventory/inventory-domain.ts";
+import { bangkokInstant } from "../fulfillment/fulfillment-domain.ts";
 
 export type ReceivingSummary = { order_id: string; order_no: string; supplier_name: string; status: string; version: number | string; full_received_at?: string };
 export type ReceivingLine = { material_id: string; material_name: string; unit_name: string; ordered: string; good: string; damaged: string; outstanding: string };

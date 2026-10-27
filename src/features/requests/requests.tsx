@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { BackendApi, positiveInt64, displayMoney, type Account, type Attachment, type Customer, type Decision, type JobRequest, type Page, type SignedLink, type Terms } from "../src/lib/api/backend-api";
-import { useCommand, useResource } from "../src/hooks/backend-hooks";
-import { Field, Feedback, Paging, text } from "../src/components/ui/backend-ui";
-import { LiveQuotations } from "./backend-quotations";
-import { formatBangkok } from "../src/lib/formatting/display";
+import { BackendApi, positiveInt64, displayMoney, type Account, type Attachment, type Customer, type Decision, type JobRequest, type Page, type SignedLink, type Terms } from "../../lib/api/backend-api";
+import { useCommand, useResource } from "../../hooks/backend-hooks";
+import { Field, Feedback, Paging, text } from "../../components/ui/backend-ui";
+import { LiveQuotations } from "../quotations/quotations";
+import { formatBangkok } from "../../lib/formatting/display";
 
 // "all" is the Staff/Admin record. Customer pages focus one step of the same
 // request record: details/files (UC1), quotations/decisions (UC3) or the

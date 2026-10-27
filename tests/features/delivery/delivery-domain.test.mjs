@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { availableActions, inspectPayload, paymentPayload, reviewPayload, shipPayload } from "../../../app/backend-delivery-domain.ts";
+import { availableActions, inspectPayload, paymentPayload, reviewPayload, shipPayload } from "../../../src/features/delivery/delivery-domain.ts";
 
 const command = { idempotency_key: "10000000-0000-4000-8000-000000000009", expected_version: 4 };
 const base = { job_id: "j", request_id: "r", job_status: "completed", request_status: "ongoing", version: 4, cycle: 1, opening_balance: "8200.00", deposit: "0.00", deliveries: [], payments: [], events: [], rework_history: [] };

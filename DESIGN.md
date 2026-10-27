@@ -13,7 +13,7 @@
 | `src/features/landing/` | Landing markup, content, scoped CSS Module และ procedural scene |
 | `src/components/appearance/` | Icons, Logo, theme/scale provider และ Settings |
 | `src/features/workspace/` | Shared role shell, permissions mapping และ URL |
-| `app/workflows.css` | Functional UC forms/tables และ role shell overrides |
+| `src/components/ui/workflows.module.css` | Functional UC forms/tables และ role shell overrides |
 | `src/features/auth/` | Connected Login/Register และ memory-only live/mock session |
 | `src/features/inbox/`, `src/features/memberships/` | Inbox และ company memberships แยกจาก login |
 | `app/mock-*.ts` | In-browser mock backend ตามสัญญา API (dev/preview เท่านั้น) |
@@ -238,6 +238,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-27 | จัด UC screens/domain logic ตาม feature; shared forms ใช้ CSS Module scoped ที่ theme provider; จำกัด Tailwind loader ไม่ให้แปลง CSS Modules โดยไม่เพิ่ม dependency | Native tests, lint, TypeScript, build และ route inventory เดิม |
 | 2026-10-27 | ย้าย landing เป็น feature; แยก robot arm, conveyor, furnace, workpiece และ primitives; CSS Module ใช้ local owner กับ zero-specificity scope เพื่อคง cascade เดิม; ลบเฉพาะ SVG starter 5 ไฟล์ที่อนุมัติ | Timing tests, lint, TypeScript, build; รูปแบบและ public image URLs เดิม |
 | 2026-10-27 | จัด shared infrastructure, auth และ workspace ไว้ใน src; แยก icons, API types, inbox และ memberships ตามหน้าที่ โดยไม่เปลี่ยน UI หรือ URL | Native tests, lint, TypeScript, build และ design snapshot |
 | 2026-10-27 | แก้ preference hydration ด้วย external-store subscription แทน setState ใน effect; คง Settings, theme transition และ scale เดิม | Preference unit tests; full lint, TypeScript และ browser regression checks |
@@ -842,265 +843,267 @@ html[data-theme="light"], .theme-root[data-theme="light"] {
   .sidebar-theme .theme-toggle span { display: inline; }
   .theme-toggle span { display: none; }
 }
+
+/* Shared workflow token aliases. */
+:root { --foreground: var(--text); --border: var(--line); --accent: var(--lime); }
 ```
 
-### A2. Shared workflow styles — app/workflows.css
+### A2. Shared workflow styles — src/components/ui/workflows.module.css
 
 ```css
 /* Shared UC forms, derived from develop and adapted to the design tokens. */
-:root { --foreground: var(--text); --border: var(--line); --accent: var(--lime); }
 /* Customer demo workflows (UC1, UC3, UC4, UC9). */
-.workflow-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.125rem; }
-.workflow-toolbar > p { color: var(--muted); font-size: 0.75rem; line-height: 1.6; }
-.workflow-success { padding: 0.9375rem 1.125rem; background: var(--surface-2); border: 0.0625rem solid var(--line); color: var(--text); border-radius: 0.5rem; font-size: 0.75rem; line-height: 1.7; margin-bottom: 1.125rem; overflow-wrap: anywhere; }
-.field-error { font-size: 0.75rem; color: var(--text); background: var(--surface-2); border: 0.0625rem solid var(--line); padding: 0.75rem; border-radius: 0.4375rem; margin: 0.625rem 0; line-height: 1.7; }
-.record-layout { display: grid; grid-template-columns: minmax(12.5rem, 31%) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
-.record-list { display: grid; gap: 0.625rem; }
-.record-list-item { min-width: 0; width: 100%; text-align: left; display: grid; gap: 0.75rem; padding: 1.0625rem; border: 0.0625rem solid var(--border); border-radius: 0.5625rem; background: var(--surface-2); }
-.record-list-item:hover { border-color: var(--line); }
-.record-list-item.selected { border-color: var(--accent); box-shadow: inset 0.1875rem 0 var(--accent); background: var(--surface-2); }
-.record-list-item > span:first-child { font-size: 0.75rem; color: var(--text); text-transform: capitalize; }
-.record-list-item > strong { font-size: 0.75rem; line-height: 1.6; font-weight: 550; overflow-wrap: anywhere; }
-.record-list-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; align-items: center; }
-.record-list-bottom > span:last-child { font-size: 0.75rem; color: var(--text); }
-.record-status { display: inline-flex; align-items: center; border-radius: 0.3125rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 550; color: var(--text); background: var(--surface-2); width: fit-content; }
-.status-approved, .status-paid, .status-delivered, .status-completed { background: var(--surface-2); color: var(--text); }
-.status-sent, .status-ongoing, .status-shipping { background: var(--surface-2); color: var(--text); }
-.status-partial, .status-pending { background: var(--surface-2); color: var(--text); }
-.status-canceled, .status-rejected, .status-returned { background: var(--surface-2); color: var(--text); }
-.record-detail, .workflow-form-panel { background: var(--surface-2); border: 0.0625rem solid var(--border); border-radius: 0.625rem; padding: 1.5625rem; min-width: 0; }
-.record-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.9375rem; }
-.record-heading h2 { font-size: 1.1875rem; line-height: 1.5; letter-spacing: -.025em; margin-top: 0.5rem; font-weight: 600; overflow-wrap: anywhere; }
-.record-id { font-size: 0.75rem; color: var(--text); overflow-wrap: anywhere; margin: 0.75rem 0 1.25rem; }
-.detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; padding: 1.125rem; border: 0.0625rem solid var(--border); border-radius: 0.5rem; background: var(--surface-2); margin: 1.25rem 0; }
-.detail-grid dt { font-size: 0.75rem; color: var(--text); margin-bottom: 0.375rem; }
-.detail-grid dd { margin: 0; font-size: 0.75rem; overflow-wrap: anywhere; }
-.record-detail h3 { font-size: 0.75rem; margin: 1.5rem 0 0.75rem; font-weight: 600; }
-.attachment-list { display: grid; gap: 0.5625rem; margin: 0.75rem 0 1.25rem; }
-.attachment-link { display: flex; justify-content: space-between; gap: 0.75rem; width: 100%; min-height: 2.75rem; padding: 0.6875rem 0.8125rem; background: var(--surface-2); border: 0.0625rem solid var(--line); border-radius: 0.375rem; color: var(--text); font-size: 0.75rem; text-align: left; overflow-wrap: anywhere; margin: 0.5rem 0; }
-.attachment-link > span { color: var(--text); font-weight: 600; flex-shrink: 0; }
-.price-summary { padding: 1.4375rem; background: var(--surface-2); border: 0.0625rem solid var(--line); border-radius: 0.5625rem; display: grid; gap: 0.625rem; }
-.price-summary > span { font-size: 0.75rem; color: var(--text); }
-.price-summary > strong { font-size: 2rem; letter-spacing: -.045em; font-weight: 600; color: var(--text); }
-.terms-summary { padding: 1.125rem 0; font-size: 0.75rem; line-height: 1.8; }
-.terms-summary > strong { font-weight: 600; }
-.terms-summary > p { color: var(--text); font-size: 0.75rem; margin-top: 0.375rem; }
-.workflow-note { font-size: 0.75rem; color: var(--text); line-height: 1.8; margin: 0.9375rem 0; }
-.form-actions { display: flex; gap: 0.625rem; flex-wrap: wrap; margin: 1.25rem 0; }
-.button-danger { background: var(--surface-2); color: var(--text); border: 0.0625rem solid var(--line); border-radius: 0.5rem; min-height: 2.875rem; padding: 0.75rem 1.125rem; font-size: 0.75rem; }
-button:disabled { cursor: not-allowed; opacity: .45; }
-.revision-history { margin-top: 1.75rem; border-top: 0.0625rem solid var(--border); padding-top: 1rem; }
-.revision-history summary, .demo-tools summary { cursor: pointer; color: var(--text); font-size: 0.75rem; min-height: 1.875rem; }
-.revision-history p { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.625rem; font-size: 0.75rem; align-items: center; padding: 0.625rem 0; }
-.workflow-form-panel { margin-bottom: 1.375rem; }
-.workflow-form-panel h2 { font-size: 1.25rem; letter-spacing: -.025em; margin-bottom: 1.25rem; }
-.form-field { display: grid; gap: 0.5rem; color: var(--text); font-size: 0.75rem; margin-bottom: 1.1875rem; }
-.form-field input, .form-field textarea, .form-field select { width: 100%; min-width: 0; background: var(--surface-2); color: var(--foreground); border: 0.0625rem solid var(--line); border-radius: 0.4375rem; padding: 0.75rem; min-height: 2.8125rem; font-size: 0.875rem; }
-.form-field textarea { resize: vertical; line-height: 1.7; }
-.file-picker { padding: 0.9375rem; border: 0.0625rem dashed var(--line); background: var(--surface-2); border-radius: 0.5rem; margin-bottom: 1rem; }
-.file-picker label { display: grid; gap: 0.75rem; font-size: 0.75rem; color: var(--text); font-weight: 550; }
-.file-picker input { width: 100%; min-width: 0; color: var(--text); font-size: 0.75rem; }
-.file-picker input::file-selector-button { background: var(--surface-2); border: 0.0625rem solid var(--line); border-radius: 0.3125rem; padding: 0.5625rem; margin-right: 0.625rem; color: var(--text); cursor: pointer; }
-.file-picker-hint { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.625rem; margin-top: 0.75rem; align-items: center; }
-.file-picker-hint > span { font-size: 0.75rem; color: var(--text); line-height: 1.7; }
-.text-action { color: var(--text); background: transparent; border: 0; padding: 0.3125rem 0; font-size: 0.75rem; text-decoration: underline; text-underline-offset: 0.1875rem; }
-.text-action, .revision-history summary, .demo-tools summary { min-height: 2.75rem; }
-.file-picker[aria-busy="true"] { border-style: solid; }
-@media (max-width: 47.5rem) { .form-field input, .form-field textarea, .form-field select { font-size: 1rem; } .file-picker input::file-selector-button { min-height: 2.75rem; } }
-.confirmation-files { display: grid; gap: 1rem; margin-bottom: 1.25rem; }
-.balance-strip { background: var(--surface-2); border: 0.0625rem solid var(--border); border-radius: 0.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.9375rem; padding: 1.25rem; margin: 1.375rem 0; }
-.balance-strip span { display: block; font-size: 0.75rem; color: var(--text); margin-bottom: 0.4375rem; }
-.balance-strip strong { font-size: 1.3125rem; color: var(--text); letter-spacing: -.03em; }
-.payment-history { list-style: none; padding: 0; margin: 0; }
-.payment-history li { display: flex; justify-content: space-between; gap: 0.75rem; border-bottom: 0.0625rem solid var(--border); padding: 0.75rem 0; font-size: 0.75rem; color: var(--text); }
-.payment-history strong { color: var(--text); }
-.payment-form { padding: 1.125rem; border: 0.0625rem solid var(--line); border-radius: 0.5rem; }
-.demo-tools { border-top: 0.0625rem solid var(--border); margin-top: 1.75rem; padding-top: 1.125rem; }
-.demo-tools p { font-size: 0.75rem; line-height: 1.7; color: var(--text); margin: 0.625rem 0; }
-.demo-tools button { margin: 0.5rem 0.625rem 0 0; font-size: 0.75rem; }
-.customer-dialog { width: min(40rem, calc(100vw - 2rem)); max-height: calc(100svh - 2.5rem); overflow-y: auto; background: var(--surface-2); color: var(--foreground); border: 0.0625rem solid var(--line); border-radius: 0.75rem; padding: 1.5625rem; margin: auto; box-shadow: 0 1.25rem 5rem #00000033; }
-.customer-dialog::backdrop { background: var(--surface-2); }
-.worker-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 1.125rem; margin-top: 1.375rem; }
-.stock-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-.stock-card { padding: 1rem; border: 0.0625rem solid var(--border); border-radius: 0.5rem; min-width: 0; }
-.stock-card h3, .supplier-order h3, .worker-workflow h3 { font-size: 0.8125rem; font-weight: 600; line-height: 1.6; margin: 0.875rem 0; }
-.stock-card .detail-grid { padding: 0; background: transparent; border: 0; margin-bottom: 0; }
-.table-scroll { width: 100%; min-width: 0; overflow-x: auto; margin: 1.25rem 0; border: 0.0625rem solid var(--border); border-radius: 0.5rem; }
-.workflow-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: left; }
-.workflow-table th, .workflow-table td { padding: 0.875rem; border-bottom: 0.0625rem solid var(--border); white-space: nowrap; }
-.workflow-table thead { background: var(--surface-2); color: var(--text); }
-.workflow-table tbody th { font-weight: 500; }
-.worker-history-row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem; padding: 0.875rem 0; border-bottom: 0.0625rem solid var(--border); font-size: 0.75rem; overflow-wrap: anywhere; }
-.worker-history-row > span { min-width: 0; }
-.worker-history-row small { display: block; font-size: 0.75rem; color: var(--text); margin-top: 0.4375rem; line-height: 1.7; overflow-wrap: anywhere; }
-.supplier-order { border: 0.0625rem solid var(--border); padding: 1.125rem; border-radius: 0.5rem; margin-bottom: 1.125rem; }
-.supplier-order .button-danger { margin-top: 1rem; }
-.worker-ledger { max-height: 25rem; overflow-y: auto; }
-.admin-toolbar-actions { display: flex; flex-wrap: wrap; gap: 0.625rem; }
-.admin-filters { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 1.125rem; }
-.admin-boundary { background: var(--surface-2); border: 0.0625rem solid var(--line); border-radius: 0.5rem; padding: 1rem; }
-.worker-contact { overflow-wrap: anywhere; }
-.status-active { background: var(--surface-2); color: var(--text); }
-.status-inactive { background: var(--surface-2); color: var(--text); }
-@media (max-width: 37.5rem) { .admin-filters { grid-template-columns: 1fr; gap: 0; } .admin-toolbar-actions { width: 100%; } .admin-toolbar-actions > button { flex: 1; } }
-@media (max-width: 68.75rem) { .stock-cards { grid-template-columns: 1fr; } }
-@media (max-width: 37.5rem) { .worker-form-grid { grid-template-columns: 1fr; } .worker-workflow .workflow-toolbar > button { width: 100%; } .supplier-order { padding: 0.8125rem; } }
-.dialog-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.9375rem; margin-bottom: 1.25rem; }
-.dialog-heading h2 { font-size: 1.25rem; letter-spacing: -.025em; overflow-wrap: anywhere; }
-.dialog-heading > button { flex-shrink: 0; font-size: 0.75rem; }
-.attachment-preview { display: block; width: 100%; max-height: 55svh; object-fit: contain; margin: 1.25rem 0; }
-.sample-document { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text); background: var(--surface-2); padding: 1.375rem; font-size: 0.75rem; line-height: 1.8; margin: 1.25rem 0; }
-@media (max-width: 68.75rem) { .record-layout { grid-template-columns: 1fr; } .record-list { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 37.5rem) { .workflow-toolbar { flex-wrap: wrap; } .record-list { grid-template-columns: 1fr; max-height: 20rem; overflow-y: auto; } .record-detail, .workflow-form-panel { padding: 1.125rem; } .record-heading { flex-wrap: wrap; } .record-heading h2 { font-size: 1.125rem; } .detail-grid { gap: 1rem 0.625rem; padding: 0.875rem; } .balance-strip { padding: 0.9375rem; gap: 0.625rem; } .balance-strip strong { font-size: 1.125rem; } .price-summary > strong { font-size: 1.75rem; } .customer-dialog { padding: 1.25rem; } .form-actions > button { flex: 1; } }
+:where(.scope) :global(.workflow-toolbar) { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.125rem; }
+:where(.scope) :global(.workflow-toolbar) > p { color: var(--muted); font-size: 0.75rem; line-height: 1.6; }
+:where(.scope) :global(.workflow-success) { padding: 0.9375rem 1.125rem; background: var(--surface-2); border: 0.0625rem solid var(--line); color: var(--text); border-radius: 0.5rem; font-size: 0.75rem; line-height: 1.7; margin-bottom: 1.125rem; overflow-wrap: anywhere; }
+:where(.scope) :global(.field-error) { font-size: 0.75rem; color: var(--text); background: var(--surface-2); border: 0.0625rem solid var(--line); padding: 0.75rem; border-radius: 0.4375rem; margin: 0.625rem 0; line-height: 1.7; }
+:where(.scope) :global(.record-layout) { display: grid; grid-template-columns: minmax(12.5rem, 31%) minmax(0, 1fr); gap: 1.25rem; align-items: start; }
+:where(.scope) :global(.record-list) { display: grid; gap: 0.625rem; }
+:where(.scope) :global(.record-list-item) { min-width: 0; width: 100%; text-align: left; display: grid; gap: 0.75rem; padding: 1.0625rem; border: 0.0625rem solid var(--border); border-radius: 0.5625rem; background: var(--surface-2); }
+:where(.scope) :global(.record-list-item):hover { border-color: var(--line); }
+:where(.scope) :global(.record-list-item):global(.selected) { border-color: var(--accent); box-shadow: inset 0.1875rem 0 var(--accent); background: var(--surface-2); }
+:where(.scope) :global(.record-list-item) > span:first-child { font-size: 0.75rem; color: var(--text); text-transform: capitalize; }
+:where(.scope) :global(.record-list-item) > strong { font-size: 0.75rem; line-height: 1.6; font-weight: 550; overflow-wrap: anywhere; }
+:where(.scope) :global(.record-list-bottom) { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem; align-items: center; }
+:where(.scope) :global(.record-list-bottom) > span:last-child { font-size: 0.75rem; color: var(--text); }
+:where(.scope) :global(.record-status) { display: inline-flex; align-items: center; border-radius: 0.3125rem; padding: 0.25rem 0.5rem; font-size: 0.75rem; font-weight: 550; color: var(--text); background: var(--surface-2); width: fit-content; }
+:where(.scope) :global(.status-approved), :where(.scope) :global(.status-paid), :where(.scope) :global(.status-delivered), :where(.scope) :global(.status-completed) { background: var(--surface-2); color: var(--text); }
+:where(.scope) :global(.status-sent), :where(.scope) :global(.status-ongoing), :where(.scope) :global(.status-shipping) { background: var(--surface-2); color: var(--text); }
+:where(.scope) :global(.status-partial), :where(.scope) :global(.status-pending) { background: var(--surface-2); color: var(--text); }
+:where(.scope) :global(.status-canceled), :where(.scope) :global(.status-rejected), :where(.scope) :global(.status-returned) { background: var(--surface-2); color: var(--text); }
+:where(.scope) :global(.record-detail), :where(.scope) :global(.workflow-form-panel) { background: var(--surface-2); border: 0.0625rem solid var(--border); border-radius: 0.625rem; padding: 1.5625rem; min-width: 0; }
+:where(.scope) :global(.record-heading) { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.9375rem; }
+:where(.scope) :global(.record-heading) h2 { font-size: 1.1875rem; line-height: 1.5; letter-spacing: -.025em; margin-top: 0.5rem; font-weight: 600; overflow-wrap: anywhere; }
+:where(.scope) :global(.record-id) { font-size: 0.75rem; color: var(--text); overflow-wrap: anywhere; margin: 0.75rem 0 1.25rem; }
+:where(.scope) :global(.detail-grid) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; padding: 1.125rem; border: 0.0625rem solid var(--border); border-radius: 0.5rem; background: var(--surface-2); margin: 1.25rem 0; }
+:where(.scope) :global(.detail-grid) dt { font-size: 0.75rem; color: var(--text); margin-bottom: 0.375rem; }
+:where(.scope) :global(.detail-grid) dd { margin: 0; font-size: 0.75rem; overflow-wrap: anywhere; }
+:where(.scope) :global(.record-detail) h3 { font-size: 0.75rem; margin: 1.5rem 0 0.75rem; font-weight: 600; }
+:where(.scope) :global(.attachment-list) { display: grid; gap: 0.5625rem; margin: 0.75rem 0 1.25rem; }
+:where(.scope) :global(.attachment-link) { display: flex; justify-content: space-between; gap: 0.75rem; width: 100%; min-height: 2.75rem; padding: 0.6875rem 0.8125rem; background: var(--surface-2); border: 0.0625rem solid var(--line); border-radius: 0.375rem; color: var(--text); font-size: 0.75rem; text-align: left; overflow-wrap: anywhere; margin: 0.5rem 0; }
+:where(.scope) :global(.attachment-link) > span { color: var(--text); font-weight: 600; flex-shrink: 0; }
+:where(.scope) :global(.price-summary) { padding: 1.4375rem; background: var(--surface-2); border: 0.0625rem solid var(--line); border-radius: 0.5625rem; display: grid; gap: 0.625rem; }
+:where(.scope) :global(.price-summary) > span { font-size: 0.75rem; color: var(--text); }
+:where(.scope) :global(.price-summary) > strong { font-size: 2rem; letter-spacing: -.045em; font-weight: 600; color: var(--text); }
+:where(.scope) :global(.terms-summary) { padding: 1.125rem 0; font-size: 0.75rem; line-height: 1.8; }
+:where(.scope) :global(.terms-summary) > strong { font-weight: 600; }
+:where(.scope) :global(.terms-summary) > p { color: var(--text); font-size: 0.75rem; margin-top: 0.375rem; }
+:where(.scope) :global(.workflow-note) { font-size: 0.75rem; color: var(--text); line-height: 1.8; margin: 0.9375rem 0; }
+:where(.scope) :global(.form-actions) { display: flex; gap: 0.625rem; flex-wrap: wrap; margin: 1.25rem 0; }
+:where(.scope) :global(.button-danger) { background: var(--surface-2); color: var(--text); border: 0.0625rem solid var(--line); border-radius: 0.5rem; min-height: 2.875rem; padding: 0.75rem 1.125rem; font-size: 0.75rem; }
+:where(.scope) button:disabled { cursor: not-allowed; opacity: .45; }
+:where(.scope) :global(.revision-history) { margin-top: 1.75rem; border-top: 0.0625rem solid var(--border); padding-top: 1rem; }
+:where(.scope) :global(.revision-history) summary, :where(.scope) :global(.demo-tools) summary { cursor: pointer; color: var(--text); font-size: 0.75rem; min-height: 1.875rem; }
+:where(.scope) :global(.revision-history) p { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.625rem; font-size: 0.75rem; align-items: center; padding: 0.625rem 0; }
+:where(.scope) :global(.workflow-form-panel) { margin-bottom: 1.375rem; }
+:where(.scope) :global(.workflow-form-panel) h2 { font-size: 1.25rem; letter-spacing: -.025em; margin-bottom: 1.25rem; }
+:where(.scope) :global(.form-field) { display: grid; gap: 0.5rem; color: var(--text); font-size: 0.75rem; margin-bottom: 1.1875rem; }
+:where(.scope) :global(.form-field) input, :where(.scope) :global(.form-field) textarea, :where(.scope) :global(.form-field) select { width: 100%; min-width: 0; background: var(--surface-2); color: var(--foreground); border: 0.0625rem solid var(--line); border-radius: 0.4375rem; padding: 0.75rem; min-height: 2.8125rem; font-size: 0.875rem; }
+:where(.scope) :global(.form-field) textarea { resize: vertical; line-height: 1.7; }
+:where(.scope) :global(.file-picker) { padding: 0.9375rem; border: 0.0625rem dashed var(--line); background: var(--surface-2); border-radius: 0.5rem; margin-bottom: 1rem; }
+:where(.scope) :global(.file-picker) label { display: grid; gap: 0.75rem; font-size: 0.75rem; color: var(--text); font-weight: 550; }
+:where(.scope) :global(.file-picker) input { width: 100%; min-width: 0; color: var(--text); font-size: 0.75rem; }
+:where(.scope) :global(.file-picker) input::file-selector-button { background: var(--surface-2); border: 0.0625rem solid var(--line); border-radius: 0.3125rem; padding: 0.5625rem; margin-right: 0.625rem; color: var(--text); cursor: pointer; }
+:where(.scope) :global(.file-picker-hint) { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.625rem; margin-top: 0.75rem; align-items: center; }
+:where(.scope) :global(.file-picker-hint) > span { font-size: 0.75rem; color: var(--text); line-height: 1.7; }
+:where(.scope) :global(.text-action) { color: var(--text); background: transparent; border: 0; padding: 0.3125rem 0; font-size: 0.75rem; text-decoration: underline; text-underline-offset: 0.1875rem; }
+:where(.scope) :global(.text-action), :where(.scope) :global(.revision-history) summary, :where(.scope) :global(.demo-tools) summary { min-height: 2.75rem; }
+:where(.scope) :global(.file-picker)[aria-busy="true"] { border-style: solid; }
+@media (max-width: 47.5rem) { :where(.scope) :global(.form-field) input, :where(.scope) :global(.form-field) textarea, :where(.scope) :global(.form-field) select { font-size: 1rem; } :where(.scope) :global(.file-picker) input::file-selector-button { min-height: 2.75rem; } }
+:where(.scope) :global(.confirmation-files) { display: grid; gap: 1rem; margin-bottom: 1.25rem; }
+:where(.scope) :global(.balance-strip) { background: var(--surface-2); border: 0.0625rem solid var(--border); border-radius: 0.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 0.9375rem; padding: 1.25rem; margin: 1.375rem 0; }
+:where(.scope) :global(.balance-strip) span { display: block; font-size: 0.75rem; color: var(--text); margin-bottom: 0.4375rem; }
+:where(.scope) :global(.balance-strip) strong { font-size: 1.3125rem; color: var(--text); letter-spacing: -.03em; }
+:where(.scope) :global(.payment-history) { list-style: none; padding: 0; margin: 0; }
+:where(.scope) :global(.payment-history) li { display: flex; justify-content: space-between; gap: 0.75rem; border-bottom: 0.0625rem solid var(--border); padding: 0.75rem 0; font-size: 0.75rem; color: var(--text); }
+:where(.scope) :global(.payment-history) strong { color: var(--text); }
+:where(.scope) :global(.payment-form) { padding: 1.125rem; border: 0.0625rem solid var(--line); border-radius: 0.5rem; }
+:where(.scope) :global(.demo-tools) { border-top: 0.0625rem solid var(--border); margin-top: 1.75rem; padding-top: 1.125rem; }
+:where(.scope) :global(.demo-tools) p { font-size: 0.75rem; line-height: 1.7; color: var(--text); margin: 0.625rem 0; }
+:where(.scope) :global(.demo-tools) button { margin: 0.5rem 0.625rem 0 0; font-size: 0.75rem; }
+:where(.scope) :global(.customer-dialog) { width: min(40rem, calc(100vw - 2rem)); max-height: calc(100svh - 2.5rem); overflow-y: auto; background: var(--surface-2); color: var(--foreground); border: 0.0625rem solid var(--line); border-radius: 0.75rem; padding: 1.5625rem; margin: auto; box-shadow: 0 1.25rem 5rem #00000033; }
+:where(.scope) :global(.customer-dialog)::backdrop { background: var(--surface-2); }
+:where(.scope) :global(.worker-form-grid) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 1.125rem; margin-top: 1.375rem; }
+:where(.scope) :global(.stock-cards) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+:where(.scope) :global(.stock-card) { padding: 1rem; border: 0.0625rem solid var(--border); border-radius: 0.5rem; min-width: 0; }
+:where(.scope) :global(.stock-card) h3, :where(.scope) :global(.supplier-order) h3, :where(.scope) :global(.worker-workflow) h3 { font-size: 0.8125rem; font-weight: 600; line-height: 1.6; margin: 0.875rem 0; }
+:where(.scope) :global(.stock-card) :global(.detail-grid) { padding: 0; background: transparent; border: 0; margin-bottom: 0; }
+:where(.scope) :global(.table-scroll) { width: 100%; min-width: 0; overflow-x: auto; margin: 1.25rem 0; border: 0.0625rem solid var(--border); border-radius: 0.5rem; }
+:where(.scope) :global(.workflow-table) { width: 100%; border-collapse: collapse; font-size: 0.75rem; text-align: left; }
+:where(.scope) :global(.workflow-table) th, :where(.scope) :global(.workflow-table) td { padding: 0.875rem; border-bottom: 0.0625rem solid var(--border); white-space: nowrap; }
+:where(.scope) :global(.workflow-table) thead { background: var(--surface-2); color: var(--text); }
+:where(.scope) :global(.workflow-table) tbody th { font-weight: 500; }
+:where(.scope) :global(.worker-history-row) { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.75rem; padding: 0.875rem 0; border-bottom: 0.0625rem solid var(--border); font-size: 0.75rem; overflow-wrap: anywhere; }
+:where(.scope) :global(.worker-history-row) > span { min-width: 0; }
+:where(.scope) :global(.worker-history-row) small { display: block; font-size: 0.75rem; color: var(--text); margin-top: 0.4375rem; line-height: 1.7; overflow-wrap: anywhere; }
+:where(.scope) :global(.supplier-order) { border: 0.0625rem solid var(--border); padding: 1.125rem; border-radius: 0.5rem; margin-bottom: 1.125rem; }
+:where(.scope) :global(.supplier-order) :global(.button-danger) { margin-top: 1rem; }
+:where(.scope) :global(.worker-ledger) { max-height: 25rem; overflow-y: auto; }
+:where(.scope) :global(.admin-toolbar-actions) { display: flex; flex-wrap: wrap; gap: 0.625rem; }
+:where(.scope) :global(.admin-filters) { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 1.125rem; }
+:where(.scope) :global(.admin-boundary) { background: var(--surface-2); border: 0.0625rem solid var(--line); border-radius: 0.5rem; padding: 1rem; }
+:where(.scope) :global(.worker-contact) { overflow-wrap: anywhere; }
+:where(.scope) :global(.status-active) { background: var(--surface-2); color: var(--text); }
+:where(.scope) :global(.status-inactive) { background: var(--surface-2); color: var(--text); }
+@media (max-width: 37.5rem) { :where(.scope) :global(.admin-filters) { grid-template-columns: 1fr; gap: 0; } :where(.scope) :global(.admin-toolbar-actions) { width: 100%; } :where(.scope) :global(.admin-toolbar-actions) > button { flex: 1; } }
+@media (max-width: 68.75rem) { :where(.scope) :global(.stock-cards) { grid-template-columns: 1fr; } }
+@media (max-width: 37.5rem) { :where(.scope) :global(.worker-form-grid) { grid-template-columns: 1fr; } :where(.scope) :global(.worker-workflow) :global(.workflow-toolbar) > button { width: 100%; } :where(.scope) :global(.supplier-order) { padding: 0.8125rem; } }
+:where(.scope) :global(.dialog-heading) { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.9375rem; margin-bottom: 1.25rem; }
+:where(.scope) :global(.dialog-heading) h2 { font-size: 1.25rem; letter-spacing: -.025em; overflow-wrap: anywhere; }
+:where(.scope) :global(.dialog-heading) > button { flex-shrink: 0; font-size: 0.75rem; }
+:where(.scope) :global(.attachment-preview) { display: block; width: 100%; max-height: 55svh; object-fit: contain; margin: 1.25rem 0; }
+:where(.scope) :global(.sample-document) { white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text); background: var(--surface-2); padding: 1.375rem; font-size: 0.75rem; line-height: 1.8; margin: 1.25rem 0; }
+@media (max-width: 68.75rem) { :where(.scope) :global(.record-layout) { grid-template-columns: 1fr; } :where(.scope) :global(.record-list) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 37.5rem) { :where(.scope) :global(.workflow-toolbar) { flex-wrap: wrap; } :where(.scope) :global(.record-list) { grid-template-columns: 1fr; max-height: 20rem; overflow-y: auto; } :where(.scope) :global(.record-detail), :where(.scope) :global(.workflow-form-panel) { padding: 1.125rem; } :where(.scope) :global(.record-heading) { flex-wrap: wrap; } :where(.scope) :global(.record-heading) h2 { font-size: 1.125rem; } :where(.scope) :global(.detail-grid) { gap: 1rem 0.625rem; padding: 0.875rem; } :where(.scope) :global(.balance-strip) { padding: 0.9375rem; gap: 0.625rem; } :where(.scope) :global(.balance-strip) strong { font-size: 1.125rem; } :where(.scope) :global(.price-summary) > strong { font-size: 1.75rem; } :where(.scope) :global(.customer-dialog) { padding: 1.25rem; } :where(.scope) :global(.form-actions) > button { flex: 1; } }
 
 /* Unified controls and role shells. Dimensions scale with the root rem size. */
-.button-primary,.button-secondary,.button-danger { display:inline-flex; align-items:center; justify-content:center; gap:.625rem; min-height:2.875rem; padding:.75rem 1.125rem; border-radius:.75rem; font:inherit; font-size:.875rem; font-weight:650; cursor:pointer; }
-.button-primary { background:var(--lime); border:1px solid var(--lime); color:#211509; }
-.button-secondary { background:var(--surface); border:1px solid var(--line); color:var(--text); }
-.button-danger { color:var(--danger); border-color:var(--danger); }
-:is(button,a,input,select,textarea,summary,[tabindex]):focus-visible { outline:2px solid var(--lime); outline-offset:3px; }
-button:disabled { opacity:.5; cursor:not-allowed; }
-.form-field :is(input,textarea,select) { font-size:1rem; color:var(--text); background:var(--surface); }
-.form-field,.file-picker label,.detail-grid dt,.record-id,.workflow-note,.workflow-toolbar>p,.record-list-item>span:first-child { color:var(--muted); }
-.record-detail,.workflow-form-panel,.record-list-item { background:var(--surface); border-radius:1rem; }
-.record-list-item.selected { background:color-mix(in srgb,var(--lime) 10%,var(--surface)); }
-.record-heading h2,.workflow-form-panel h2 { font-size:1.375rem; font-weight:700; }
-.record-detail h3 { font-size:1rem; }
-.record-list-item>strong { font-size:.9375rem; font-weight:650; }
-.text-action,.attachment-link>span { color:var(--lime); }
-.price-summary>strong { color:var(--lime); }
-.field-error { color:var(--danger); border-color:var(--danger); background:color-mix(in srgb,var(--danger) 8%,var(--surface)); }
-.workflow-success { color:var(--text); border-color:var(--lime); background:color-mix(in srgb,var(--lime) 8%,var(--surface)); }
-.record-status { background:var(--surface-3); color:var(--text); }
-.status-approved,.status-paid,.status-completed,.status-active,.status-delivered { background:#163e32; color:#a9edce; }
-.status-sent,.status-ongoing,.status-shipping { background:#163846; color:#ace3f2; }
-.status-partial,.status-pending { background:#45341b; color:#ffdc97; }
-.status-canceled,.status-rejected,.status-returned { background:#492626; color:#ffb5af; }
-[data-theme="light"] :is(.status-approved,.status-paid,.status-completed,.status-active,.status-delivered) { background:#e0f1e8; color:#23553f; }
-[data-theme="light"] :is(.status-sent,.status-ongoing,.status-shipping) { background:#deedf5; color:#24596d; }
-[data-theme="light"] :is(.status-partial,.status-pending) { background:#fff0cd; color:#715119; }
-[data-theme="light"] :is(.status-canceled,.status-rejected,.status-returned) { background:#ffe5e1; color:#8d3229; }
-.customer-dialog { background:var(--surface); width:min(42rem,calc(100vw - 2rem)); }
-.customer-dialog::backdrop { background:#0008; }
-.demo-context { color:var(--muted); font-size:.8rem; line-height:1.7; margin:1rem 0 1.5rem; }
-.integrated-shell .integrated-sidebar { display:flex; flex-direction:column; position:fixed; inset:0 auto 0 0; width:17rem; height:100dvh; min-height:0; overflow:hidden; }
-.sidebar-scroll { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; padding-right:.25rem; }
-.integrated-sidebar .nav-list { display:flex; flex-direction:column; overflow:visible; }
-.integrated-sidebar .sidebar-theme { flex:none; margin:0; padding:.75rem 0; }
-.integrated-sidebar .sidebar-footer { display:grid; flex:none; margin:0; padding-top:1rem; }
-.integrated-sidebar .brand { flex-shrink:0; }
-.integrated-shell .app-stage { margin-left:17rem; min-width:0; }
-.integrated-topbar { display:flex; gap:1rem; }
-.integrated-topbar .eyebrow { margin:0; }
-.switch-account { margin-left:auto; font-size:.8rem; text-decoration:none; padding:.7rem 1rem; }
-.mobile-navigation { display:none; }
-.workspace-links { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
-.workspace-link-card { padding:1.75rem; min-width:0; text-decoration:none; display:flex; flex-direction:column; align-items:flex-start; gap:.8rem; transition:border-color .2s,transform .2s; }
-.workspace-link-card:hover { border-color:var(--lime); transform:translateY(-2px); }
-.workspace-link-card h2 { font-size:1.2rem; color:var(--text); }
-.workspace-link-card p { font-size:.85rem; color:var(--muted); line-height:1.7; flex:1; }
-.workspace-card-icon { color:var(--lime); background:color-mix(in srgb,var(--lime) 12%,transparent); padding:.75rem; border-radius:.8rem; }
-.workspace-card-action { display:flex; align-items:center; gap:.5rem; font-size:.8rem; color:var(--lime); margin-top:.8rem; }
-.workflow-skip { position:fixed; top:-10rem; left:1rem; z-index:100; background:var(--surface); padding:1rem; color:var(--text); }
-.workflow-skip:focus { top:1rem; }
-.navigation-scrim { display:none; }
-.auth-availability { color:var(--muted); font-size:.85rem; line-height:1.8; padding:1rem; border:1px solid var(--line); border-radius:.75rem; margin:1.5rem 0; }
-.login-card .live-fields { gap:0; }
-.login-card .login-submit { margin-top:1.5rem; }
-.login-card .bypass-actions { grid-template-columns:1fr; gap:.75rem; }
-.login-card .bypass-actions button { min-height:4.5rem; }
-.login-register-link { display:block; margin-top:1rem; text-align:center; line-height:1.5; }
-.demo-bypass { margin-top:1.75rem; border-top:.0625rem solid var(--line); border-bottom:.0625rem solid var(--line); }
-.demo-bypass summary { display:flex; align-items:center; justify-content:space-between; gap:1rem; min-height:3.5rem; color:var(--muted); font-size:.6875rem; cursor:pointer; list-style:none; }
-.demo-bypass summary::-webkit-details-marker { display:none; }
-.demo-bypass summary i { width:.625rem; height:.625rem; flex:none; border-right:.09375rem solid currentColor; border-bottom:.09375rem solid currentColor; transform:rotate(45deg); transition:transform .2s ease; }
-.demo-bypass[open] summary i { transform:rotate(225deg); }
-.demo-bypass-content { padding:0 0 1rem; }
-.demo-bypass .demo-context { margin-bottom:0; }
-.login-field select { width:100%; border:0; outline:0; background:transparent; color:var(--text); font:inherit; font-size:.8125rem; }
-.auth-help,.auth-api { display:block; color:var(--muted); font-size:.6875rem; line-height:1.6; }
-.auth-help { margin:.625rem 0 0; }
-.auth-api { margin-top:1rem; text-align:center; opacity:.7; }
-@media(prefers-reduced-motion:reduce) { .demo-bypass summary i { transition:none; } }
-@media(max-width:75rem) { .workspace-links { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+:where(.scope) :global(.button-primary), :where(.scope) :global(.button-secondary), :where(.scope) :global(.button-danger) { display:inline-flex; align-items:center; justify-content:center; gap:.625rem; min-height:2.875rem; padding:.75rem 1.125rem; border-radius:.75rem; font:inherit; font-size:.875rem; font-weight:650; cursor:pointer; }
+:where(.scope) :global(.button-primary) { background:var(--lime); border:1px solid var(--lime); color:#211509; }
+:where(.scope) :global(.button-secondary) { background:var(--surface); border:1px solid var(--line); color:var(--text); }
+:where(.scope) :global(.button-danger) { color:var(--danger); border-color:var(--danger); }
+:where(.scope) :is(button,a,input,select,textarea,summary,[tabindex]):focus-visible { outline:2px solid var(--lime); outline-offset:3px; }
+:where(.scope) button:disabled { opacity:.5; cursor:not-allowed; }
+:where(.scope) :global(.form-field) :is(input,textarea,select) { font-size:1rem; color:var(--text); background:var(--surface); }
+:where(.scope) :global(.form-field), :where(.scope) :global(.file-picker) label, :where(.scope) :global(.detail-grid) dt, :where(.scope) :global(.record-id), :where(.scope) :global(.workflow-note), :where(.scope) :global(.workflow-toolbar)>p, :where(.scope) :global(.record-list-item)>span:first-child { color:var(--muted); }
+:where(.scope) :global(.record-detail), :where(.scope) :global(.workflow-form-panel), :where(.scope) :global(.record-list-item) { background:var(--surface); border-radius:1rem; }
+:where(.scope) :global(.record-list-item):global(.selected) { background:color-mix(in srgb,var(--lime) 10%,var(--surface)); }
+:where(.scope) :global(.record-heading) h2, :where(.scope) :global(.workflow-form-panel) h2 { font-size:1.375rem; font-weight:700; }
+:where(.scope) :global(.record-detail) h3 { font-size:1rem; }
+:where(.scope) :global(.record-list-item)>strong { font-size:.9375rem; font-weight:650; }
+:where(.scope) :global(.text-action), :where(.scope) :global(.attachment-link)>span { color:var(--lime); }
+:where(.scope) :global(.price-summary)>strong { color:var(--lime); }
+:where(.scope) :global(.field-error) { color:var(--danger); border-color:var(--danger); background:color-mix(in srgb,var(--danger) 8%,var(--surface)); }
+:where(.scope) :global(.workflow-success) { color:var(--text); border-color:var(--lime); background:color-mix(in srgb,var(--lime) 8%,var(--surface)); }
+:where(.scope) :global(.record-status) { background:var(--surface-3); color:var(--text); }
+:where(.scope) :global(.status-approved), :where(.scope) :global(.status-paid), :where(.scope) :global(.status-completed), :where(.scope) :global(.status-active), :where(.scope) :global(.status-delivered) { background:#163e32; color:#a9edce; }
+:where(.scope) :global(.status-sent), :where(.scope) :global(.status-ongoing), :where(.scope) :global(.status-shipping) { background:#163846; color:#ace3f2; }
+:where(.scope) :global(.status-partial), :where(.scope) :global(.status-pending) { background:#45341b; color:#ffdc97; }
+:where(.scope) :global(.status-canceled), :where(.scope) :global(.status-rejected), :where(.scope) :global(.status-returned) { background:#492626; color:#ffb5af; }
+:global([data-theme="light"]) :where(.scope) :is(:global(.status-approved),:global(.status-paid),:global(.status-completed),:global(.status-active),:global(.status-delivered)) { background:#e0f1e8; color:#23553f; }
+:global([data-theme="light"]) :where(.scope) :is(:global(.status-sent),:global(.status-ongoing),:global(.status-shipping)) { background:#deedf5; color:#24596d; }
+:global([data-theme="light"]) :where(.scope) :is(:global(.status-partial),:global(.status-pending)) { background:#fff0cd; color:#715119; }
+:global([data-theme="light"]) :where(.scope) :is(:global(.status-canceled),:global(.status-rejected),:global(.status-returned)) { background:#ffe5e1; color:#8d3229; }
+:where(.scope) :global(.customer-dialog) { background:var(--surface); width:min(42rem,calc(100vw - 2rem)); }
+:where(.scope) :global(.customer-dialog)::backdrop { background:#0008; }
+:where(.scope) :global(.demo-context) { color:var(--muted); font-size:.8rem; line-height:1.7; margin:1rem 0 1.5rem; }
+:where(.scope) :global(.integrated-shell) :global(.integrated-sidebar) { display:flex; flex-direction:column; position:fixed; inset:0 auto 0 0; width:17rem; height:100dvh; min-height:0; overflow:hidden; }
+:where(.scope) :global(.sidebar-scroll) { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; scrollbar-width:thin; padding-right:.25rem; }
+:where(.scope) :global(.integrated-sidebar) :global(.nav-list) { display:flex; flex-direction:column; overflow:visible; }
+:where(.scope) :global(.integrated-sidebar) :global(.sidebar-theme) { flex:none; margin:0; padding:.75rem 0; }
+:where(.scope) :global(.integrated-sidebar) :global(.sidebar-footer) { display:grid; flex:none; margin:0; padding-top:1rem; }
+:where(.scope) :global(.integrated-sidebar) :global(.brand) { flex-shrink:0; }
+:where(.scope) :global(.integrated-shell) :global(.app-stage) { margin-left:17rem; min-width:0; }
+:where(.scope) :global(.integrated-topbar) { display:flex; gap:1rem; }
+:where(.scope) :global(.integrated-topbar) :global(.eyebrow) { margin:0; }
+:where(.scope) :global(.switch-account) { margin-left:auto; font-size:.8rem; text-decoration:none; padding:.7rem 1rem; }
+:where(.scope) :global(.mobile-navigation) { display:none; }
+:where(.scope) :global(.workspace-links) { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
+:where(.scope) :global(.workspace-link-card) { padding:1.75rem; min-width:0; text-decoration:none; display:flex; flex-direction:column; align-items:flex-start; gap:.8rem; transition:border-color .2s,transform .2s; }
+:where(.scope) :global(.workspace-link-card):hover { border-color:var(--lime); transform:translateY(-2px); }
+:where(.scope) :global(.workspace-link-card) h2 { font-size:1.2rem; color:var(--text); }
+:where(.scope) :global(.workspace-link-card) p { font-size:.85rem; color:var(--muted); line-height:1.7; flex:1; }
+:where(.scope) :global(.workspace-card-icon) { color:var(--lime); background:color-mix(in srgb,var(--lime) 12%,transparent); padding:.75rem; border-radius:.8rem; }
+:where(.scope) :global(.workspace-card-action) { display:flex; align-items:center; gap:.5rem; font-size:.8rem; color:var(--lime); margin-top:.8rem; }
+:where(.scope) :global(.workflow-skip) { position:fixed; top:-10rem; left:1rem; z-index:100; background:var(--surface); padding:1rem; color:var(--text); }
+:where(.scope) :global(.workflow-skip):focus { top:1rem; }
+:where(.scope) :global(.navigation-scrim) { display:none; }
+:where(.scope) :global(.auth-availability) { color:var(--muted); font-size:.85rem; line-height:1.8; padding:1rem; border:1px solid var(--line); border-radius:.75rem; margin:1.5rem 0; }
+:where(.scope) :global(.login-card) :global(.live-fields) { gap:0; }
+:where(.scope) :global(.login-card) :global(.login-submit) { margin-top:1.5rem; }
+:where(.scope) :global(.login-card) :global(.bypass-actions) { grid-template-columns:1fr; gap:.75rem; }
+:where(.scope) :global(.login-card) :global(.bypass-actions) button { min-height:4.5rem; }
+:where(.scope) :global(.login-register-link) { display:block; margin-top:1rem; text-align:center; line-height:1.5; }
+:where(.scope) :global(.demo-bypass) { margin-top:1.75rem; border-top:.0625rem solid var(--line); border-bottom:.0625rem solid var(--line); }
+:where(.scope) :global(.demo-bypass) summary { display:flex; align-items:center; justify-content:space-between; gap:1rem; min-height:3.5rem; color:var(--muted); font-size:.6875rem; cursor:pointer; list-style:none; }
+:where(.scope) :global(.demo-bypass) summary::-webkit-details-marker { display:none; }
+:where(.scope) :global(.demo-bypass) summary i { width:.625rem; height:.625rem; flex:none; border-right:.09375rem solid currentColor; border-bottom:.09375rem solid currentColor; transform:rotate(45deg); transition:transform .2s ease; }
+:where(.scope) :global(.demo-bypass)[open] summary i { transform:rotate(225deg); }
+:where(.scope) :global(.demo-bypass-content) { padding:0 0 1rem; }
+:where(.scope) :global(.demo-bypass) :global(.demo-context) { margin-bottom:0; }
+:where(.scope) :global(.login-field) select { width:100%; border:0; outline:0; background:transparent; color:var(--text); font:inherit; font-size:.8125rem; }
+:where(.scope) :global(.auth-help), :where(.scope) :global(.auth-api) { display:block; color:var(--muted); font-size:.6875rem; line-height:1.6; }
+:where(.scope) :global(.auth-help) { margin:.625rem 0 0; }
+:where(.scope) :global(.auth-api) { margin-top:1rem; text-align:center; opacity:.7; }
+@media(prefers-reduced-motion:reduce) { :where(.scope) :global(.demo-bypass) summary i { transition:none; } }
+@media(max-width:75rem) { :where(.scope) :global(.workspace-links) { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:900px) {
-  .integrated-shell .integrated-sidebar { width:min(20rem,88vw); transform:translateX(-100%); visibility:hidden; z-index:45; padding:1rem; }
-  .integrated-shell .integrated-sidebar.navigation-open { transform:translateX(0); visibility:visible; }
-  .integrated-shell .app-stage { margin-left:0; }
-  .integrated-sidebar .nav-label { display:block; }
-  .integrated-sidebar .nav-list :is(a,button) { min-width:0; }
-  .mobile-navigation { display:inline-flex; }
-  .navigation-scrim { display:block; position:fixed; inset:0; background:#0009; border:0; z-index:44; }
-  .integrated-topbar { position:sticky; top:0; z-index:30; height:auto; min-height:4.5rem; padding:1rem; background:var(--surface); }
-  .integrated-sidebar .sidebar-theme .theme-toggle { width:100%; justify-content:flex-start; }
-  .integrated-sidebar .sidebar-theme .theme-toggle span { display:inline; }
+  :where(.scope) :global(.integrated-shell) :global(.integrated-sidebar) { width:min(20rem,88vw); transform:translateX(-100%); visibility:hidden; z-index:45; padding:1rem; }
+  :where(.scope) :global(.integrated-shell) :global(.integrated-sidebar):global(.navigation-open) { transform:translateX(0); visibility:visible; }
+  :where(.scope) :global(.integrated-shell) :global(.app-stage) { margin-left:0; }
+  :where(.scope) :global(.integrated-sidebar) :global(.nav-label) { display:block; }
+  :where(.scope) :global(.integrated-sidebar) :global(.nav-list) :is(a,button) { min-width:0; }
+  :where(.scope) :global(.mobile-navigation) { display:inline-flex; }
+  :where(.scope) :global(.navigation-scrim) { display:block; position:fixed; inset:0; background:#0009; border:0; z-index:44; }
+  :where(.scope) :global(.integrated-topbar) { position:sticky; top:0; z-index:30; height:auto; min-height:4.5rem; padding:1rem; background:var(--surface); }
+  :where(.scope) :global(.integrated-sidebar) :global(.sidebar-theme) :global(.theme-toggle) { width:100%; justify-content:flex-start; }
+  :where(.scope) :global(.integrated-sidebar) :global(.sidebar-theme) :global(.theme-toggle) span { display:inline; }
 }
 @media(max-width:600px) {
-  .workspace-links { grid-template-columns:1fr; }
-  .integrated-topbar .eyebrow { font-size:.6rem; }
-  .switch-account { font-size:.7rem; padding:.6rem; }
-  .workflow-content .button-primary,.workflow-content .button-secondary { white-space:normal; }
+  :where(.scope) :global(.workspace-links) { grid-template-columns:1fr; }
+  :where(.scope) :global(.integrated-topbar) :global(.eyebrow) { font-size:.6rem; }
+  :where(.scope) :global(.switch-account) { font-size:.7rem; padding:.6rem; }
+  :where(.scope) :global(.workflow-content) :global(.button-primary), :where(.scope) :global(.workflow-content) :global(.button-secondary) { white-space:normal; }
 }
 
 /* Connected backend surfaces share the same appearance tokens and UI scale. */
-.live-inventory-row { padding-block: 1.25rem; border-bottom: 1px solid var(--line); min-width: 0; overflow-wrap: anywhere; }
-.live-inventory-row dl { font-variant-numeric: tabular-nums; }
-.live-inventory-row h3, .live-inventory-row h5 { margin-bottom: .5rem; }
-.live-plan-line { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; padding-block: .75rem; border-bottom: 1px solid var(--line); }
-.live-plan-line .form-field { flex: 1 1 12rem; min-width: 0; }
-.live-plan-line .record-id { flex-basis: 100%; }
-.live-fields { display:grid; gap:.875rem; border:0; padding:0; min-width:0; }
-.live-section { border-top:.0625rem solid var(--line); padding-top:1.375rem; margin-top:1.5rem; }
-.live-section h3,.live-section h4 { margin-bottom:.875rem; }
-.live-section form { margin-top:1.125rem; }
-.workflow-error { font-size:.8125rem; color:var(--danger); background:color-mix(in srgb,var(--danger) 8%,var(--surface)); border:.0625rem solid var(--danger); padding:.875rem; border-radius:.5rem; margin:.875rem 0; line-height:1.7; overflow-wrap:anywhere; }
-.live-description,.private-invitation { white-space:pre-wrap; overflow-wrap:anywhere; }
-.private-invitation { display:block; user-select:all; }
-.live-workspace button { min-height:2.75rem; padding:.5625rem .75rem; }
-.live-workspace .form-actions { align-items:center; }
-.live-workspace .record-detail,.live-workspace .record-list-item { overflow-wrap:anywhere; }
-.live-editor { margin:1.5rem 0; padding:1.25rem 0; border-top:.0625rem solid var(--line); border-bottom:.0625rem solid var(--line); }
-.live-editor h3 { margin-bottom:1rem; font-size:1.125rem; }
-.live-worker-row { padding:1.25rem 0; border-bottom:.0625rem solid var(--line-soft); }
-.live-worker-row p,.live-editor p { line-height:1.7; font-size:.875rem; }
-.live-worker-row .detail-grid { background:transparent; }
-.live-worker-row .form-actions>button { flex:1 1 8rem; white-space:normal; overflow-wrap:normal; }
-.live-workspace :is(input,textarea,select) { caret-color:var(--lime); }
-.live-workspace ::selection { color:var(--text); background:color-mix(in srgb,var(--lime) 25%,var(--surface)); }
-.fulfillment-section { font-variant-numeric:tabular-nums; }
-.live-evidence-record { margin-top:1.25rem; padding:1.25rem 0; border-top:.0625rem solid var(--line-soft); }
-.live-evidence-record p { margin:.75rem 0; line-height:1.7; font-size:.875rem; overflow-wrap:anywhere; }
-.live-review-confirm { display:flex; align-items:start; gap:.75rem; line-height:1.6; }
-.live-review-confirm input { width:1.25rem; min-height:1.25rem; flex:none; margin-top:.1875rem; accent-color:var(--lime); }
-@media(max-width:37.5rem) { .live-workspace .detail-grid { grid-template-columns:1fr; } }
+:where(.scope) :global(.live-inventory-row) { padding-block: 1.25rem; border-bottom: 1px solid var(--line); min-width: 0; overflow-wrap: anywhere; }
+:where(.scope) :global(.live-inventory-row) dl { font-variant-numeric: tabular-nums; }
+:where(.scope) :global(.live-inventory-row) h3, :where(.scope) :global(.live-inventory-row) h5 { margin-bottom: .5rem; }
+:where(.scope) :global(.live-plan-line) { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; padding-block: .75rem; border-bottom: 1px solid var(--line); }
+:where(.scope) :global(.live-plan-line) :global(.form-field) { flex: 1 1 12rem; min-width: 0; }
+:where(.scope) :global(.live-plan-line) :global(.record-id) { flex-basis: 100%; }
+:where(.scope) :global(.live-fields) { display:grid; gap:.875rem; border:0; padding:0; min-width:0; }
+:where(.scope) :global(.live-section) { border-top:.0625rem solid var(--line); padding-top:1.375rem; margin-top:1.5rem; }
+:where(.scope) :global(.live-section) h3, :where(.scope) :global(.live-section) h4 { margin-bottom:.875rem; }
+:where(.scope) :global(.live-section) form { margin-top:1.125rem; }
+:where(.scope) :global(.workflow-error) { font-size:.8125rem; color:var(--danger); background:color-mix(in srgb,var(--danger) 8%,var(--surface)); border:.0625rem solid var(--danger); padding:.875rem; border-radius:.5rem; margin:.875rem 0; line-height:1.7; overflow-wrap:anywhere; }
+:where(.scope) :global(.live-description), :where(.scope) :global(.private-invitation) { white-space:pre-wrap; overflow-wrap:anywhere; }
+:where(.scope) :global(.private-invitation) { display:block; user-select:all; }
+:where(.scope) :global(.live-workspace) button { min-height:2.75rem; padding:.5625rem .75rem; }
+:where(.scope) :global(.live-workspace) :global(.form-actions) { align-items:center; }
+:where(.scope) :global(.live-workspace) :global(.record-detail), :where(.scope) :global(.live-workspace) :global(.record-list-item) { overflow-wrap:anywhere; }
+:where(.scope) :global(.live-editor) { margin:1.5rem 0; padding:1.25rem 0; border-top:.0625rem solid var(--line); border-bottom:.0625rem solid var(--line); }
+:where(.scope) :global(.live-editor) h3 { margin-bottom:1rem; font-size:1.125rem; }
+:where(.scope) :global(.live-worker-row) { padding:1.25rem 0; border-bottom:.0625rem solid var(--line-soft); }
+:where(.scope) :global(.live-worker-row) p, :where(.scope) :global(.live-editor) p { line-height:1.7; font-size:.875rem; }
+:where(.scope) :global(.live-worker-row) :global(.detail-grid) { background:transparent; }
+:where(.scope) :global(.live-worker-row) :global(.form-actions)>button { flex:1 1 8rem; white-space:normal; overflow-wrap:normal; }
+:where(.scope) :global(.live-workspace) :is(input,textarea,select) { caret-color:var(--lime); }
+:where(.scope) :global(.live-workspace) ::selection { color:var(--text); background:color-mix(in srgb,var(--lime) 25%,var(--surface)); }
+:where(.scope) :global(.fulfillment-section) { font-variant-numeric:tabular-nums; }
+:where(.scope) :global(.live-evidence-record) { margin-top:1.25rem; padding:1.25rem 0; border-top:.0625rem solid var(--line-soft); }
+:where(.scope) :global(.live-evidence-record) p { margin:.75rem 0; line-height:1.7; font-size:.875rem; overflow-wrap:anywhere; }
+:where(.scope) :global(.live-review-confirm) { display:flex; align-items:start; gap:.75rem; line-height:1.6; }
+:where(.scope) :global(.live-review-confirm) input { width:1.25rem; min-height:1.25rem; flex:none; margin-top:.1875rem; accent-color:var(--lime); }
+@media(max-width:37.5rem) { :where(.scope) :global(.live-workspace) :global(.detail-grid) { grid-template-columns:1fr; } }
 
 /* Connected shell (2026-10-24): session mode badge and mock-only account switcher. */
-.integrated-topbar .api-mode-badge { margin-left:auto; padding:.3125rem .625rem; border:.0625rem solid var(--line); border-radius:62.4375rem; color:var(--muted); font-size:.6875rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
-.integrated-topbar .api-mode-badge.mock { color:var(--warning); border-color:color-mix(in srgb,var(--warning) 45%,var(--line)); }
-.integrated-topbar .api-mode-badge.live { color:var(--cyan); border-color:color-mix(in srgb,var(--cyan) 45%,var(--line)); }
-.integrated-topbar .api-mode-badge + .switch-account, .integrated-topbar .api-mode-badge + .mock-switcher { margin-left:.75rem; }
-.mock-switcher { position:relative; }
-.mock-switcher summary { list-style:none; cursor:pointer; }
-.mock-switcher summary::-webkit-details-marker { display:none; }
-.mock-switcher-menu { position:absolute; right:0; top:calc(100% + .5rem); z-index:30; width:min(22rem,calc(100vw - 2rem)); display:grid; gap:.5rem; padding:.75rem; border:.0625rem solid var(--line); border-radius:1rem; background:var(--surface); box-shadow:0 1.5rem 5.625rem #0004; }
-.mock-switcher-menu > button { display:grid; gap:.125rem; justify-items:start; text-align:left; min-height:3rem; padding:.625rem .75rem; border:.0625rem solid var(--line); border-radius:.75rem; background:var(--surface-2); color:var(--text); }
-.mock-switcher-menu > button[aria-current="true"] { border-color:var(--lime); }
-.mock-switcher-menu > button small { color:var(--muted); font-size:.75rem; }
-.mock-switcher-menu .mock-toggle { display:flex; gap:.625rem; align-items:start; font-size:.75rem; line-height:1.5; color:var(--muted); padding:.25rem .125rem; }
-.mock-switcher-menu .mock-toggle input { width:1.125rem; min-height:1.125rem; flex:none; accent-color:var(--lime); }
-.live-workspace button:not([class]) { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border:.0625rem solid var(--line); border-radius:.75rem; background:var(--surface); color:var(--text); font:inherit; font-size:.875rem; font-weight:600; cursor:pointer; }
-.live-workspace button:not([class]):hover:not(:disabled) { border-color:var(--lime); }
-@media(max-width:37.5rem) { .integrated-topbar .api-mode-badge { padding:.25rem .5rem; font-size:.5625rem; letter-spacing:.04em; } }
+:where(.scope) :global(.integrated-topbar) :global(.api-mode-badge) { margin-left:auto; padding:.3125rem .625rem; border:.0625rem solid var(--line); border-radius:62.4375rem; color:var(--muted); font-size:.6875rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
+:where(.scope) :global(.integrated-topbar) :global(.api-mode-badge):global(.mock) { color:var(--warning); border-color:color-mix(in srgb,var(--warning) 45%,var(--line)); }
+:where(.scope) :global(.integrated-topbar) :global(.api-mode-badge):global(.live) { color:var(--cyan); border-color:color-mix(in srgb,var(--cyan) 45%,var(--line)); }
+:where(.scope) :global(.integrated-topbar) :global(.api-mode-badge) + :global(.switch-account), :where(.scope) :global(.integrated-topbar) :global(.api-mode-badge) + :global(.mock-switcher) { margin-left:.75rem; }
+:where(.scope) :global(.mock-switcher) { position:relative; }
+:where(.scope) :global(.mock-switcher) summary { list-style:none; cursor:pointer; }
+:where(.scope) :global(.mock-switcher) summary::-webkit-details-marker { display:none; }
+:where(.scope) :global(.mock-switcher-menu) { position:absolute; right:0; top:calc(100% + .5rem); z-index:30; width:min(22rem,calc(100vw - 2rem)); display:grid; gap:.5rem; padding:.75rem; border:.0625rem solid var(--line); border-radius:1rem; background:var(--surface); box-shadow:0 1.5rem 5.625rem #0004; }
+:where(.scope) :global(.mock-switcher-menu) > button { display:grid; gap:.125rem; justify-items:start; text-align:left; min-height:3rem; padding:.625rem .75rem; border:.0625rem solid var(--line); border-radius:.75rem; background:var(--surface-2); color:var(--text); }
+:where(.scope) :global(.mock-switcher-menu) > button[aria-current="true"] { border-color:var(--lime); }
+:where(.scope) :global(.mock-switcher-menu) > button small { color:var(--muted); font-size:.75rem; }
+:where(.scope) :global(.mock-switcher-menu) :global(.mock-toggle) { display:flex; gap:.625rem; align-items:start; font-size:.75rem; line-height:1.5; color:var(--muted); padding:.25rem .125rem; }
+:where(.scope) :global(.mock-switcher-menu) :global(.mock-toggle) input { width:1.125rem; min-height:1.125rem; flex:none; accent-color:var(--lime); }
+:where(.scope) :global(.live-workspace) button:not([class]) { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border:.0625rem solid var(--line); border-radius:.75rem; background:var(--surface); color:var(--text); font:inherit; font-size:.875rem; font-weight:600; cursor:pointer; }
+:where(.scope) :global(.live-workspace) button:not([class]):hover:not(:disabled) { border-color:var(--lime); }
+@media(max-width:37.5rem) { :where(.scope) :global(.integrated-topbar) :global(.api-mode-badge) { padding:.25rem .5rem; font-size:.5625rem; letter-spacing:.04em; } }
 /* UC5–UC9 backend status values reuse the existing four status colour families. */
-.status-accepted,.status-received,.status-resolved { background:#163e32; color:#a9edce; }
-.status-ordered,.status-in_progress,.status-claimed { background:#163846; color:#ace3f2; }
-.status-queued,.status-partially_received,.status-pending_claim,.status-unpaid { background:#45341b; color:#ffdc97; }
-.status-cancelled { background:#492626; color:#ffb5af; }
-[data-theme="light"] :is(.status-accepted,.status-received,.status-resolved) { background:#e0f1e8; color:#23553f; }
-[data-theme="light"] :is(.status-ordered,.status-in_progress,.status-claimed) { background:#deedf5; color:#24596d; }
-[data-theme="light"] :is(.status-queued,.status-partially_received,.status-pending_claim,.status-unpaid) { background:#fff0cd; color:#715119; }
-[data-theme="light"] .status-cancelled { background:#ffe5e1; color:#8d3229; }
-.record-list-item > span.record-code { text-transform:none; overflow-wrap:anywhere; }
+:where(.scope) :global(.status-accepted), :where(.scope) :global(.status-received), :where(.scope) :global(.status-resolved) { background:#163e32; color:#a9edce; }
+:where(.scope) :global(.status-ordered), :where(.scope) :global(.status-in_progress), :where(.scope) :global(.status-claimed) { background:#163846; color:#ace3f2; }
+:where(.scope) :global(.status-queued), :where(.scope) :global(.status-partially_received), :where(.scope) :global(.status-pending_claim), :where(.scope) :global(.status-unpaid) { background:#45341b; color:#ffdc97; }
+:where(.scope) :global(.status-cancelled) { background:#492626; color:#ffb5af; }
+:global([data-theme="light"]) :where(.scope) :is(:global(.status-accepted),:global(.status-received),:global(.status-resolved)) { background:#e0f1e8; color:#23553f; }
+:global([data-theme="light"]) :where(.scope) :is(:global(.status-ordered),:global(.status-in_progress),:global(.status-claimed)) { background:#deedf5; color:#24596d; }
+:global([data-theme="light"]) :where(.scope) :is(:global(.status-queued),:global(.status-partially_received),:global(.status-pending_claim),:global(.status-unpaid)) { background:#fff0cd; color:#715119; }
+:global([data-theme="light"]) :where(.scope) :global(.status-cancelled) { background:#ffe5e1; color:#8d3229; }
+:where(.scope) :global(.record-list-item) > span:global(.record-code) { text-transform:none; overflow-wrap:anywhere; }
 ```
 
 ### A3. Cinematic public landing — src/features/landing/landing.module.css
@@ -1242,7 +1245,6 @@ import "./globals.css";
 import { AppThemeProvider } from "../src/components/appearance/appearance";
 import { ApiSessionProvider } from "../src/features/auth/api-session";
 import { Suspense } from "react";
-import "./workflows.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

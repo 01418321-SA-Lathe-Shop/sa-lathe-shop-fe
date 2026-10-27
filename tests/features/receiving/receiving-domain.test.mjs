@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { claimNote, claimOwed, creditDays, receiptPayload, settlementPayload } from "../../../app/backend-receiving-domain.ts";
+import { claimNote, claimOwed, creditDays, receiptPayload, settlementPayload } from "../../../src/features/receiving/receiving-domain.ts";
 
 const id = (n) => `10000000-0000-4000-8000-00000000000${n}`;
 const claim = { id: id(5), receipt_id: id(6), material_id: id(1), quantity: "5.000000", replaced: "2.000000", status: "claimed", note: "x" };
