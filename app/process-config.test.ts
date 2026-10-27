@@ -16,6 +16,14 @@ test("arm places scrap before linear feed; scrap is hidden throughout melting", 
   assert.ok(sampleProcess(3.5).pour > 0);
   assert.equal(sampleProcess(3.9).pour < 1e-10, true);
 });
+test("placement release is continuous and the arm has time to retract", () => {
+  const release = 1 + 0.8 * 0.54;
+  const before = sampleProcess(release - 0.00001), after = sampleProcess(release + 0.00001);
+  assert.ok(Math.abs(before.scrapX - after.scrapX) < 0.0001);
+  assert.ok(Math.abs(before.scrapY - after.scrapY) < 0.0001);
+  assert.equal(sampleProcess(1.8).armX, sampleProcess(0).armX);
+  assert.equal(sampleProcess(1).armY, 1.15);
+});
 test("output is cold and settled for the final 0.3 seconds", () => {
   const a = sampleProcess(4.7), b = sampleProcess(5);
   assert.equal(a.ingotX, b.ingotX); assert.equal(a.ingotHeat, 0);

@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Component, useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { landingConfig } from "./landing-config";
-import { processConfig, processDuration, type ProcessMotion } from "./process-config";
+import { processConfig, type ProcessMotion } from "./process-config";
 import type { ProcessClock } from "./process-clock";
 import { Nav } from "./landing-nav";
 import { StatCards } from "./landing-stat-cards";
@@ -31,7 +31,6 @@ export function Hero() {
   const clock = useRef<ProcessClock | null>(null);
   const stateRef = useRef("loading");
   const [state, setState] = useState<"loading" | "playing" | "paused" | "complete" | "failed">("loading");
-  const [loop, setLoop] = useState<boolean>(processConfig.loop);
   const [ready, setReady] = useState(false), [visible, setVisible] = useState(true);
   const reduced = useMedia("(prefers-reduced-motion: reduce)");
   const mobile = useMedia("(max-width: 767px)");
@@ -41,11 +40,6 @@ export function Hero() {
     stateRef.current = "failed"; setState("failed");
   }, []);
   const complete = useCallback(() => { stateRef.current = "complete"; setState("complete"); }, []);
-  const showFinal = useCallback(() => {
-    motion.current.time = processDuration;
-    clock.current?.finish();
-    complete();
-  }, [complete]);
   const togglePlayback = () => {
     if (state === "playing") { clock.current?.pause(); stateRef.current = "paused"; setState("paused"); }
     else {
@@ -91,23 +85,24 @@ export function Hero() {
   const staticMode = reduced === true || state === "failed";
   return <section ref={root} className="cinematic-hero" data-state={staticMode ? "static" : state} aria-labelledby="cinematic-title">
     <div className="cinematic-horizon" aria-hidden="true" />
-    <div className="cinematic-art" role="img" aria-label="Illustrative process: a robotic gripper places scrap on a conveyor, a furnace melts it, and a finished metal ingot emerges.">
+    <div className="cinematic-art">
+      <p id="cinematic-scene-description" className="cinematic-sr-only">ภาพจำลองแขนกลหยิบเศษโลหะวางบนสายพาน ลำเลียงเข้าเตาหลอม และขึ้นรูปเป็นแท่งโลหะสำเร็จ</p>
       <picture className="cinematic-poster"><source media="(max-width: 767px)" srcSet="/landing-final-mobile.webp" /><img src="/landing-final-desktop.webp" alt="" width="1440" height="320" fetchPriority="high" /></picture>
       {reduced === false && mobile !== null && state !== "failed" && <div className="cinematic-canvas" data-ready={ready} aria-hidden="true">
         <SceneLoadBoundary onError={onError}><Scene motion={motion} mobile={mobile} playing={state === "playing"} frameState={state} visible={visible} onReady={onReady} onError={onError} /></SceneLoadBoundary>
       </div>}
+      {!staticMode && ready && <button className="cinematic-scene-toggle" type="button" onClick={togglePlayback}
+        aria-label={state === "playing" ? "หยุดภาพเคลื่อนไหวชั่วคราว" : "เล่นภาพเคลื่อนไหว"}
+        aria-describedby="cinematic-scene-description" aria-pressed={state === "paused"}
+        title={state === "playing" ? "แตะเพื่อหยุดภาพเคลื่อนไหว" : "แตะเพื่อเล่นภาพเคลื่อนไหว"} />}
     </div>
     <Nav />
     <div className="cinematic-copy"><h1 id="cinematic-title">{landingConfig.headline.map(line => <span className="cinematic-line" key={line}>{line}</span>)}</h1></div>
-    <div className="cinematic-description"><p>{landingConfig.paragraph}</p><Link href="/register" className="cinematic-primary">Start a job <span aria-hidden="true">↗</span></Link></div>
-    <div className="cinematic-bottom-copy"><p>Manufacturing, <br />from first request <br />to final delivery.</p><a href="#workflow" aria-label="Explore the manufacturing workflow">Explore below <span aria-hidden="true">↓</span></a></div>
+    <div className="cinematic-description"><p>{landingConfig.paragraph}</p><Link href="/register" className="cinematic-primary">เริ่มสั่งผลิต <span aria-hidden="true">↗</span></Link></div>
+    <div className="cinematic-bottom-copy"><p>ดูแลงานผลิต<br />ตั้งแต่รับงาน<br />จนถึงส่งมอบ</p><a href="#workflow" aria-label="ดูขั้นตอนการทำงาน">ดูขั้นตอน <span aria-hidden="true">↓</span></a></div>
     <StatCards />
-    {!staticMode && <div className="cinematic-intro-controls" aria-label="Animation controls">
-      {state === "loading" ? <span role="status">Loading 3D…</span> : <button type="button" onClick={togglePlayback}>{state === "playing" ? "Pause" : state === "complete" ? "Replay" : "Play"}</button>}
-      <button type="button" aria-pressed={loop} onClick={() => { motion.current.loop = !loop; setLoop(!loop); }}>Loop {loop ? "on" : "off"}</button>
-      <button type="button" onClick={showFinal} disabled={state === "complete"}>Show final frame</button>
-    </div>}
-    {state === "failed" && <p className="cinematic-scene-notice" role="status">3D unavailable. Showing the finished piece.</p>}
-    <noscript><style>{`.cinematic-hero .cinematic-poster{opacity:1!important;filter:none!important}.cinematic-intro-controls{display:none!important}`}</style></noscript>
+    {!staticMode && state === "loading" && <p className="cinematic-scene-notice" role="status">กำลังเตรียมภาพสามมิติ…</p>}
+    {state === "failed" && <p className="cinematic-scene-notice" role="status">แสดงภาพนิ่งแทน เนื่องจากไม่สามารถเปิดภาพสามมิติได้</p>}
+    <noscript><style>{`.cinematic-hero .cinematic-poster{opacity:1!important;filter:none!important}.cinematic-scene-notice{display:none!important}`}</style></noscript>
   </section>;
 }

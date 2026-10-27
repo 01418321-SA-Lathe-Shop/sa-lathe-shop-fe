@@ -38,19 +38,19 @@ export function sampleProcess(time: number, cycle = 0) {
   let armX = -5.65, armY = -0.08, gap = 0.48;
   if (t < processStages.place.start) {
     gap = mix(0.48, 0.21, armEase(clamp(pickup / 0.2)));
-    armY = mix(-0.08, 1.45, armEase(clamp((pickup - 0.2) / 0.8)));
+    armY = mix(-0.08, 1.15, armEase(clamp((pickup - 0.2) / 0.8)));
   } else if (t < processStages.feed.start) {
-    const move = armEase(clamp(place / 0.62));
+    const move = armEase(clamp(place / 0.54));
     armX = mix(-5.65, -3.65, move);
-    armY = mix(1.45, 0.02, move) + Math.sin(move * Math.PI) * 0.28;
-    gap = mix(0.21, 0.48, armEase(clamp((place - 0.62) / 0.14)));
-    if (place > 0.76) {
-      const back = armEase((place - 0.76) / 0.24);
+    armY = mix(1.15, 0.02, move) + Math.sin(move * Math.PI) * 0.2;
+    gap = mix(0.21, 0.48, armEase(clamp((place - 0.54) / 0.12)));
+    if (place > 0.66) {
+      const back = armEase((place - 0.66) / 0.34);
       armX = mix(-3.65, -5.65, back);
       armY = mix(0.02, -0.08, back) + Math.sin(back * Math.PI) * 0.65;
     }
   }
-  const attached = t < processStages.place.start || place < 0.62;
+  const attached = t < processStages.place.start || place < 0.54;
   const scrapX = attached ? armX : mix(-3.65, 1.1, easings[processConfig.easing.belt](feed));
   const scrapY = attached ? armY - 0.36 : -0.34;
   const output = easings[processConfig.easing.output](clamp((t - processStages.output.start) / Math.max(0.01, processStages.output.duration - processConfig.finalHold)));

@@ -37,6 +37,8 @@ const snapshot = [
   fence('css', read('app/landing.css')),
   '### B. Font loading and root layout — app/layout.tsx',
   fence('tsx', read('app/layout.tsx')),
+  '### B2. Scoped Thai landing font — app/dashboard.tsx',
+  fence('tsx', read('app/dashboard.tsx').split('const workflow =')[0]),
   '### C. SVG geometry and brand markup — app/appearance.tsx',
   fence('tsx', dashboard.slice(iconStart, iconEnd)),
   '### D. Route file inventory',
