@@ -12,6 +12,7 @@ import { API_ROLES, canAccessWorkspace, getWorkspaces, type Role, type Workspace
 import { PAGE_LABELS, ROLE_LABELS, ROLE_ROOTS, workspacePath } from "./workspace-routes";
 import { MOCK_LOGINS } from "../../mocks/data/mock-accounts";
 import ConnectedWorkspace from "./connected-workspace";
+import CustomerShell from "../customer/customer-shell";
 
 import { workspaceIcons as icons } from "./workspace-icons";
 const descriptions: Record<Role, string> = {
@@ -42,6 +43,7 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
   const overview = workspaceId === "overview";
   const leave = () => void signOut().then(() => router.push("/login"));
   const initials = account.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "??";
+  if (role === "Customer") return <CustomerShell session={session} workspaceId={workspaceId} mockControls={mode === "mock" ? <MockSwitcher current={account.username} /> : undefined} leave={leave} />;
   return <div className={`app-shell integrated-shell ${styles.scope}`}>
     <a className="workflow-skip" href="#main-content">ข้ามไปเนื้อหา</a>
     {menuOpen && <button className="navigation-scrim" aria-label="ปิดเมนู" onClick={() => setMenuOpen(false)}/>}

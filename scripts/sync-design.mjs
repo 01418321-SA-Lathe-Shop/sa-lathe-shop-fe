@@ -34,6 +34,8 @@ const snapshot = [
   fence('css', read('src/components/ui/workflows.module.css')),
   '### A3. Cinematic public landing — src/features/landing/landing.module.css',
   fence('css', read('src/features/landing/landing.module.css')),
+  '### A4. Customer wireframe surface — src/features/customer/customer.module.css',
+  fence('css', read('src/features/customer/customer.module.css')),
   '### B. Font loading and root layout — app/layout.tsx',
   fence('tsx', read('app/layout.tsx')),
   '### B2. Scoped Thai landing font — src/features/landing/landing-page.tsx',
