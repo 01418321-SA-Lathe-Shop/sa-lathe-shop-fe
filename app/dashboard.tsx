@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Noto_Sans_Thai } from "next/font/google";
-import { Logo, ThemeToggle } from "./appearance";
+import { ThemeToggle } from "../src/components/appearance/appearance";
+import { Logo } from "../src/components/appearance/icons";
+
 import { Hero } from "./landing-hero";
 import "./landing.css";
 

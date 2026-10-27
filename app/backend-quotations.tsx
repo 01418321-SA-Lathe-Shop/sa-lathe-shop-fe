@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { BackendApi, displayMoney, moneyInput, type Account, type Decision, type Estimate, type JobRequest, type Page, type Quotation } from "./backend-api";
-import { useCommand, useResource } from "./backend-hooks";
-import { Feedback, Field, Paging, text } from "./backend-ui";
+import { BackendApi, displayMoney, moneyInput, type Account, type Decision, type Estimate, type JobRequest, type Page, type Quotation } from "../src/lib/api/backend-api";
+import { useCommand, useResource } from "../src/hooks/backend-hooks";
+import { Feedback, Field, Paging, text } from "../src/components/ui/backend-ui";
 import { LiveFulfillment } from "./backend-fulfillment";
 
 export function LiveQuotations({ api, account, request, onChanged, only = "all" }: { api: BackendApi; account: Account; request: JobRequest; onChanged: () => void; only?: "all" | "quotations" | "fulfillment" }) {

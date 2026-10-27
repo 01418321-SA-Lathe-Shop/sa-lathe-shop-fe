@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { BackendApi, displayMoney, type Account } from "./backend-api";
-import { useCommand, useResource } from "./backend-hooks";
+import { BackendApi, displayMoney, type Account } from "../src/lib/api/backend-api";
+import { useCommand, useResource } from "../src/hooks/backend-hooks";
 import { inventoryDisplay } from "./backend-inventory-domain";
 import { claimNote, claimOwed, creditDays, receiptPayload, settlementPayload, type Claim, type DraftReceipt, type ReceivingState, type ReceivingSummary } from "./backend-receiving-domain";
-import { Feedback, Field, Paging, PrivateUpload, RetryNote, Status, text, type ReadyFile } from "./backend-ui";
-import { formatBangkok } from "./demo-display";
+import { Feedback, Field, Paging, PrivateUpload, RetryNote, Status, text, type ReadyFile } from "../src/components/ui/backend-ui";
+import { formatBangkok } from "../src/lib/formatting/display";
 
 const name = (state: ReceivingState, materialId: string) => state.lines?.find((line) => line.material_id === materialId);
 

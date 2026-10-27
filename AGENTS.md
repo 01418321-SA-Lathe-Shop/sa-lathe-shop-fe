@@ -11,7 +11,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Project-specific guidance
 
 - This repository is the frontend for the Machine Shop Custom Manufacturing System. Read `docs/02-frontend.md` before making project changes; treat it as the source of truth for product workflows and requirements.
-- Preserve the existing project layout: Next.js App Router files live under `app/`; do not restructure folders without asking.
+- App Router routes and special files remain under `app/`. The owner-approved cleanup groups non-route code under `src/features/`, shared code under `src/components/`, `src/hooks/`, `src/lib/`, mocks under `src/mocks/`, and mirrored native tests under `tests/`. Do not move route folders or change URLs without asking.
 - Follow the versions already declared in `package.json` (Next.js 16.4.0, React 19.3.0, TypeScript, and Tailwind CSS 4). Do not install or upgrade dependencies without asking.
 - Keep UI behavior aligned with the documented Customer, Worker, and Admin permissions and UC1–UC9 workflows. Preserve entity names and status values exactly. Do not infer Admin permissions beyond those documented.
 - The UI must not contain S3 or authentication secrets. Use `NEXT_PUBLIC_API_BASE_URL` for the public API URL. Real integration uses the existing Go backend's memory-only opaque Bearer session; never put tokens in localStorage/sessionStorage, URLs or logs. Read `docs/08-backend-integration-handoff.md` and backend `docs/AUTH.md`, `UC1.md`, `UC2.md`, `UC3.md` before changing connected behavior.

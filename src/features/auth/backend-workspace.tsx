@@ -1,17 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Icon, Logo, ThemeToggle } from "./appearance";
-import { BackendApi, type Customer, type Notification, type Page } from "./backend-api";
-import { useCommand, useResource } from "./backend-hooks";
-import { useApiSession, type ApiMode } from "./api-session";
-import { formatBangkok } from "./demo-display";
-import { MOCK_LOGINS, type MockLogin } from "./mock-accounts";
-import { API_ROLES } from "./workspace-access";
-import { Field, Feedback, Paging, passwordError, text } from "./backend-ui";
-import { ROLE_ROOTS } from "./workspace-routes";
+import { useEffect,useRef,useState,type FormEvent } from "react";
+import { ThemeToggle } from "../../components/appearance/appearance";
+import { Icon,Logo } from "../../components/appearance/icons";
+
+import { MOCK_LOGINS,type MockLogin } from "../../../app/mock-accounts";
+import { Feedback,passwordError,text } from "../../components/ui/backend-ui";
+import { useCommand } from "../../hooks/backend-hooks";
+import { BackendApi } from "../../lib/api/backend-api";
+import { API_ROLES } from "../workspace/workspace-access";
+import { ROLE_ROOTS } from "../workspace/workspace-routes";
+import { useApiSession,type ApiMode } from "./api-session";
 
 // Designed Login/Register page. Real sign-in uses the live API; the test-account
 // buttons sign into the explicit in-browser mock backend. Both open the same shell.
@@ -66,21 +67,5 @@ function LiveLogin({ base, notice, initialRegister, onLogin, onMock }: { base: s
       <span className="auth-api">Connected API · {base}</span></div>
     </section>
   </main>;
-}
-
-export function Inbox({ api }: { api: BackendApi }) {
-  const [offset, setOffset] = useState(0); const resource = useResource<Page<Notification>>(api, `/notifications?limit=20&offset=${offset}`); const action = useCommand();
-  return <section className="record-detail"><h2>Inbox</h2><button onClick={resource.reload}>Refresh inbox</button><Feedback busy={resource.loading} error={resource.error} />
-    {resource.data && <>{!(resource.data.items?.length) && <p>No notifications on this page. New-request alerts arrive when the backend worker processes its outbox.</p>}{resource.data.items?.map((item) => <article className="supplier-order" key={item.id}><h3>{item.title}</h3><p>{formatBangkok(item.created_at)} · {item.read_at ? "Read" : "Unread"}</p>{!item.read_at && <button disabled={action.busy} onClick={() => void action.run(async (signal) => { await api.call(`/notifications/${item.id}/read`, "PATCH", undefined, signal); resource.reload(); }, "Marked as read.")}>Mark read</button>}</article>)}<Paging offset={offset} count={resource.data.items?.length ?? 0} busy={action.busy} setOffset={setOffset} /></>}<Feedback {...action} />
-  </section>;
-}
-
-export function Memberships({ api }: { api: BackendApi }) {
-  const resource = useResource<{ items: Customer[] | null }>(api, "/customers"); const action = useCommand(); const [invitation, setInvitation] = useState("");
-  return <section className="record-detail"><h2>Customer memberships</h2><button onClick={resource.reload}>Refresh memberships</button><Feedback busy={resource.loading} error={resource.error} />
-    {resource.data?.items?.map((item) => <article className="supplier-order" key={item.id}><h3>{item.name}</h3><p>{item.customer_type} · {item.is_owner ? "Owner" : "Member"}</p><p className="record-id">{item.id}</p>{item.customer_type === "company" && item.is_owner && <button disabled={action.busy} onClick={() => { setInvitation(""); void action.run(async (signal) => { const result = await api.call<{ invitation: string }>(`/customers/${item.id}/invitations`, "POST", undefined, signal); setInvitation(result.invitation); }, "Invitation created. Share privately; one use, expires after 24 hours."); }}>Create private invitation</button>}</article>)}
-    {invitation && <div className="workflow-success"><p>Shown only in this page; share privately. It will disappear when you leave.</p><output className="private-invitation">{invitation}</output><button onClick={() => setInvitation("")}>Hide invitation</button></div>}
-    <form onSubmit={(event) => { event.preventDefault(); const form = event.currentTarget; const token = text(new FormData(form), "invitation"); form.reset(); void action.run(async (signal) => { await api.call("/customers/join", "POST", { invitation: token }, signal); resource.reload(); }, "Company joined."); }}><Field label="Join company with private invitation"><input name="invitation" type="password" required autoComplete="off" /></Field><button disabled={action.busy} type="submit">Join company</button></form><Feedback {...action} />
-  </section>;
 }
 

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
-import { getServerTheme, getServerUiSize, getTheme, getUiSize, saveTheme, saveUiSize, subscribeAppearance } from "../../../app/appearance-preferences.ts";
+import { getServerTheme, getServerUiSize, getTheme, getUiSize, saveTheme, saveUiSize, subscribeAppearance } from "../../../src/components/appearance/appearance-preferences.ts";
 
 afterEach(() => {
   Reflect.deleteProperty(globalThis, "window");

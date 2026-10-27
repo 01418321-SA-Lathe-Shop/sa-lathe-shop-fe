@@ -11,11 +11,11 @@
 | `DESIGN.md` | Design system, component, responsive และ handoff rules |
 | `app/globals.css` | ค่าจริงของ selector, breakpoint, theme และ state |
 | `app/dashboard.tsx` | Landing markup |
-| `app/appearance.tsx` | Icons, Logo, theme/scale provider และ Settings |
-| `app/workspace-shell.tsx`, `app/workspace-routes.ts` | Shared role shell, permissions mapping และ URL |
+| `src/components/appearance/` | Icons, Logo, theme/scale provider และ Settings |
+| `src/features/workspace/` | Shared role shell, permissions mapping และ URL |
 | `app/workflows.css` | Functional UC forms/tables และ role shell overrides |
-| `app/auth-gateway.tsx`, `app/backend-workspace.tsx` | Connected Login/Register ในดีไซน์หลัก และปุ่มบัญชีทดสอบ (mock backend) ใต้ฟอร์ม |
-| `app/api-session.tsx`, `app/connected-workspace.tsx`, `app/workspace-access.ts` | Memory-only session (live หรือ mock), เนื้อหาแต่ละหน้า และ role → route map |
+| `src/features/auth/` | Connected Login/Register และ memory-only live/mock session |
+| `src/features/inbox/`, `src/features/memberships/` | Inbox และ company memberships แยกจาก login |
 | `app/mock-*.ts` | In-browser mock backend ตามสัญญา API (dev/preview เท่านั้น) |
 | `app/layout.tsx` | Font loading, language และ provider |
 | `app/**/page.tsx` | Route จริง |
@@ -238,6 +238,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-27 | จัด shared infrastructure, auth และ workspace ไว้ใน src; แยก icons, API types, inbox และ memberships ตามหน้าที่ โดยไม่เปลี่ยน UI หรือ URL | Native tests, lint, TypeScript, build และ design snapshot |
 | 2026-10-27 | แก้ preference hydration ด้วย external-store subscription แทน setState ใน effect; คง Settings, theme transition และ scale เดิม | Preference unit tests; full lint, TypeScript และ browser regression checks |
 | 2026-10-27 | Thai landing with self-hosted Noto Sans Thai; remove action bar, retain scene tap/keyboard pause; add brushed metals, mechanical details, soft shadows and refined arm/conveyor motion |5 timing tests; type/lint/build; desktop/mobile, Thai font, no toolbar, offscreen and fallback checks |
 | 2026-10-27 | Replace one-shot spindle intro with configurable five-second arm/conveyor/furnace/ingot loop, playback controls and lighter mobile rendering | Timing tests, type/lint and browser checks; current evidence in landing handoff |
@@ -1237,8 +1238,8 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { AppThemeProvider } from "./appearance";
-import { ApiSessionProvider } from "./api-session";
+import { AppThemeProvider } from "../src/components/appearance/appearance";
+import { ApiSessionProvider } from "../src/features/auth/api-session";
 import { Suspense } from "react";
 import "./workflows.css";
 
@@ -1274,27 +1275,33 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 ```tsx
 import Link from "next/link";
 import { Noto_Sans_Thai } from "next/font/google";
-import { Logo, ThemeToggle } from "./appearance";
+import { ThemeToggle } from "../src/components/appearance/appearance";
+import { Logo } from "../src/components/appearance/icons";
+
 import { Hero } from "./landing-hero";
 import "./landing.css";
 
 const thai = Noto_Sans_Thai({ subsets: ["thai", "latin"], display: "swap", variable: "--font-landing-thai" });
 ```
 
-### C. SVG geometry and brand markup — app/appearance.tsx
+### C. SVG geometry and brand markup — src/components/appearance/icons.tsx
 
 ```tsx
-function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
+
+
+type IconName = "grid" | "inbox" | "machine" | "truck" | "file" | "layers" | "wallet" | "clock" | "search" | "plus" | "arrow" | "bell" | "logout" | "close" | "sun" | "moon";
+
+
+export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
   const p: Record<IconName, React.ReactNode> = { grid: <><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></>, inbox: <><path d="M4 4h16v13H4z"/><path d="M4 13h4l2 3h4l2-3h4"/></>, machine: <path d="M5 20V8h14v12M8 8V4h8v4M9 13h6M12 10v6"/>, truck: <><path d="M3 6h11v10H3zM14 10h4l3 3v3h-7z"/><circle cx="7" cy="18" r="2"/><circle cx="18" cy="18" r="2"/></>, file: <path d="M6 3h8l4 4v14H6zM14 3v5h5M9 13h6M9 17h4"/>, layers: <path d="m12 3 9 5-9 5-9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/>, wallet: <path d="M4 6h15v13H4zM4 9V5h12M15 13h6v4h-6z"/>, clock: <><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>, search: <><circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4"/></>, plus: <path d="M12 5v14M5 12h14"/>, arrow: <path d="m9 18 6-6-6-6"/>, bell: <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>, logout: <path d="M10 5H5v14h5M14 8l4 4-4 4M9 12h9"/>, close: <path d="M6 6l12 12M18 6 6 18"/>, sun: <><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></>, moon: <path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/> };
   return <svg aria-hidden="true" className="icon" width={`${size / 16}rem`} height={`${size / 16}rem`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{p[name]}</svg>;
 }
+
 
 export function Logo({ onClick }: { onClick?: () => void }) {
   const mark = <><span className="brand-mark"><span/></span><span><b>LATHE</b><small>SHOP CONTROL</small></span></>;
   return onClick ? <button className="brand brand-button" onClick={onClick} aria-label="กลับหน้าแรก">{mark}</button> : <div className="brand">{mark}</div>;
 }
-
-export
 ```
 
 ### D. Route file inventory

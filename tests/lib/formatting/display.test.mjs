@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { formatTHB, formatBangkok } from '../../../app/demo-display.ts';
+import { formatTHB, formatBangkok } from '../../../src/lib/formatting/display.ts';
 
 test('THB display uses satang, exact two-decimal presentation and no VAT',()=>{
   assert.match(formatTHB(12345),/THB\s*123\.45/);

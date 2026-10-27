@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { BackendApi, displayMoney, type Account, type Evidence, type EvidenceSubmission, type Fulfillment, type SignedLink } from "./backend-api";
+import { BackendApi, displayMoney, type Account, type Evidence, type EvidenceSubmission, type Fulfillment, type SignedLink } from "../src/lib/api/backend-api";
 import { availableEvidenceKinds, evidencePayload, reviewReason } from "./backend-fulfillment-domain";
-import { useCommand, useResource } from "./backend-hooks";
-import { Feedback, Field, text } from "./backend-ui";
-import { formatBangkok } from "./demo-display";
+import { useCommand, useResource } from "../src/hooks/backend-hooks";
+import { Feedback, Field, text } from "../src/components/ui/backend-ui";
+import { formatBangkok } from "../src/lib/formatting/display";
 import { LiveMaterialPlan } from "./backend-material-plan";
 
 type ReviewAttempt = { outcome: "approved" | "rejected"; expected_version: number | string; reason?: string };

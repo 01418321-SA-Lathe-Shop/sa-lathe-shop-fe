@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from "react";
-import type { BackendApi } from "./backend-api";
-import { useCommand } from "./backend-hooks";
+import type { BackendApi } from "../../lib/api/backend-api";
+import { useCommand } from "../../hooks/backend-hooks";
 
 export function Field({ label, children }: { label: string; children: ReactNode }) { return <label className="form-field"><span>{label}</span>{children}</label>; }
 export function Feedback({ busy, error, message }: { busy?: boolean; error?: string; message?: string }) { return <>{busy && <p role="status">Working…</p>}{error && <p role="alert" className="workflow-error">{error}</p>}{message && <p role="status" className="workflow-success">{message}</p>}</>; }

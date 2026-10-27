@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { type Account, BackendApi } from "./backend-api";
-import { useCommand, useResource } from "./backend-hooks";
+import { type Account, BackendApi } from "../src/lib/api/backend-api";
+import { useCommand, useResource } from "../src/hooks/backend-hooks";
 import { catalogName, inventoryDisplay, stockFields, type InventoryMaterial, type InventoryMovement } from "./backend-inventory-domain";
-import { Field, Feedback, Paging, text } from "./backend-ui";
-import { formatBangkok } from "./demo-display";
+import { Field, Feedback, Paging, text } from "../src/components/ui/backend-ui";
+import { formatBangkok } from "../src/lib/formatting/display";
 
 type Items<T> = { items: T[] | null };
 type Unit = { id: string; name: string };

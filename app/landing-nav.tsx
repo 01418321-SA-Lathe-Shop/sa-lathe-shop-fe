@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Logo } from "./appearance";
+import { Logo } from "../src/components/appearance/icons";
+
 
 export function Nav() {
   return <nav className="cinematic-nav" aria-label="เมนูหลัก">

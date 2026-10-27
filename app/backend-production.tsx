@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { BackendApi, displayMoney, type Account, type JobRequest } from "./backend-api";
-import { useCommand, useResource, useRetryableWrite } from "./backend-hooks";
+import { BackendApi, displayMoney, type Account, type JobRequest } from "../src/lib/api/backend-api";
+import { useCommand, useResource, useRetryableWrite } from "../src/hooks/backend-hooks";
 import { inventoryDisplay, type InventoryPlan } from "./backend-inventory-domain";
 import { MaterialSearch } from "./backend-inventory";
 import { formatMinutes, laborPayload, timePayload, usagePayload, type ProductionState, type UsageDraft } from "./backend-production-domain";
-import { Feedback, Field, Paging, PrivateUpload, RetryNote, Status, text, type ReadyFile } from "./backend-ui";
-import { formatBangkok } from "./demo-display";
-import type { ProductionSummary } from "./connected-workspace";
+import { Feedback, Field, Paging, PrivateUpload, RetryNote, Status, text, type ReadyFile } from "../src/components/ui/backend-ui";
+import { formatBangkok } from "../src/lib/formatting/display";
+import type { ProductionSummary } from "../src/features/workspace/connected-workspace";
 
 const short = (id: string) => id.slice(0, 8);
 

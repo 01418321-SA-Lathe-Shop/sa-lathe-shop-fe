@@ -3,14 +3,16 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Icon, Logo, ThemeToggle } from "./appearance";
-import { useApiSession } from "./api-session";
+import { ThemeToggle } from "../../components/appearance/appearance";
+import { Icon, Logo } from "../../components/appearance/icons";
+
+import { useApiSession } from "../auth/api-session";
 import { API_ROLES, canAccessWorkspace, getWorkspaces, type Role, type WorkspaceId } from "./workspace-access";
 import { PAGE_LABELS, ROLE_LABELS, ROLE_ROOTS, workspacePath } from "./workspace-routes";
-import { MOCK_LOGINS } from "./mock-accounts";
+import { MOCK_LOGINS } from "../../../app/mock-accounts";
 import ConnectedWorkspace from "./connected-workspace";
 
-const icons = { overview: "grid", requests: "inbox", quotations: "file", "deposit-po": "wallet", materials: "layers", orders: "file", receiving: "inbox", production: "machine", "delivery-payment": "truck", workers: "grid", inbox: "bell", memberships: "grid" } as const;
+import { workspaceIcons as icons } from "./workspace-icons";
 const descriptions: Record<Role, string> = {
   Customer: "ส่งคำขอ ตอบรับใบเสนอราคา และติดตามการส่งมอบกับการชำระเงิน",
   Worker: "ประเมินราคา จัดเตรียมวัตถุดิบ และติดตามงานตั้งแต่ผลิตจนส่งมอบ",

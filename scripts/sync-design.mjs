@@ -22,10 +22,7 @@ function pages(directory) {
   }).sort();
 }
 
-const dashboard = read('app/appearance.tsx');
-const iconStart = dashboard.indexOf('function Icon(');
-const iconEnd = dashboard.indexOf('function ThemeToggle(', iconStart);
-if (iconStart < 0 || iconEnd < 0) throw new Error('Icon/Logo source boundaries changed; update the design generator.');
+const icons = read('src/components/appearance/icons.tsx');
 const fence = (language, source) => '```' + language + '\n' + source.trimEnd() + '\n```';
 const snapshot = [
   '### A. Full CSS specification — app/globals.css',
@@ -39,8 +36,8 @@ const snapshot = [
   fence('tsx', read('app/layout.tsx')),
   '### B2. Scoped Thai landing font — app/dashboard.tsx',
   fence('tsx', read('app/dashboard.tsx').split('const workflow =')[0]),
-  '### C. SVG geometry and brand markup — app/appearance.tsx',
-  fence('tsx', dashboard.slice(iconStart, iconEnd)),
+  '### C. SVG geometry and brand markup — src/components/appearance/icons.tsx',
+  fence('tsx', icons),
   '### D. Route file inventory',
   pages(join(root, 'app')).map((path) => '- `' + path + '`').join('\n'),
 ].join('\n\n');

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { AppThemeProvider } from "./appearance";
-import { ApiSessionProvider } from "./api-session";
+import { AppThemeProvider } from "../src/components/appearance/appearance";
+import { ApiSessionProvider } from "../src/features/auth/api-session";
 import { Suspense } from "react";
 import "./workflows.css";
 

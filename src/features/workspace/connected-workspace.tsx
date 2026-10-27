@@ -2,25 +2,28 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Icon } from "./appearance";
-import type { ApiSession } from "./api-session";
-import type { BackendApi, JobRequest, Notification, Page } from "./backend-api";
-import { useResource } from "./backend-hooks";
-import { Feedback, Paging } from "./backend-ui";
-import { LiveRequests } from "./backend-requests";
-import { LiveWorkers } from "./backend-workers";
-import { LiveInventory } from "./backend-inventory";
-import { LiveMaterialPlan } from "./backend-material-plan";
-import { Inbox, Memberships } from "./backend-workspace";
-import { LiveProcurement } from "./backend-procurement";
-import { LiveReceiving } from "./backend-receiving";
-import { LiveProduction } from "./backend-production";
-import { LiveDelivery } from "./backend-delivery";
-import { formatBangkok } from "./demo-display";
+import { Icon } from "../../components/appearance/icons";
+
+import type { ApiSession } from "../auth/api-session";
+import type { BackendApi, JobRequest, Notification, Page } from "../../lib/api/backend-api";
+import { useResource } from "../../hooks/backend-hooks";
+import { Feedback, Paging } from "../../components/ui/backend-ui";
+import { LiveRequests } from "../../../app/backend-requests";
+import { LiveWorkers } from "../../../app/backend-workers";
+import { LiveInventory } from "../../../app/backend-inventory";
+import { LiveMaterialPlan } from "../../../app/backend-material-plan";
+import { Inbox } from "../inbox/inbox";
+import { Memberships } from "../memberships/memberships";
+
+import { LiveProcurement } from "../../../app/backend-procurement";
+import { LiveReceiving } from "../../../app/backend-receiving";
+import { LiveProduction } from "../../../app/backend-production";
+import { LiveDelivery } from "../../../app/backend-delivery";
+import { formatBangkok } from "../../lib/formatting/display";
 import { getWorkspaces, type Role, type WorkspaceId } from "./workspace-access";
 import { PAGE_LABELS, workspacePath } from "./workspace-routes";
 
-const icons = { requests: "inbox", quotations: "file", "deposit-po": "wallet", materials: "layers", orders: "file", receiving: "inbox", production: "machine", "delivery-payment": "truck", workers: "grid", inbox: "bell", memberships: "grid" } as const;
+import { workspaceIcons as icons } from "./workspace-icons";
 export type ProductionSummary = { job_id: string; request_id: string; status: string; version: number | string; material_plan_version: number | string; cycle: number | string; started_at?: string; completed_at?: string };
 
 export default function ConnectedWorkspace({ role, workspaceId, session }: { role: Role; workspaceId: WorkspaceId; session: ApiSession }) {

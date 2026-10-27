@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { BackendApi, type Page, type Worker } from "./backend-api";
+import { BackendApi, type Page, type Worker } from "../src/lib/api/backend-api";
 import { workerContacts } from "./backend-fulfillment-domain";
-import { useCommand, useResource } from "./backend-hooks";
-import { Field, Feedback, Paging, passwordError, text } from "./backend-ui";
+import { useCommand, useResource } from "../src/hooks/backend-hooks";
+import { Field, Feedback, Paging, passwordError, text } from "../src/components/ui/backend-ui";
 
 export function LiveWorkers({ api }: { api: BackendApi }) {
   const [offset, setOffset] = useState(0);

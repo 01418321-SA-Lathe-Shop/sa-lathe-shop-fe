@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BackendApi, errorMessage } from "./backend-api";
+import { BackendApi, errorMessage } from "../lib/api/backend-api";
 
 // Responses for superseded keys are ignored. An explicit reload of the same
 // path keeps showing the last server data (marked loading) so detail views do

@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { BackendApi, displayMoney } from "./backend-api";
-import { useCommand, useResource } from "./backend-hooks";
+import { BackendApi, displayMoney } from "../src/lib/api/backend-api";
+import { useCommand, useResource } from "../src/hooks/backend-hooks";
 import { inventoryDisplay } from "./backend-inventory-domain";
 import { MaterialSearch } from "./backend-inventory";
 import { allowedActions, lineTotal, orderActionPayload, orderPayload, orderTotal, supplierFields, type DraftLine, type OrderAction, type Supplier, type SupplierOrder } from "./backend-procurement-domain";
-import { Feedback, Field, Paging, RetryNote, Status, text } from "./backend-ui";
-import { formatBangkok } from "./demo-display";
-import type { ProductionSummary } from "./connected-workspace";
+import { Feedback, Field, Paging, RetryNote, Status, text } from "../src/components/ui/backend-ui";
+import { formatBangkok } from "../src/lib/formatting/display";
+import type { ProductionSummary } from "../src/features/workspace/connected-workspace";
 
 type Items<T> = { items: T[] | null };
 const ACTION_LABELS: Record<OrderAction, string> = { accept: "Record supplier acceptance", reject: "Record supplier rejection", cancel: "Cancel order" };

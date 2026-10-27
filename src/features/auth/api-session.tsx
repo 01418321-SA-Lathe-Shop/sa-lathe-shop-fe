@@ -1,8 +1,8 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { BackendApi, type Account } from "./backend-api";
-import type { MockBackend } from "./mock-backend";
+import { BackendApi, type Account } from "../../lib/api/backend-api";
+import type { MockBackend } from "../../../app/mock-backend";
 
 // One memory-only session for the whole designed shell. Client navigation keeps
 // it; reload or sign-out discards it. Tokens never touch browser storage/URLs.
@@ -43,7 +43,7 @@ export function ApiSessionProvider({ children }: { children: ReactNode }) {
     let backend = mockRef.current;
     if (mode === "mock" && !backend) {
       // Loaded on demand so live users never download the mock module.
-      const { createLatheMockBackend } = await import("./mock-seed");
+      const { createLatheMockBackend } = await import("../../../app/mock-seed");
       backend = mockRef.current = createLatheMockBackend(); setMock(backend);
     }
     const api = new BackendApi(mode === "mock" && backend ? backend.base : LIVE_BASE, () => { if (active.current === api) { active.current = null; setSession(null); setNotice("Session expired or revoked. Please sign in again."); } }, mode === "mock" && backend ? backend.transport : undefined);

@@ -1,7 +1,7 @@
 // UC8 production commands (backend UC8.md). Usage is incremental actual use,
 // never a cumulative total; minutes are explicit whole labor minutes.
 import { inventoryDecimal } from "./backend-inventory-domain.ts";
-import { moneyInput } from "./backend-api.ts";
+import { moneyInput } from "../src/lib/api/backend-api.ts";
 
 export type ProductionMaterial = { material_id: string; name: string; unit_name: string; required: string; reserved: string; reservation_consumed: string; used: string; released: string };
 export type ProductionUsage = { id: string; material_id: string; material_name: string; unit_name: string; quantity: string; reservation_used: string; actor_id: string; created_at: string; unit_cost?: string; total_amount?: string };
