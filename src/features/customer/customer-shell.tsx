@@ -12,8 +12,8 @@ import { subscribeAppearance } from "../../components/appearance/appearance-pref
 import ConnectedWorkspace from "../workspace/connected-workspace";
 import { PAGE_LABELS } from "../workspace/workspace-routes";
 import { getCustomerTheme, getServerCustomerTheme } from "./customer-preferences";
-import { NotificationBell, CustomerNotifications } from "./customer-notifications";
-import { CustomerOverview } from "./customer-overview";
+import { NotificationBell } from "./customer-notifications";
+import { CustomerContent } from "./customer-content";
 import { PageTitle } from "./customer-ui";
 import styles from "./customer.module.css";
 
@@ -26,7 +26,7 @@ export default function CustomerShell({ session, workspaceId, mockControls, leav
   const menu = useRef<HTMLDialogElement>(null); const theme = useSyncExternalStore(subscribeAppearance, getCustomerTheme, getServerCustomerTheme);
   const settings = query.get("view") === "settings";
   function links(items: string[][]) { return items.map(([href, label]) => <Link key={href} href={href} aria-current={pathname === href && !settings ? "page" : undefined} onClick={() => menu.current?.close()}>{label}</Link>); }
-  const content = settings ? <><PageTitle title="ตั้งค่าการแสดงผล" /><ThemeToggle /></> : workspaceId === "overview" ? <CustomerOverview api={session.api} /> : workspaceId === "inbox" ? <CustomerNotifications api={session.api} /> : <><PageTitle title={PAGE_LABELS[workspaceId]} /><div className="live-workspace"><ConnectedWorkspace role="Customer" session={session} workspaceId={workspaceId} /></div></>;
+  const content = settings ? <><PageTitle title="ตั้งค่าการแสดงผล" /><ThemeToggle /></> : <CustomerContent api={session.api} fallback={<><PageTitle title={PAGE_LABELS[workspaceId]} /><div className="live-workspace"><ConnectedWorkspace role="Customer" session={session} workspaceId={workspaceId} /></div></>} />;
   return <div className={`${styles.root} ${thai.variable}`} data-customer-theme={theme}>
     <a className="cust-skip" href="#customer-content">ข้ามไปเนื้อหา</a>
     <header className="cust-navbar"><div className="cust-nav-inner"><Logo onClick={() => router.push("/customer")} /><nav className="cust-desktop-nav" aria-label="เมนูหลัก"><Link href="/customer" aria-current={workspaceId === "overview" && !settings ? "page" : undefined}>ภาพรวม</Link><details><summary>งานของฉัน</summary><div>{links(orders)}</div></details><details><summary>เอกสารและการชำระเงิน</summary><div>{links(documents)}</div></details></nav>

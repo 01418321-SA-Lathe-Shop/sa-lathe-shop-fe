@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon } from "../../components/appearance/icons";
 import type { BackendApi } from "../../lib/api/backend-api";
 import { useCommand } from "../../hooks/backend-hooks";
@@ -42,5 +42,7 @@ export function Disclosure({ title, children }: { title: string; children: React
 }
 export function ConfirmChoice({ title, children, onConfirm, onCancel, busy = false, danger = false }: { title: string; children: ReactNode; onConfirm: () => void; onCancel: () => void; busy?: boolean; danger?: boolean }) {
   const [checked, setChecked] = useState(false);
-  return <section className="cust-confirm" aria-label={title}><h2>{title}</h2>{children}<label className="cust-checkbox"><input type="checkbox" checked={checked} disabled={busy} onChange={(e) => setChecked(e.target.checked)} />ฉันอ่านรายละเอียดและยืนยันการดำเนินการนี้</label><div className="cust-actions"><button className={danger ? "cust-danger" : "cust-primary"} disabled={!checked || busy} onClick={onConfirm}>ยืนยัน</button><button disabled={busy} onClick={onCancel}>กลับไปตรวจสอบ</button></div></section>;
+  const section = useRef<HTMLElement>(null);
+  useEffect(() => { section.current?.focus(); }, []);
+  return <section ref={section} tabIndex={-1} className="cust-confirm" aria-label={title}><h2>{title}</h2>{children}<label className="cust-checkbox"><input type="checkbox" checked={checked} disabled={busy} onChange={(e) => setChecked(e.target.checked)} />ฉันอ่านรายละเอียดและยืนยันการดำเนินการนี้</label><div className="cust-actions"><button className={danger ? "cust-danger" : "cust-primary"} disabled={!checked || busy} onClick={onConfirm}>ยืนยัน</button><button disabled={busy} onClick={onCancel}>กลับไปตรวจสอบ</button></div></section>;
 }

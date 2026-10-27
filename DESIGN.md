@@ -34,6 +34,15 @@
 - Existing paginated reads are traversed with a 1,000-record safety boundary and bounded sales-enrichment concurrency; incomplete data is labeled, never advertised as an exact global count. No live-to-mock fallback. Mock account controls stay explicitly labeled.
 - Batch 1 intentionally retains existing customer forms inside the new shell until the next cohesive batch. Full customer wireframe coverage is not claimed at this checkpoint.
 
+## Customer requests, quotation decisions and Deposit/PO — batch 2 (2026-10-27)
+
+- Existing Customer URLs are retained. Query selectors (`request`, `quotation`, `view=new`, list `q/status`) give navigable detail states; UUID selectors are validated before path interpolation. Lists keep the query/filter in the URL, with no session tokens or signed links stored there. No new App Router special file or API endpoint is added.
+- Requests now use searchable full-width rows (stacked mobile) and separate document-style details. Quote and deposit lists have their own document-price and evidence-checklist patterns. Filters operate on the explicitly traversed collection; incomplete enrichment/paging is disclosed.
+- The four-step request wizard is ผู้สั่ง / รายละเอียด / ไฟล์แนบ / ตรวจทาน, with a desktop live summary. Customer type is derived from membership. Files are selected locally, then request creation precedes uploading. A created request ID and per-file outcomes remain in memory: upload retry never recreates the request or reuploads ready files. An uncertain non-idempotent create freezes resubmission and directs inspection of the request list. No persisted draft is implied.
+- Quote detail shows whole-job price, scope, comparison/history and separate decision confirmation; mobile decision controls are fixed above the bottom edge with reserved content space. Five rejections permit revision, the sixth warns and cancels. Versioned decisions preserve the original exact payload on explicit uncertain retry. Preview terms use exact satang math; persisted terms and deadline are shown from server history/fulfillment after acceptance.
+- Deposit/PO detail pairs immutable terms with the applicable upload form. Private upload completion precedes explicit evidence submission; PO omits amount/time. One deposit is minimum-to-full, not installments. Ready file, pending/approved/rejected evidence, overdue state and actual opened job are distinct. Existing private signed downloads expose a clear เปิดใบ PO action. No local expiry, banking verification or staff approval is invented.
+- New customer forms are Thai, use labels and 44px targets, and keep internal IDs/costs out of the UI. Staff/Admin forms are unchanged.
+
 ## Visual direction
 
 - Modern industrial dashboard: หัวเรื่องและตัวเลขใหญ่ การ์ดมุมมน เส้นขอบบาง และพื้นที่ว่างชัดเจน
@@ -1092,7 +1101,7 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-skip:focus) { top: 8px; }
 .root :global(.cust-navbar) { position: sticky; top: 0; z-index: 30; background: var(--cust-surface); border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-nav-inner) { max-width: 1280px; margin: auto; padding: 0 32px; min-height: 80px; display: flex; align-items: center; gap: 40px; }
-.root :global(.brand) { flex-shrink: 0; cursor: pointer; border: 0; padding: 0; background: transparent; color: var(--cust-ink); }
+.root :global(.brand) { flex-shrink: 0; width: auto; cursor: pointer; border: 0; padding: 0; background: transparent; color: var(--cust-ink); }
 .root :global(.brand b) { color: var(--cust-ink); }
 .root :global(.brand-copy strong) { color: var(--cust-ink); }
 .root :global(.brand-copy span) { color: var(--cust-muted); }
@@ -1193,6 +1202,61 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-checkbox) { display: flex; gap: 12px; align-items: flex-start; min-height: 44px; margin-top: 20px; }
 .root :global(.cust-checkbox input) { margin-top: 4px; }
 .root :global(.cust-confirm) { padding: 24px; background: var(--cust-tint); border-radius: 12px; margin: 24px 0; }
+.root :global(fieldset) { border: 0; padding: 0; margin: 0; min-width: 0; }
+.root :global(.cust-filters) { display: grid; grid-template-columns: minmax(0, 2fr) minmax(180px, 1fr) auto; align-items: end; gap: 16px; margin-bottom: 24px; }
+.root :global(.cust-filters .cust-field) { margin: 0; }
+.root :global(.cust-filter-result) { margin: 16px 0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.root :global(.cust-request-head), .root :global(.cust-request-row) { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 170px; gap: 24px; }
+.root :global(.cust-request-head) { padding: 16px 0; font-size: .875rem; color: var(--cust-muted); border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-request-row) { padding: 24px 0; border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-request-row time) { font-size: .875rem; color: var(--cust-muted); }
+.root :global(.cust-request-row p) { margin-top: 8px; }
+.root :global(.cust-record-title) { display: grid; color: var(--cust-ink); gap: 4px; overflow-wrap: anywhere; }
+.root :global(.cust-record-title small) { font-size: .875rem; }
+.root :global(.cust-document), .root :global(.cust-form-surface) { background: var(--cust-surface); padding: 32px; border-radius: 12px; min-width: 0; }
+.root :global(.cust-document > h2), .root :global(.cust-form-surface > h2) { margin-bottom: 24px; }
+.root :global(.cust-definition) { margin: 24px 0; }
+.root :global(.cust-definition > div) { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-definition dt) { color: var(--cust-muted); }
+.root :global(.cust-definition dd) { margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.root :global(.cust-definition dd small) { display: block; }
+.root :global(.cust-detail-grid), .root :global(.cust-quotation-layout) { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 32px; align-items: start; }
+.root :global(.cust-side-summary) { padding: 24px; background: var(--cust-surface); border-radius: 12px; position: sticky; top: 104px; }
+.root :global(.cust-side-summary .cust-definition > div) { grid-template-columns: 1fr; gap: 4px; }
+.root :global(.cust-side-summary > *) + :global(*) { margin-top: 16px; }
+.root :global(.cust-file-row), .root :global(.cust-file-list li) { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-file-row > span), .root :global(.cust-file-list span) { min-width: 0; overflow-wrap: anywhere; }
+.root :global(.cust-file-row small), .root :global(.cust-file-list small) { display: block; }
+.root :global(.cust-history-row) { padding: 16px 0; border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-history-row p) { margin: 6px 0; overflow-wrap: anywhere; }
+.root :global(.cust-stepper) { display: flex; list-style: none; padding: 0; margin: 0 0 32px; gap: 24px; }
+.root :global(.cust-stepper li) { display: flex; align-items: center; gap: 8px; color: var(--cust-muted); }
+.root :global(.cust-stepper span) { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: var(--cust-surface); border: 1px solid var(--cust-line); }
+.root :global(.cust-stepper [aria-current="step"]) { color: var(--cust-accent); font-weight: 650; }
+.root :global(.cust-stepper [aria-current="step"] span) { background: #b54708; color: #fff; border: 0; }
+.root :global(.cust-stepper .done span) { border-color: var(--cust-green); color: var(--cust-green); }
+.root :global(.cust-wizard-grid) { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.root :global(.cust-wizard-summary) { padding: 24px 0; position: sticky; top: 104px; }
+.root :global(.cust-file-list) { padding: 0; list-style: none; }
+.root :global(.cust-document-row) { display: flex; justify-content: space-between; align-items: center; gap: 32px; padding: 28px 0; border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-document-row h2) { margin: 8px 0 12px; overflow-wrap: anywhere; }
+.root :global(.cust-document-action) { flex-shrink: 0; text-align: right; }
+.root :global(.cust-list-price) { display: block; font-size: 1.5rem; }
+.root :global(.cust-price-panel) { background: var(--cust-surface); padding: 32px; border-radius: 12px; position: sticky; top: 104px; }
+.root :global(.cust-price-panel > p) { margin-top: 16px; }
+.root :global(.cust-price-panel > section) { margin: 24px 0; padding-top: 24px; border-top: 1px solid var(--cust-line); }
+.root :global(.cust-hero-price) { display: block; font-size: clamp(1.5rem, 2.5vw, 2rem); margin-top: 8px; font-weight: 650; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.root :global(.cust-terms-list) { padding-left: 20px; }
+.root :global(.cust-terms-list li) { margin: 10px 0; }
+.root :global(.cust-decision-bar) { display: grid; gap: 12px; margin-top: 24px; }
+.root :global(.cust-preserve) { white-space: pre-wrap; overflow-wrap: anywhere; }
+.root :global(.cust-payment-layout) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 32px; align-items: start; }
+.root :global(.cust-checklist) { list-style: none; padding: 0; margin: 20px 0; }
+.root :global(.cust-checklist li) { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-upload) { padding: 24px; border: 1px dashed var(--cust-muted); border-radius: 12px; margin: 24px 0; background: var(--cust-bg); }
+.root :global(.cust-upload .cust-field) { margin-top: 16px; }
+.root :global(.cust-upload > button) { margin-top: 16px; }
+.root :global(.cust-upload input) { max-width: 100%; padding: 8px; font-size: .875rem; }
 @media (max-width: 1020px) {
   .root :global(.cust-nav-inner) { gap: 24px; }
   .root :global(.cust-desktop-nav), .root :global(.cust-account-menu) { display: none; }
@@ -1215,6 +1279,21 @@ src/features/workspace/workspace.module.css
   .root :global(.cust-inbox-panel) { padding: 16px; }
   .root :global(.cust-inbox-panel .cust-notification-scroll) { max-height: calc(100dvh - 320px); }
   .root :global(.cust-tabs) { gap: 20px; }
+  .root :global(.cust-filters) { grid-template-columns: 1fr; }
+  .root :global(.cust-request-head) { display: none; }
+  .root :global(.cust-request-row) { grid-template-columns: 1fr; gap: 12px; }
+  .root :global(.cust-detail-grid), .root :global(.cust-quotation-layout), .root :global(.cust-wizard-grid), .root :global(.cust-payment-layout) { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .root :global(.cust-document), .root :global(.cust-form-surface), .root :global(.cust-price-panel), .root :global(.cust-side-summary) { padding: 20px; position: static; }
+  .root :global(.cust-detail-grid > .cust-side-summary), .root :global(.cust-quotation-layout > .cust-price-panel) { grid-row: 1; }
+  .root :global(.cust-definition > div) { grid-template-columns: 1fr; gap: 4px; }
+  .root :global(.cust-stepper) { gap: 8px; justify-content: space-between; }
+  .root :global(.cust-stepper li) { flex-direction: column; font-size: .8125rem; gap: 6px; }
+  .root :global(.cust-wizard-summary) { position: static; padding: 16px 0; border-top: 1px solid var(--cust-line); }
+  .root :global(.cust-wizard-grid .cust-actions .cust-primary) { flex: 1; }
+  .root :global(.cust-document-row) { align-items: stretch; flex-direction: column; gap: 16px; }
+  .root :global(.cust-document-action) { text-align: left; }
+  .root :global(.cust-decision-bar) { position: fixed; bottom: 0; left: 0; right: 0; z-index: 20; background: var(--cust-surface); padding: 12px 16px max(12px, env(safe-area-inset-bottom)); border-top: 1px solid var(--cust-line); gap: 4px; }
+  .root :global(.cust-main:has(.cust-decision-bar)) { padding-bottom: 180px; }
 }
 @media (prefers-reduced-motion: reduce) { .root *, .root *::before, .root *::after { scroll-behavior: auto; transition: none; animation: none; } }
 ```
