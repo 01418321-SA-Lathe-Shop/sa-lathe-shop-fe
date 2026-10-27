@@ -120,7 +120,7 @@ Noto Sans Thai is self-hosted through Next/font for Customer only, with a sans-s
 
 ## Layout
 
-The main reading area is capped at 1180px with 32px desktop side padding; the navbar has a 1280px cap. Desktop navigation becomes a native-dialog menu at 1020px. At 700px, content side padding becomes 16px, multi-column task layouts stack, notification dialogs become full-screen sheets, and quotation decisions sit above the safe-area edge with reserved content space.
+On desktop (>1020px), Customer navigation docks on the left as a 17rem persistent sidebar drawer, with the main workspace stage offset (`margin-left: 17rem`) and capped reading width of 1180px with 32px padding. The desktop stage features a 64px slim topbar with mode indicators, mock controls, and notification access. On mobile (≤1020px), the sidebar is hidden, the stage margin is reset, and the sticky top navbar (`.cust-navbar`) with logo, notifications, and menu toggle takes over. At 700px, content side padding becomes 16px, multi-column task layouts stack, notification dialogs become full-screen sheets, and quotation decisions sit above the safe-area edge with reserved content space.
 
 Overview prioritizes attention and recent work; requests use rows and document details; quotations use a price/decision rail; Deposit/PO uses an evidence checklist; jobs use a timeline; receipt uses a focused decision form; invoices prioritize balance; account/settings use split task layouts. These are Customer surface patterns, not prescriptions for Landing or Staff.
 
@@ -148,7 +148,7 @@ Document/form surfaces use the frontmatter document padding and corner treatment
 
 ### Navigation
 
-Navigation uses the actual pathname and relevant history/settings selector for active state. Main menu groups are tasks, documents/payments and account. Links use client navigation to retain the memory-only session; the mobile native dialog closes after navigation. The notification bell opens its own dialog and closes the mobile menu first.
+Desktop navigation uses a persistent 17rem left sidebar drawer with categorized sections (Workspace, งานของฉัน, เอกสารและการชำระเงิน, บัญชี), icons (`grid`, `file`, `machine`, `clock`, `layers`, `wallet`, `inbox`, `sun`), active page highlighting, and a user footer with avatar, name, and logout. Mobile navigation (≤1020px) retains the sticky top navbar header and `<dialog className="cust-mobile-menu">` slide-out drawer. All links use client navigation to retain the memory-only session; the mobile dialog closes on link navigation.
 
 ### Chips
 
@@ -436,6 +436,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-27 | Move Customer desktop navigation into persistent 17rem left sidebar drawer; keep sticky top navbar and dialog menu on mobile | Native tests, source audit, design sync check, and browser verification |
 | 2026-10-27 | Align Customer portal color palette with landing page dark aesthetic (`#060707` bg, `#111313`/`#191c1c` surfaces, `#343838` line, `#ff923f` burnt-orange action, dark default theme) | Native tests, source audit, design sync check, and browser verification |
 | 2026-10-27 | Merge Customer-only normative tokens, canonical design sections and `.impeccable/design.json`; record batch 3 notification reconciliation, path-active navigation and spaced related links; preserve Staff/Landing specifications | Token/source consistency and documentation checks; implementation verification is recorded separately in the Customer handoff, not claimed as live backend testing |
 | 2026-10-27 | ปิด redundant inner outline บน `:is(input, select):focus-visible` ใน `.login-field` เพื่อให้โฟกัสแสดงที่กรอบนอกมน `.login-field > div:focus-within` เท่านั้น | ตรวจสอบ visual rendering ในเบราว์เซอร์ทั้ง Dark และ Light mode, snapshot check และ native tests |
@@ -1305,29 +1306,52 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-small) { font-size: .875rem; }
 .root :global(.cust-skip) { position: fixed; top: -100px; left: 16px; z-index: 100; background: var(--cust-surface); padding: 12px; }
 .root :global(.cust-skip:focus) { top: 8px; }
-.root :global(.cust-navbar) { position: sticky; top: 0; z-index: 30; background: var(--cust-surface); border-bottom: 1px solid var(--cust-line); }
-.root :global(.cust-nav-inner) { max-width: 1280px; margin: auto; padding: 0 32px; min-height: 80px; display: flex; align-items: center; gap: 40px; }
-.root :global(.brand) { flex-shrink: 0; width: auto; cursor: pointer; border: 0; padding: 0; background: transparent; color: var(--cust-ink); }
-.root :global(.brand b) { color: var(--cust-ink); }
-.root :global(.brand-copy strong) { color: var(--cust-ink); }
-.root :global(.brand-copy span) { color: var(--cust-muted); }
-.root :global(.cust-desktop-nav), .root :global(.cust-nav-actions) { display: flex; align-items: center; gap: 24px; }
-.root :global(.cust-desktop-nav) { flex: 1; }
-.root :global(.cust-desktop-nav > a), .root :global(.cust-desktop-nav summary) { display: flex; align-items: center; color: var(--cust-ink); min-height: 48px; font-size: .9375rem; }
-.root :global(.cust-desktop-nav [aria-current="page"]) { color: var(--cust-accent); font-weight: 650; }
-.root :global(.cust-desktop-nav details), .root :global(.cust-account-menu) { position: relative; }
-.root :global(.cust-desktop-nav details > div), .root :global(.cust-account-menu > div) { position: absolute; right: 0; top: 100%; min-width: 250px; padding: 8px; background: var(--cust-surface); border: 1px solid var(--cust-line); border-radius: 12px; z-index: 31; }
-.root :global(.cust-desktop-nav details a), .root :global(.cust-account-menu a), .root :global(.cust-account-menu button) { display: flex; align-items: center; width: 100%; min-height: 44px; padding: 10px 12px; border: 0; color: var(--cust-ink); }
-.root :global(.cust-account-menu summary) { display: flex; align-items: center; gap: 8px; max-width: 180px; }
-.root :global(.cust-account-menu summary > span:last-child) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 120px; }
+.root :global(.cust-sidebar) { position: fixed; inset: 0 auto 0 0; z-index: 25; width: 17rem; height: 100dvh; padding: 1.5rem 1.125rem 1.25rem; display: flex; flex-direction: column; background: var(--cust-surface); border-right: 1px solid var(--cust-line); }
+.root :global(.cust-sidebar-scroll) { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--cust-line) transparent; }
+.root :global(.cust-sidebar-space) { margin: 1.25rem 0 1rem; padding: 0.75rem 0.875rem; display: flex; flex-direction: column; gap: 0.25rem; border: 1px solid var(--cust-line); border-radius: 0.75rem; background: var(--cust-surface-2); }
+.root :global(.cust-sidebar-space span) { color: var(--cust-accent); font-size: 0.625rem; font-weight: 700; letter-spacing: .16em; }
+.root :global(.cust-sidebar-space strong) { color: var(--cust-ink); font-size: 0.8125rem; font-weight: 650; }
+.root :global(.cust-sidebar-nav) { display: flex; flex-direction: column; gap: 0.25rem; }
+.root :global(.cust-sidebar-label) { display: block; padding: 0.875rem 0.625rem 0.375rem; color: var(--cust-muted); font-size: 0.6875rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.root :global(.cust-sidebar-nav a), .root :global(.cust-mobile-menu nav a) { width: 100%; min-height: 42px; padding: 0 0.6875rem; display: grid; grid-template-columns: 2rem 1fr; align-items: center; gap: 0.5rem; border: 1px solid transparent; border-radius: 0.625rem; background: transparent; color: var(--cust-muted); text-decoration: none; font-size: 0.875rem; font-weight: 550; transition: background .2s, color .2s, border-color .2s; }
+.root :global(.cust-sidebar-nav a:hover), .root :global(.cust-mobile-menu nav a:hover) { color: var(--cust-ink); background: var(--cust-surface-2); text-decoration: none; }
+.root :global(.cust-sidebar-nav a[aria-current="page"]), .root :global(.cust-mobile-menu nav a[aria-current="page"]) { color: var(--cust-ink); border-color: var(--cust-line); background: var(--cust-tint); font-weight: 700; }
+.root :global(.cust-sidebar-nav a[aria-current="page"] .cust-nav-icon), .root :global(.cust-mobile-menu nav a[aria-current="page"] .cust-nav-icon) { color: var(--cust-accent); }
+.root :global(.cust-nav-icon) { display: grid; place-items: center; width: 1.75rem; height: 1.75rem; border-radius: 0.375rem; color: var(--cust-muted); }
+.root :global(.cust-sidebar-footer) { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--cust-line); display: grid; grid-template-columns: 2.25rem 1fr 2rem; align-items: center; gap: 0.625rem; }
+.root :global(.cust-sidebar-footer .cust-avatar) { width: 2.25rem; height: 2.25rem; font-size: 0.8125rem; }
+.root :global(.cust-sidebar-footer > div) { min-width: 0; display: flex; flex-direction: column; }
+.root :global(.cust-sidebar-footer strong) { font-size: 0.8125rem; color: var(--cust-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.root :global(.cust-sidebar-footer span) { font-size: 0.6875rem; color: var(--cust-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.root :global(.cust-sidebar-footer button) { min-height: 36px; width: 36px; padding: 0; display: grid; place-items: center; background: transparent; border: 1px solid transparent; border-radius: 0.5rem; color: var(--cust-muted); }
+.root :global(.cust-sidebar-footer button:hover) { color: var(--cust-red); border-color: var(--cust-line); background: var(--cust-surface-2); }
+.root :global(.cust-stage) { min-height: 100vh; margin-left: 17rem; display: flex; flex-direction: column; }
+.root :global(.cust-topbar) { position: sticky; top: 0; z-index: 20; height: 64px; padding: 0 32px; display: flex; align-items: center; justify-content: space-between; background: rgba(17, 19, 19, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-topbar-env) { display: flex; align-items: center; gap: 16px; font-size: .8125rem; color: var(--cust-muted); }
+.root :global(.cust-topbar-actions) { display: flex; align-items: center; gap: 16px; }
+.root :global(.cust-navbar) { display: none; }
+.root :global(.cust-nav-inner) { max-width: 1280px; margin: auto; padding: 0 32px; min-height: 72px; display: flex; align-items: center; justify-content: space-between; }
+.root :global(.brand) { flex-shrink: 0; width: auto; cursor: pointer; border: 0; padding: 0; background: transparent; color: var(--cust-ink); display: inline-flex; align-items: center; gap: 0.6875rem; font-family: var(--font-geist-sans), sans-serif; }
+.root :global(.brand b) { color: var(--cust-ink); font-size: 1rem; letter-spacing: .18em; }
+.root :global(.brand small) { color: var(--cust-muted); font-size: 0.5rem; letter-spacing: .2em; display: block; }
+.root :global(.brand-mark) { position: relative; width: 1.8125rem; height: 1.8125rem; border-radius: 0.5rem; background: var(--cust-accent); transform: rotate(45deg); box-shadow: 0 0 1.75rem rgba(255,146,63,.2); flex-shrink: 0; }
+.root :global(.brand-mark):before, .root :global(.brand-mark):after { content: ""; position: absolute; background: #121514; border-radius: 0.1875rem; }
+.root :global(.brand-mark):before { width: 0.8125rem; height: 0.25rem; left: 0.5rem; top: 0.75rem; }
+.root :global(.brand-mark):after { width: 0.25rem; height: 0.8125rem; left: 0.75rem; top: 0.5rem; }
+.root :global(.cust-nav-actions) { display: flex; align-items: center; gap: 16px; }
 .root :global(.cust-avatar) { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--cust-tint); color: var(--cust-accent); font-weight: 650; }
-.root :global(.cust-bell) { display: grid; place-items: center; position: relative; width: 44px; height: 44px; padding: 8px; border: 0; }
+.root :global(.cust-bell) { display: grid; place-items: center; position: relative; width: 44px; height: 44px; padding: 8px; border: 0; background: transparent; }
 .root :global(.cust-bell > span) { position: absolute; top: -2px; right: -7px; min-width: 21px; padding: 0 4px; border-radius: 12px; background: var(--cust-accent); color: #121514; font-weight: 700; font-size: .75rem; }
 .root :global(.cust-menu-toggle) { display: none; }
-.root :global(.cust-environment) { display: flex; align-items: center; gap: 16px; max-width: 1280px; margin: auto; padding: 12px 32px 0; font-size: .8125rem; color: var(--cust-muted); }
+.root :global(.cust-environment) { display: none; }
 .root :global(.cust-mode.mock) { color: var(--cust-accent); }
 .root :global(.mock-switcher) { margin-left: auto; }
 .root :global(.mock-switcher summary) { min-height: 32px; padding: 4px 10px; color: var(--cust-ink); }
+.root :global(.cust-mobile-user) { display: flex; align-items: center; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--cust-line); margin-bottom: 12px; }
+.root :global(.cust-mobile-user strong) { display: block; font-size: 0.9375rem; color: var(--cust-ink); }
+.root :global(.cust-mobile-user small) { color: var(--cust-muted); font-size: 0.8125rem; }
+.root :global(.cust-mobile-actions) { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--cust-line); }
+.root :global(.cust-mobile-actions button) { width: 100%; }
 .root :global(.cust-main) { max-width: 1180px; margin: auto; min-height: calc(100vh - 260px); padding: 36px 32px 64px; }
 .root :global(.cust-heading) { margin-bottom: 32px; }
 .root :global(.cust-heading > div) { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
@@ -1506,10 +1530,14 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-settings-preview h3) { margin-top: 24px; }
 .root :global(.cust-settings-preview p), .root :global(.cust-settings-preview .cust-badge) { margin-top: 16px; }
 @media (max-width: 1020px) {
-  .root :global(.cust-nav-inner) { gap: 24px; }
-  .root :global(.cust-desktop-nav), .root :global(.cust-account-menu) { display: none; }
+  .root :global(.cust-sidebar) { display: none; }
+  .root :global(.cust-topbar) { display: none; }
+  .root :global(.cust-stage) { margin-left: 0; }
+  .root :global(.cust-navbar) { display: block; position: sticky; top: 0; z-index: 30; background: var(--cust-surface); border-bottom: 1px solid var(--cust-line); }
+  .root :global(.cust-nav-inner) { padding: 0 24px; min-height: 72px; }
   .root :global(.cust-nav-actions) { margin-left: auto; gap: 12px; }
-  .root :global(.cust-menu-toggle) { display: grid; place-items: center; width: 44px; padding: 8px; border: 0; }
+  .root :global(.cust-menu-toggle) { display: grid; place-items: center; width: 44px; height: 44px; padding: 8px; border: 1px solid var(--cust-line); border-radius: 8px; background: var(--cust-surface-2); color: var(--cust-ink); }
+  .root :global(.cust-environment) { display: flex; align-items: center; gap: 16px; max-width: 1280px; margin: auto; padding: 12px 24px 0; font-size: .8125rem; color: var(--cust-muted); }
 }
 @media (max-width: 700px) {
   .root :global(.cust-nav-inner) { min-height: 68px; padding: 0 16px; }
