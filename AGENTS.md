@@ -35,6 +35,9 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 - Work on `develop` and push ongoing project commits to `origin/develop`. Verify the active branch before editing or committing; do not commit or push ongoing work to `main` unless the user explicitly requests it.
 - Commit work in small, coherent groups, each with one understandable purpose and a descriptive message. Keep each group easy to review, debug, and revert.
+- Before staging, identify the purpose of each commit batch. Keep independent bug fixes, dependency/lockfile repairs, and workflow documentation in separate commits; include tightly coupled tests and required design documentation with their implementation. Do not use a final catch-all commit.
+- Inspect `git diff --cached --stat` and `git diff --cached` before committing each batch. Verify and push that batch before beginning the next independent batch. At handoff, list commit hashes and their individual purposes.
+- A merge commit preserves the existing granular commits; do not squash them into one implementation commit. Never rewrite or force-push already-published `develop` history merely to reorganize it without explicit approval for the history rewrite.
 - Validate each group before committing. Stage specific files or hunks; exclude unrelated user changes and secrets.
 - Push verified commit groups as work progresses, and finish every completed phase with all its commits pushed to the configured remote branch. Do not collect the entire project into one final commit and push.
 - Use normal pushes. If a push fails, inspect the cause, preserve local commits, and report what remains unpublished; do not force-push or rewrite shared history without explicit authorization.
