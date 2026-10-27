@@ -1,22 +1,17 @@
 import Link from "next/link";
 import { Noto_Sans_Thai } from "next/font/google";
-import { ThemeToggle } from "../src/components/appearance/appearance";
-import { Logo } from "../src/components/appearance/icons";
+import { ThemeToggle } from "../../components/appearance/appearance";
+import { Logo } from "../../components/appearance/icons";
 
 import { Hero } from "./landing-hero";
-import "./landing.css";
+import styles from "./landing.module.css";
 
 const thai = Noto_Sans_Thai({ subsets: ["thai", "latin"], display: "swap", variable: "--font-landing-thai" });
 
-const workflow = [
-  { title: "เริ่มต้นจากรายละเอียด", text: "ส่งคำขอสั่งผลิต พร้อมแบบงานและเอกสารประกอบที่จำเป็น" },
-  { title: "ตรวจสอบราคาให้ชัดเจน", text: "พิจารณาใบเสนอราคา และส่งหลักฐานเงินมัดจำหรือใบสั่งซื้อตามเงื่อนไขของงาน" },
-  { title: "เตรียมพร้อมก่อนเริ่มผลิต", text: "วางแผนวัตถุดิบ จองสต็อก สั่งซื้อ และติดตามความคืบหน้าการผลิต" },
-  { title: "ส่งมอบและปิดงานอย่างมั่นใจ", text: "ติดตามการส่งมอบ ตรวจรับ ใบแจ้งหนี้ และการชำระเงินเป็นงวดในระบบเดียว" },
-];
+import { workflow } from './landing-content';
 
-export default function Dashboard() {
-  return <main className={`cinematic-page ${thai.variable}`} lang="th">
+export default function LandingPage() {
+  return <main className={`cinematic-page ${styles.scope} ${thai.variable}`} lang="th">
     <Hero />
     <section className="cinematic-process" id="workflow" aria-labelledby="process-title">
       <div className="cinematic-section-heading"><h2 id="process-title">ทุกขั้นตอน<br />เชื่อมถึงกัน</h2><p>พื้นที่เดียวสำหรับทีมงาน วัตถุดิบ และข้อมูลที่ช่วยให้งานสั่งผลิตเดินหน้าต่อได้</p></div>

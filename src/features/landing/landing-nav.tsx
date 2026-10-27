@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Logo } from "../src/components/appearance/icons";
+import { Logo } from "../../components/appearance/icons";
 
 
 export function Nav() {

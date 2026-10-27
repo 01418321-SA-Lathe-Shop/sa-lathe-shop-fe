@@ -10,7 +10,7 @@
 | --- | --- |
 | `DESIGN.md` | Design system, component, responsive และ handoff rules |
 | `app/globals.css` | ค่าจริงของ selector, breakpoint, theme และ state |
-| `app/dashboard.tsx` | Landing markup |
+| `src/features/landing/` | Landing markup, content, scoped CSS Module และ procedural scene |
 | `src/components/appearance/` | Icons, Logo, theme/scale provider และ Settings |
 | `src/features/workspace/` | Shared role shell, permissions mapping และ URL |
 | `app/workflows.css` | Functional UC forms/tables และ role shell overrides |
@@ -164,7 +164,7 @@ Brand mark เป็น CSS square สีส้มหมุน45° พร้อ�
 
 ### Cinematic public landing (2026-10-27)
 
-Only `/` changes. `app/landing.css` scopes a fixed dark `#060707` world without changing saved workspace appearance. The public page is now Thai, including navigation, calls to action, descriptions, loading/error states and accessible names. Noto Sans Thai is self-hosted by Next/font and scoped to the landing; the existing LATHE / SHOP CONTROL brand retains Geist. Thai headline line-height1.28 and tracking−.015em leave room for marks; desktop size3–5.5rem and mobile2.25–4.5rem. Auth links, logo/pill navigation, caption and two glass stats remain. Counts (9 workflows, 3 roles) are product facts, not recycling or delivery guarantees. The furnace sequence is illustrative, not a statement of shop services. The desktop hero is at least47rem/100svh; the 3D band sits between49% from the top and16% from the bottom, below the headline. The camera remains fixed near-side-on, now slightly higher to reveal depth. No captions or text-reveal delays interrupt the story.
+Only `/` changes. `src/features/landing/landing.module.css` scopes a fixed dark `#060707` world without changing saved workspace appearance. The public page is now Thai, including navigation, calls to action, descriptions, loading/error states and accessible names. Noto Sans Thai is self-hosted by Next/font and scoped to the landing; the existing LATHE / SHOP CONTROL brand retains Geist. Thai headline line-height1.28 and tracking−.015em leave room for marks; desktop size3–5.5rem and mobile2.25–4.5rem. Auth links, logo/pill navigation, caption and two glass stats remain. Counts (9 workflows, 3 roles) are product facts, not recycling or delivery guarantees. The furnace sequence is illustrative, not a statement of shop services. The desktop hero is at least47rem/100svh; the 3D band sits between49% from the top and16% from the bottom, below the headline. The camera remains fixed near-side-on, now slightly higher to reveal depth. No captions or text-reveal delays interrupt the story.
 
 `landing-config.ts` owns public copy. `process-config.ts` owns cumulative durations: pickup1.0s → place0.8s → feed1.2s → melt0.9s → output1.1s, total5.0s on desktop AND mobile. The last0.3s is included in output and freezes the pose/belt. Arm movement uses cubic ease-in-out, belt travel is linear, ingot settling is cubic ease-out. On repeat, the previous ingot fades over the next cycle's first0.18s as fresh scrap fades in; arm, belt phase and final ingot rotation remain continuous. One GSAP clock drives mutable Three.js objects, not per-frame React updates. Local procedural geometry, reflection environment and lighting need no external model/HDR or API.
 
@@ -238,6 +238,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-27 | ย้าย landing เป็น feature; แยก robot arm, conveyor, furnace, workpiece และ primitives; CSS Module ใช้ local owner กับ zero-specificity scope เพื่อคง cascade เดิม; ลบเฉพาะ SVG starter 5 ไฟล์ที่อนุมัติ | Timing tests, lint, TypeScript, build; รูปแบบและ public image URLs เดิม |
 | 2026-10-27 | จัด shared infrastructure, auth และ workspace ไว้ใน src; แยก icons, API types, inbox และ memberships ตามหน้าที่ โดยไม่เปลี่ยน UI หรือ URL | Native tests, lint, TypeScript, build และ design snapshot |
 | 2026-10-27 | แก้ preference hydration ด้วย external-store subscription แทน setState ใน effect; คง Settings, theme transition และ scale เดิม | Preference unit tests; full lint, TypeScript และ browser regression checks |
 | 2026-10-27 | Thai landing with self-hosted Noto Sans Thai; remove action bar, retain scene tap/keyboard pause; add brushed metals, mechanical details, soft shadows and refined arm/conveyor motion |5 timing tests; type/lint/build; desktop/mobile, Thai font, no toolbar, offscreen and fallback checks |
@@ -1102,134 +1103,134 @@ button:disabled { opacity:.5; cursor:not-allowed; }
 .record-list-item > span.record-code { text-transform:none; overflow-wrap:anywhere; }
 ```
 
-### A3. Cinematic public landing — app/landing.css
+### A3. Cinematic public landing — src/features/landing/landing.module.css
 
 ```css
-.cinematic-page {
+:global(.cinematic-page):where(.scope) {
   --text: #f4f4f1; --muted: #a5aaa7; --lime: #ff923f; --bg: #060707;
   --surface: #111313; --surface-2: #191c1c; --line: #343838;
   color: var(--text); background: var(--bg); color-scheme: dark; overflow-x: clip;
   font-family: var(--font-landing-thai), var(--font-geist-sans), sans-serif;
 }
-.cinematic-page ::selection { color: #160e08; background: #ffb479; }
-.cinematic-page a { text-decoration: none; color: inherit; text-underline-offset: .25em; }
-.cinematic-page :is(a, button):focus-visible { outline: 2px solid #ffb16d; outline-offset: 5px; }
-.cinematic-page button { cursor: pointer; }
-.cinematic-hero { position: relative; min-height: max(47rem, 100svh); isolation: isolate; overflow: hidden; background: #060707; }
-.cinematic-horizon { position: absolute; z-index: -1; inset: 0; background: radial-gradient(ellipse 60% 12% at 53% 104%, #ff7c22 0%, #d4561a99 25%, transparent 72%), linear-gradient(0deg, #15191b 0%, #0b0e10 14%, #060707 46%); }
-.cinematic-art { position: absolute; z-index: 0; inset: 49% 0 16%; pointer-events: none; }
-.cinematic-canvas { position: absolute; inset: 0; opacity: 0; transition: opacity .3s; }
-.cinematic-canvas[data-ready="true"] { opacity: 1; }
-.cinematic-canvas canvas { display: block; }
-.cinematic-poster { position: absolute; inset: 0; display: block; }
-.cinematic-poster img { width: 100%; height: 100%; object-fit: contain; }
-.cinematic-hero:has(.cinematic-canvas[data-ready="true"]) .cinematic-poster { visibility: hidden; }
-.cinematic-hero[data-state="loading"] .cinematic-poster { opacity: .45; filter: blur(4px); }
-.cinematic-nav { position: relative; z-index: 3; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 2.75rem; padding: 2rem 4.5%; }
-.cinematic-brand { width: fit-content; }
-.cinematic-page .brand { padding: 0; font-family: var(--font-geist-sans), sans-serif; }
-.cinematic-page .brand b { color: #f4f4f1; font-size: .875rem; }
-.cinematic-page .brand small { color: #b0b5b2; }
-.cinematic-page .brand-mark { width: 1.8rem; height: 1.8rem; box-shadow: none; border-radius: .3rem; }
-.cinematic-nav-pills { display: flex; gap: .4rem; justify-self: start; }
-.cinematic-nav-pills a { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0 1rem; border: 1px solid #ffffff18; border-radius: 999px; background: #ffffff08; font-size: .75rem; color: #c0c4c1; transition: background .2s, color .2s; }
-.cinematic-nav-pills a:hover { color: white; background: #ffffff16; }
-.cinematic-workspace { display: inline-flex; align-items: center; gap: 1.5rem; min-height: 2.75rem; padding: 0 1rem; border: 1px solid #ffffff30; border-radius: .5rem; font-size: .75rem; transition: background .2s; }
-.cinematic-workspace:hover { background: #ffffff12; }
-.cinematic-workspace span { font-size: 1rem; }
-.cinematic-copy { position: absolute; z-index: 2; left: 4.5%; top: 18%; width: 55%; pointer-events: none; }
-.cinematic-copy h1 { margin: 0; font-size: clamp(3rem, 5.2vw, 5.5rem); line-height: 1.28; letter-spacing: -.015em; font-weight: 510; }
-.cinematic-line { display: block; white-space: nowrap; }
-.cinematic-description { position: absolute; z-index: 2; top: 23%; right: 4.5%; width: 23%; max-width: 19rem; }
-.cinematic-description p { margin: 0; color: #b6bbb8; font-size: .875rem; line-height: 1.7; text-wrap: pretty; }
-.cinematic-primary { margin-top: 2rem; min-height: 3rem; padding: .75rem 1.25rem; display: inline-flex; align-items: center; gap: 2.25rem; color: #121514 !important; background: #f3f3ef; border-radius: .375rem; font-size: .8125rem; font-weight: 600; transition: background .2s, transform .2s; }
-.cinematic-primary:hover { background: #ffd1ad; transform: translateY(-2px); }
-.cinematic-primary span { font-size: 1.125rem; }
-.cinematic-bottom-copy { position: absolute; z-index: 2; bottom: 3.5rem; left: 4.5%; isolation: isolate; }
-.cinematic-bottom-copy::before { content: ""; position: absolute; z-index: -1; inset: -.75rem -2rem -.5rem -1rem; background: linear-gradient(90deg, #080a0aee 65%, #080a0a00); pointer-events: none; }
-.cinematic-bottom-copy p { margin: 0; font-size: .875rem; line-height: 1.65; letter-spacing: 0; }
-.cinematic-bottom-copy a { margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 1rem; min-height: 2.75rem; font-size: .6875rem; color: #c0c6c2; }
-.cinematic-bottom-copy a:hover { color: #ffb16d; }
-.cinematic-stats { position: absolute; z-index: 2; right: 4.5%; bottom: 3.5rem; display: flex; gap: .65rem; margin: 0; }
-.cinematic-stats > div { display: flex; flex-direction: column-reverse; justify-content: space-between; gap: .75rem; min-width: 10.25rem; padding: 1.1rem 1.2rem; border-radius: .75rem; background: linear-gradient(135deg, #ffffff0c, #ffffff03), #101414e8; backdrop-filter: blur(14px); box-shadow: 0 .75rem 2rem #0003; }
-.cinematic-stats dt { font-size: .75rem; color: #d2d6d3; }
-.cinematic-stats dd { display: flex; align-items: center; justify-content: space-between; margin: 0; font-size: 2rem; line-height: 1; font-weight: 500; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
-.cinematic-stats dd span { font-size: .875rem; color: #ffad6a; }
-.cinematic-scene-notice { position: absolute; left: 50%; transform: translateX(-50%); bottom: 8%; font-size: .75rem; color: #b8bfbb; }
-.cinematic-process, .cinematic-platform { max-width: 100rem; margin: 0 auto; padding: 8rem 4.5%; scroll-margin-top: 2rem; }
-.cinematic-process { display: grid; grid-template-columns: 1fr 1fr; gap: 8%; border-bottom: 1px solid #ffffff15; }
-.cinematic-page h2 { margin: 0; font-weight: 500; font-size: clamp(2.5rem, 4vw, 4.5rem); line-height: 1.3; letter-spacing: -.015em; }
-.cinematic-section-heading > p { margin: 2rem 0 0; color: var(--muted); font-size: .9375rem; line-height: 1.7; max-width: 25rem; }
-.cinematic-process-list { list-style: none; padding: 0; margin: 0; }
-.cinematic-process-list li { display: grid; grid-template-columns: 2.5rem 1fr; gap: 1rem; padding: 1.75rem 0; border-top: 1px solid #ffffff20; }
-.cinematic-process-list li:first-child { padding-top: 0; border-top: 0; }
-.cinematic-step-number { padding-top: .25rem; color: #ffad6a; font-size: .75rem; font-variant-numeric: tabular-nums; }
-.cinematic-process-list h3 { margin: 0; font-size: 1.25rem; font-weight: 500; letter-spacing: -.02em; }
-.cinematic-process-list p { margin: .75rem 0 0; max-width: 27rem; color: var(--muted); font-size: .875rem; line-height: 1.7; }
-.cinematic-capabilities { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3rem; margin-top: 4rem; }
-.cinematic-capabilities article { padding-top: 1.5rem; border-top: 1px solid #ffffff30; scroll-margin-top: 2rem; }
-.cinematic-capabilities h3 { margin: 0; font-weight: 500; font-size: 1.25rem; letter-spacing: -.02em; }
-.cinematic-capabilities p { margin: 1rem 0 2rem; color: var(--muted); font-size: .875rem; line-height: 1.7; max-width: 28rem; }
-.cinematic-capabilities article > span { color: #dba27b; font-size: .6875rem; }
-.cinematic-footer { max-width: 100rem; margin: 0 auto; padding: 2rem 4.5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2rem; border-top: 1px solid #ffffff20; }
-.cinematic-footer > p { color: var(--muted); font-size: .75rem; }
-.cinematic-footer > div { display: flex; gap: 1.5rem; align-items: center; }
-.cinematic-footer > div > a { display: inline-flex; gap: 1rem; align-items: center; min-height: 2.75rem; font-size: .8125rem; }
-.cinematic-footer .settings-trigger { background: transparent; color: #c6cbc8; border-color: #ffffff30; }
+:global(.cinematic-page):where(.scope) ::selection { color: #160e08; background: #ffb479; }
+:global(.cinematic-page):where(.scope) a { text-decoration: none; color: inherit; text-underline-offset: .25em; }
+:global(.cinematic-page):where(.scope) :is(a, button):focus-visible { outline: 2px solid #ffb16d; outline-offset: 5px; }
+:global(.cinematic-page):where(.scope) button { cursor: pointer; }
+:where(.scope) :global(.cinematic-hero) { position: relative; min-height: max(47rem, 100svh); isolation: isolate; overflow: hidden; background: #060707; }
+:where(.scope) :global(.cinematic-horizon) { position: absolute; z-index: -1; inset: 0; background: radial-gradient(ellipse 60% 12% at 53% 104%, #ff7c22 0%, #d4561a99 25%, transparent 72%), linear-gradient(0deg, #15191b 0%, #0b0e10 14%, #060707 46%); }
+:where(.scope) :global(.cinematic-art) { position: absolute; z-index: 0; inset: 49% 0 16%; pointer-events: none; }
+:where(.scope) :global(.cinematic-canvas) { position: absolute; inset: 0; opacity: 0; transition: opacity .3s; }
+:where(.scope) :global(.cinematic-canvas)[data-ready="true"] { opacity: 1; }
+:where(.scope) :global(.cinematic-canvas) canvas { display: block; }
+:where(.scope) :global(.cinematic-poster) { position: absolute; inset: 0; display: block; }
+:where(.scope) :global(.cinematic-poster) img { width: 100%; height: 100%; object-fit: contain; }
+:where(.scope) :global(.cinematic-hero):has(:global(.cinematic-canvas)[data-ready="true"]) :global(.cinematic-poster) { visibility: hidden; }
+:where(.scope) :global(.cinematic-hero)[data-state="loading"] :global(.cinematic-poster) { opacity: .45; filter: blur(4px); }
+:where(.scope) :global(.cinematic-nav) { position: relative; z-index: 3; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 2.75rem; padding: 2rem 4.5%; }
+:where(.scope) :global(.cinematic-brand) { width: fit-content; }
+:global(.cinematic-page):where(.scope) :global(.brand) { padding: 0; font-family: var(--font-geist-sans), sans-serif; }
+:global(.cinematic-page):where(.scope) :global(.brand) b { color: #f4f4f1; font-size: .875rem; }
+:global(.cinematic-page):where(.scope) :global(.brand) small { color: #b0b5b2; }
+:global(.cinematic-page):where(.scope) :global(.brand-mark) { width: 1.8rem; height: 1.8rem; box-shadow: none; border-radius: .3rem; }
+:where(.scope) :global(.cinematic-nav-pills) { display: flex; gap: .4rem; justify-self: start; }
+:where(.scope) :global(.cinematic-nav-pills) a { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; padding: 0 1rem; border: 1px solid #ffffff18; border-radius: 999px; background: #ffffff08; font-size: .75rem; color: #c0c4c1; transition: background .2s, color .2s; }
+:where(.scope) :global(.cinematic-nav-pills) a:hover { color: white; background: #ffffff16; }
+:where(.scope) :global(.cinematic-workspace) { display: inline-flex; align-items: center; gap: 1.5rem; min-height: 2.75rem; padding: 0 1rem; border: 1px solid #ffffff30; border-radius: .5rem; font-size: .75rem; transition: background .2s; }
+:where(.scope) :global(.cinematic-workspace):hover { background: #ffffff12; }
+:where(.scope) :global(.cinematic-workspace) span { font-size: 1rem; }
+:where(.scope) :global(.cinematic-copy) { position: absolute; z-index: 2; left: 4.5%; top: 18%; width: 55%; pointer-events: none; }
+:where(.scope) :global(.cinematic-copy) h1 { margin: 0; font-size: clamp(3rem, 5.2vw, 5.5rem); line-height: 1.28; letter-spacing: -.015em; font-weight: 510; }
+:where(.scope) :global(.cinematic-line) { display: block; white-space: nowrap; }
+:where(.scope) :global(.cinematic-description) { position: absolute; z-index: 2; top: 23%; right: 4.5%; width: 23%; max-width: 19rem; }
+:where(.scope) :global(.cinematic-description) p { margin: 0; color: #b6bbb8; font-size: .875rem; line-height: 1.7; text-wrap: pretty; }
+:where(.scope) :global(.cinematic-primary) { margin-top: 2rem; min-height: 3rem; padding: .75rem 1.25rem; display: inline-flex; align-items: center; gap: 2.25rem; color: #121514 !important; background: #f3f3ef; border-radius: .375rem; font-size: .8125rem; font-weight: 600; transition: background .2s, transform .2s; }
+:where(.scope) :global(.cinematic-primary):hover { background: #ffd1ad; transform: translateY(-2px); }
+:where(.scope) :global(.cinematic-primary) span { font-size: 1.125rem; }
+:where(.scope) :global(.cinematic-bottom-copy) { position: absolute; z-index: 2; bottom: 3.5rem; left: 4.5%; isolation: isolate; }
+:where(.scope) :global(.cinematic-bottom-copy)::before { content: ""; position: absolute; z-index: -1; inset: -.75rem -2rem -.5rem -1rem; background: linear-gradient(90deg, #080a0aee 65%, #080a0a00); pointer-events: none; }
+:where(.scope) :global(.cinematic-bottom-copy) p { margin: 0; font-size: .875rem; line-height: 1.65; letter-spacing: 0; }
+:where(.scope) :global(.cinematic-bottom-copy) a { margin-top: 1.5rem; display: inline-flex; align-items: center; gap: 1rem; min-height: 2.75rem; font-size: .6875rem; color: #c0c6c2; }
+:where(.scope) :global(.cinematic-bottom-copy) a:hover { color: #ffb16d; }
+:where(.scope) :global(.cinematic-stats) { position: absolute; z-index: 2; right: 4.5%; bottom: 3.5rem; display: flex; gap: .65rem; margin: 0; }
+:where(.scope) :global(.cinematic-stats) > div { display: flex; flex-direction: column-reverse; justify-content: space-between; gap: .75rem; min-width: 10.25rem; padding: 1.1rem 1.2rem; border-radius: .75rem; background: linear-gradient(135deg, #ffffff0c, #ffffff03), #101414e8; backdrop-filter: blur(14px); box-shadow: 0 .75rem 2rem #0003; }
+:where(.scope) :global(.cinematic-stats) dt { font-size: .75rem; color: #d2d6d3; }
+:where(.scope) :global(.cinematic-stats) dd { display: flex; align-items: center; justify-content: space-between; margin: 0; font-size: 2rem; line-height: 1; font-weight: 500; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+:where(.scope) :global(.cinematic-stats) dd span { font-size: .875rem; color: #ffad6a; }
+:where(.scope) :global(.cinematic-scene-notice) { position: absolute; left: 50%; transform: translateX(-50%); bottom: 8%; font-size: .75rem; color: #b8bfbb; }
+:where(.scope) :global(.cinematic-process), :where(.scope) :global(.cinematic-platform) { max-width: 100rem; margin: 0 auto; padding: 8rem 4.5%; scroll-margin-top: 2rem; }
+:where(.scope) :global(.cinematic-process) { display: grid; grid-template-columns: 1fr 1fr; gap: 8%; border-bottom: 1px solid #ffffff15; }
+:global(.cinematic-page):where(.scope) h2 { margin: 0; font-weight: 500; font-size: clamp(2.5rem, 4vw, 4.5rem); line-height: 1.3; letter-spacing: -.015em; }
+:where(.scope) :global(.cinematic-section-heading) > p { margin: 2rem 0 0; color: var(--muted); font-size: .9375rem; line-height: 1.7; max-width: 25rem; }
+:where(.scope) :global(.cinematic-process-list) { list-style: none; padding: 0; margin: 0; }
+:where(.scope) :global(.cinematic-process-list) li { display: grid; grid-template-columns: 2.5rem 1fr; gap: 1rem; padding: 1.75rem 0; border-top: 1px solid #ffffff20; }
+:where(.scope) :global(.cinematic-process-list) li:first-child { padding-top: 0; border-top: 0; }
+:where(.scope) :global(.cinematic-step-number) { padding-top: .25rem; color: #ffad6a; font-size: .75rem; font-variant-numeric: tabular-nums; }
+:where(.scope) :global(.cinematic-process-list) h3 { margin: 0; font-size: 1.25rem; font-weight: 500; letter-spacing: -.02em; }
+:where(.scope) :global(.cinematic-process-list) p { margin: .75rem 0 0; max-width: 27rem; color: var(--muted); font-size: .875rem; line-height: 1.7; }
+:where(.scope) :global(.cinematic-capabilities) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3rem; margin-top: 4rem; }
+:where(.scope) :global(.cinematic-capabilities) article { padding-top: 1.5rem; border-top: 1px solid #ffffff30; scroll-margin-top: 2rem; }
+:where(.scope) :global(.cinematic-capabilities) h3 { margin: 0; font-weight: 500; font-size: 1.25rem; letter-spacing: -.02em; }
+:where(.scope) :global(.cinematic-capabilities) p { margin: 1rem 0 2rem; color: var(--muted); font-size: .875rem; line-height: 1.7; max-width: 28rem; }
+:where(.scope) :global(.cinematic-capabilities) article > span { color: #dba27b; font-size: .6875rem; }
+:where(.scope) :global(.cinematic-footer) { max-width: 100rem; margin: 0 auto; padding: 2rem 4.5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2rem; border-top: 1px solid #ffffff20; }
+:where(.scope) :global(.cinematic-footer) > p { color: var(--muted); font-size: .75rem; }
+:where(.scope) :global(.cinematic-footer) > div { display: flex; gap: 1.5rem; align-items: center; }
+:where(.scope) :global(.cinematic-footer) > div > a { display: inline-flex; gap: 1rem; align-items: center; min-height: 2.75rem; font-size: .8125rem; }
+:where(.scope) :global(.cinematic-footer) :global(.settings-trigger) { background: transparent; color: #c6cbc8; border-color: #ffffff30; }
 @media (min-width: 768px) and (max-width: 1100px) {
-  .cinematic-nav { gap: 1.5rem; }
-  .cinematic-nav-pills a { padding-inline: .75rem; }
-  .cinematic-description { width: 23%; }
-  .cinematic-stats > div { min-width: 8.25rem; padding: 1rem; }
+  :where(.scope) :global(.cinematic-nav) { gap: 1.5rem; }
+  :where(.scope) :global(.cinematic-nav-pills) a { padding-inline: .75rem; }
+  :where(.scope) :global(.cinematic-description) { width: 23%; }
+  :where(.scope) :global(.cinematic-stats) > div { min-width: 8.25rem; padding: 1rem; }
 }
 @media (max-width: 767px) {
-  .cinematic-hero { min-height: 57rem; display: flex; flex-direction: column; }
-  .cinematic-nav { grid-template-columns: 1fr auto; padding: 1.5rem 1.25rem 0; gap: 1.25rem 1rem; }
-  .cinematic-nav-pills { grid-row: 2; grid-column: 1 / -1; gap: .4rem; }
-  .cinematic-nav-pills a { font-size: .6875rem; min-height: 2.75rem; padding-inline: .9rem; }
-  .cinematic-workspace { padding-inline: .75rem; font-size: .6875rem; gap: .75rem; }
-  .cinematic-page .brand b { font-size: .75rem; }
-  .cinematic-page .brand small { font-size: .4375rem; }
-  .cinematic-page .brand-mark { width: 1.5rem; height: 1.5rem; }
-  .cinematic-copy { position: relative; left: auto; top: auto; width: auto; margin: 3rem 1.25rem 0; }
-  .cinematic-copy h1 { font-size: clamp(2.25rem, 10vw, 4.5rem); }
-  .cinematic-description { position: relative; top: auto; right: auto; width: auto; max-width: 27rem; margin: 1.5rem 1.25rem 0; }
-  .cinematic-description p { font-size: .8125rem; max-width: 32ch; }
-  .cinematic-primary { margin-top: 1.25rem; }
-  .cinematic-art { position: relative; inset: auto; height: 15rem; width: 100%; flex: none; order: 1; margin-top: 1.25rem; margin-bottom: 8rem; }
-  .cinematic-bottom-copy { bottom: 2rem; left: 1.25rem; max-width: 35%; }
-  .cinematic-bottom-copy p { font-size: .6875rem; }
-  .cinematic-bottom-copy a { font-size: .625rem; margin-top: .75rem; gap: .4rem; }
-  .cinematic-stats { right: 1.25rem; bottom: 2.5rem; gap: .4rem; }
-  .cinematic-stats > div { min-width: 5.4rem; max-width: 6.5rem; padding: .8rem; gap: .7rem; }
-  .cinematic-stats dd { font-size: 1.75rem; }
-  .cinematic-stats dt { font-size: .6875rem; max-width: 12ch; line-height: 1.6; }
-  .cinematic-scene-notice { bottom: 10rem; width: 90%; text-align: center; }
-  .cinematic-process, .cinematic-platform { padding: 4.5rem 1.25rem; }
-  .cinematic-process { grid-template-columns: 1fr; gap: 3rem; }
-  .cinematic-capabilities { grid-template-columns: 1fr; gap: 2.5rem; margin-top: 3rem; }
-  .cinematic-footer { padding: 2rem 1.25rem; gap: 1.5rem; }
-  .cinematic-footer > p { width: 100%; order: 3; margin: 0; }
+  :where(.scope) :global(.cinematic-hero) { min-height: 57rem; display: flex; flex-direction: column; }
+  :where(.scope) :global(.cinematic-nav) { grid-template-columns: 1fr auto; padding: 1.5rem 1.25rem 0; gap: 1.25rem 1rem; }
+  :where(.scope) :global(.cinematic-nav-pills) { grid-row: 2; grid-column: 1 / -1; gap: .4rem; }
+  :where(.scope) :global(.cinematic-nav-pills) a { font-size: .6875rem; min-height: 2.75rem; padding-inline: .9rem; }
+  :where(.scope) :global(.cinematic-workspace) { padding-inline: .75rem; font-size: .6875rem; gap: .75rem; }
+  :global(.cinematic-page):where(.scope) :global(.brand) b { font-size: .75rem; }
+  :global(.cinematic-page):where(.scope) :global(.brand) small { font-size: .4375rem; }
+  :global(.cinematic-page):where(.scope) :global(.brand-mark) { width: 1.5rem; height: 1.5rem; }
+  :where(.scope) :global(.cinematic-copy) { position: relative; left: auto; top: auto; width: auto; margin: 3rem 1.25rem 0; }
+  :where(.scope) :global(.cinematic-copy) h1 { font-size: clamp(2.25rem, 10vw, 4.5rem); }
+  :where(.scope) :global(.cinematic-description) { position: relative; top: auto; right: auto; width: auto; max-width: 27rem; margin: 1.5rem 1.25rem 0; }
+  :where(.scope) :global(.cinematic-description) p { font-size: .8125rem; max-width: 32ch; }
+  :where(.scope) :global(.cinematic-primary) { margin-top: 1.25rem; }
+  :where(.scope) :global(.cinematic-art) { position: relative; inset: auto; height: 15rem; width: 100%; flex: none; order: 1; margin-top: 1.25rem; margin-bottom: 8rem; }
+  :where(.scope) :global(.cinematic-bottom-copy) { bottom: 2rem; left: 1.25rem; max-width: 35%; }
+  :where(.scope) :global(.cinematic-bottom-copy) p { font-size: .6875rem; }
+  :where(.scope) :global(.cinematic-bottom-copy) a { font-size: .625rem; margin-top: .75rem; gap: .4rem; }
+  :where(.scope) :global(.cinematic-stats) { right: 1.25rem; bottom: 2.5rem; gap: .4rem; }
+  :where(.scope) :global(.cinematic-stats) > div { min-width: 5.4rem; max-width: 6.5rem; padding: .8rem; gap: .7rem; }
+  :where(.scope) :global(.cinematic-stats) dd { font-size: 1.75rem; }
+  :where(.scope) :global(.cinematic-stats) dt { font-size: .6875rem; max-width: 12ch; line-height: 1.6; }
+  :where(.scope) :global(.cinematic-scene-notice) { bottom: 10rem; width: 90%; text-align: center; }
+  :where(.scope) :global(.cinematic-process), :where(.scope) :global(.cinematic-platform) { padding: 4.5rem 1.25rem; }
+  :where(.scope) :global(.cinematic-process) { grid-template-columns: 1fr; gap: 3rem; }
+  :where(.scope) :global(.cinematic-capabilities) { grid-template-columns: 1fr; gap: 2.5rem; margin-top: 3rem; }
+  :where(.scope) :global(.cinematic-footer) { padding: 2rem 1.25rem; gap: 1.5rem; }
+  :where(.scope) :global(.cinematic-footer) > p { width: 100%; order: 3; margin: 0; }
 }
 @media (max-width: 380px) {
-  .cinematic-nav { gap: 1rem .5rem; }
-  .cinematic-workspace { gap: .4rem; padding-inline: .6rem; }
-  .cinematic-workspace > span { display: none; }
-  .cinematic-art { margin-bottom: 12rem; }
-  .cinematic-bottom-copy { bottom: 9.5rem; max-width: calc(100% - 2.5rem); }
-  .cinematic-bottom-copy p br { display: none; }
-  .cinematic-bottom-copy a { margin-top: .2rem; }
-  .cinematic-stats { left: 1.25rem; right: 1.25rem; }
-  .cinematic-stats > div { flex: 1; max-width: none; }
-  .cinematic-stats dt { max-width: none; }
+  :where(.scope) :global(.cinematic-nav) { gap: 1rem .5rem; }
+  :where(.scope) :global(.cinematic-workspace) { gap: .4rem; padding-inline: .6rem; }
+  :where(.scope) :global(.cinematic-workspace) > span { display: none; }
+  :where(.scope) :global(.cinematic-art) { margin-bottom: 12rem; }
+  :where(.scope) :global(.cinematic-bottom-copy) { bottom: 9.5rem; max-width: calc(100% - 2.5rem); }
+  :where(.scope) :global(.cinematic-bottom-copy) p br { display: none; }
+  :where(.scope) :global(.cinematic-bottom-copy) a { margin-top: .2rem; }
+  :where(.scope) :global(.cinematic-stats) { left: 1.25rem; right: 1.25rem; }
+  :where(.scope) :global(.cinematic-stats) > div { flex: 1; max-width: none; }
+  :where(.scope) :global(.cinematic-stats) dt { max-width: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .cinematic-page *, .cinematic-page *::before, .cinematic-page *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-  .cinematic-hero .cinematic-poster { opacity: 1; filter: none; }
+  :global(.cinematic-page):where(.scope) *, :global(.cinematic-page):where(.scope) *::before, :global(.cinematic-page):where(.scope) *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  :where(.scope) :global(.cinematic-hero) :global(.cinematic-poster) { opacity: 1; filter: none; }
 }
-.cinematic-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-.cinematic-scene-toggle { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; background: transparent; border: 0; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
-.cinematic-page .cinematic-scene-toggle:focus-visible { outline-offset: -8px; border-radius: 1rem; }
+:where(.scope) :global(.cinematic-sr-only) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+:where(.scope) :global(.cinematic-scene-toggle) { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; background: transparent; border: 0; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
+:global(.cinematic-page):where(.scope) :global(.cinematic-scene-toggle):focus-visible { outline-offset: -8px; border-radius: 1rem; }
 ```
 
 ### B. Font loading and root layout — app/layout.tsx
@@ -1270,16 +1271,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 }
 ```
 
-### B2. Scoped Thai landing font — app/dashboard.tsx
+### B2. Scoped Thai landing font — src/features/landing/landing-page.tsx
 
 ```tsx
 import Link from "next/link";
 import { Noto_Sans_Thai } from "next/font/google";
-import { ThemeToggle } from "../src/components/appearance/appearance";
-import { Logo } from "../src/components/appearance/icons";
+import { ThemeToggle } from "../../components/appearance/appearance";
+import { Logo } from "../../components/appearance/icons";
 
 import { Hero } from "./landing-hero";
-import "./landing.css";
+import styles from "./landing.module.css";
 
 const thai = Noto_Sans_Thai({ subsets: ["thai", "latin"], display: "swap", variable: "--font-landing-thai" });
 ```

@@ -13,7 +13,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000). If a dev server is already running for this checkout, use it instead of starting another. Real login/workspaces continue to use the existing backend setup; see `docs/11-phase-ten-handoff.md`.
 
-The page is Thai, with self-hosted Noto Sans Thai. Change copy in `app/landing-config.ts`; change the five durations, easings, loop default and render budgets in `app/process-config.ts`. There is no visible playback bar: tap/click the illustration or use Enter/Space when focused to pause/resume. Reduced motion shows the final-frame image without mounting WebGL. Brushed textures, fasteners, piston rods and soft shadows are procedural. See `docs/landing-handoff.md` for the storyboard, complete source map, asset origins and verification.
+The page is Thai, with self-hosted Noto Sans Thai. Change copy in `src/features/landing/landing-config.ts`; change the five durations, easings, loop default and render budgets in `src/features/landing/process-config.ts`. There is no visible playback bar: tap/click the illustration or use Enter/Space when focused to pause/resume. Reduced motion shows the final-frame image without mounting WebGL. Brushed textures, fasteners, piston rods and soft shadows are procedural. See `docs/landing-handoff.md` for the storyboard, complete source map, asset origins and verification.
 
 ```bash
 npm run build
@@ -28,4 +28,3 @@ Landing copy uses Noto Sans Thai via `next/font`; the wordmark and unchanged wor
 Run `npm test` from the project root. The dependency-free runner discovers all
 `.test.ts` and `.test.mjs` files recursively under `tests/` on Windows and Unix.
 Tests mirror feature/shared-code ownership; they do not live in App Router folders.
-

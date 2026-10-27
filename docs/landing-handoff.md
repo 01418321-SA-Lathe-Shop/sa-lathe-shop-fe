@@ -31,18 +31,18 @@ At the loop seam the arm is already home and the belt keeps its phase. The finis
 
 | File | Responsibility |
 |---|---|
-| `app/process-config.ts` | Five durations, easing selections, final hold, reset fade, loop default, mobile/desktop budgets; pure deterministic pose sampler |
-| `app/process-clock.ts` | Lazy GSAP clock; pause/resume/restart/finish/dispose; cycle counting without per-frame React updates |
-| `app/process-machine.tsx` | RobotArm, Gripper, Conveyor, Furnace, ScrapAndIngot; procedural geometry, instanced rollers/slats/sparks, molten stream, cooling and heat wisps |
-| `app/process-effects.tsx` | Desktop-only restrained BokehPass depth of field, alpha-preserving composition and resource cleanup |
-| `app/process-config.test.ts` | Native timing, placement-release continuity, final-hold and seam tests |
-| `app/process-materials.tsx` | Shared seeded brushed-metal roughness/bump texture, material context and cleanup |
-| `app/landing-scene.tsx` | Lazy Canvas, fixed camera/framing, local RoomEnvironment, lighting, visibility and context-loss handling |
-| `app/landing-hero.tsx` | Thai HTML content, chrome-free scene pause target, lifecycle, reduced-motion and static error boundaries |
-| `app/landing-geometry.ts` | Bent-bracket extrusion and seeded random generator |
-| `app/landing-config.ts` | Thai headline, paragraph and factual platform statistics |
-| `app/landing.css` | Existing dark page styling, bounded scene band and responsive controls |
-| `app/landing-nav.tsx`, `app/landing-stat-cards.tsx`, `app/dashboard.tsx` | Thai navigation/statistics/workflow/footer; scoped Noto Sans Thai font; existing route targets retained |
+| `src/features/landing/process-config.ts` | Five durations, easing selections, final hold, reset fade, loop default, mobile/desktop budgets; pure deterministic pose sampler |
+| `src/features/landing/process-clock.ts` | Lazy GSAP clock; pause/resume/restart/finish/dispose; cycle counting without per-frame React updates |
+| `src/features/landing/process-machine.tsx` | RobotArm, Gripper, Conveyor, Furnace, ScrapAndIngot; procedural geometry, instanced rollers/slats/sparks, molten stream, cooling and heat wisps |
+| `src/features/landing/process-effects.tsx` | Desktop-only restrained BokehPass depth of field, alpha-preserving composition and resource cleanup |
+| `tests/features/landing/process-config.test.ts` | Native timing, placement-release continuity, final-hold and seam tests |
+| `src/features/landing/process-materials.tsx` | Shared seeded brushed-metal roughness/bump texture, material context and cleanup |
+| `src/features/landing/landing-scene.tsx` | Lazy Canvas, fixed camera/framing, local RoomEnvironment, lighting, visibility and context-loss handling |
+| `src/features/landing/landing-hero.tsx` | Thai HTML content, chrome-free scene pause target, lifecycle, reduced-motion and static error boundaries |
+| `src/features/landing/landing-geometry.ts` | Bent-bracket extrusion and seeded random generator |
+| `src/features/landing/landing-config.ts` | Thai headline, paragraph and factual platform statistics |
+| `src/features/landing/landing.module.css` | Existing dark page styling, bounded scene band and responsive controls |
+| `src/features/landing/landing-nav.tsx`, `src/features/landing/landing-stat-cards.tsx`, `src/features/landing/landing-page.tsx` | Thai navigation/statistics/workflow/footer; scoped Noto Sans Thai font; existing route targets retained |
 
 Obsolete `landing-intro.ts`, `landing-machine.tsx` and `landing-scrap-pile.tsx` were removed after the replacement was connected. Git history preserves them.
 
@@ -62,7 +62,7 @@ Production and checks:
 ```powershell
 npm run build
 npm start
-node --experimental-strip-types --test app/process-config.test.ts
+node --experimental-strip-types --test tests/features/landing/process-config.test.ts
 node scripts/sync-design.mjs --check
 ```
 
@@ -70,7 +70,7 @@ Use the existing supported Node version. First build needs network access to obt
 
 ## Tweak it
 
-Edit `app/process-config.ts`:
+Edit `src/features/landing/process-config.ts`:
 
 ```ts
 durations: { pickup: 1, place: 0.8, feed: 1.2, melt: 0.9, output: 1.1 },
@@ -136,15 +136,15 @@ The browser samples were taken with installed hardware-backed Chrome on this lap
 ## Changed files for the five-second implementation (previous request)
 
 Added:
-- `app/process-config.ts`
-- `app/process-clock.ts`
-- `app/process-machine.tsx`
-- `app/process-effects.tsx`
-- `app/process-config.test.ts`
+- `src/features/landing/process-config.ts`
+- `src/features/landing/process-clock.ts`
+- `src/features/landing/process-machine.tsx`
+- `src/features/landing/process-effects.tsx`
+- `tests/features/landing/process-config.test.ts`
 
 Updated:
-- `app/landing-hero.tsx`, `app/landing-scene.tsx`
-- `app/landing-config.ts`, `app/landing-geometry.ts`, `app/landing.css`
+- `src/features/landing/landing-hero.tsx`, `src/features/landing/landing-scene.tsx`
+- `src/features/landing/landing-config.ts`, `src/features/landing/landing-geometry.ts`, `src/features/landing/landing.module.css`
 - `public/landing-final-desktop.webp`, `public/landing-final-mobile.webp`
 - `DESIGN.md`, `README.md`
 - `AGENTS.md` (Next.js regenerated its agent-feedback wording during the local server restart; project rules unchanged)
@@ -155,11 +155,11 @@ Removed (recoverable in Git):
 
 ## Changed files for the Thai/realism refinement
 
-Added: `app/process-materials.tsx`.
+Added: `src/features/landing/process-materials.tsx`.
 
 Updated:
-- `app/dashboard.tsx`, `app/landing-config.ts`, `app/landing-nav.tsx`, `app/landing-stat-cards.tsx`, `app/landing-hero.tsx`, `app/landing.css`
-- `app/landing-scene.tsx`, `app/process-machine.tsx`, `app/process-config.ts`, `app/process-config.test.ts`
+- `src/features/landing/landing-page.tsx`, `src/features/landing/landing-config.ts`, `src/features/landing/landing-nav.tsx`, `src/features/landing/landing-stat-cards.tsx`, `src/features/landing/landing-hero.tsx`, `src/features/landing/landing.module.css`
+- `src/features/landing/landing-scene.tsx`, `src/features/landing/process-machine.tsx`, `src/features/landing/process-config.ts`, `tests/features/landing/process-config.test.ts`
 - `public/landing-final-desktop.webp`, `public/landing-final-mobile.webp`
 - `scripts/sync-design.mjs`, `DESIGN.md`, `README.md`, `docs/02-frontend.md`, `docs/landing-surface.md`, `docs/landing-handoff.md`
 

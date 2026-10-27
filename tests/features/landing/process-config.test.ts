@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { processDuration, processStages, sampleProcess } from "../../../app/process-config.ts";
+import { processDuration, processStages, sampleProcess } from "../../../src/features/landing/process-config.ts";
 
 test("five stages are contiguous and total exactly five seconds", () => {
   assert.equal(processDuration, 5);
