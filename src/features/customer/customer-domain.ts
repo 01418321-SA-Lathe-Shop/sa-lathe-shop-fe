@@ -33,6 +33,12 @@ export function matchingRequests(items: JobRequest[], query: string, status: str
   return items.filter((item) => (!status || item.status === status) && (!term || `${item.no_request} ${item.description}`.toLocaleLowerCase("th-TH").includes(term)))
     .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at) || a.id.localeCompare(b.id));
 }
+export function requestStatusCounts(items: JobRequest[], query: string) {
+  const matched = matchingRequests(items, query, "");
+  const byStatus = Object.fromEntries(Object.keys(REQUEST_LABELS).map((status) => [status, 0]));
+  for (const item of matched) if (Object.hasOwn(byStatus, item.status)) byStatus[item.status]++;
+  return { all: matched.length, byStatus };
+}
 export function moneyTH(value: string) {
   if (!/^\d+\.\d{2}$/.test(value)) return "ไม่พบยอดเงิน";
   const [whole, cents] = value.split(".");

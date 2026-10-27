@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { customerHref, dateTH, isBangkokToday, latestQuote, matchingRequests, moneyTH, readCollection, unreadCount } from "../../../src/features/customer/customer-domain.ts";
+import { customerHref, dateTH, isBangkokToday, latestQuote, matchingRequests, moneyTH, readCollection, requestStatusCounts, unreadCount } from "../../../src/features/customer/customer-domain.ts";
 
 test("customer amounts and quotation versions do not lose integer precision", () => {
   assert.equal(moneyTH("9999999999999999.99"), "9,999,999,999,999,999.99 บาท");
@@ -23,6 +23,13 @@ test("collection reads all pages and discloses a safety boundary", async () => {
   assert.equal(result.items.length, 101); assert.equal(result.complete, true);
   assert.deepEqual(paths, ["/requests?limit=100&offset=0", "/requests?limit=100&offset=100"]);
   assert.equal((await readCollection(api, "/requests", new AbortController().signal, 1)).complete, false);
+});
+test("request tab counts use the applied literal query across all real statuses", () => {
+  const items = ["pending", "ongoing", "completed", "canceled"].map((status, index) => ({ id: String(index), no_request: index, description: index === 1 ? "Other" : "S45C [test]", status, created_at: "2026-10-27T00:00:00Z" }));
+  assert.deepEqual(requestStatusCounts(items, "[test]"), { all: 3, byStatus: { pending: 1, ongoing: 0, completed: 1, canceled: 1 } });
+  assert.equal(requestStatusCounts(items, "").all, 4);
+  assert.deepEqual(requestStatusCounts([], ""), { all: 0, byStatus: { pending: 0, ongoing: 0, completed: 0, canceled: 0 } });
+  assert.equal(requestStatusCounts(items, "not found").all, 0);
 });
 test("notification badge never claims a partial count as total", () => {
   assert.equal(unreadCount([], true), ""); assert.equal(unreadCount([{ id: "a" }], true), "1");

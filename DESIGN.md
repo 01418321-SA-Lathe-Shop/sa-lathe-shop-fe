@@ -453,10 +453,23 @@ git diff --check
 
 Generator อัปเดตเฉพาะภาคผนวกจาก source ไม่สามารถตรวจความถูกต้องของคำอธิบาย ผู้แก้ต้องทบทวน prose ด้วย ไม่มี background watcher หรือ CI auto-update ติดตั้งไว้
 
+### Request-list presentation — 2026-10-28
+
+Owner-approved reference adaptation changes composition, not the Customer palette.
+The request list alone has a wrapping status-pill navigation with count badges,
+plus its existing applied search form. Filters retain `q/status` URLs, literal
+matching, newest-first sorting, 20-record pagination and all four request states
+(pending/ongoing/completed/canceled). Counts describe loaded records matching the
+applied query before the selected status; loading shows an ellipsis, and incomplete
+collections retain their existing warning. No count endpoint, profile lookup or
+authorization change is introduced. The new CSS Module is scoped under its list
+owner; shared badges, navigation, drawer, detail and wizard remain unchanged.
+
 ### Change log
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Request-list batch 1: replace the status select with wrapping pill navigation and loaded-record count badges; preserve applied search/status URLs and all four Request statuses | Literal-query/count unit tests plus existing checks; no API, theme or detail-view change |
 | 2026-10-28 | Replace Customer mobile/tablet capped-width drawer with full-screen navigation; separate scroll region, safe-area header/footer, quiet logout, scroll-lock cleanup and desktop-resize close | Native lifecycle regression tests and scoped browser responsive/keyboard checks; no live-backend claim |
 | 2026-10-27 | Fix desktop notification bell crash by making the mobile-only pre-open callback optional; preserve mobile menu-close ordering | Regression tests exercise the actual bell click handler with and without the callback |
 | 2026-10-27 | Move Customer desktop navigation into persistent 17rem left sidebar drawer; keep sticky top navbar and dialog menu on mobile | Native tests, source audit, design sync check, and browser verification |
@@ -1653,6 +1666,25 @@ src/features/workspace/workspace.module.css
   .root :global(.cust-mobile-menu[open]) { animation: none; }
 }
 .root :global(.cust-related-links) { display: grid; justify-items: start; gap: 8px; }
+```
+
+### A5. Request list presentation — src/features/customer/customer-requests.module.css
+
+```css
+.list { min-width: 0; }
+.list .searchForm { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 16px; margin-bottom: 24px; }
+.list .searchForm > label { margin: 0; }
+.list .searchForm > button { min-height: 48px; }
+.list .statusFilters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.list .statusFilters a { min-height: 44px; gap: 10px; padding: 8px 14px; border-radius: 999px; color: var(--cust-muted); background: var(--cust-surface); text-decoration: none; font-size: .875rem; }
+.list .statusFilters a:hover { background: var(--cust-surface-2); color: var(--cust-ink); }
+.list .statusFilters a[aria-current="page"] { background: var(--cust-tint); color: var(--cust-accent); font-weight: 650; }
+.list .count { min-width: 24px; padding: 0 6px; border-radius: 999px; background: var(--cust-surface-2); color: var(--cust-ink); text-align: center; font-variant-numeric: tabular-nums; }
+.list .visuallyHidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+@media (max-width: 640px) {
+  .list .searchForm { gap: 12px; }
+  .list .statusFilters a { padding: 8px 12px; }
+}
 ```
 
 ### B. Font loading and root layout — app/layout.tsx

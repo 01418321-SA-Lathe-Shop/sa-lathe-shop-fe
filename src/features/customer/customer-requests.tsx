@@ -10,6 +10,8 @@ import { useSalesIndex, salesStep } from "./customer-sales-data";
 import { customerHref, dateTH, latestQuote, matchingRequests, QUOTE_LABELS, REQUEST_LABELS } from "./customer-domain";
 import { Badge, Disclosure, Empty, Field, Limited, LocalPages, PageTitle, PrivateFile, ResourceFeedback } from "./customer-ui";
 import { CustomerUpload } from "./customer-upload";
+import { RequestStatusFilters } from "./customer-request-list";
+import styles from "./customer-requests.module.css";
 
 export function OrderTabs({ active }: { active: "requests" | "jobs" | "history" }) {
   return <nav className="cust-tabs" aria-label="งานของฉัน">{[["requests", "/customer/requests", "คำขอผลิต"], ["jobs", "/customer/jobs", "งานผลิต"], ["history", "/customer/jobs?view=history", "ประวัติ"]].map(([id, href, label]) => <Link key={id} href={href} aria-current={active === id ? "page" : undefined}>{label}</Link>)}</nav>;
@@ -18,8 +20,9 @@ export function CustomerRequests({ api }: { api: BackendApi }) {
   const router = useRouter(); const params = useSearchParams(); const resource = useSalesIndex(api); const profiles = useResource<{ items: Customer[] | null }>(api, "/customers");
   const [page, setPage] = useState(0); const q = params.get("q") ?? ""; const status = params.get("status") ?? "";
   const filtered = matchingRequests(resource.records.map((item) => item.request), q, status);
-  return <><OrderTabs active="requests" /><PageTitle title="คำขอผลิต" description="ดูสถานะและขั้นตอนถัดไป ตั้งแต่ส่งคำขอจนเปิดงานผลิต" action={<Link className="cust-primary" href={customerHref("requests", { view: "new" })}>ส่งคำขอผลิตใหม่</Link>} />
-    <form className="cust-filters" onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); router.replace(customerHref("requests", { q: String(data.get("q") ?? ""), status: String(data.get("status") ?? "") }), { scroll: false }); }}><Field label="ค้นหาคำขอ"><input name="q" type="search" defaultValue={q} placeholder="เลขคำขอหรือรายละเอียดงาน" /></Field><Field label="สถานะคำขอ"><select name="status" defaultValue={status}><option value="">ทั้งหมด</option>{Object.entries(REQUEST_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field><button type="submit">ค้นหา</button></form>
+  return <section className={styles.list}><OrderTabs active="requests" /><PageTitle title="คำขอผลิต" description="ดูสถานะและขั้นตอนถัดไป ตั้งแต่ส่งคำขอจนเปิดงานผลิต" action={<Link className="cust-primary" href={customerHref("requests", { view: "new" })}>ส่งคำขอผลิตใหม่</Link>} />
+    <form className={styles.searchForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); router.replace(customerHref("requests", { q: String(data.get("q") ?? ""), status: String(data.get("status") ?? "") }), { scroll: false }); }}><Field label="ค้นหาคำขอ"><input name="q" type="search" defaultValue={q} placeholder="เลขคำขอหรือรายละเอียดงาน" /></Field><input type="hidden" name="status" value={status} /><button type="submit">ค้นหา</button></form>
+    <RequestStatusFilters items={resource.records.map((item) => item.request)} query={q} status={status} loading={resource.loading} />
     {(q || status) && <p className="cust-filter-result">ผลจากการค้นหาและตัวกรอง <Link href="/customer/requests">ล้างการค้นหาและตัวกรอง</Link></p>}
     <ResourceFeedback {...resource} />{resource.data && !resource.loading && <Limited complete={resource.complete} />}
     <p className="cust-muted cust-small">เรียงจากวันที่ส่งล่าสุด · ค้นหาจากรายการที่โหลดสำเร็จตามสิทธิ์</p>
@@ -32,7 +35,7 @@ export function CustomerRequests({ api }: { api: BackendApi }) {
     })}
     {resource.data && !resource.loading && !filtered.length && !resource.error && <Empty title={q || status ? "ไม่พบคำขอที่ตรงกับการค้นหา" : "ยังไม่มีคำขอผลิต"} action={<Link href={q || status ? "/customer/requests" : customerHref("requests", { view: "new" })}>{q || status ? "ล้างการค้นหาและตัวกรอง" : "ส่งคำขอผลิตแรก"}</Link>}>ลองเปลี่ยนตัวกรอง หรือเริ่มส่งรายละเอียดงานให้ร้านประเมินราคา</Empty>}
     <LocalPages count={filtered.length} page={page} setPage={setPage} />
-  </>;
+  </section>;
 }
 
 export function CustomerRequestDetail({ api, id }: { api: BackendApi; id: string }) {
