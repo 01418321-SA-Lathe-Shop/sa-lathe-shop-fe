@@ -198,7 +198,7 @@ Root layout ถือ `ApiSessionProvider` (memory-only) จึงรักษ�
 | ≤68.75rem | Record layout1column |
 | ≤600px | Cards/forms1column; tables scroll horizontally |
 | ≤73.75rem / ≤51.25rem | Auth narrower columns / single column |
-| ≤767px | Public landing hero, workflow and capabilities stack; lighter 27rem scene |
+| ≤767px | Public landing hero, workflow and capabilities stack; lighter 15rem scene |
 | ≤380px | Public landing caption sits above full-width stat cards to avoid overlap |
 
 ทดสอบ Large แยกจาก breakpoint เพราะ rem media queries อิง browser initial font size
@@ -209,7 +209,7 @@ Root layout ถือ `ApiSessionProvider` (memory-only) จึงรักษ�
 - ค่าเริ่ม state dark/medium แล้วอ่าน storage/system preference หลัง mount เพื่อไม่ให้ SSR/client markup ต่างกัน
 - Theme ใช้ `startViewTransition` ถ้ารองรับ; 320ms ease-in-out, fallback transition250ms; reduced-motion ปิด animation
 - Navigation active สะท้อน path และรองรับ refresh/back/forward Settings radio checked เป็น semantic state; แต่ละ instance ใช้ useId แยก radio group เพื่อไม่ชนกับหน้าที่ Next เก็บไว้ใน cache; dialogใช้ Tab/Escape ตาม native behavior
-- Root/workspace ใช้ `lang=th`; public landing overrides เป็น `lang=en`; เงินบาท เวลา Asia/Bangkok ไม่มี VAT Key icon controls มี aria-label
+- Root/workspace และ public landing ใช้ `lang=th`; landing แปลข้อความเป็นไทยแล้ว ส่วน functional UC forms คงเดิม; เงินบาท เวลา Asia/Bangkok ไม่มี VAT Key icon controls มี aria-label
 - ทุกหน้าใน shell ใช้ loading/error/empty/success states จาก request จริง (live หรือ mock) และ native confirm สำหรับคำสั่งที่ย้อนไม่ได้; full accessibility audit และการทดสอบกับ Go/PostgreSQL/S3 จริงยังรอ
 - ปุ่มที่ไม่มี class ภายใน `.live-workspace` ใช้รูปแบบ secondary (border `--line`, radius .75rem, พื้น `--surface`, hover ขอบส้ม) ปุ่มหลักใช้ `.button-primary` เดิม
 

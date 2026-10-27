@@ -13,7 +13,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000). If a dev server is already running for this checkout, use it instead of starting another. Real login/workspaces continue to use the existing backend setup; see `docs/11-phase-ten-handoff.md`.
 
-Change copy in `app/landing-config.ts`; change the five step durations, easings, loop default and render budgets in `app/process-config.ts`. Reduced motion shows the final-frame image without mounting WebGL. Controls: Pause/Play, Loop on/off, Replay and Show final frame. See `docs/landing-handoff.md` for the storyboard, complete source map, asset origins and verification.
+The page is Thai, with self-hosted Noto Sans Thai. Change copy in `app/landing-config.ts`; change the five durations, easings, loop default and render budgets in `app/process-config.ts`. There is no visible playback bar: tap/click the illustration or use Enter/Space when focused to pause/resume. Reduced motion shows the final-frame image without mounting WebGL. Brushed textures, fasteners, piston rods and soft shadows are procedural. See `docs/landing-handoff.md` for the storyboard, complete source map, asset origins and verification.
 
 ```bash
 npm run build
@@ -22,4 +22,4 @@ npm start
 
 `npm start` requires a successful production build. The approved feature lives on `codex/cinematic-scrap-landing`; do not merge it into `develop` or deploy without the owner's direction.
 
-Typography uses the existing Geist family via `next/font`; no new font assets are required.
+Landing copy uses Noto Sans Thai via `next/font`; the wordmark and unchanged workspace retain Geist. The first build downloads the Thai font and then self-hosts it; no manual font file or new package is required.
