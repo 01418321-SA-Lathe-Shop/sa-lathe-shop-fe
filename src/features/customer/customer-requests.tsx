@@ -6,11 +6,11 @@ import { useState } from "react";
 import type { Attachment, BackendApi, Customer, Decision, Fulfillment, JobRequest, Quotation } from "../../lib/api/backend-api";
 import { useResource } from "../../hooks/backend-hooks";
 import { useCollection } from "./customer-hooks";
-import { useSalesIndex, salesStep } from "./customer-sales-data";
+import { useSalesIndex } from "./customer-sales-data";
 import { customerHref, dateTH, latestQuote, matchingRequests, QUOTE_LABELS, REQUEST_LABELS } from "./customer-domain";
 import { Badge, Disclosure, Empty, Field, Limited, LocalPages, PageTitle, PrivateFile, ResourceFeedback } from "./customer-ui";
 import { CustomerUpload } from "./customer-upload";
-import { RequestStatusFilters } from "./customer-request-list";
+import { RequestCard, RequestCardSkeleton, RequestStatusFilters } from "./customer-request-list";
 import styles from "./customer-requests.module.css";
 
 export function OrderTabs({ active }: { active: "requests" | "jobs" | "history" }) {
@@ -20,19 +20,16 @@ export function CustomerRequests({ api }: { api: BackendApi }) {
   const router = useRouter(); const params = useSearchParams(); const resource = useSalesIndex(api); const profiles = useResource<{ items: Customer[] | null }>(api, "/customers");
   const [page, setPage] = useState(0); const q = params.get("q") ?? ""; const status = params.get("status") ?? "";
   const filtered = matchingRequests(resource.records.map((item) => item.request), q, status);
+  const recordsById = new Map(resource.records.map((record) => [record.request.id, record]));
+  const profilesById = new Map((profiles.data?.items ?? []).map((profile) => [profile.id, profile]));
   return <section className={styles.list}><OrderTabs active="requests" /><PageTitle title="คำขอผลิต" description="ดูสถานะและขั้นตอนถัดไป ตั้งแต่ส่งคำขอจนเปิดงานผลิต" action={<Link className="cust-primary" href={customerHref("requests", { view: "new" })}>ส่งคำขอผลิตใหม่</Link>} />
     <form className={styles.searchForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); router.replace(customerHref("requests", { q: String(data.get("q") ?? ""), status: String(data.get("status") ?? "") }), { scroll: false }); }}><Field label="ค้นหาคำขอ"><input name="q" type="search" defaultValue={q} placeholder="เลขคำขอหรือรายละเอียดงาน" /></Field><input type="hidden" name="status" value={status} /><button type="submit">ค้นหา</button></form>
-    <RequestStatusFilters items={resource.records.map((item) => item.request)} query={q} status={status} loading={resource.loading} />
+    <RequestStatusFilters items={resource.records.map((item) => item.request)} query={q} status={status} loading={resource.loading} countUnavailable={Boolean(resource.error && !resource.data)} />
     {(q || status) && <p className="cust-filter-result">ผลจากการค้นหาและตัวกรอง <Link href="/customer/requests">ล้างการค้นหาและตัวกรอง</Link></p>}
-    <ResourceFeedback {...resource} />{resource.data && !resource.loading && <Limited complete={resource.complete} />}
+    <ResourceFeedback {...resource} loading={false} />{resource.data && !resource.loading && <Limited complete={resource.complete} />}
     <p className="cust-muted cust-small">เรียงจากวันที่ส่งล่าสุด · ค้นหาจากรายการที่โหลดสำเร็จตามสิทธิ์</p>
-    <div className="cust-request-head" aria-hidden="true"><span>คำขอ / รายละเอียดงาน</span><span>สถานะและขั้นตอนถัดไป</span><span>ส่งคำขอเมื่อ</span></div>
-    {filtered.slice(page * 20, page * 20 + 20).map((request) => {
-      const record = resource.records.find((item) => item.request.id === request.id)!;
-      const quote = latestQuote(record.quotations); const job = record.fulfillment?.job;
-      const next = job ? customerHref("jobs", { job: job.id }) : customerHref(quote?.status === "approved" ? "deposit-po" : "quotations", { request: request.id, quotation: quote?.id });
-      return <article className="cust-request-row" key={request.id}><div><Link className="cust-record-title" href={customerHref("requests", { request: request.id })}><small>คำขอ #{request.no_request}</small><strong>{request.description}</strong></Link><p className="cust-muted">จำนวน {request.qty} ชิ้น{(profiles.data?.items?.length ?? 0) > 1 && ` · ${profiles.data?.items?.find((p) => p.id === request.customer_id)?.name ?? "บัญชีผู้สั่ง"}`}</p><Link className="cust-link" href={customerHref("requests", { request: request.id })}>ดูคำขอ →</Link></div><div><Badge value={request.status} labels={REQUEST_LABELS} /><p>{salesStep(record)}</p>{quote && !record.issue && request.status === "ongoing" && <Link className="cust-link" href={next}>{job ? "ติดตามงานผลิต" : quote.status === "approved" ? "ดูหลักฐานมัดจำ / PO" : "ดูใบเสนอราคา"} →</Link>}</div><time dateTime={request.created_at}>{dateTH(request.created_at)}</time></article>;
-    })}
+    {resource.loading && !resource.records.length && <RequestCardSkeleton />}
+    <div className={styles.grid}>{filtered.slice(page * 20, page * 20 + 20).map((request) => <RequestCard key={request.id} record={recordsById.get(request.id)!} profile={profilesById.get(request.customer_id)} profileLoading={profiles.loading} profileError={profiles.error} />)}</div>
     {resource.data && !resource.loading && !filtered.length && !resource.error && <Empty title={q || status ? "ไม่พบคำขอที่ตรงกับการค้นหา" : "ยังไม่มีคำขอผลิต"} action={<Link href={q || status ? "/customer/requests" : customerHref("requests", { view: "new" })}>{q || status ? "ล้างการค้นหาและตัวกรอง" : "ส่งคำขอผลิตแรก"}</Link>}>ลองเปลี่ยนตัวกรอง หรือเริ่มส่งรายละเอียดงานให้ร้านประเมินราคา</Empty>}
     <LocalPages count={filtered.length} page={page} setPage={setPage} />
   </section>;

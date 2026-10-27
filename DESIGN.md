@@ -123,15 +123,15 @@ Noto Sans Thai is self-hosted through Next/font for Customer only, with a sans-s
 
 On desktop (>1024px), Customer navigation docks on the left as a 17rem persistent sidebar drawer (`width: 17rem; height: 100dvh; background: #060707`), sharing the obsidian background with the workspace stage offset (`margin-left: 17rem; width: calc(100% - 17rem); max-width: calc(100% - 17rem)`). Content spans the full available width with fluid side padding (`clamp(1.25rem, 2.5vw, 2.5rem)`), eliminating artificial max-width constraints on wide viewports (1280px, 1440px, 1920px, and 2560px ultrawide). Dashboards, request lists, quotations, invoices, and job tracking expand to fill the full stage. Forms and single-column steps maintain an ergonomic readable maximum width (`clamp(540px, 60vw, 760px)`) or use a balanced 2-column layout with a sticky summary panel. The desktop stage features a sticky 64px topbar with fluid padding, mode indicators, mock controls, and notification access.
 
-On tablet/mobile (≤1024px), the desktop sidebar is hidden, the stage margin is reset (`width: 100%`), and the sticky top navbar (`.cust-navbar`, background `#060707`) with logo, notifications, and menu toggle takes over. The mobile drawer dialog (`.cust-mobile-menu`) uses the same `#060707` background as the canvas. At tablet breakpoint (≤880px), multi-column task layouts stack into single columns with fluid gaps, sticky side summaries unstick to inline/top order, and filter toolbars wrap responsively. On mobile (≤640px), content padding becomes 1rem (16px), request rows convert into stacked card records, buttons and actions take full width, notification dialogs become full-screen sheets (`100dvh`), and quotation decisions sit above the safe-area edge with reserved content space.
+On tablet/mobile (≤1024px), the desktop sidebar is hidden, the stage margin is reset (`width: 100%`), and the sticky top navbar (`.cust-navbar`, background `#060707`) with logo, notifications, and menu toggle takes over. The existing full-screen mobile drawer dialog (`.cust-mobile-menu`) uses the same background as the canvas and remains unchanged by the request-list adaptation. At tablet breakpoint (≤880px), multi-column task layouts stack into single columns with fluid gaps, sticky side summaries unstick to inline/top order, and filter toolbars wrap responsively. On mobile (≤640px), content padding becomes 1rem (16px), buttons and actions take full width, notification dialogs become full-screen sheets (`100dvh`), and quotation decisions sit above the safe-area edge with reserved content space.
 
-On tablet/mobile (≤1024px), the desktop sidebar is hidden, the stage margin is reset (width: 100%), and the sticky top navbar (.cust-navbar) with logo, notifications, and menu toggle takes over. At tablet breakpoint (≤880px), multi-column task layouts stack into single columns with fluid gaps, sticky side summaries unstick to inline/top order, and filter toolbars wrap responsively. On mobile (≤640px), content padding becomes 1rem (16px), request rows convert into stacked card records, buttons and actions take full width, notification dialogs become full-screen sheets (100dvh), and quotation decisions sit above the safe-area edge with reserved content space.
+The request list is a scoped exception to the general tablet stacking breakpoint: its full-width card grid has two columns above 640px and one column at 640px and below. Grid gaps are 24px/16px and card padding is 24px/20px respectively, with 16px corners. Search stays above wrapping real-status pill navigation; loaded-query count badges do not imply global totals. The existing query-selected document detail replaces the list; no permanent detail panel or new detail drawer is introduced.
 
-Overview prioritizes attention and recent work; requests use rows and document details; quotations use a price/decision rail; Deposit/PO uses an evidence checklist; jobs use a timeline; receipt uses a focused decision form; invoices prioritize balance; account/settings use split task layouts. These are Customer surface patterns, not prescriptions for Landing or Staff.
+Overview prioritizes attention and recent work; requests use responsive record cards and separate document details; quotations use a price/decision rail; Deposit/PO uses an evidence checklist; jobs use a timeline; receipt uses a focused decision form; invoices prioritize balance; account/settings use split task layouts. These are Customer surface patterns, not prescriptions for Landing or Staff.
 
 ## Elevation & Depth
 
-Customer surfaces are flat: solid fills and thin dividers provide hierarchy without a new shadow vocabulary. Native dialogs occupy the browser top layer and use translucent backdrops. Motion does not carry task meaning; reduced motion disables Customer transitions and animations.
+Customer surfaces are predominantly flat: solid fills and thin dividers provide hierarchy. Request-list cards are a scoped exception, with a restrained resting shadow and a shadow-only hover treatment as recorded in their presentation guidance below. Native dialogs occupy the browser top layer and use translucent backdrops. Motion does not carry task meaning; reduced motion disables Customer transitions and animations.
 
 ## Shapes
 
@@ -149,7 +149,7 @@ Inputs use a 48px minimum height and a muted-tone 1px border; textarea height st
 
 ### Cards / Containers
 
-Document/form surfaces use the frontmatter document padding and corner treatment, reduced to 20px padding on mobile. Attention uses a bordered surface. Divider-separated rows remain the default for record lists.
+Document/form surfaces use the frontmatter document padding and corner treatment, reduced to 20px padding on mobile. Attention uses a bordered surface. Divider-separated rows remain the default for record lists other than the scoped request-list card grid described in Layout; this exception does not restyle other Customer lists.
 
 ### Navigation
 
@@ -461,14 +461,49 @@ plus its existing applied search form. Filters retain `q/status` URLs, literal
 matching, newest-first sorting, 20-record pagination and all four request states
 (pending/ongoing/completed/canceled). Counts describe loaded records matching the
 applied query before the selected status; loading shows an ellipsis, and incomplete
-collections retain their existing warning. No count endpoint, profile lookup or
+collections retain their existing warning. No new count/profile endpoint or
 authorization change is introduced. The new CSS Module is scoped under its list
 owner; shared badges, navigation, drawer, detail and wizard remain unchanged.
+
+The reference's composition is translated to the existing dark/orange system,
+not its white/purple identity. A two-column full-width grid above 640px becomes
+one column at 640px and below, with 24px/16px gaps and 24px/20px card padding.
+Cards have a 16px radius and `0 4px 16px rgba(0,0,0,.12)` shadow; hover changes
+only shadow, never position/scale. Fills and text retain existing Customer
+variables and saved Light/Dark preferences; the existing `#ffb16d` focus outline
+is reused. A list-local primary-link hover correction restores its intended
+existing `#121514` foreground instead of inheriting the generic link hover color;
+it is a state-cascade fix, not a palette change. Request-only pill badge geometry retains the shared badge's exact
+value, wording and color mapping, including its existing neutral canceled tone.
+
+Cards show exact request number/quantity, a two-line description (full text in
+the unchanged detail), request state, Bangkok creation/requested dates, current
+sales step and original follow-up destinations. The small machine/clock/inbox
+icons reuse the existing icon system. A customer-ID lookup from the existing
+`/customers` read supplies the footer's customer name/type, with explicit loading
+or unavailable text instead of invented values. Requested dates retain the
+non-promised-date caveat. A stretched native Link opens the existing request
+detail from the card surface; secondary quotation/evidence/job links remain
+independently focusable above it. Card keyboard focus is visible. No request
+detail drawer or sticky selected-card state is added: the current query selector
+replaces the list, just as before. The navigation drawer remains unchanged.
+
+Initial loading uses four static decorative skeletons and one status announcement.
+Read failure retains retry/error feedback and never becomes an empty-list success;
+unknown count badges show a dash rather than a known zero. Empty/search-empty
+messages and 20-record paging retain their original actions. No new backend call,
+photo preview, signed link, dimensions, progress percentage, contact action, map,
+right-hand permanent panel or timeline is introduced. The existing palette is
+preserved even where legacy Light-theme colors have separate contrast limitations;
+this local restyle is not a global accessibility/palette audit or a full AA claim.
+The scope, finish-review findings, evidence and limitations are recorded in
+`docs/customer-request-list-restyle.md`.
 
 ### Change log
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Request-list batch 2: responsive record cards, existing machine icon, date rows, membership footer, accessible whole-card link and static skeleton; unknown counts remain distinct from zero; restore existing primary-link hover foreground and reconcile active layout prose | 83 native tests; Chrome 375/640/768/1280/1440px Dark plus 375/1280px Light; synthetic loading/read-error/empty/31-record pagination checks and scoped finish review. Build/check evidence and remaining limitations are recorded in the request-list handoff; not Go/PostgreSQL/S3 verification |
 | 2026-10-28 | Request-list batch 1: replace the status select with wrapping pill navigation and loaded-record count badges; preserve applied search/status URLs and all four Request statuses | Literal-query/count unit tests plus existing checks; no API, theme or detail-view change |
 | 2026-10-28 | Replace Customer mobile/tablet capped-width drawer with full-screen navigation; separate scroll region, safe-area header/footer, quiet logout, scroll-lock cleanup and desktop-resize close | Native lifecycle regression tests and scoped browser responsive/keyboard checks; no live-backend claim |
 | 2026-10-27 | Fix desktop notification bell crash by making the mobile-only pre-open callback optional; preserve mobile menu-close ordering | Regression tests exercise the actual bell click handler with and without the callback |
@@ -1672,6 +1707,7 @@ src/features/workspace/workspace.module.css
 
 ```css
 .list { min-width: 0; }
+.list a:global(.cust-primary):hover { color: #121514; }
 .list .searchForm { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 16px; margin-bottom: 24px; }
 .list .searchForm > label { margin: 0; }
 .list .searchForm > button { min-height: 48px; }
@@ -1681,10 +1717,45 @@ src/features/workspace/workspace.module.css
 .list .statusFilters a[aria-current="page"] { background: var(--cust-tint); color: var(--cust-accent); font-weight: 650; }
 .list .count { min-width: 24px; padding: 0 6px; border-radius: 999px; background: var(--cust-surface-2); color: var(--cust-ink); text-align: center; font-variant-numeric: tabular-nums; }
 .list .visuallyHidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.list .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 24px; }
+.list .card { position: relative; min-width: 0; display: flex; flex-direction: column; padding: 24px; border-radius: 16px; background: var(--cust-surface); box-shadow: 0 4px 16px rgba(0, 0, 0, .12); transition: box-shadow 180ms ease-out; }
+.list .card:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
+.list .card:has(.openCard:focus-visible) { outline: 2px solid #ffb16d; outline-offset: 3px; }
+.list .cardHeader { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.list .cardHeader > div { min-width: 0; }
+.list .cardHeader strong { display: block; color: var(--cust-ink); font-size: 1.0625rem; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.list .cardHeader > svg { flex-shrink: 0; color: var(--cust-muted); }
+.list .metaLabel { display: block; color: var(--cust-muted); font-size: .875rem; }
+.list .cardTitle { margin: 16px 0 12px; font-size: 1.125rem; line-height: 1.5; font-weight: 650; }
+.list .openCard { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--cust-ink); overflow-wrap: anywhere; text-decoration: none; }
+.list .openCard:hover { color: var(--cust-ink); text-decoration: none; }
+.list .openCard:focus-visible { outline: none; }
+.list .openCard::after { content: ""; position: absolute; inset: 0; border-radius: 16px; }
+.list .card :global(.cust-badge) { border-radius: 999px; }
+.list .dates { display: grid; gap: 16px; margin: 24px 0 20px; }
+.list .dates dt { display: flex; align-items: center; gap: 10px; color: var(--cust-muted); font-size: .875rem; }
+.list .dates dt svg { flex-shrink: 0; }
+.list .dates dd { margin: 4px 0 0 26px; color: var(--cust-ink); font-size: .9375rem; overflow-wrap: anywhere; }
+.list .dates small { display: block; margin-top: 4px; font-size: .8125rem; }
+.list .nextStep { padding-bottom: 20px; color: var(--cust-muted); font-size: .875rem; }
+.list .quantity { color: var(--cust-ink); margin-bottom: 4px; }
+.list .secondaryLink { position: relative; z-index: 1; margin-top: 4px; font-size: .875rem; }
+.list .buyer { position: relative; display: grid; justify-items: start; gap: 4px; padding-top: 20px; margin-top: auto; border-top: 1px solid var(--cust-line); pointer-events: none; overflow-wrap: anywhere; }
+.list .buyer strong { font-size: 1rem; color: var(--cust-ink); }
+.list .buyer > span:not(.openHint) { color: var(--cust-muted); font-size: .875rem; }
+.list .openHint { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-top: 4px; color: var(--cust-accent); font-size: .875rem; }
+.list .skeleton { min-height: 440px; gap: 24px; }
+.list .skeleton > span { height: 16px; width: 70%; border-radius: 6px; background: var(--cust-surface-2); }
+.list .skeleton > span:nth-child(2) { width: 90%; height: 44px; }
+.list .skeleton > span:nth-child(3) { width: 35%; height: 28px; border-radius: 999px; }
+.list .skeleton > span:last-child { margin-top: auto; }
 @media (max-width: 640px) {
   .list .searchForm { gap: 12px; }
   .list .statusFilters a { padding: 8px 12px; }
+  .list .grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .list .card { padding: 20px; }
 }
+@media (prefers-reduced-motion: reduce) { .list .card { transition: none; } }
 ```
 
 ### B. Font loading and root layout — app/layout.tsx
