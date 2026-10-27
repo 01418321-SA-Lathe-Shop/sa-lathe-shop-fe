@@ -23,3 +23,9 @@ npm start
 `npm start` requires a successful production build. The approved feature lives on `codex/cinematic-scrap-landing`; do not merge it into `develop` or deploy without the owner's direction.
 
 Landing copy uses Noto Sans Thai via `next/font`; the wordmark and unchanged workspace retain Geist. The first build downloads the Thai font and then self-hosts it; no manual font file or new package is required.
+# Native tests
+
+Run `npm test` from the project root. The dependency-free runner discovers all
+`.test.ts` and `.test.mjs` files recursively under `tests/` on Windows and Unix.
+Tests mirror feature/shared-code ownership; they do not live in App Router folders.
+

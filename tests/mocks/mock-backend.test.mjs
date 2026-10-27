@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createLatheMockBackend, MOCK_LOGINS, MOCK_PASSWORD } from "./mock-seed.ts";
-import { fmt2, fmt6, lineSatang, micro, minimumPrice, satang, weightedAverage } from "./mock-decimal.ts";
+import { createLatheMockBackend, MOCK_LOGINS, MOCK_PASSWORD } from "../../app/mock-seed.ts";
+import { fmt2, fmt6, lineSatang, micro, minimumPrice, satang, weightedAverage } from "../../app/mock-decimal.ts";
 
 function session(backend, username) {
   const login = backend.dispatch("POST", "/auth/login", null, { username, password: MOCK_PASSWORD });

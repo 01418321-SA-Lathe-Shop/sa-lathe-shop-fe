@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { inventoryDecimal, inventoryDisplay, planLines, stockFields, catalogName } from "./backend-inventory-domain.ts";
+import { inventoryDecimal, inventoryDisplay, planLines, stockFields, catalogName } from "../../../app/backend-inventory-domain.ts";
 const material = { is_active: true, qty_reserved: "2.000001" };
 const id = "10000000-0000-4000-8000-000000000001";
 test("six-place quantities/unit costs retain full PostgreSQL precision without rounding", () => {

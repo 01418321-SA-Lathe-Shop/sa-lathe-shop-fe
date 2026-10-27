@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { allowedActions, lineTotal, orderActionPayload, orderPayload, orderTotal, supplierFields } from "./backend-procurement-domain.ts";
+import { allowedActions, lineTotal, orderActionPayload, orderPayload, orderTotal, supplierFields } from "../../../app/backend-procurement-domain.ts";
 
 const id = (n) => `10000000-0000-4000-8000-00000000000${n}`;
 

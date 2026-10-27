@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { BackendApi, ApiError, parseApiJSON, positiveInt64, moneyInput, displayMoney, uploadType } from "./backend-api.ts";
+import { BackendApi, ApiError, parseApiJSON, positiveInt64, moneyInput, displayMoney, uploadType } from "../../../app/backend-api.ts";
 
 test("preserves unsafe int64 values without changing quoted strings or money", () => {
   assert.deepEqual(parseApiJSON('{"qty":9223372036854775807,"note":"1234567890123456789","price":"1600.01","version":2}'), { qty: "9223372036854775807", note: "1234567890123456789", price: "1600.01", version: 2 });

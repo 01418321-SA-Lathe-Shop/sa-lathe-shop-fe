@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { formatMinutes, laborPayload, timePayload, usagePayload } from "./backend-production-domain.ts";
+import { formatMinutes, laborPayload, timePayload, usagePayload } from "../../../app/backend-production-domain.ts";
 
 const id = (n) => `10000000-0000-4000-8000-00000000000${n}`;
 const command = { idempotency_key: id(9), expected_version: 2 };
