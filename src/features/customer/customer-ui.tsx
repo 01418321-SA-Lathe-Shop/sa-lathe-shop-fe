@@ -23,7 +23,7 @@ export function ActionFeedback({ busy, error, message }: { busy?: boolean; error
   return <>{busy && <p role="status" className="cust-muted">กำลังดำเนินการ…</p>}{error && <p role="alert" className="cust-alert danger">{/[ก-๙]/.test(error) ? error : "ดำเนินการไม่สำเร็จ ตรวจสอบข้อมูลและโหลดสถานะล่าสุดก่อนส่งซ้ำ"}</p>}{message && <p role="status" className="cust-alert success">{message}</p>}</>;
 }
 export function Limited({ complete }: { complete?: boolean }) {
-  return complete === false ? <p className="cust-alert">กำลังแสดงรายการที่โหลดแล้วสูงสุด 1,000 รายการ การค้นหาและจำนวนในหน้านี้ยังไม่ครอบคลุมรายการทั้งหมด</p> : null;
+  return complete === false ? <p className="cust-alert">ข้อมูลยังไม่ครบ การค้นหาและจำนวนครอบคลุมเฉพาะรายการที่โหลดสำเร็จ · ระบบโหลดได้สูงสุด 1,000 รายการต่อชุด</p> : null;
 }
 export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
   return <label className="cust-field"><span>{label}</span>{children}{hint && <small>{hint}</small>}</label>;

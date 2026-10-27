@@ -1,2 +1,2 @@
-import { redirect } from "next/navigation";
-export default function Page() { redirect("/customer/requests"); }
+import WorkspaceShell from "../../../src/features/workspace/workspace-shell";
+export default function Page() { return <WorkspaceShell role="Customer" workspaceId="delivery-payment"/>; }

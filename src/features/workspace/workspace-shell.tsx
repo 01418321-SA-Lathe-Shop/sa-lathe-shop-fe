@@ -43,7 +43,7 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
   const overview = workspaceId === "overview";
   const leave = () => void signOut().then(() => router.push("/login"));
   const initials = account.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "??";
-  if (role === "Customer") return <CustomerShell session={session} workspaceId={workspaceId} mockControls={mode === "mock" ? <MockSwitcher current={account.username} /> : undefined} leave={leave} />;
+  if (role === "Customer") return <CustomerShell key={account.id} session={session} mockControls={mode === "mock" ? <MockSwitcher current={account.username} /> : undefined} leave={leave} />;
   return <div className={`app-shell integrated-shell ${styles.scope}`}>
     <a className="workflow-skip" href="#main-content">ข้ามไปเนื้อหา</a>
     {menuOpen && <button className="navigation-scrim" aria-label="ปิดเมนู" onClick={() => setMenuOpen(false)}/>}

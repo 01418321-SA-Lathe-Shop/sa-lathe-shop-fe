@@ -1,5 +1,21 @@
 # Machine Shop Custom Manufacturing System — Frontend Guide
 
+## Customer wireframe implementation — 2026-10-27
+
+The owner approved replacing all authenticated Customer screens with the Thai,
+mobile-first wireframes. The implementation is isolated in `src/features/customer/`;
+Staff/Admin, Landing and Login/Register are preserved. Existing route files remain;
+jobs and payments aliases now render their own workspaces. Request/quotation/job
+detail and wizard states use UUID query selectors on existing routes. Customer
+data comes only from existing authorized endpoints, with explicit incomplete-read
+labels and no live-to-mock fallback. The bell uses current personal inbox reads and
+per-item read commands; unread reversal/typed event targets remain gaps, not fake APIs.
+
+Business rules and exact money/int64 handling are unchanged. UC4 file upload is not
+evidence approval, Job opening or money verification. UC9 supports installments,
+independent receipt/payment order, and same-job free rework before acceptance.
+See `docs/customer-redesign-handoff.md` for coverage and verification limitations.
+
 ## Source organization update — 2026-10-27
 
 App Router routes remain under `app/`; non-route code is organized under `src/features/`,

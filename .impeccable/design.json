@@ -1,0 +1,280 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-27T00:00:00Z",
+  "title": "Design System: Lathe Shop Control — Customer",
+  "extensions": {
+    "colorMeta": {
+      "customer-action": {
+        "role": "primary",
+        "displayName": "Burnt Orange",
+        "tonalRamp": [
+          "oklch(15% 0.16 45)",
+          "oklch(27% 0.16 45)",
+          "oklch(38% 0.16 45)",
+          "oklch(50% 0.16 45)",
+          "oklch(61% 0.16 45)",
+          "oklch(73% 0.16 45)",
+          "oklch(84% 0.16 45)",
+          "oklch(95% 0.16 45)"
+        ]
+      },
+      "customer-action-hover": {
+        "role": "primary",
+        "displayName": "Deep Burnt Orange",
+        "tonalRamp": [
+          "oklch(15% 0.14 45)",
+          "oklch(27% 0.14 45)",
+          "oklch(38% 0.14 45)",
+          "oklch(50% 0.14 45)",
+          "oklch(61% 0.14 45)",
+          "oklch(73% 0.14 45)",
+          "oklch(84% 0.14 45)",
+          "oklch(95% 0.14 45)"
+        ]
+      },
+      "customer-background": {
+        "role": "neutral",
+        "displayName": "Workshop Background",
+        "tonalRamp": [
+          "oklch(15% 0.005 145)",
+          "oklch(27% 0.005 145)",
+          "oklch(38% 0.005 145)",
+          "oklch(50% 0.005 145)",
+          "oklch(61% 0.005 145)",
+          "oklch(73% 0.005 145)",
+          "oklch(84% 0.005 145)",
+          "oklch(95% 0.005 145)"
+        ]
+      },
+      "customer-surface": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(38% 0 0)",
+          "oklch(50% 0 0)",
+          "oklch(61% 0 0)",
+          "oklch(73% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "customer-ink": {
+        "role": "neutral",
+        "displayName": "Charcoal Ink",
+        "tonalRamp": [
+          "oklch(15% 0.01 155)",
+          "oklch(27% 0.01 155)",
+          "oklch(38% 0.01 155)",
+          "oklch(50% 0.01 155)",
+          "oklch(61% 0.01 155)",
+          "oklch(73% 0.01 155)",
+          "oklch(84% 0.01 155)",
+          "oklch(95% 0.01 155)"
+        ]
+      },
+      "customer-muted": {
+        "role": "neutral",
+        "displayName": "Quiet Gray",
+        "tonalRamp": [
+          "oklch(15% 0.015 155)",
+          "oklch(27% 0.015 155)",
+          "oklch(38% 0.015 155)",
+          "oklch(50% 0.015 155)",
+          "oklch(61% 0.015 155)",
+          "oklch(73% 0.015 155)",
+          "oklch(84% 0.015 155)",
+          "oklch(95% 0.015 155)"
+        ]
+      },
+      "customer-line": {
+        "role": "neutral",
+        "displayName": "Divider",
+        "tonalRamp": [
+          "oklch(15% 0.01 145)",
+          "oklch(27% 0.01 145)",
+          "oklch(38% 0.01 145)",
+          "oklch(50% 0.01 145)",
+          "oklch(61% 0.01 145)",
+          "oklch(73% 0.01 145)",
+          "oklch(84% 0.01 145)",
+          "oklch(95% 0.01 145)"
+        ]
+      },
+      "customer-tint": {
+        "role": "neutral",
+        "displayName": "Pale Workshop Tint",
+        "tonalRamp": [
+          "oklch(15% 0.02 60)",
+          "oklch(27% 0.02 60)",
+          "oklch(38% 0.02 60)",
+          "oklch(50% 0.02 60)",
+          "oklch(61% 0.02 60)",
+          "oklch(73% 0.02 60)",
+          "oklch(84% 0.02 60)",
+          "oklch(95% 0.02 60)"
+        ]
+      },
+      "customer-information": {
+        "role": "secondary",
+        "displayName": "Information Blue",
+        "tonalRamp": [
+          "oklch(15% 0.19 265)",
+          "oklch(27% 0.19 265)",
+          "oklch(38% 0.19 265)",
+          "oklch(50% 0.19 265)",
+          "oklch(61% 0.19 265)",
+          "oklch(73% 0.19 265)",
+          "oklch(84% 0.19 265)",
+          "oklch(95% 0.19 265)"
+        ]
+      },
+      "customer-success": {
+        "role": "secondary",
+        "displayName": "Workshop Green",
+        "tonalRamp": [
+          "oklch(15% 0.12 150)",
+          "oklch(27% 0.12 150)",
+          "oklch(38% 0.12 150)",
+          "oklch(50% 0.12 150)",
+          "oklch(61% 0.12 150)",
+          "oklch(73% 0.12 150)",
+          "oklch(84% 0.12 150)",
+          "oklch(95% 0.12 150)"
+        ]
+      },
+      "customer-danger": {
+        "role": "secondary",
+        "displayName": "Signal Red",
+        "tonalRamp": [
+          "oklch(15% 0.18 28)",
+          "oklch(27% 0.18 28)",
+          "oklch(38% 0.18 28)",
+          "oklch(50% 0.18 28)",
+          "oklch(61% 0.18 28)",
+          "oklch(73% 0.18 28)",
+          "oklch(84% 0.18 28)",
+          "oklch(95% 0.18 28)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "customer-heading": {
+        "displayName": "Customer Heading",
+        "purpose": "Page titles only in the Customer workspace."
+      },
+      "customer-title": {
+        "displayName": "Customer Section Title",
+        "purpose": "Task/document section headings."
+      },
+      "customer-body": {
+        "displayName": "Customer Body",
+        "purpose": "Thai-first task copy and controls."
+      },
+      "customer-metadata": {
+        "displayName": "Customer Metadata",
+        "purpose": "Supporting times and secondary text."
+      }
+    },
+    "breakpoints": [
+      {
+        "name": "customer-navigation",
+        "value": "1020px"
+      },
+      {
+        "name": "customer-stacked",
+        "value": "700px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "customer-button-primary",
+      "description": "Customer-only primary button; minimum touch target and visible keyboard focus.",
+      "html": "<button class=\"ds-primary\">ดำเนินการต่อ</button>",
+      "css": ".ds-primary{font-family:'Noto Sans Thai',sans-serif;font-size:1rem;line-height:1.65;min-height:48px;padding:11px 20px;border:0;border-radius:10px;background:#b54708;color:#fff;cursor:pointer;font-weight:600;}.ds-primary:hover{background:#913907;}.ds-primary:focus-visible{outline:3px solid #1d4ed8;outline-offset:3px;}"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "customer-button-secondary",
+      "description": "Customer-only secondary button; minimum touch target and visible keyboard focus.",
+      "html": "<button class=\"ds-secondary\">ยกเลิก</button>",
+      "css": ".ds-secondary{font-family:'Noto Sans Thai',sans-serif;font-size:1rem;line-height:1.65;min-height:44px;padding:9px 16px;border:1px solid #d8dfda;border-radius:10px;background:#fff;color:#202624;cursor:pointer;}.ds-secondary:focus-visible{outline:3px solid #1d4ed8;outline-offset:3px;}"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "customer-button-danger",
+      "description": "Customer-only danger button; minimum touch target and visible keyboard focus.",
+      "html": "<button class=\"ds-danger\">ส่งคืนงาน</button>",
+      "css": ".ds-danger{font-family:'Noto Sans Thai',sans-serif;font-size:1rem;line-height:1.65;min-height:48px;padding:11px 20px;border:0;border-radius:10px;background:#b42318;color:#fff;cursor:pointer;font-weight:600;}.ds-danger:focus-visible{outline:3px solid #1d4ed8;outline-offset:3px;}"
+    },
+    {
+      "name": "Text Link",
+      "kind": "button",
+      "description": "Quiet Customer secondary action.",
+      "html": "<button class=\"ds-link\">ดูรายละเอียด</button>",
+      "css": ".ds-link{font-family:'Noto Sans Thai',sans-serif;font-size:1rem;line-height:1.65;display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:#b54708;padding:8px 0;min-height:44px;cursor:pointer;}.ds-link:focus-visible{outline:3px solid #1d4ed8;outline-offset:3px;}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "customer-field",
+      "description": "Customer field with visible label.",
+      "html": "<label class=\"ds-label\">รายละเอียด<input class=\"ds-field\" placeholder=\"ระบุรายละเอียดงาน\"></label>",
+      "css": ".ds-label{font-family:'Noto Sans Thai',sans-serif;font-size:1rem;line-height:1.65;display:grid;gap:8px;color:#202624;font-weight:550;}.ds-field{font-family:'Noto Sans Thai',sans-serif;font-size:1rem;line-height:1.65;min-height:48px;background:#fff;color:#202624;border:1px solid #59635e;border-radius:8px;padding:10px 12px;caret-color:#b54708;}.ds-field::placeholder{color:#59635e;opacity:1;}.ds-field:focus-visible{outline:3px solid #1d4ed8;outline-offset:3px;}"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "description": "Customer desktop navigation sample; app runtime supplies real routing and active state.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"เมนูตัวอย่าง\"><a href=\"#overview\" aria-current=\"page\">ภาพรวม</a><a href=\"#requests\">คำขอผลิต</a></nav>",
+      "css": ".ds-nav{font-family:'Noto Sans Thai',sans-serif;font-size:1rem;line-height:1.65;display:flex;gap:24px;background:#fff;}.ds-nav a{display:flex;align-items:center;min-height:48px;font-size:.9375rem;color:#202624;text-decoration:none;}.ds-nav a[aria-current=page]{color:#b54708;font-weight:650;}.ds-nav a:hover{text-decoration:underline;text-underline-offset:4px;}.ds-nav a:focus-visible{outline:3px solid #1d4ed8;outline-offset:3px;}"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "description": "Written Customer status with semantic color and dot; not an interactive filter.",
+      "html": "<span class=\"ds-badge\"><span class=\"ds-dot\"></span>เสร็จแล้ว</span>",
+      "css": ".ds-badge{font-family:'Noto Sans Thai',sans-serif;font-size:1rem;line-height:1.65;display:inline-flex;align-items:center;gap:7px;padding:4px 10px;border-radius:6px;background:#f5f6f4;color:#166534;font-size:.875rem;font-weight:550;}.ds-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}"
+    },
+    {
+      "name": "Document Surface",
+      "kind": "card",
+      "refersTo": "customer-document",
+      "description": "Customer document container; intentionally flat and non-interactive.",
+      "html": "<section class=\"ds-document\"><h2>รายละเอียดงาน</h2><p>เอกสารและสถานะของคำขอ</p></section>",
+      "css": ".ds-document{font-family:'Noto Sans Thai',sans-serif;font-size:1rem;line-height:1.65;background:#fff;color:#202624;padding:32px;border-radius:12px;min-width:0;}.ds-document h2{font-size:1.25rem;line-height:1.5;font-weight:650;margin:0 0 24px;}.ds-document p{margin:0;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Light Industrial Customer Workspace",
+    "overview": "The approved Customer world is calm, practical and light industrial: white document surfaces, charcoal text and burnt-orange actions support Thai task completion. This names the approved direction rather than introducing a new visual concept.\n\nThe frontmatter and the eight canonical sections here apply only to the authenticated Customer surface. Staff, Admin, Landing and Auth retain their existing visual systems and specifications below. Source authority is `src/features/customer/customer.module.css` and `customer-shell.tsx`; the frontmatter records reused light-theme primitives, while the stylesheet remains authoritative for dark overrides and complete component states.",
+    "keyCharacteristics": [
+      "Thai-first readable typography.",
+      "Task-specific layouts with clear document and status hierarchy.",
+      "Flat surfaces, restrained borders and explicit actions."
+    ],
+    "rules": [
+      {
+        "name": "The Surface Scope Rule",
+        "body": "Customer tokens must not replace Staff, Admin, Landing or Auth tokens.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "Do keep Customer typography, palette and layout scoped to the authenticated Customer workspace.",
+      "Do distinguish request, quotation, evidence, job, delivery and invoice states in both copy and layout.",
+      "Do preserve keyboard focus, native dialog behavior and explicit loading, empty, error and partial-data states."
+    ],
+    "donts": [
+      "Don't expose staff costs, stock or supplier data to decorate Customer views.",
+      "Don't describe mock browser checks as live backend verification.",
+      "Don't persist session tokens, signed links or transient retry payloads in browser storage."
+    ]
+  }
+}

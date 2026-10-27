@@ -1,8 +1,166 @@
+---
+name: Lathe Shop Control — Customer
+description: Customer-only light industrial design tokens; legacy Staff, Admin, Landing and Auth specifications remain separate below.
+colors:
+  customer-action: "#b54708"
+  customer-action-hover: "#913907"
+  customer-background: "#f5f6f4"
+  customer-surface: "#ffffff"
+  customer-ink: "#202624"
+  customer-muted: "#59635e"
+  customer-line: "#d8dfda"
+  customer-tint: "#fff4eb"
+  customer-information: "#1d4ed8"
+  customer-success: "#166534"
+  customer-danger: "#b42318"
+typography:
+  customer-heading:
+    fontFamily: "Noto Sans Thai, sans-serif"
+    fontSize: "1.75rem"
+    fontWeight: 700
+    lineHeight: 1.4
+    letterSpacing: "-.02em"
+  customer-title:
+    fontFamily: "Noto Sans Thai, sans-serif"
+    fontSize: "1.25rem"
+    fontWeight: 650
+    lineHeight: 1.5
+  customer-body:
+    fontFamily: "Noto Sans Thai, sans-serif"
+    fontSize: "1rem"
+    fontWeight: 400
+    lineHeight: 1.65
+  customer-metadata:
+    fontFamily: "Noto Sans Thai, sans-serif"
+    fontSize: ".875rem"
+    fontWeight: 400
+    lineHeight: 1.65
+rounded:
+  customer-field: "8px"
+  customer-control: "10px"
+  customer-document: "12px"
+  customer-attention: "16px"
+spacing:
+  customer-tight: "8px"
+  customer-inline: "16px"
+  customer-section: "24px"
+  customer-document: "32px"
+  customer-wide: "48px"
+components:
+  customer-button-primary:
+    backgroundColor: "{colors.customer-action}"
+    textColor: "{colors.customer-surface}"
+    rounded: "{rounded.customer-control}"
+    padding: "11px 20px"
+  customer-button-primary-hover:
+    backgroundColor: "{colors.customer-action-hover}"
+  customer-button-secondary:
+    backgroundColor: "{colors.customer-surface}"
+    textColor: "{colors.customer-ink}"
+    rounded: "{rounded.customer-control}"
+    padding: "9px 16px"
+  customer-button-danger:
+    backgroundColor: "{colors.customer-danger}"
+    textColor: "{colors.customer-surface}"
+    rounded: "{rounded.customer-control}"
+    padding: "11px 20px"
+  customer-field:
+    backgroundColor: "{colors.customer-surface}"
+    textColor: "{colors.customer-ink}"
+    rounded: "{rounded.customer-field}"
+    padding: "10px 12px"
+  customer-document:
+    backgroundColor: "{colors.customer-surface}"
+    rounded: "{rounded.customer-document}"
+    padding: "32px"
+---
+
 # Lathe Shop Control — Design specification
 
 อัปเดตล่าสุด: 2026-10-27 · สถานะ: designed shell ใช้ session จริงหรือ mock backend ตามสัญญา API; cinematic landing และ feature-based cleanup อยู่บน develop; real-stack frontend verification ยังแยกจาก mock/browser checks
 
 เอกสารนี้ใช้ส่งต่องานให้ designer และ developer เพื่อสร้าง UI ให้ตรงกับระบบปัจจุบัน อ่านคู่กับ `docs/02-frontend.md` ซึ่งเป็นแหล่งอ้างอิง Business Flow และ permission ข้อมูลบนหน้าปัจจุบันหลายส่วนเป็น mock data และยังไม่ใช่หลักฐานว่า Backend หรือ UC1–UC9 ทำงานครบ
+
+## Overview
+
+**Creative North Star: "Light Industrial Customer Workspace"**
+
+The approved Customer world is calm, practical and light industrial: white document surfaces, charcoal text and burnt-orange actions support Thai task completion. This names the approved direction rather than introducing a new visual concept.
+
+The frontmatter and the eight canonical sections here apply only to the authenticated Customer surface. Staff, Admin, Landing and Auth retain their existing visual systems and specifications below. Source authority is `src/features/customer/customer.module.css` and `customer-shell.tsx`; the frontmatter records reused light-theme primitives, while the stylesheet remains authoritative for dark overrides and complete component states.
+
+The `.impeccable/design.json` sidecar extends these tokens with source-derived component previews and breakpoints. Its eight-step tonal ramps are synthesized preview aids, not additional shipped CSS tokens. Preview snippets resolve Customer-local variables to literals because those variables are not declared on the document root; runtime typography uses the self-hosted font, while standalone previews use the same family name with the documented fallback.
+
+**Key Characteristics:**
+
+- Thai-first readable typography.
+- Task-specific layouts with clear document and status hierarchy.
+- Flat surfaces, restrained borders and explicit actions.
+
+## Colors
+
+### Primary
+
+Burnt Orange (`customer-action`) identifies actions and selected states; its deeper hover tone is reserved for filled primary actions. Pale Workshop Tint separates attention and confirmation regions without competing with the document.
+
+### Secondary
+
+Information Blue identifies focus, information and informational statuses. Workshop Green and Signal Red communicate success and danger together with text, never color alone.
+
+### Neutral
+
+Paper White surfaces sit on a softened workshop background. Charcoal Ink leads; Quiet Gray supports metadata; the Divider tone separates records. The Customer dark variant uses explicit local overrides, not the legacy workspace palette. Filled primary/danger buttons retain their dark backgrounds and white labels in both themes.
+
+**The Surface Scope Rule.** Customer tokens must not replace Staff, Admin, Landing or Auth tokens.
+
+## Typography
+
+Noto Sans Thai is self-hosted through Next/font for Customer only, with a sans-serif fallback. The frontmatter hierarchy records heading, section title, body and metadata roles. Rem text responds to the existing UI-size preference; most Customer spacing and target dimensions are currently fixed pixels, not a fully rem-scaled spacing system. The shared brand retains its existing identity styling.
+
+## Layout
+
+The main reading area is capped at 1180px with 32px desktop side padding; the navbar has a 1280px cap. Desktop navigation becomes a native-dialog menu at 1020px. At 700px, content side padding becomes 16px, multi-column task layouts stack, notification dialogs become full-screen sheets, and quotation decisions sit above the safe-area edge with reserved content space.
+
+Overview prioritizes attention and recent work; requests use rows and document details; quotations use a price/decision rail; Deposit/PO uses an evidence checklist; jobs use a timeline; receipt uses a focused decision form; invoices prioritize balance; account/settings use split task layouts. These are Customer surface patterns, not prescriptions for Landing or Staff.
+
+## Elevation & Depth
+
+Customer surfaces are flat: solid fills and thin dividers provide hierarchy without a new shadow vocabulary. Native dialogs occupy the browser top layer and use translucent backdrops. Motion does not carry task meaning; reduced motion disables Customer transitions and animations.
+
+## Shapes
+
+Fields have gently rounded corners, controls slightly fuller corners, and documents restrained rounded containers as recorded in the frontmatter. Attention containers use the largest extracted corner. Avatars and timeline markers are circular; these exceptions communicate identity or sequence rather than turning every surface into a card.
+
+## Components
+
+### Buttons
+
+Primary and danger actions have a 48px minimum height, while ordinary buttons and links have a 44px minimum target. Primary hover deepens the action color. Focus uses a 3px Information Blue outline offset by 3px; disabled ordinary controls use muted text on the page background. Secondary and text-link actions retain a quieter visual role.
+
+### Inputs / Fields
+
+Inputs use a 48px minimum height and a muted-tone 1px border; textarea height starts at 110px and resizes vertically. Labels stay visible. Checkbox/radio controls retain native semantics and are paired with larger labeled targets.
+
+### Cards / Containers
+
+Document/form surfaces use the frontmatter document padding and corner treatment, reduced to 20px padding on mobile. Attention uses a bordered surface. Divider-separated rows remain the default for record lists.
+
+### Navigation
+
+Navigation uses the actual pathname and relevant history/settings selector for active state. Main menu groups are tasks, documents/payments and account. Links use client navigation to retain the memory-only session; the mobile native dialog closes after navigation. The notification bell opens its own dialog and closes the mobile menu first.
+
+### Chips
+
+Compact status badges pair a written status with a colored dot. Their color is semantic, not a substitute for the status label or an invented backend state.
+
+## Do's and Don'ts
+
+- Do keep Customer typography, palette and layout scoped to the authenticated Customer workspace.
+- Do distinguish request, quotation, evidence, job, delivery and invoice states in both copy and layout.
+- Do preserve keyboard focus, native dialog behavior and explicit loading, empty, error and partial-data states.
+- Don't expose staff costs, stock or supplier data to decorate Customer views.
+- Don't describe mock browser checks as live backend verification.
+- Don't persist session tokens, signed links or transient retry payloads in browser storage.
 
 ## แหล่งอ้างอิง
 
@@ -43,7 +201,20 @@
 - Deposit/PO detail pairs immutable terms with the applicable upload form. Private upload completion precedes explicit evidence submission; PO omits amount/time. One deposit is minimum-to-full, not installments. Ready file, pending/approved/rejected evidence, overdue state and actual opened job are distinct. Existing private signed downloads expose a clear เปิดใบ PO action. No local expiry, banking verification or staff approval is invented.
 - New customer forms are Thai, use labels and 44px targets, and keep internal IDs/costs out of the UI. Staff/Admin forms are unchanged.
 
+## Customer jobs, receipt, finance and account — batch 3 (2026-10-27)
+
+- `/customer/jobs` now mounts the existing authenticated Customer shell instead of redirecting to requests; `/customer/payments` now mounts the invoice workspace instead of redirecting to the combined legacy workspace. No URL or route file is removed. `/customer/delivery-payment` is the receipt workspace; `?job=UUID` selects details. `/customer/documents` remains a compatible redirect to Deposit/PO.
+- Job list uses existing Customer `/fulfillment/jobs` data and request labels, never Staff `/production/jobs` or stock. Job detail has a vertical queued/in_progress/completed timeline, separate shipment and invoice rails, approved deposit, linked original request/quotation and rework history. No supplier details, stock quantities, actual costs or made-up percentages are exposed. Requested date remains distinct from a promised date (not supplied). Customer production photos and material-waiting status remain explicitly unsupported, not fabricated.
+- Inspection is a focused delivery summary and decision form with required acknowledgement. Acceptance is final; return requires a reason and reopens the same job, preserving invoice and payments. Payment is not gated on acceptance, and acceptance is not gated on payment. Closed requests display the server's accepted-and-paid result.
+- Invoice list/detail emphasize exact outstanding balance and immutable due date from server credit terms, not the 14-day UC4 deadline. Bank installments require a ready private file, nonfuture Bangkok time and a positive amount within balance. Pending proof does not reduce the balance. Command fields freeze after an uncertain response; explicit retry preserves original UUID/payload/version. Payment proof download is offered only for the current uploader. Customer cannot issue invoices, set credit terms, approve proof or record cash.
+- Account/company uses the actual membership/owner flags. Owner invitation and join flows are distinct, one-use/24-hour and memory-only; no customer profile/password mutations are invented. Settings uses existing theme and size preferences with immediate preview and an explicit blocked-storage warning. Auth tokens still never touch browser storage.
+- Customer shell is keyed by account ID so a mock-account switch destroys prior customer data/forms, notification dialog and transient file/retry state. Staff/Admin and public/auth surfaces are unchanged. The old shared customer forms are no longer mounted by the new Customer workspace.
+- Read-all notification failures reconcile confirmed successful reads with the local unread collection and count; failed items remain actionable. No unsupported bulk endpoint or optimistic all-read claim is added.
+- Active navigation follows the actual path rather than treating nested job/payment pages as Overview. Related original-request/quotation links are stacked with an 8px gap and independent touch targets.
+
 ## Visual direction
+
+The following legacy visual sections describe Staff/Admin and preserved public/auth surfaces unless explicitly labeled otherwise. The Customer-specific normative sections above supersede their historical Customer shell references.
 
 - Modern industrial dashboard: หัวเรื่องและตัวเลขใหญ่ การ์ดมุมมน เส้นขอบบาง และพื้นที่ว่างชัดเจน
 - สีแบรนด์คือส้มบน charcoal ใน Dark และส้มเข้มบนพื้นขาวอมครีมใน Light
@@ -204,7 +375,7 @@ The entire playback action bar is removed at the owner's request. There are no v
 | /customer/requests, /customer/quotations, /customer/deposit-po, /customer/delivery-payment, /customer/inbox, /customer/memberships | UC1 / UC3 / UC4 / UC9, การแจ้งเตือน, บริษัทและคำเชิญ |
 | /admin, /admin/requests, /admin/workers, /admin/materials, /admin/orders, /admin/receiving, /admin/production, /admin/delivery-payment, /admin/inbox | Admin overview, UC1–UC4 read/review, จัดการ Staff, UC5 catalog/stock, UC6, UC7 finance, UC8 labor cost, UC9 terms/payments |
 
-Legacy redirects: /staff/orders → /staff/receiving (UC6 เป็นของ Admin เท่านั้นตาม backend UC6.md); /staff/requests → /staff/quotations; /staff/delivery, /staff/payments, /staff/debtors → /staff/delivery-payment; /customer/jobs → /customer/requests; /customer/documents → /customer/deposit-po; /customer/payments → /customer/delivery-payment
+Legacy redirects: /staff/orders → /staff/receiving (UC6 เป็นของ Admin เท่านั้นตาม backend UC6.md); /staff/requests → /staff/quotations; /staff/delivery, /staff/payments, /staff/debtors → /staff/delivery-payment; /customer/documents → /customer/deposit-po. Customer jobs and payments now render their own task workspaces at their existing URLs.
 
 Root layout ถือ `ApiSessionProvider` (memory-only) จึงรักษา session ระหว่าง client navigation; reload หรือออกจากระบบจะล้าง session และข้อมูล mock Route guard ส่งผู้ไม่มี session ไป /login และผู้ผิดบทบาทไปภาพรวมของตน เป็นการจัดหน้า ไม่ใช่ authorization; backend ตรวจสิทธิ์ทุกคำสั่ง เมนูตามบทบาทสะท้อนสิทธิ์ที่ backend ยืนยัน: Admin มีคำขอ (อ่าน/ตรวจ UC4), พนักงาน, วัตถุดิบ, สั่งซื้อ UC6, รับเข้า (การเงิน), งานผลิต (ค่าแรง) และส่งมอบ/รับชำระ (terms/ตรวจการชำระ); Staff ไม่มีการจัดการพนักงานและไม่มี UC6
 
@@ -258,6 +429,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-27 | Merge Customer-only normative tokens, canonical design sections and `.impeccable/design.json`; record batch 3 notification reconciliation, path-active navigation and spaced related links; preserve Staff/Landing specifications | Token/source consistency and documentation checks; implementation verification is recorded separately in the Customer handoff, not claimed as live backend testing |
 | 2026-10-27 | ปิด redundant inner outline บน `:is(input, select):focus-visible` ใน `.login-field` เพื่อให้โฟกัสแสดงที่กรอบนอกมน `.login-field > div:focus-within` เท่านั้น | ตรวจสอบ visual rendering ในเบราว์เซอร์ทั้ง Dark และ Light mode, snapshot check และ native tests |
 | 2026-10-27 | เหลือ global stylesheet ไฟล์เดียว; ย้าย appearance/auth/workspace เป็น CSS Modules; ลบ selector ที่ไม่พบ required class ใน source literals/dynamic prefixes และเก็บ selector กำกวมไว้; audit ใน docs/refactor/css-cleanup.json | Native tests, lint, TypeScript, build, routes และ desktop/mobile baseline comparison |
 | 2026-10-27 | จัด UC screens/domain logic ตาม feature; shared forms ใช้ CSS Module scoped ที่ theme provider; จำกัด Tailwind loader ไม่ให้แปลง CSS Modules โดยไม่เพิ่ม dependency | Native tests, lint, TypeScript, build และ route inventory เดิม |
@@ -1080,7 +1252,7 @@ src/features/workspace/workspace.module.css
 .root :global(h1) { font-size: 1.75rem; line-height: 1.4; font-weight: 700; letter-spacing: -.02em; }
 .root :global(h2) { font-size: 1.25rem; line-height: 1.5; font-weight: 650; }
 .root :global(h3) { font-size: 1.0625rem; font-weight: 650; }
-.root :global(a) { color: var(--cust-accent); text-decoration: none; text-underline-offset: 4px; }
+.root :global(a) { display: inline-flex; align-items: center; min-height: 44px; color: var(--cust-accent); text-decoration: none; text-underline-offset: 4px; }
 .root :global(a:hover) { text-decoration: underline; }
 .root :global(button), .root :global(input), .root :global(textarea), .root :global(select) { font: inherit; }
 .root :global(button), .root :global(summary) { min-height: 44px; cursor: pointer; }
@@ -1144,7 +1316,7 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-action-row a) { display: inline-flex; gap: 8px; align-items: center; min-height: 44px; }
 .root :global(.cust-toolbar) { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .root :global(.cust-recent-row) { display: grid; gap: 12px; padding: 24px 0; border-bottom: 1px solid var(--cust-line); }
-.root :global(.cust-recent-row a) { color: var(--cust-ink); overflow-wrap: anywhere; }
+.root :global(.cust-recent-row a) { display: block; color: var(--cust-ink); overflow-wrap: anywhere; }
 .root :global(.cust-recent-row a > *) { display: block; }
 .root :global(.cust-recent-row a > span) { color: var(--cust-muted); font-size: .875rem; }
 .root :global(.cust-badge) { display: inline-flex; width: fit-content; align-items: center; gap: 7px; padding: 4px 10px; border-radius: 6px; background: var(--cust-bg); color: var(--cust-muted); font-size: .875rem; font-weight: 550; }
@@ -1167,10 +1339,10 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-tabs [aria-current="page"]), .root :global(.cust-tabs [aria-pressed="true"]) { color: var(--cust-accent); border-bottom-color: var(--cust-accent); font-weight: 650; }
 .root :global(.cust-notification-dialog) { margin: 92px 32px 0 auto; padding: 0; border: 1px solid var(--cust-line); border-radius: 14px; width: min(430px, calc(100vw - 32px)); max-height: calc(100dvh - 116px); color: var(--cust-ink); background: var(--cust-surface); }
 .root :global(.cust-notification-dialog::backdrop) { background: #151a1820; }
-.root :global(.cust-inbox-panel) { padding: 20px; }
+.root :global(.cust-inbox-panel) { display: flex; flex-direction: column; padding: 20px; max-height: calc(100dvh - 116px); }
 .root :global(.cust-inbox-panel .cust-toolbar) { gap: 8px; }
 .root :global(.cust-inbox-panel > .cust-small) { margin: 12px 0; }
-.root :global(.cust-notification-scroll) { max-height: 52dvh; overflow-y: auto; scrollbar-color: var(--cust-muted) var(--cust-bg); }
+.root :global(.cust-notification-scroll) { min-height: 0; max-height: 52dvh; overflow-y: auto; scrollbar-color: var(--cust-muted) var(--cust-bg); }
 .root :global(.cust-notification-page) { max-width: 800px; margin: auto; }
 .root :global(.cust-notification-page .cust-notification-scroll) { max-height: none; }
 .root :global(.cust-group-title) { font-size: .875rem; color: var(--cust-muted); padding: 20px 4px 8px; }
@@ -1178,7 +1350,7 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-notification.unread) { background: var(--cust-tint); border-radius: 8px; }
 .root :global(.cust-notice-icon) { flex-shrink: 0; color: var(--cust-accent); padding-top: 4px; }
 .root :global(.cust-notification > div) { min-width: 0; flex: 1; }
-.root :global(.cust-notification a) { color: var(--cust-ink); overflow-wrap: anywhere; }
+.root :global(.cust-notification a) { display: block; color: var(--cust-ink); overflow-wrap: anywhere; }
 .root :global(.cust-notification strong) { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: .875rem; }
 .root :global(.cust-notification time) { color: var(--cust-muted); font-size: .875rem; }
 .root :global(.cust-unread-dot) { background: var(--cust-accent); width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; margin-top: 10px; }
@@ -1188,6 +1360,8 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-notification details button) { display: block; width: 100%; text-align: left; border: 0; }
 .root :global(.cust-load-more) { display: block; margin: 16px auto; }
 .root :global(.cust-inbox-footer) { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-top: 1px solid var(--cust-line); margin-top: 16px; }
+.root :global(.cust-inbox-panel > .cust-toolbar), .root :global(.cust-inbox-panel > .cust-tabs), .root :global(.cust-inbox-footer), .root :global(.cust-notification-help) { flex-shrink: 0; }
+.root :global(.cust-notification-help summary) { display: flex; align-items: center; color: var(--cust-muted); font-size: .875rem; }
 .root :global(.cust-mobile-menu) { inset: 0 0 0 auto; margin: 0; width: min(375px, 100vw); height: 100dvh; max-height: 100dvh; max-width: 100vw; border: 0; padding: 24px; background: var(--cust-surface); color: var(--cust-ink); }
 .root :global(.cust-mobile-menu::backdrop) { background: #151a1870; }
 .root :global(.cust-mobile-menu nav a), .root :global(.cust-mobile-menu nav button) { display: flex; align-items: center; width: 100%; min-height: 48px; padding: 8px 0; color: var(--cust-ink); border: 0; }
@@ -1257,6 +1431,46 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-upload .cust-field) { margin-top: 16px; }
 .root :global(.cust-upload > button) { margin-top: 16px; }
 .root :global(.cust-upload input) { max-width: 100%; padding: 8px; font-size: .875rem; }
+.root :global(.cust-list-filter) { max-width: 320px; }
+.root :global(.cust-job-row) { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 32px; padding: 28px 0; border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-job-row h2) { margin: 8px 0 12px; overflow-wrap: anywhere; }
+.root :global(.cust-job-row p) { margin-top: 8px; }
+.root :global(.cust-job-action) { text-align: right; align-self: center; }
+.root :global(.cust-job-detail) { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.root :global(.cust-job-summary) { display: grid; gap: 32px; }
+.root :global(.cust-job-summary > section) { padding-bottom: 24px; border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-job-summary p), .root :global(.cust-job-summary .cust-badge), .root :global(.cust-job-summary .cust-primary) { margin-top: 12px; }
+.root :global(.cust-timeline) { list-style: none; padding: 0; margin: 32px 0; }
+.root :global(.cust-timeline li) { display: flex; gap: 20px; position: relative; padding: 0 0 36px; color: var(--cust-muted); }
+.root :global(.cust-timeline li:not(:last-child))::after { content: ""; position: absolute; width: 1px; background: var(--cust-line); top: 42px; left: 20px; bottom: 0; }
+.root :global(.cust-timeline-point) { width: 42px; height: 42px; display: grid; place-items: center; border: 1px solid var(--cust-line); border-radius: 50%; flex-shrink: 0; }
+.root :global(.cust-timeline .current) { color: var(--cust-accent); }
+.root :global(.cust-timeline .done) { color: var(--cust-green); }
+.root :global(.cust-timeline .current .cust-timeline-point) { background: var(--cust-tint); border-color: var(--cust-accent); }
+.root :global(.cust-timeline p) { font-size: .875rem; margin-top: 4px; }
+.root :global(.cust-inspection-layout) { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 40px; align-items: start; }
+.root :global(.cust-inspection-decision) { padding: 24px 0; }
+.root :global(.cust-inspection-decision p) { margin: 12px 0; }
+.root :global(.cust-inspection-decision .cust-primary), .root :global(.cust-inspection-decision .cust-danger) { display: flex; width: 100%; margin-top: 24px; }
+.root :global(.cust-inspection-decision fieldset > .cust-link) { margin-top: 12px; }
+.root :global(.cust-invoice-summary > .cust-hero-price) { margin: 8px 0 24px; }
+.root :global(.cust-invoice-summary > h2) { margin-top: 16px; }
+.root :global(.cust-account-layout) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr); gap: 64px; }
+.root :global(.cust-account-profile) { padding: 24px 0; }
+.root :global(.cust-profile-avatar) { width: 72px; height: 72px; display: grid; place-items: center; font-size: 1.75rem; background: var(--cust-tint); color: var(--cust-accent); border-radius: 50%; margin-bottom: 16px; }
+.root :global(.cust-membership) { padding: 24px 0; border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-membership p) { color: var(--cust-muted); margin-top: 8px; }
+.root :global(.cust-narrow) { max-width: 620px; margin: auto; }
+.root :global(.cust-narrow > p), .root :global(.cust-narrow > button) { margin-top: 20px; }
+.root :global(.cust-secret) { padding: 24px; background: var(--cust-bg); border: 1px dashed var(--cust-muted); border-radius: 10px; margin: 24px 0; }
+.root :global(.cust-secret output) { display: block; overflow-wrap: anywhere; margin-top: 16px; user-select: all; }
+.root :global(.cust-settings-layout) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; }
+.root :global(.cust-preference) { padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-preference legend) { font-size: 1.25rem; margin-bottom: 16px; font-weight: 650; }
+.root :global(.cust-preference label) { display: flex; align-items: center; gap: 12px; min-height: 48px; cursor: pointer; }
+.root :global(.cust-settings-preview) { padding: 32px; }
+.root :global(.cust-settings-preview h3) { margin-top: 24px; }
+.root :global(.cust-settings-preview p), .root :global(.cust-settings-preview .cust-badge) { margin-top: 16px; }
 @media (max-width: 1020px) {
   .root :global(.cust-nav-inner) { gap: 24px; }
   .root :global(.cust-desktop-nav), .root :global(.cust-account-menu) { display: none; }
@@ -1276,7 +1490,7 @@ src/features/workspace/workspace.module.css
   .root :global(.cust-page-end) { align-items: flex-start; flex-direction: column; }
   .root :global(.cust-footer) { padding: 24px 16px; flex-direction: column; }
   .root :global(.cust-notification-dialog) { inset: 0; margin: 0; width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
-  .root :global(.cust-inbox-panel) { padding: 16px; }
+  .root :global(.cust-inbox-panel) { padding: 16px; max-height: 100dvh; height: 100dvh; }
   .root :global(.cust-inbox-panel .cust-notification-scroll) { max-height: calc(100dvh - 320px); }
   .root :global(.cust-tabs) { gap: 20px; }
   .root :global(.cust-filters) { grid-template-columns: 1fr; }
@@ -1294,8 +1508,12 @@ src/features/workspace/workspace.module.css
   .root :global(.cust-document-action) { text-align: left; }
   .root :global(.cust-decision-bar) { position: fixed; bottom: 0; left: 0; right: 0; z-index: 20; background: var(--cust-surface); padding: 12px 16px max(12px, env(safe-area-inset-bottom)); border-top: 1px solid var(--cust-line); gap: 4px; }
   .root :global(.cust-main:has(.cust-decision-bar)) { padding-bottom: 180px; }
+  .root :global(.cust-job-row), .root :global(.cust-job-detail), .root :global(.cust-inspection-layout), .root :global(.cust-account-layout), .root :global(.cust-settings-layout) { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .root :global(.cust-job-action) { text-align: left; }
+  .root :global(.cust-inspection-decision), .root :global(.cust-account-profile), .root :global(.cust-settings-preview) { padding: 16px 0; }
 }
 @media (prefers-reduced-motion: reduce) { .root *, .root *::before, .root *::after { scroll-behavior: auto; transition: none; animation: none; } }
+.root :global(.cust-related-links) { display: grid; justify-items: start; gap: 8px; }
 ```
 
 ### B. Font loading and root layout — app/layout.tsx
