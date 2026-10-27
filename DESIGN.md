@@ -214,6 +214,12 @@ Compact status badges pair a written status with a colored dot. Their color is s
 
 ## Visual direction
 
+Private-file viewing correction (2026-10-27): files without a download filename
+open in a new tab, preserving the original app's memory-only session. Named
+downloads keep their filename behavior. Signed links are requested on demand,
+never persisted, and retain `noopener`, `noreferrer` and `no-referrer` protections.
+Verified with a private PO popup in the contract mock and a native regression test.
+
 The following legacy visual sections describe Staff/Admin and preserved public/auth surfaces unless explicitly labeled otherwise. The Customer-specific normative sections above supersede their historical Customer shell references.
 
 - Modern industrial dashboard: หัวเรื่องและตัวเลขใหญ่ การ์ดมุมมน เส้นขอบบาง และพื้นที่ว่างชัดเจน

@@ -74,6 +74,9 @@ signed links, invitation secrets and retry payloads stay out of URLs/storage/log
 - TypeScript, ESLint and source audit passed; 70 native tests passed for Customer
   workflows, including three partial/uncertain notification-read regressions.
 - Production build passed (37 routes). Dependencies and route inventory unchanged.
+- The separate private-file correction brings the final suite to 71 passing tests.
+  Opening an uploaded PO was verified in a new tab with the original authenticated
+  app tab preserved; named downloads retain their filename behavior.
 - Forty initial screenshots cover the planned page states at 375px/1280px;
   corrected Job and bell views were captured again at both widths. No horizontal
   overflow or runtime errors were observed in these checks.
