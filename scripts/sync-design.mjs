@@ -28,6 +28,8 @@ const snapshot = [
   '### A. Full CSS specification — app/globals.css',
   'Preserve order and media-query context when reproducing the design.',
   fence('css', read('app/globals.css')),
+  '### A1. Appearance, auth and workspace CSS Modules',
+  ...['src/components/appearance/appearance.module.css', 'src/features/auth/auth.module.css', 'src/features/workspace/workspace.module.css'].flatMap((path) => [path, fence('css', read(path))]),
   '### A2. Shared workflow styles — src/components/ui/workflows.module.css',
   fence('css', read('src/components/ui/workflows.module.css')),
   '### A3. Cinematic public landing — src/features/landing/landing.module.css',

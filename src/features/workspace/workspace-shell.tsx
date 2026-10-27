@@ -1,4 +1,5 @@
 "use client";
+import { workspaceStyles as styles } from "../../components/ui/style-scopes";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -34,14 +35,14 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
     window.addEventListener("keydown", close);
     return () => window.removeEventListener("keydown", close);
   }, [menuOpen]);
-  if (!session || role !== expected) return <main className="page-content"><p role="status">กำลังตรวจสอบพื้นที่ทำงาน…</p></main>;
-  if (!canAccessWorkspace(role, workspaceId)) return <main className="page-content"><h1>ไม่มีสิทธิ์เข้าถึงหน้านี้</h1><Link href={ROLE_ROOTS[role]}>กลับภาพรวม</Link></main>;
+  if (!session || role !== expected) return <main className={`page-content ${styles.scope}`}><p role="status">กำลังตรวจสอบพื้นที่ทำงาน…</p></main>;
+  if (!canAccessWorkspace(role, workspaceId)) return <main className={`page-content ${styles.scope}`}><h1>ไม่มีสิทธิ์เข้าถึงหน้านี้</h1><Link href={ROLE_ROOTS[role]}>กลับภาพรวม</Link></main>;
   const { account, mode } = session;
   const items = getWorkspaces(role);
   const overview = workspaceId === "overview";
   const leave = () => void signOut().then(() => router.push("/login"));
   const initials = account.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "??";
-  return <div className="app-shell integrated-shell">
+  return <div className={`app-shell integrated-shell ${styles.scope}`}>
     <a className="workflow-skip" href="#main-content">ข้ามไปเนื้อหา</a>
     {menuOpen && <button className="navigation-scrim" aria-label="ปิดเมนู" onClick={() => setMenuOpen(false)}/>}
     <aside className={`sidebar integrated-sidebar ${menuOpen ? "navigation-open" : ""}`} aria-label={`เมนู ${ROLE_LABELS[role]}`}>
@@ -60,7 +61,7 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
         <span className={`api-mode-badge ${mode}`}>{mode === "mock" ? "Mock backend" : "Connected API"}</span>
         {mode === "mock" ? <MockSwitcher current={account.username} /> : <button className="secondary-button switch-account" onClick={leave}>ออกจากระบบ</button>}
       </header>
-      <main id="main-content" className="page-content">
+      <main id="main-content" className={`page-content ${styles.scope}`}>
         <section className="page-heading"><div><span className="eyebrow">{ROLE_LABELS[role].toUpperCase()} / {workspaceId.toUpperCase()}</span><h1 id="workspace-title" tabIndex={-1}>{overview ? role === "Admin" ? "ศูนย์จัดการระบบ" : role === "Worker" ? "ศูนย์ควบคุมงานผลิต" : "งานของคุณในที่เดียว" : PAGE_LABELS[workspaceId]}</h1><p>{overview ? descriptions[role] : items.find((item) => item.id === workspaceId)?.description}</p></div></section>
         {mode === "mock" ? <p className="demo-context">Mock backend ในเบราว์เซอร์ · ข้อมูลตัวอย่างร่วมกันระหว่างบัญชีทดสอบ · รีโหลดหน้าเพื่อเริ่มใหม่ · ไม่ใช่ข้อมูลจริง</p> : <p className="demo-context">ข้อมูลจริงจาก backend · เวลา Asia/Bangkok · เงินบาท ไม่รวม VAT · รีโหลดหน้าต้องเข้าสู่ระบบใหม่</p>}
         <div className="workflow-content live-workspace"><ConnectedWorkspace key={`${account.id}:${workspaceId}`} role={role} workspaceId={workspaceId} session={session} /></div>

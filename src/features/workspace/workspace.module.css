@@ -1,0 +1,137 @@
+/* Locally owned styles; legacy descendant class contracts are intentionally preserved. */
+:global(.app-shell):where(.scope) { min-height: 100vh; background: radial-gradient(circle at 88% -10%, rgba(255,155,69,.07), transparent 28%), var(--bg); }
+:where(.scope) :global(.sidebar) { position: fixed; inset: 0 auto 0 0; z-index: 20; width: 15.25rem; padding: 1.625rem 1.125rem 1.25rem; display: flex; flex-direction: column; border-right: 0.0625rem solid var(--line); background: rgba(12,14,14,.97); }
+:where(.scope) :global(.nav-list) { display: flex; flex-direction: column; gap: 0.3125rem; }
+:where(.scope) :global(.nav-list) a { text-decoration: none; }
+:where(.scope) :global(.nav-list) a:focus-visible { outline: 0.125rem solid var(--lime); outline-offset: 0.125rem; }
+:where(.scope) :global(.nav-label) { padding: 0 0.75rem 0.6875rem; color: #59605c; font-size: 0.5625rem; font-weight: 700; letter-spacing: .2em; }
+:where(.scope) :global(.nav-list) :is(button, a) { width: 100%; height: 2.6875rem; padding: 0 0.6875rem; display: grid; grid-template-columns: 1.875rem 1fr auto; align-items: center; gap: 0.3125rem; border: 0.0625rem solid transparent; border-radius: 0.6875rem; background: transparent; color: #89908c; text-align: left; font-size: 0.8125rem; cursor: pointer; transition: .2s ease; }
+:where(.scope) :global(.nav-list) :is(button, a):hover { color: #d9ddd8; background: #151817; }
+:where(.scope) :global(.nav-list) :is(button, a):global(.active) { color: var(--text); border-color: #343835; background: linear-gradient(90deg, #242824, #1a1d1b); font-weight: 700; }
+:where(.scope) :global(.nav-list) :is(button, a):global(.active) :global(.nav-icon) { color: var(--lime); background: #352820; }
+:where(.scope) :global(.nav-icon) { width: 1.75rem; height: 1.75rem; display: grid; place-items: center; border-radius: 0.5rem; }
+:where(.scope) :global(.nav-list) em { min-width: 1.375rem; height: 1.25rem; padding: 0 0.375rem; display: grid; place-items: center; border-radius: 0.5625rem; background: #272b28; color: #b9c0bb; font-size: 0.625rem; font-style: normal; }
+:where(.scope) :global(.sidebar-footer) { margin-top: auto; padding: 1.0625rem 0.4375rem 0.0625rem; display: grid; grid-template-columns: 2.375rem 1fr 1.5rem; align-items: center; border-top: 0.0625rem solid var(--line); }
+:where(.scope) :global(.sidebar-footer) :global(.avatar) { width: 2rem; height: 2rem; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(140deg, #464d49, #242825); color: var(--lime); font-size: 0.625rem; font-weight: 700; }
+:where(.scope) :global(.sidebar-footer) > div:nth-child(2) { min-width: 0; display: flex; flex-direction: column; }
+:where(.scope) :global(.sidebar-footer) strong { overflow: hidden; color: #dfe2de; font-size: 0.6875rem; text-overflow: ellipsis; white-space: nowrap; }
+:where(.scope) :global(.sidebar-footer) span { color: #636a66; font-size: 0.5625rem; }
+:where(.scope) :global(.sidebar-footer) button { border: 0; background: transparent; color: #686f6a; cursor: pointer; }
+
+:where(.scope) :global(.app-stage) { min-height: 100vh; margin-left: 15.25rem; }
+:where(.scope) :global(.topbar) { height: 4.75rem; padding: 0 1.75rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 0.0625rem solid var(--line); background: rgba(10,11,11,.83); backdrop-filter: blur(1.125rem); position: sticky; top: 0; z-index: 15; }
+:where(.scope) :global(.status-ribbon) { display: flex; gap: 0.5625rem; align-items: center; }
+:where(.scope) :global(.status-ribbon) > span { padding: 0.4375rem 0.625rem; border: 0.0625rem solid var(--line-soft); border-radius: 0.5625rem; color: #747b77; background: #101211; font-size: 0.625rem; }
+:where(.scope) :global(.status-ribbon) > span:first-child { color: #aab0ab; }
+:where(.scope) :global(.search) { height: 2.375rem; display: flex; align-items: center; gap: 0.5625rem; padding: 0 0.75rem; border: 0.0625rem solid var(--line); border-radius: 0.625rem; background: #101212; color: #68706b; }
+:where(.scope) :global(.search) { width: 17.75rem; }
+:where(.scope) :global(.search) input { width: 100%; border: 0; outline: 0; background: transparent; color: #dce0dc; font-size: 0.6875rem; }
+:where(.scope) :global(.search) input::placeholder { color: #5f6662; }
+:where(.scope) :global(.icon-button) { position: relative; width: 2.375rem; height: 2.375rem; display: grid; place-items: center; border: 0.0625rem solid var(--line); border-radius: 0.625rem; background: #121414; color: #949b96; cursor: pointer; }
+:where(.scope) :global(.icon-button) > span { position: absolute; top: 0.5rem; right: 0.5rem; width: 0.3125rem; height: 0.3125rem; border-radius: 50%; background: var(--lime); }
+
+:global(.page-content):where(.scope) { max-width: 96.25rem; margin: 0 auto; padding: 2.25rem 2rem 3.75rem; }
+:where(.scope) :global(.page-heading) { min-height: 4.625rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; margin-bottom: 1.625rem; }
+:where(.scope) :global(.page-heading) h1 { margin: 0; font-size: clamp(1.625rem, 2.35vw, 2.375rem); line-height: 1.15; letter-spacing: -.045em; }
+:where(.scope) :global(.page-heading) p { margin: 0.4375rem 0 0; color: var(--muted); font-size: 0.75rem; }
+:where(.scope) :global(.panel) { position: relative; border: 0.0625rem solid var(--line); border-radius: 0.9375rem; background: linear-gradient(145deg, #141616, #101212); }
+:where(.scope) :global(.progress) { display: grid; grid-template-columns: 1fr 1.5625rem; align-items: center; gap: 0.375rem; }
+:where(.scope) :global(.progress) > div { height: 0.1875rem; overflow: hidden; border-radius: 0.3125rem; background: #2b2f2c; }
+:where(.scope) :global(.progress) i { display: block; height: 100%; border-radius: inherit; background: var(--lime); }
+:where(.scope) :global(.progress) span { color: #777e79; font-size: 0.5rem; }
+
+:where(.scope) :global(.workspace-stats) { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8125rem; margin-bottom: 0.8125rem; }
+:where(.scope) :global(.workspace-stats) article { min-height: 7rem; padding: 1rem 1.125rem; display: flex; flex-direction: column; border: 0.0625rem solid var(--line); border-radius: 0.875rem; background: var(--surface); }
+:where(.scope) :global(.workspace-stats) span { color: #777e79; font-size: 0.625rem; }:where(.scope) :global(.workspace-stats) strong { margin-top: 0.4375rem; font-size: 1.5rem; letter-spacing: -.04em; }:where(.scope) :global(.workspace-stats) small { margin-top: auto; color: #5e6561; font-size: 0.5rem; }
+:where(.scope) :global(.data-row):not(:global(.data-head)):hover { background: #171a18; }:where(.scope) :global(.status-pill) { padding: 0.375rem 0.5625rem; border-radius: 0.5rem; background: #2a211a; color: var(--lime); font-size: 0.5625rem; }:where(.scope) :global(.upload){height:2.625rem;padding:0 0.75rem;display:flex;flex-direction:column;justify-content:center;border:0.0625rem dashed #3a3f3c;border-radius:0.625rem;background:#0d0f0f;color:#a0a6a2}:where(.scope) :global(.upload) small{color:#59605c;font-size: 0.4375rem}
+:where(.scope) :global(.sidebar) { width: 17rem; padding: 1.875rem 1.375rem 1.5rem; }
+:where(.scope) :global(.nav-list) { gap: 0.4375rem; }:where(.scope) :global(.nav-list) :is(button, a) { height: 3.0625rem; font-size: 0.875rem; }:where(.scope) :global(.nav-icon) { width: 2rem; height: 2rem; }
+:where(.scope) :global(.app-stage) { margin-left: 17rem; }:where(.scope) :global(.topbar) { height: 5.25rem; padding: 0 2.25rem; }:where(.scope) :global(.status-ribbon) > span { padding: 0.5rem 0.75rem; font-size: 0.6875rem; }
+:where(.scope) :global(.search) { width: 20.625rem; }:where(.scope) :global(.search), :where(.scope) :global(.icon-button) { height: 2.6875rem; }
+:global(.page-content):where(.scope) { max-width: 105rem; padding: 3rem 2.75rem 4.75rem; }:where(.scope) :global(.page-heading) { min-height: 5.375rem; margin-bottom: 1.9375rem; }:where(.scope) :global(.page-heading) h1 { font-size: clamp(2.25rem,3vw,3rem); font-weight: 680; }:where(.scope) :global(.page-heading) p { margin-top: 0.625rem; font-size: 0.875rem; }:where(.scope) :global(.panel) { border-radius: 1.125rem; }:where(.scope) :global(.progress) span { font-size: 0.5625rem; }
+:where(.scope) :global(.workspace-stats) { gap: 1rem; margin-bottom: 1rem; }:where(.scope) :global(.workspace-stats) article { min-height: 8.75rem; padding: 1.3125rem; }:where(.scope) :global(.workspace-stats) span { font-size: 0.75rem; }:where(.scope) :global(.workspace-stats) strong { font-size: 2rem; }:where(.scope) :global(.workspace-stats) small { font-size: 0.5625rem; }
+:where(.scope) :global(.machine-orbit) { position: absolute; border: 0.0625rem solid rgba(255,155,69,.15); border-radius: 50%; }:where(.scope) :global(.orbit-one) { width: 33.75rem; height: 33.75rem; }:where(.scope) :global(.orbit-two) { width: 26.875rem; height: 26.875rem; border-color: rgba(255,255,255,.06); }
+:where(.scope) :global(.machine-core) { position:absolute; width:11.875rem; height:11.875rem; border:0.0625rem solid #4d3b2f; border-radius:50%; background:radial-gradient(circle at 42% 38%,#72513a 0,#2d2119 16%,#121512 42%,#090b0a 70%); box-shadow:0 0 0 1.75rem rgba(255,255,255,.012),0 0 5rem rgba(255,155,69,.12); }:where(.scope) :global(.machine-core):before, :where(.scope) :global(.machine-core):after{content:"";position:absolute;inset:1.6875rem;border:0.0625rem dashed #74543d;border-radius:50%}:where(.scope) :global(.machine-core):after{inset:3.8125rem;border-style:solid;background:#090b0a}:where(.scope) :global(.machine-core) span, :where(.scope) :global(.machine-core) i{position:absolute;z-index:2;top:5.75rem;left:-1.375rem;width:14.625rem;height:0.3125rem;border-radius:0.5625rem;background:linear-gradient(90deg,transparent,#bd6d31,var(--lime),#bd6d31,transparent);transform:rotate(45deg)}:where(.scope) :global(.machine-core) i{transform:rotate(-45deg)}
+:where(.scope) :global(.mock-dashboard) { position: relative; z-index: 3; width: min(42.5rem,94%); min-height: 24.0625rem; padding: 1.375rem; border: 0.0625rem solid rgba(255,255,255,.15); border-radius: 1.25rem; background: linear-gradient(145deg,rgba(29,32,29,.96),rgba(11,13,12,.97)); box-shadow: 0 3.125rem 6.25rem rgba(0,0,0,.45); transform: rotateY(-7deg) rotateX(4deg) rotateZ(-1deg); backdrop-filter: blur(1.25rem); }
+:where(.scope) :global(.mock-top) { display:flex; align-items:flex-start; justify-content:space-between; padding-bottom:1.125rem; border-bottom:0.0625rem solid var(--line); }:where(.scope) :global(.mock-top) div{display:flex;flex-direction:column}:where(.scope) :global(.mock-top) span{color:#6c746e;font-size: 0.5rem;letter-spacing:.16em}:where(.scope) :global(.mock-top) strong{margin-top:0.3125rem;font-size: 1.125rem}:where(.scope) :global(.mock-top) em{color:#69706c;font-size: 0.5rem;font-style:normal}
+:where(.scope) :global(.mock-job-focus) { min-height: 9.6875rem; margin-top: 1.125rem; padding: 1.4375rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; border: 0.0625rem solid #65432b; border-radius: 0.9375rem; background: linear-gradient(145deg,#2a211a,#151411); }:where(.scope) :global(.mock-job-focus)>div { display:flex; flex-direction:column; }:where(.scope) :global(.mock-job-focus) span { color:var(--lime);font-size: 0.5rem;font-weight:750;letter-spacing:.14em }:where(.scope) :global(.mock-job-focus) strong { margin-top:1.125rem;font-size: 1.5625rem;letter-spacing:-.035em }:where(.scope) :global(.mock-job-focus) small { margin-top:0.5625rem;color:#747b76;font-size: 0.5625rem}:where(.scope) :global(.mock-job-focus) em { color:var(--lime);font-size: 2.375rem;font-style:normal;font-weight:730;line-height:1 }
+:where(.scope) :global(.mock-progress) { height: 0.4375rem; margin: -2.1875rem 1.4375rem 0; border-radius: 0.4375rem; background:#302a26; overflow:hidden }:where(.scope) :global(.mock-progress) i { display:block;width:78%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#b86223,var(--lime)) }
+:where(.scope) :global(.mock-flow) { margin-top: 2.8125rem; display:grid;grid-template-columns:repeat(4,1fr) }:where(.scope) :global(.mock-flow)>div { position:relative;display:flex;flex-direction:column;align-items:center;gap:0.625rem;color:#6c746e;font-size: 0.5rem}:where(.scope) :global(.mock-flow)>div:after { content:"";position:absolute;top:0.9375rem;left:50%;width:100%;height:0.0625rem;background:#343936 }:where(.scope) :global(.mock-flow)>div:last-child:after { display:none }:where(.scope) :global(.mock-flow) i { position:relative;z-index:1;width:1.9375rem;height:1.9375rem;display:grid;place-items:center;border:0.0625rem solid #3a403c;border-radius:50%;background:#121513;color:#737b75;font-style:normal }
+
+@media (max-width: 70rem) { :where(.scope) :global(.sidebar) { width: 12.875rem; }:where(.scope) :global(.app-stage) { margin-left:12.875rem }:where(.scope) :global(.search) { width:13.75rem }:where(.scope) :global(.status-ribbon) span:nth-child(n+2){display:none} }
+@media (max-width: 56.25rem) { :where(.scope) :global(.sidebar) { position:relative; width:100%; height:auto; min-height:0; padding:1rem; border-right:0; border-bottom:0.0625rem solid var(--line) }:where(.scope) :global(.nav-list){margin-top:1rem;display:grid;grid-template-columns:repeat(4,minmax(7.5rem,1fr));overflow-x:auto;padding-bottom:0.25rem}:where(.scope) :global(.nav-label), :where(.scope) :global(.sidebar-footer){display:none}:where(.scope) :global(.nav-list) :is(button, a){min-width:7.5rem}:where(.scope) :global(.app-stage){margin-left:0}:where(.scope) :global(.topbar){height:4rem;padding:0 1rem}:where(.scope) :global(.status-ribbon){display:none}:where(.scope) :global(.search){width:auto;flex:1}:global(.page-content):where(.scope){padding:1.5625rem 1rem 2.8125rem}:where(.scope) :global(.page-heading){min-height:0}:where(.scope) :global(.page-heading) h1{font-size: 1.75rem}:where(.scope) :global(.workspace-stats){grid-template-columns:1fr} }
+@media (max-width: 30rem) {:where(.scope) :global(.page-heading){flex-direction:column}:where(.scope) :global(.workspace-stats){grid-template-columns:1fr} }
+@media (max-width: 47.5rem) {:where(.scope) :global(.machine-orbit):global(.orbit-one) { width: 24.375rem; height: 24.375rem; }:where(.scope) :global(.machine-orbit):global(.orbit-two) { width: 19.375rem; height: 19.375rem; }:where(.scope) :global(.machine-core) { width: 9.0625rem; height: 9.0625rem; }:where(.scope) :global(.machine-core):before{inset:1.375rem}:where(.scope) :global(.machine-core):after{inset:3rem}:where(.scope) :global(.machine-core) span, :where(.scope) :global(.machine-core) i{top:4.375rem;left:-0.875rem;width:10.75rem}:where(.scope) :global(.mock-dashboard) { min-height: 20.625rem; padding: 0.9375rem; }
+}
+@media (max-width: 30rem) {:where(.scope) :global(.mock-dashboard){width:100%;transform:rotateY(-4deg) rotateX(3deg)}:where(.scope) :global(.mock-job-focus){padding:1.125rem;min-height:9.0625rem}:where(.scope) :global(.mock-job-focus) strong{font-size: 1.25rem}:where(.scope) :global(.mock-job-focus) em{font-size: 1.9375rem}:where(.scope) :global(.mock-progress){margin-left:1.125rem;margin-right:1.125rem}:where(.scope) :global(.machine-orbit):global(.orbit-one){width:20.625rem;height:20.625rem}:where(.scope) :global(.machine-orbit):global(.orbit-two){width:16.25rem;height:16.25rem}
+}
+:where(.scope) :global(.staff-space) { margin: 1.875rem 0 1.375rem; padding: 0.875rem 0.9375rem; display: flex; flex-direction: column; gap: 0.25rem; border: 0.0625rem solid var(--line); border-radius: 0.75rem; background: #111412; }
+:where(.scope) :global(.staff-space) span { color: var(--lime); font-size: 0.5rem; font-weight: 700; letter-spacing: .16em; }
+:where(.scope) :global(.staff-space) strong { color: #9ca39d; font-size: 0.75rem; font-weight: 700; }
+:where(.scope) :global(.sidebar) :global(.nav-list) :is(button, a):not(:global(.active)) { font-weight: 600; }
+:global(.app-shell):where(.scope) :is(h1, h2), :where(.scope) :global(.customer-portal) :is(h1, h2) { font-weight: 700; }
+@media (max-width: 51.25rem) {:where(.scope) :global(.staff-space){display:none}
+}
+@media (min-width: 56.251rem) {
+  :where(.scope) :global(.sidebar) {
+    height: 100dvh;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+    overflow: hidden;
+  }
+  :where(.scope) :global(.sidebar) > :global(.staff-space), :where(.scope) :global(.sidebar) > :global(.sidebar-footer) {
+    flex-shrink: 0;
+  }
+  :where(.scope) :global(.sidebar) > :global(.nav-list) {
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--line) transparent;
+    padding: 0.1875rem 0.375rem 0.75rem 0.1875rem;
+    mask-image: linear-gradient(to bottom, transparent 0, #000 0.5rem, #000 calc(100% - 0.75rem), transparent 100%);
+  }
+  :where(.scope) :global(.sidebar) > :global(.nav-list) > * { flex-shrink: 0; }
+  :where(.scope) :global(.sidebar) > :global(.sidebar-footer) {
+    margin-top: 0;
+    background: inherit;
+  }
+}
+:global([data-theme="light"]) :where(.scope) :global(.machine-orbit) { border-color: rgba(201,97,21,.24); }
+:global([data-theme="light"]) :where(.scope) :global(.machine-orbit):global(.orbit-two) { border-color: rgba(24,32,25,.09); }
+:global([data-theme="light"]) :where(.scope) :global(.machine-core) { border-color: #dfc4ae; background: radial-gradient(circle at 42% 38%,#fff 0,#f7e6d7 28%,#eee1d5 70%); box-shadow: 0 0 0 1.75rem rgba(223,116,30,.025),0 0 5rem rgba(223,116,30,.08); }
+:global([data-theme="light"]) :where(.scope) :global(.machine-core):before { border-color: #cba17e; }
+:global([data-theme="light"]) :where(.scope) :global(.machine-core):after { border-color: #d4b699; background: #faf3ec; }
+:global([data-theme="light"]) :where(.scope) :global(.mock-dashboard) { border-color: var(--line); background: linear-gradient(145deg,#fff,#faf6f1); color: var(--text); box-shadow: 0 1.875rem 4.375rem rgba(80,53,32,.14); }
+:global([data-theme="light"]) :where(.scope) :global(.mock-top) span, :global([data-theme="light"]) :where(.scope) :global(.mock-top) em, :global([data-theme="light"]) :where(.scope) :global(.mock-job-focus) small { color: var(--muted); }
+:global([data-theme="light"]) :where(.scope) :global(.mock-job-focus) { border-color: #edc7a8; background: linear-gradient(145deg,#fff4e9,#fffaf5); }
+:global([data-theme="light"]) :where(.scope) :global(.mock-job-focus) span, :global([data-theme="light"]) :where(.scope) :global(.mock-job-focus) em { color: #ac4e0b; }
+:global([data-theme="light"]) :where(.scope) :global(.mock-progress) { background: #eddfd3; }
+:global([data-theme="light"]) :where(.scope) :global(.mock-flow)>div { color: var(--muted); }
+:global([data-theme="light"]) :where(.scope) :global(.mock-flow)>div:after { background: #d8cec4; }
+:global([data-theme="light"]) :where(.scope) :global(.mock-flow) i { border-color: #d8cec4; background: #fff; color: var(--muted); }
+
+:global([data-theme="light"]) :global(.app-shell):where(.scope) { background: radial-gradient(circle at 88% -10%,rgba(223,116,30,.13),transparent 30%),var(--bg); }
+:global([data-theme="light"]) :where(.scope) :global(.sidebar) { border-color: var(--line); background: rgba(248,250,245,.97); }
+:global([data-theme="light"]) :where(.scope) :global(.staff-space), :global([data-theme="light"]) :where(.scope) :global(.status-ribbon)>span, :global([data-theme="light"]) :where(.scope) :global(.search), :global([data-theme="light"]) :where(.scope) :global(.icon-button) { border-color: var(--line); background: #fff; color: #5f695f; }
+:global([data-theme="light"]) :where(.scope) :global(.staff-space) strong, :global([data-theme="light"]) :where(.scope) :global(.status-ribbon)>span:first-child { color: #4d574e; }
+:global([data-theme="light"]) :where(.scope) :global(.topbar) { border-color: var(--line); background: rgba(245,247,241,.88); }
+:global([data-theme="light"]) :where(.scope) :global(.search) input { color: #202921; }
+:global([data-theme="light"]) :where(.scope) :global(.search) input::placeholder { color: #8b948b; }
+:global([data-theme="light"]) :where(.scope) :global(.nav-list) :is(button, a) { color: #5f695f; }
+:global([data-theme="light"]) :where(.scope) :global(.nav-list) :is(button, a):hover { color: #263027; background: #eef1e9; }
+:global([data-theme="light"]) :where(.scope) :global(.nav-list) :is(button, a):global(.active) { border-color: #edc7a8; color: #482d1a; background: linear-gradient(90deg,#ffead8,#fff6ee); }
+:global([data-theme="light"]) :where(.scope) :global(.nav-list) :is(button, a):global(.active) :global(.nav-icon) { background: #f8d9bf; color: #a64c0d; }
+:global([data-theme="light"]) :where(.scope) :global(.sidebar-footer) :global(.avatar) { background: #ffead8; color: #a64c0d; }
+:global([data-theme="light"]) :where(.scope) :global(.nav-list) em { background: #e3e8de; color: #566057; }
+:global([data-theme="light"]) :where(.scope) :global(.sidebar-footer) strong { color: #364037; }
+:global([data-theme="light"]) :where(.scope) :global(.sidebar-footer) span, :global([data-theme="light"]) :where(.scope) :global(.sidebar-footer) button, :global([data-theme="light"]) :where(.scope) :global(.nav-label) { color: #727c73; }
+:global([data-theme="light"]) :where(.scope) :global(.panel), :global([data-theme="light"]) :where(.scope) :global(.workspace-stats) article { border-color: var(--line); background: linear-gradient(145deg,#fff,#f5f7f2); box-shadow: 0 0.9375rem 2.625rem rgba(45,56,40,.05); }
+:global([data-theme="light"]) :where(.scope) :global(.workspace-stats) span { color: #606b61; }
+:global([data-theme="light"]) :where(.scope) :global(.workspace-stats) small { color: #737d74; }
+:global([data-theme="light"]) :where(.scope) :global(.progress) div { border-color: var(--line); background: #e7eae4; }
+:global([data-theme="light"]) :where(.scope) :global(.data-row):not(:global(.data-head)):hover { background: #f3f5f0; }
+:global([data-theme="light"]) :where(.scope) :global(.status-pill) { background: #ffeadb; color: #a64c0d !important; }
+:global([data-theme="light"]) :where(.scope) :global(.upload) { border-color: var(--line); background: #f7f8f4; color: #263027; }

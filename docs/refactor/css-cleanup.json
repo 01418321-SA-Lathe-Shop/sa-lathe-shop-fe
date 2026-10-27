@@ -1,0 +1,2949 @@
+{
+  "removed": [
+    {
+      "line": 61,
+      "selector": ".role-switch",
+      "reason": "Required class absent from source literals/dynamic class prefixes: role-switch"
+    },
+    {
+      "line": 62,
+      "selector": ".role-switch button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: role-switch"
+    },
+    {
+      "line": 63,
+      "selector": ".role-switch button.active",
+      "reason": "Required class absent from source literals/dynamic class prefixes: role-switch"
+    },
+    {
+      "line": 67,
+      "selector": ".topbar.staff-topbar",
+      "reason": "Required class absent from source literals/dynamic class prefixes: staff-topbar"
+    },
+    {
+      "line": 68,
+      "selector": ".staff-topbar .topbar-actions",
+      "reason": "Required class absent from source literals/dynamic class prefixes: staff-topbar, topbar-actions"
+    },
+    {
+      "line": 69,
+      "selector": ".customer-route-content",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-route-content"
+    },
+    {
+      "line": 70,
+      "selector": ".customer-stage .customer-route-content .customer-side-stack",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-stage, customer-route-content, customer-side-stack"
+    },
+    {
+      "line": 71,
+      "selector": ".customer-route-content .status-pill",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-route-content"
+    },
+    {
+      "line": 92,
+      "selector": ".topbar-actions",
+      "reason": "Required class absent from source literals/dynamic class prefixes: topbar-actions"
+    },
+    {
+      "line": 93,
+      "selector": ".table-search",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-search"
+    },
+    {
+      "line": 95,
+      "selector": ".table-search input",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-search"
+    },
+    {
+      "line": 96,
+      "selector": ".table-search input::placeholder",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-search"
+    },
+    {
+      "line": 109,
+      "selector": ".heading-meta",
+      "reason": "Required class absent from source literals/dynamic class prefixes: heading-meta"
+    },
+    {
+      "line": 110,
+      "selector": ".heading-meta span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: heading-meta"
+    },
+    {
+      "line": 111,
+      "selector": ".heading-meta strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: heading-meta"
+    },
+    {
+      "line": 112,
+      "selector": ".customer-tag",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-tag"
+    },
+    {
+      "line": 113,
+      "selector": ".quick-strip",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quick-strip"
+    },
+    {
+      "line": 114,
+      "selector": ".quick-strip > span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quick-strip"
+    },
+    {
+      "line": 115,
+      "selector": ".quick-strip button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quick-strip"
+    },
+    {
+      "line": 116,
+      "selector": ".quick-strip button.selected",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quick-strip"
+    },
+    {
+      "line": 117,
+      "selector": ".quick-strip b",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quick-strip"
+    },
+    {
+      "line": 119,
+      "selector": ".metrics-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metrics-grid"
+    },
+    {
+      "line": 120,
+      "selector": ".metric-card",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card"
+    },
+    {
+      "line": 121,
+      "selector": ".metric-card:after",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card"
+    },
+    {
+      "line": 122,
+      "selector": ".metric-card.accent",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card, accent"
+    },
+    {
+      "line": 123,
+      "selector": ".metric-top",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-top"
+    },
+    {
+      "line": 124,
+      "selector": ".metric-top button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-top"
+    },
+    {
+      "line": 125,
+      "selector": ".metric-card > strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card"
+    },
+    {
+      "line": 126,
+      "selector": ".metric-card.accent > strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card, accent"
+    },
+    {
+      "line": 127,
+      "selector": ".metric-card > small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card"
+    },
+    {
+      "line": 128,
+      "selector": ".mini-chart",
+      "reason": "Required class absent from source literals/dynamic class prefixes: mini-chart"
+    },
+    {
+      "line": 129,
+      "selector": ".mini-chart i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: mini-chart"
+    },
+    {
+      "line": 130,
+      "selector": ".metric-card.accent .mini-chart i:nth-last-child(-n+3)",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card, accent, mini-chart"
+    },
+    {
+      "line": 132,
+      "selector": ".dashboard-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: dashboard-grid"
+    },
+    {
+      "line": 134,
+      "selector": ".production-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: production-panel"
+    },
+    {
+      "line": 135,
+      "selector": ".panel-head",
+      "reason": "Required class absent from source literals/dynamic class prefixes: panel-head"
+    },
+    {
+      "line": 136,
+      "selector": ".panel-head h2",
+      "reason": "Required class absent from source literals/dynamic class prefixes: panel-head"
+    },
+    {
+      "line": 137,
+      "selector": ".text-button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: text-button"
+    },
+    {
+      "line": 138,
+      "selector": ".job-list",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-list"
+    },
+    {
+      "line": 139,
+      "selector": ".job-row",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-row"
+    },
+    {
+      "line": 140,
+      "selector": ".job-row:first-child",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-row"
+    },
+    {
+      "line": 141,
+      "selector": ".job-indicator",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-indicator"
+    },
+    {
+      "line": 142,
+      "selector": ".tone-1",
+      "reason": "Required class absent from source literals/dynamic class prefixes: tone-1"
+    },
+    {
+      "line": 142,
+      "selector": ".tone-2",
+      "reason": "Required class absent from source literals/dynamic class prefixes: tone-2"
+    },
+    {
+      "line": 142,
+      "selector": ".tone-3",
+      "reason": "Required class absent from source literals/dynamic class prefixes: tone-3"
+    },
+    {
+      "line": 143,
+      "selector": ".job-id",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-id"
+    },
+    {
+      "line": 143,
+      "selector": ".job-work",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-work"
+    },
+    {
+      "line": 144,
+      "selector": ".job-id strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-id"
+    },
+    {
+      "line": 144,
+      "selector": ".job-work strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-work"
+    },
+    {
+      "line": 145,
+      "selector": ".job-id span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-id"
+    },
+    {
+      "line": 145,
+      "selector": ".job-work span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-work"
+    },
+    {
+      "line": 150,
+      "selector": ".job-row > button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-row"
+    },
+    {
+      "line": 151,
+      "selector": ".revenue-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: revenue-panel"
+    },
+    {
+      "line": 152,
+      "selector": ".trend",
+      "reason": "Required class absent from source literals/dynamic class prefixes: trend"
+    },
+    {
+      "line": 153,
+      "selector": ".money",
+      "reason": "Required class absent from source literals/dynamic class prefixes: money"
+    },
+    {
+      "line": 154,
+      "selector": ".muted",
+      "reason": "Required class absent from source literals/dynamic class prefixes: muted"
+    },
+    {
+      "line": 155,
+      "selector": ".bar-chart",
+      "reason": "Required class absent from source literals/dynamic class prefixes: bar-chart"
+    },
+    {
+      "line": 156,
+      "selector": ".bar-chart div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: bar-chart"
+    },
+    {
+      "line": 157,
+      "selector": ".bar-chart i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: bar-chart"
+    },
+    {
+      "line": 158,
+      "selector": ".bar-chart i.hot",
+      "reason": "Required class absent from source literals/dynamic class prefixes: bar-chart, hot"
+    },
+    {
+      "line": 159,
+      "selector": ".bar-chart span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: bar-chart"
+    },
+    {
+      "line": 160,
+      "selector": ".alert-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: alert-panel"
+    },
+    {
+      "line": 160,
+      "selector": ".activity-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity-panel"
+    },
+    {
+      "line": 161,
+      "selector": ".count-badge",
+      "reason": "Required class absent from source literals/dynamic class prefixes: count-badge"
+    },
+    {
+      "line": 162,
+      "selector": ".material-item",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-item"
+    },
+    {
+      "line": 163,
+      "selector": ".material-item:nth-of-type(2)",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-item"
+    },
+    {
+      "line": 164,
+      "selector": ".material-code",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-code"
+    },
+    {
+      "line": 165,
+      "selector": ".material-code.color-1",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-code, color-1"
+    },
+    {
+      "line": 165,
+      "selector": ".material-code.color-2",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-code, color-2"
+    },
+    {
+      "line": 166,
+      "selector": ".material-item div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-item"
+    },
+    {
+      "line": 166,
+      "selector": ".material-item strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-item"
+    },
+    {
+      "line": 166,
+      "selector": ".material-item small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-item"
+    },
+    {
+      "line": 167,
+      "selector": ".material-item em",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-item"
+    },
+    {
+      "line": 167,
+      "selector": ".material-item em.neutral",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-item, neutral"
+    },
+    {
+      "line": 168,
+      "selector": ".activity",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity"
+    },
+    {
+      "line": 169,
+      "selector": ".activity:nth-of-type(2)",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity"
+    },
+    {
+      "line": 169,
+      "selector": ".activity > i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity"
+    },
+    {
+      "line": 169,
+      "selector": ".activity > i.active",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity"
+    },
+    {
+      "line": 170,
+      "selector": ".activity div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity"
+    },
+    {
+      "line": 170,
+      "selector": ".activity strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity"
+    },
+    {
+      "line": 170,
+      "selector": ".activity span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity"
+    },
+    {
+      "line": 174,
+      "selector": ".workspace-stats article.featured",
+      "reason": "Required class absent from source literals/dynamic class prefixes: featured"
+    },
+    {
+      "line": 175,
+      "selector": ".workspace-stats .featured strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: featured"
+    },
+    {
+      "line": 176,
+      "selector": ".data-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-panel"
+    },
+    {
+      "line": 177,
+      "selector": ".table-tools",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-tools"
+    },
+    {
+      "line": 178,
+      "selector": ".segmented",
+      "reason": "Required class absent from source literals/dynamic class prefixes: segmented"
+    },
+    {
+      "line": 179,
+      "selector": ".segmented button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: segmented"
+    },
+    {
+      "line": 179,
+      "selector": ".segmented button.active",
+      "reason": "Required class absent from source literals/dynamic class prefixes: segmented"
+    },
+    {
+      "line": 180,
+      "selector": ".table-search",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-search"
+    },
+    {
+      "line": 181,
+      "selector": ".data-table",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-table"
+    },
+    {
+      "line": 182,
+      "selector": ".data-row",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-row"
+    },
+    {
+      "line": 184,
+      "selector": ".data-head",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-head"
+    },
+    {
+      "line": 185,
+      "selector": ".data-row span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-row"
+    },
+    {
+      "line": 185,
+      "selector": ".data-row span:first-child",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-row"
+    },
+    {
+      "line": 185,
+      "selector": ".data-row span i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-row"
+    },
+    {
+      "line": 186,
+      "selector": ".data-row b",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-row"
+    },
+    {
+      "line": 186,
+      "selector": ".cell-status",
+      "reason": "Required class absent from source literals/dynamic class prefixes: cell-status"
+    },
+    {
+      "line": 187,
+      "selector": ".table-footer",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-footer"
+    },
+    {
+      "line": 187,
+      "selector": ".table-footer div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-footer"
+    },
+    {
+      "line": 187,
+      "selector": ".table-footer button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-footer"
+    },
+    {
+      "line": 187,
+      "selector": ".table-footer button.active",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-footer"
+    },
+    {
+      "line": 189,
+      "selector": ".customer-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-grid"
+    },
+    {
+      "line": 190,
+      "selector": ".customer-job",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-job"
+    },
+    {
+      "line": 191,
+      "selector": ".customer-job-meta",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-job-meta"
+    },
+    {
+      "line": 191,
+      "selector": ".customer-job-meta div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-job-meta"
+    },
+    {
+      "line": 191,
+      "selector": ".customer-job-meta div:last-child",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-job-meta"
+    },
+    {
+      "line": 191,
+      "selector": ".customer-job-meta span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-job-meta"
+    },
+    {
+      "line": 191,
+      "selector": ".customer-job-meta strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-job-meta"
+    },
+    {
+      "line": 192,
+      "selector": ".timeline",
+      "reason": "Required class absent from source literals/dynamic class prefixes: timeline"
+    },
+    {
+      "line": 192,
+      "selector": ".timeline div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: timeline"
+    },
+    {
+      "line": 192,
+      "selector": ".timeline div:after",
+      "reason": "Required class absent from source literals/dynamic class prefixes: timeline"
+    },
+    {
+      "line": 192,
+      "selector": ".timeline div:last-child:after",
+      "reason": "Required class absent from source literals/dynamic class prefixes: timeline"
+    },
+    {
+      "line": 192,
+      "selector": ".timeline i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: timeline"
+    },
+    {
+      "line": 192,
+      "selector": ".timeline .done i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: timeline, done"
+    },
+    {
+      "line": 192,
+      "selector": ".timeline .done:after",
+      "reason": "Required class absent from source literals/dynamic class prefixes: timeline, done"
+    },
+    {
+      "line": 193,
+      "selector": ".job-note",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-note"
+    },
+    {
+      "line": 193,
+      "selector": ".job-note div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-note"
+    },
+    {
+      "line": 193,
+      "selector": ".job-note strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-note"
+    },
+    {
+      "line": 193,
+      "selector": ".job-note span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-note"
+    },
+    {
+      "line": 193,
+      "selector": ".job-note b",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-note"
+    },
+    {
+      "line": 194,
+      "selector": ".quote-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quote-panel"
+    },
+    {
+      "line": 194,
+      "selector": ".quote-panel h2",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quote-panel"
+    },
+    {
+      "line": 194,
+      "selector": ".quote-panel p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quote-panel"
+    },
+    {
+      "line": 194,
+      "selector": ".quote-panel > strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quote-panel"
+    },
+    {
+      "line": 194,
+      "selector": ".quote-panel > small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quote-panel"
+    },
+    {
+      "line": 194,
+      "selector": ".quote-panel .primary-button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quote-panel"
+    },
+    {
+      "line": 195,
+      "selector": ".docs-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: docs-panel"
+    },
+    {
+      "line": 195,
+      "selector": ".doc-row",
+      "reason": "Required class absent from source literals/dynamic class prefixes: doc-row"
+    },
+    {
+      "line": 195,
+      "selector": ".doc-row:nth-of-type(2)",
+      "reason": "Required class absent from source literals/dynamic class prefixes: doc-row"
+    },
+    {
+      "line": 195,
+      "selector": ".doc-row>span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: doc-row"
+    },
+    {
+      "line": 195,
+      "selector": ".doc-row div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: doc-row"
+    },
+    {
+      "line": 195,
+      "selector": ".doc-row strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: doc-row"
+    },
+    {
+      "line": 195,
+      "selector": ".doc-row small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: doc-row"
+    },
+    {
+      "line": 195,
+      "selector": ".doc-row button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: doc-row"
+    },
+    {
+      "line": 197,
+      "selector": ".modal-backdrop",
+      "reason": "Required class absent from source literals/dynamic class prefixes: modal-backdrop"
+    },
+    {
+      "line": 198,
+      "selector": ".modal",
+      "reason": "Required class absent from source literals/dynamic class prefixes: modal"
+    },
+    {
+      "line": 199,
+      "selector": ".modal-head",
+      "reason": "Required class absent from source literals/dynamic class prefixes: modal-head"
+    },
+    {
+      "line": 199,
+      "selector": ".modal h2",
+      "reason": "Required class absent from source literals/dynamic class prefixes: modal"
+    },
+    {
+      "line": 199,
+      "selector": ".modal p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: modal"
+    },
+    {
+      "line": 200,
+      "selector": ".form-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: form-grid"
+    },
+    {
+      "line": 200,
+      "selector": ".form-grid label",
+      "reason": "Required class absent from source literals/dynamic class prefixes: form-grid"
+    },
+    {
+      "line": 200,
+      "selector": ".form-grid label.full",
+      "reason": "Required class absent from source literals/dynamic class prefixes: form-grid"
+    },
+    {
+      "line": 200,
+      "selector": ".form-grid input",
+      "reason": "Required class absent from source literals/dynamic class prefixes: form-grid"
+    },
+    {
+      "line": 200,
+      "selector": ".form-grid textarea",
+      "reason": "Required class absent from source literals/dynamic class prefixes: form-grid"
+    },
+    {
+      "line": 200,
+      "selector": ".form-grid input",
+      "reason": "Required class absent from source literals/dynamic class prefixes: form-grid"
+    },
+    {
+      "line": 200,
+      "selector": ".form-grid textarea",
+      "reason": "Required class absent from source literals/dynamic class prefixes: form-grid"
+    },
+    {
+      "line": 200,
+      "selector": ".form-grid input:focus",
+      "reason": "Required class absent from source literals/dynamic class prefixes: form-grid"
+    },
+    {
+      "line": 200,
+      "selector": ".form-grid textarea:focus",
+      "reason": "Required class absent from source literals/dynamic class prefixes: form-grid"
+    },
+    {
+      "line": 201,
+      "selector": ".modal-actions",
+      "reason": "Required class absent from source literals/dynamic class prefixes: modal-actions"
+    },
+    {
+      "line": 210,
+      "selector": ".role-switch",
+      "reason": "Required class absent from source literals/dynamic class prefixes: role-switch"
+    },
+    {
+      "line": 210,
+      "selector": ".role-switch button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: role-switch"
+    },
+    {
+      "line": 213,
+      "selector": ".table-search",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-search"
+    },
+    {
+      "line": 215,
+      "selector": ".quick-strip",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quick-strip"
+    },
+    {
+      "line": 215,
+      "selector": ".quick-strip button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quick-strip"
+    },
+    {
+      "line": 216,
+      "selector": ".metrics-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metrics-grid"
+    },
+    {
+      "line": 216,
+      "selector": ".metric-card",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card"
+    },
+    {
+      "line": 216,
+      "selector": ".metric-top",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-top"
+    },
+    {
+      "line": 216,
+      "selector": ".metric-card > strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card"
+    },
+    {
+      "line": 216,
+      "selector": ".metric-card > small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card"
+    },
+    {
+      "line": 216,
+      "selector": ".mini-chart",
+      "reason": "Required class absent from source literals/dynamic class prefixes: mini-chart"
+    },
+    {
+      "line": 216,
+      "selector": ".mini-chart i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: mini-chart"
+    },
+    {
+      "line": 217,
+      "selector": ".dashboard-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: dashboard-grid"
+    },
+    {
+      "line": 217,
+      "selector": ".production-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: production-panel"
+    },
+    {
+      "line": 217,
+      "selector": ".revenue-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: revenue-panel"
+    },
+    {
+      "line": 217,
+      "selector": ".panel-head h2",
+      "reason": "Required class absent from source literals/dynamic class prefixes: panel-head"
+    },
+    {
+      "line": 217,
+      "selector": ".job-list",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-list"
+    },
+    {
+      "line": 217,
+      "selector": ".job-row",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-row"
+    },
+    {
+      "line": 217,
+      "selector": ".job-id strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-id"
+    },
+    {
+      "line": 217,
+      "selector": ".job-work strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-work"
+    },
+    {
+      "line": 217,
+      "selector": ".job-id span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-id"
+    },
+    {
+      "line": 217,
+      "selector": ".job-work span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-work"
+    },
+    {
+      "line": 218,
+      "selector": ".money",
+      "reason": "Required class absent from source literals/dynamic class prefixes: money"
+    },
+    {
+      "line": 218,
+      "selector": ".bar-chart",
+      "reason": "Required class absent from source literals/dynamic class prefixes: bar-chart"
+    },
+    {
+      "line": 219,
+      "selector": ".alert-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: alert-panel"
+    },
+    {
+      "line": 219,
+      "selector": ".activity-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity-panel"
+    },
+    {
+      "line": 219,
+      "selector": ".material-item",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-item"
+    },
+    {
+      "line": 219,
+      "selector": ".material-code",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-code"
+    },
+    {
+      "line": 219,
+      "selector": ".material-item strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-item"
+    },
+    {
+      "line": 219,
+      "selector": ".material-item small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-item"
+    },
+    {
+      "line": 219,
+      "selector": ".activity",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity"
+    },
+    {
+      "line": 219,
+      "selector": ".activity strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity"
+    },
+    {
+      "line": 219,
+      "selector": ".activity span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity"
+    },
+    {
+      "line": 221,
+      "selector": ".table-tools",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-tools"
+    },
+    {
+      "line": 221,
+      "selector": ".segmented button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: segmented"
+    },
+    {
+      "line": 221,
+      "selector": ".table-search",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-search"
+    },
+    {
+      "line": 221,
+      "selector": ".data-row",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-row"
+    },
+    {
+      "line": 221,
+      "selector": ".data-head",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-head"
+    },
+    {
+      "line": 221,
+      "selector": ".data-row span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-row"
+    },
+    {
+      "line": 221,
+      "selector": ".table-footer",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-footer"
+    },
+    {
+      "line": 224,
+      "selector": ".landing",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing"
+    },
+    {
+      "line": 225,
+      "selector": ".landing-nav",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-nav"
+    },
+    {
+      "line": 226,
+      "selector": ".landing-nav .brand",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-nav"
+    },
+    {
+      "line": 226,
+      "selector": ".landing-links",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-links"
+    },
+    {
+      "line": 226,
+      "selector": ".landing-links a",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-links"
+    },
+    {
+      "line": 226,
+      "selector": ".landing-links a:hover",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-links"
+    },
+    {
+      "line": 227,
+      "selector": ".landing-nav-actions",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-nav-actions"
+    },
+    {
+      "line": 227,
+      "selector": ".landing-register",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-register"
+    },
+    {
+      "line": 227,
+      "selector": ".landing-register:hover",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-register"
+    },
+    {
+      "line": 227,
+      "selector": ".landing-nav-cta",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-nav-cta"
+    },
+    {
+      "line": 228,
+      "selector": ".landing-hero",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-hero"
+    },
+    {
+      "line": 229,
+      "selector": ".hero-copy",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-copy"
+    },
+    {
+      "line": 230,
+      "selector": ".hero-copy h1",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-copy"
+    },
+    {
+      "line": 230,
+      "selector": ".hero-copy h1 span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-copy"
+    },
+    {
+      "line": 231,
+      "selector": ".hero-copy > p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-copy"
+    },
+    {
+      "line": 232,
+      "selector": ".hero-actions",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-actions"
+    },
+    {
+      "line": 232,
+      "selector": ".hero-primary",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-primary"
+    },
+    {
+      "line": 232,
+      "selector": ".hero-secondary",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-secondary"
+    },
+    {
+      "line": 232,
+      "selector": ".hero-primary",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-primary"
+    },
+    {
+      "line": 232,
+      "selector": ".hero-secondary",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-secondary"
+    },
+    {
+      "line": 233,
+      "selector": ".hero-proof",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-proof"
+    },
+    {
+      "line": 233,
+      "selector": ".hero-proof div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-proof"
+    },
+    {
+      "line": 233,
+      "selector": ".hero-proof div:last-child",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-proof"
+    },
+    {
+      "line": 233,
+      "selector": ".hero-proof strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-proof"
+    },
+    {
+      "line": 233,
+      "selector": ".hero-proof span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-proof"
+    },
+    {
+      "line": 234,
+      "selector": ".hero-visual",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-visual"
+    },
+    {
+      "line": 234,
+      "selector": ".hero-visual:before",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-visual"
+    },
+    {
+      "line": 241,
+      "selector": ".mock-flow .done i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: done"
+    },
+    {
+      "line": 241,
+      "selector": ".mock-flow .done:after",
+      "reason": "Required class absent from source literals/dynamic class prefixes: done"
+    },
+    {
+      "line": 242,
+      "selector": ".visual-label",
+      "reason": "Required class absent from source literals/dynamic class prefixes: visual-label"
+    },
+    {
+      "line": 242,
+      "selector": ".visual-chip",
+      "reason": "Required class absent from source literals/dynamic class prefixes: visual-chip"
+    },
+    {
+      "line": 242,
+      "selector": ".visual-label",
+      "reason": "Required class absent from source literals/dynamic class prefixes: visual-label"
+    },
+    {
+      "line": 242,
+      "selector": ".visual-chip",
+      "reason": "Required class absent from source literals/dynamic class prefixes: visual-chip"
+    },
+    {
+      "line": 242,
+      "selector": ".visual-chip span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: visual-chip"
+    },
+    {
+      "line": 242,
+      "selector": ".visual-chip strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: visual-chip"
+    },
+    {
+      "line": 242,
+      "selector": ".left-chip",
+      "reason": "Required class absent from source literals/dynamic class prefixes: left-chip"
+    },
+    {
+      "line": 242,
+      "selector": ".right-chip",
+      "reason": "Required class absent from source literals/dynamic class prefixes: right-chip"
+    },
+    {
+      "line": 242,
+      "selector": ".right-chip strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: right-chip"
+    },
+    {
+      "line": 243,
+      "selector": ".landing-workflow",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-workflow"
+    },
+    {
+      "line": 243,
+      "selector": ".section-heading>span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: section-heading"
+    },
+    {
+      "line": 243,
+      "selector": ".section-heading h2",
+      "reason": "Required class absent from source literals/dynamic class prefixes: section-heading"
+    },
+    {
+      "line": 243,
+      "selector": ".capability-lead h2",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-lead"
+    },
+    {
+      "line": 243,
+      "selector": ".section-heading p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: section-heading"
+    },
+    {
+      "line": 243,
+      "selector": ".workflow-steps",
+      "reason": "Required class absent from source literals/dynamic class prefixes: workflow-steps"
+    },
+    {
+      "line": 243,
+      "selector": ".workflow-steps article",
+      "reason": "Required class absent from source literals/dynamic class prefixes: workflow-steps"
+    },
+    {
+      "line": 243,
+      "selector": ".workflow-steps article>span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: workflow-steps"
+    },
+    {
+      "line": 243,
+      "selector": ".workflow-steps article>i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: workflow-steps"
+    },
+    {
+      "line": 243,
+      "selector": ".workflow-steps h3",
+      "reason": "Required class absent from source literals/dynamic class prefixes: workflow-steps"
+    },
+    {
+      "line": 243,
+      "selector": ".workflow-steps p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: workflow-steps"
+    },
+    {
+      "line": 244,
+      "selector": ".landing-capabilities",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-capabilities"
+    },
+    {
+      "line": 244,
+      "selector": ".capability-lead",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-lead"
+    },
+    {
+      "line": 244,
+      "selector": ".capability-lead .eyebrow",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-lead"
+    },
+    {
+      "line": 244,
+      "selector": ".capability-lead h2",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-lead"
+    },
+    {
+      "line": 244,
+      "selector": ".capability-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-grid"
+    },
+    {
+      "line": 244,
+      "selector": ".capability-grid article",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-grid"
+    },
+    {
+      "line": 244,
+      "selector": ".capability-grid .icon",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-grid"
+    },
+    {
+      "line": 244,
+      "selector": ".capability-grid strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-grid"
+    },
+    {
+      "line": 244,
+      "selector": ".capability-grid p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-grid"
+    },
+    {
+      "line": 245,
+      "selector": ".landing-footer",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-footer"
+    },
+    {
+      "line": 245,
+      "selector": ".landing-footer .brand",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-footer"
+    },
+    {
+      "line": 245,
+      "selector": ".landing-footer p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-footer"
+    },
+    {
+      "line": 245,
+      "selector": ".landing-footer>button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-footer"
+    },
+    {
+      "line": 247,
+      "selector": ".metrics-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metrics-grid"
+    },
+    {
+      "line": 247,
+      "selector": ".dashboard-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: dashboard-grid"
+    },
+    {
+      "line": 247,
+      "selector": ".production-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: production-panel"
+    },
+    {
+      "line": 247,
+      "selector": ".revenue-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: revenue-panel"
+    },
+    {
+      "line": 248,
+      "selector": ".role-switch",
+      "reason": "Required class absent from source literals/dynamic class prefixes: role-switch"
+    },
+    {
+      "line": 248,
+      "selector": ".topbar-actions",
+      "reason": "Required class absent from source literals/dynamic class prefixes: topbar-actions"
+    },
+    {
+      "line": 248,
+      "selector": ".heading-meta",
+      "reason": "Required class absent from source literals/dynamic class prefixes: heading-meta"
+    },
+    {
+      "line": 248,
+      "selector": ".metrics-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metrics-grid"
+    },
+    {
+      "line": 248,
+      "selector": ".dashboard-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: dashboard-grid"
+    },
+    {
+      "line": 248,
+      "selector": ".customer-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-grid"
+    },
+    {
+      "line": 248,
+      "selector": ".customer-job",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-job"
+    },
+    {
+      "line": 248,
+      "selector": ".job-row",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-row"
+    },
+    {
+      "line": 248,
+      "selector": ".job-work",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-work"
+    },
+    {
+      "line": 248,
+      "selector": ".form-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: form-grid"
+    },
+    {
+      "line": 248,
+      "selector": ".form-grid label.full",
+      "reason": "Required class absent from source literals/dynamic class prefixes: form-grid"
+    },
+    {
+      "line": 248,
+      "selector": ".quick-strip>span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quick-strip"
+    },
+    {
+      "line": 249,
+      "selector": ".metrics-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metrics-grid"
+    },
+    {
+      "line": 249,
+      "selector": ".table-tools",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-tools"
+    },
+    {
+      "line": 249,
+      "selector": ".table-search",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-search"
+    },
+    {
+      "line": 249,
+      "selector": ".segmented",
+      "reason": "Required class absent from source literals/dynamic class prefixes: segmented"
+    },
+    {
+      "line": 249,
+      "selector": ".quick-strip",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quick-strip"
+    },
+    {
+      "line": 249,
+      "selector": ".customer-job-meta",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-job-meta"
+    },
+    {
+      "line": 249,
+      "selector": ".customer-job-meta div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-job-meta"
+    },
+    {
+      "line": 249,
+      "selector": ".customer-job-meta div:last-child",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-job-meta"
+    },
+    {
+      "line": 249,
+      "selector": ".timeline",
+      "reason": "Required class absent from source literals/dynamic class prefixes: timeline"
+    },
+    {
+      "line": 249,
+      "selector": ".modal-backdrop",
+      "reason": "Required class absent from source literals/dynamic class prefixes: modal-backdrop"
+    },
+    {
+      "line": 249,
+      "selector": ".modal",
+      "reason": "Required class absent from source literals/dynamic class prefixes: modal"
+    },
+    {
+      "line": 252,
+      "selector": ".landing-nav",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-nav"
+    },
+    {
+      "line": 252,
+      "selector": ".landing-links",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-links"
+    },
+    {
+      "line": 253,
+      "selector": ".landing-hero",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-hero"
+    },
+    {
+      "line": 253,
+      "selector": ".hero-copy",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-copy"
+    },
+    {
+      "line": 253,
+      "selector": ".hero-visual",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-visual"
+    },
+    {
+      "line": 254,
+      "selector": ".landing-workflow",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-workflow"
+    },
+    {
+      "line": 254,
+      "selector": ".capability-lead",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-lead"
+    },
+    {
+      "line": 254,
+      "selector": ".capability-lead h2",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-lead"
+    },
+    {
+      "line": 257,
+      "selector": ".landing-nav",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-nav"
+    },
+    {
+      "line": 257,
+      "selector": ".landing-nav-actions .landing-register",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-nav-actions, landing-register"
+    },
+    {
+      "line": 257,
+      "selector": ".landing-nav-cta",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-nav-cta"
+    },
+    {
+      "line": 258,
+      "selector": ".landing-hero",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-hero"
+    },
+    {
+      "line": 258,
+      "selector": ".hero-copy h1",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-copy"
+    },
+    {
+      "line": 258,
+      "selector": ".hero-copy > p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-copy"
+    },
+    {
+      "line": 258,
+      "selector": ".hero-proof",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-proof"
+    },
+    {
+      "line": 259,
+      "selector": ".hero-visual",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-visual"
+    },
+    {
+      "line": 259,
+      "selector": ".visual-label",
+      "reason": "Required class absent from source literals/dynamic class prefixes: visual-label"
+    },
+    {
+      "line": 260,
+      "selector": ".landing-workflow",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-workflow"
+    },
+    {
+      "line": 260,
+      "selector": ".landing-capabilities",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-capabilities"
+    },
+    {
+      "line": 260,
+      "selector": ".workflow-steps",
+      "reason": "Required class absent from source literals/dynamic class prefixes: workflow-steps"
+    },
+    {
+      "line": 260,
+      "selector": ".workflow-steps article",
+      "reason": "Required class absent from source literals/dynamic class prefixes: workflow-steps"
+    },
+    {
+      "line": 260,
+      "selector": ".capability-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-grid"
+    },
+    {
+      "line": 260,
+      "selector": ".capability-grid article",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-grid"
+    },
+    {
+      "line": 260,
+      "selector": ".capability-grid strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-grid"
+    },
+    {
+      "line": 261,
+      "selector": ".landing-footer",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-footer"
+    },
+    {
+      "line": 261,
+      "selector": ".landing-footer p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-footer"
+    },
+    {
+      "line": 261,
+      "selector": ".landing-footer>button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-footer"
+    },
+    {
+      "line": 264,
+      "selector": ".landing-nav .brand small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-nav"
+    },
+    {
+      "line": 264,
+      "selector": ".landing-nav-cta",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-nav-cta"
+    },
+    {
+      "line": 264,
+      "selector": ".landing-nav-cta .icon",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-nav-cta"
+    },
+    {
+      "line": 265,
+      "selector": ".hero-copy h1",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-copy"
+    },
+    {
+      "line": 265,
+      "selector": ".hero-actions",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-actions"
+    },
+    {
+      "line": 265,
+      "selector": ".hero-primary",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-primary"
+    },
+    {
+      "line": 265,
+      "selector": ".hero-secondary",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-secondary"
+    },
+    {
+      "line": 265,
+      "selector": ".hero-proof",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-proof"
+    },
+    {
+      "line": 265,
+      "selector": ".hero-proof div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-proof"
+    },
+    {
+      "line": 265,
+      "selector": ".hero-proof div:last-child",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-proof"
+    },
+    {
+      "line": 266,
+      "selector": ".hero-visual",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-visual"
+    },
+    {
+      "line": 267,
+      "selector": ".section-heading h2",
+      "reason": "Required class absent from source literals/dynamic class prefixes: section-heading"
+    },
+    {
+      "line": 267,
+      "selector": ".capability-lead h2",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-lead"
+    },
+    {
+      "line": 267,
+      "selector": ".landing-footer>button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-footer"
+    },
+    {
+      "line": 267,
+      "selector": ".landing-footer>button .icon",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-footer"
+    },
+    {
+      "line": 281,
+      "selector": ".login-home",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-home"
+    },
+    {
+      "line": 295,
+      "selector": ".login-role",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-role"
+    },
+    {
+      "line": 296,
+      "selector": ".login-role > button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-role"
+    },
+    {
+      "line": 297,
+      "selector": ".login-role > button.active",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-role"
+    },
+    {
+      "line": 298,
+      "selector": ".login-role > button span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-role"
+    },
+    {
+      "line": 299,
+      "selector": ".login-role strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-role"
+    },
+    {
+      "line": 299,
+      "selector": ".login-role small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-role"
+    },
+    {
+      "line": 304,
+      "selector": ".login-options",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-options"
+    },
+    {
+      "line": 304,
+      "selector": ".login-options label",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-options"
+    },
+    {
+      "line": 304,
+      "selector": ".login-options input",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-options"
+    },
+    {
+      "line": 304,
+      "selector": ".login-options button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-options"
+    },
+    {
+      "line": 307,
+      "selector": ".login-divider",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-divider"
+    },
+    {
+      "line": 307,
+      "selector": ".login-divider:before",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-divider"
+    },
+    {
+      "line": 307,
+      "selector": ".login-divider:after",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-divider"
+    },
+    {
+      "line": 307,
+      "selector": ".login-divider span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-divider"
+    },
+    {
+      "line": 309,
+      "selector": ".demo-note",
+      "reason": "Required class absent from source literals/dynamic class prefixes: demo-note"
+    },
+    {
+      "line": 309,
+      "selector": ".demo-note > span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: demo-note"
+    },
+    {
+      "line": 309,
+      "selector": ".demo-note strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: demo-note"
+    },
+    {
+      "line": 309,
+      "selector": ".demo-note small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: demo-note"
+    },
+    {
+      "line": 310,
+      "selector": ".register-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-panel"
+    },
+    {
+      "line": 310,
+      "selector": ".register-card",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-card"
+    },
+    {
+      "line": 310,
+      "selector": ".register-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-grid"
+    },
+    {
+      "line": 310,
+      "selector": ".register-grid .full",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-grid"
+    },
+    {
+      "line": 310,
+      "selector": ".register-grid select",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-grid"
+    },
+    {
+      "line": 310,
+      "selector": ".register-grid option",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-grid"
+    },
+    {
+      "line": 310,
+      "selector": ".register-submit",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-submit"
+    },
+    {
+      "line": 310,
+      "selector": ".register-note",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-note"
+    },
+    {
+      "line": 310,
+      "selector": ".register-note>span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-note"
+    },
+    {
+      "line": 310,
+      "selector": ".register-note strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-note"
+    },
+    {
+      "line": 310,
+      "selector": ".register-note small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-note"
+    },
+    {
+      "line": 313,
+      "selector": ".customer-portal",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-portal"
+    },
+    {
+      "line": 314,
+      "selector": ".customer-nav",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav"
+    },
+    {
+      "line": 315,
+      "selector": ".customer-nav .brand",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav"
+    },
+    {
+      "line": 315,
+      "selector": ".customer-nav > nav",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav"
+    },
+    {
+      "line": 315,
+      "selector": ".customer-nav > nav button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav"
+    },
+    {
+      "line": 315,
+      "selector": ".customer-nav > nav button.active",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav"
+    },
+    {
+      "line": 316,
+      "selector": ".customer-nav-actions",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav-actions"
+    },
+    {
+      "line": 316,
+      "selector": ".customer-alert",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-alert"
+    },
+    {
+      "line": 316,
+      "selector": ".customer-alert i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-alert"
+    },
+    {
+      "line": 317,
+      "selector": ".customer-profile",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-profile"
+    },
+    {
+      "line": 317,
+      "selector": ".customer-profile > span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-profile"
+    },
+    {
+      "line": 317,
+      "selector": ".customer-profile > div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-profile"
+    },
+    {
+      "line": 317,
+      "selector": ".customer-profile strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-profile"
+    },
+    {
+      "line": 317,
+      "selector": ".customer-profile small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-profile"
+    },
+    {
+      "line": 318,
+      "selector": ".customer-logout",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-logout"
+    },
+    {
+      "line": 318,
+      "selector": ".customer-logout .icon",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-logout"
+    },
+    {
+      "line": 319,
+      "selector": ".customer-content",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-content"
+    },
+    {
+      "line": 320,
+      "selector": ".customer-sidebar",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-sidebar"
+    },
+    {
+      "line": 321,
+      "selector": ".customer-topbar",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-topbar"
+    },
+    {
+      "line": 322,
+      "selector": ".customer-content [id]",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-content"
+    },
+    {
+      "line": 323,
+      "selector": ".customer-stage .customer-welcome",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-stage, customer-welcome"
+    },
+    {
+      "line": 324,
+      "selector": ".customer-stage .customer-welcome h1",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-stage, customer-welcome"
+    },
+    {
+      "line": 325,
+      "selector": ".customer-stage .customer-portal-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-stage, customer-portal-grid"
+    },
+    {
+      "line": 326,
+      "selector": ".customer-stage .customer-side-stack",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-stage, customer-side-stack"
+    },
+    {
+      "line": 327,
+      "selector": ".customer-stage .customer-portal-grid > *",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-stage, customer-portal-grid"
+    },
+    {
+      "line": 327,
+      "selector": ".customer-stage .customer-summary > *",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-stage, customer-summary"
+    },
+    {
+      "line": 329,
+      "selector": ".customer-stage .customer-portal-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-stage, customer-portal-grid"
+    },
+    {
+      "line": 330,
+      "selector": ".customer-stage .customer-side-stack",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-stage, customer-side-stack"
+    },
+    {
+      "line": 333,
+      "selector": ".customer-sidebar .nav-list",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-sidebar"
+    },
+    {
+      "line": 334,
+      "selector": ".customer-sidebar .staff-space",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-sidebar"
+    },
+    {
+      "line": 335,
+      "selector": ".customer-sidebar .sidebar-footer",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-sidebar"
+    },
+    {
+      "line": 336,
+      "selector": ".customer-stage .customer-content",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-stage, customer-content"
+    },
+    {
+      "line": 337,
+      "selector": ".customer-stage .customer-welcome",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-stage, customer-welcome"
+    },
+    {
+      "line": 340,
+      "selector": ".customer-stage .customer-side-stack",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-stage, customer-side-stack"
+    },
+    {
+      "line": 341,
+      "selector": ".customer-stage .customer-welcome h1",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-stage, customer-welcome"
+    },
+    {
+      "line": 343,
+      "selector": ".customer-welcome",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-welcome"
+    },
+    {
+      "line": 344,
+      "selector": ".customer-welcome h1",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-welcome"
+    },
+    {
+      "line": 344,
+      "selector": ".customer-welcome h1 em",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-welcome"
+    },
+    {
+      "line": 344,
+      "selector": ".customer-welcome p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-welcome"
+    },
+    {
+      "line": 344,
+      "selector": ".customer-welcome .hero-primary",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-welcome, hero-primary"
+    },
+    {
+      "line": 345,
+      "selector": ".customer-summary",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-summary"
+    },
+    {
+      "line": 345,
+      "selector": ".customer-summary article",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-summary"
+    },
+    {
+      "line": 345,
+      "selector": ".customer-summary article:first-child",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-summary"
+    },
+    {
+      "line": 345,
+      "selector": ".customer-summary span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-summary"
+    },
+    {
+      "line": 345,
+      "selector": ".customer-summary strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-summary"
+    },
+    {
+      "line": 345,
+      "selector": ".customer-summary article:first-child strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-summary"
+    },
+    {
+      "line": 345,
+      "selector": ".customer-summary small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-summary"
+    },
+    {
+      "line": 345,
+      "selector": ".customer-summary small .live-dot",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-summary"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-portal-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-portal-grid"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-focus-card",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-focus-card"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-action-card",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-action-card"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-documents",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-documents"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-focus-card",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-focus-card"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-card-head",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-card-head"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-card-head h2",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-card-head"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-focus-meta",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-focus-meta"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-focus-meta span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-focus-meta"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-progress",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-progress"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-progress-label",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-progress-label"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-progress-label span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-progress-label"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-progress-label strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-progress-label"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-progress-track",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-progress-track"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-progress-track i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-progress-track"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-progress p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-progress"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-steps",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-steps"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-steps>div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-steps"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-steps>div:after",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-steps"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-steps>div:last-child:after",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-steps"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-steps i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-steps"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-steps .done i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-steps, done"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-steps .done:after",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-steps, done"
+    },
+    {
+      "line": 346,
+      "selector": ".customer-link",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-link"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-side-stack",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-side-stack"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-action-card",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-action-card"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-action-card h2",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-action-card"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-action-card p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-action-card"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-action-card>strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-action-card"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-action-card>small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-action-card"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-action-card .primary-button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-action-card"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-documents",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-documents"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-doc-row",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-doc-row"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-doc-row:nth-of-type(1)",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-doc-row"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-doc-row>span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-doc-row"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-doc-row>div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-doc-row"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-doc-row strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-doc-row"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-doc-row small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-doc-row"
+    },
+    {
+      "line": 347,
+      "selector": ".customer-doc-row>.icon",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-doc-row"
+    },
+    {
+      "line": 351,
+      "selector": ".customer-nav",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav"
+    },
+    {
+      "line": 351,
+      "selector": ".customer-nav > nav",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav"
+    },
+    {
+      "line": 351,
+      "selector": ".customer-profile > div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-profile"
+    },
+    {
+      "line": 351,
+      "selector": ".customer-logout",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-logout"
+    },
+    {
+      "line": 351,
+      "selector": ".customer-portal-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-portal-grid"
+    },
+    {
+      "line": 351,
+      "selector": ".customer-side-stack",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-side-stack"
+    },
+    {
+      "line": 355,
+      "selector": ".customer-nav",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav"
+    },
+    {
+      "line": 355,
+      "selector": ".customer-nav > nav",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav"
+    },
+    {
+      "line": 355,
+      "selector": ".customer-nav > nav button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav"
+    },
+    {
+      "line": 355,
+      "selector": ".customer-content",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-content"
+    },
+    {
+      "line": 355,
+      "selector": ".customer-welcome",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-welcome"
+    },
+    {
+      "line": 355,
+      "selector": ".customer-welcome p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-welcome"
+    },
+    {
+      "line": 355,
+      "selector": ".customer-welcome .hero-primary",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-welcome, hero-primary"
+    },
+    {
+      "line": 355,
+      "selector": ".customer-summary",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-summary"
+    },
+    {
+      "line": 355,
+      "selector": ".customer-side-stack",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-side-stack"
+    },
+    {
+      "line": 358,
+      "selector": ".login-options",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-options"
+    },
+    {
+      "line": 358,
+      "selector": ".register-grid",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-grid"
+    },
+    {
+      "line": 358,
+      "selector": ".register-grid .full",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-grid"
+    },
+    {
+      "line": 358,
+      "selector": ".register-panel",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-panel"
+    },
+    {
+      "line": 359,
+      "selector": ".customer-nav .brand small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav"
+    },
+    {
+      "line": 359,
+      "selector": ".customer-profile",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-profile"
+    },
+    {
+      "line": 359,
+      "selector": ".customer-welcome h1",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-welcome"
+    },
+    {
+      "line": 359,
+      "selector": ".customer-welcome .hero-primary",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-welcome, hero-primary"
+    },
+    {
+      "line": 359,
+      "selector": ".customer-focus-card",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-focus-card"
+    },
+    {
+      "line": 359,
+      "selector": ".customer-focus-meta",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-focus-meta"
+    },
+    {
+      "line": 359,
+      "selector": ".customer-progress",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-progress"
+    },
+    {
+      "line": 359,
+      "selector": ".customer-steps",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-steps"
+    },
+    {
+      "line": 359,
+      "selector": ".customer-steps span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-steps"
+    },
+    {
+      "line": 359,
+      "selector": ".customer-action-card",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-action-card"
+    },
+    {
+      "line": 359,
+      "selector": ".customer-documents",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-documents"
+    },
+    {
+      "line": 442,
+      "selector": "[data-theme=\"light\"] .landing",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing"
+    },
+    {
+      "line": 443,
+      "selector": "[data-theme=\"light\"] .landing-nav",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-nav"
+    },
+    {
+      "line": 443,
+      "selector": "[data-theme=\"light\"] .landing-footer",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-footer"
+    },
+    {
+      "line": 443,
+      "selector": "[data-theme=\"light\"] .customer-welcome",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-welcome"
+    },
+    {
+      "line": 444,
+      "selector": "[data-theme=\"light\"] .landing-links a",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-links"
+    },
+    {
+      "line": 444,
+      "selector": "[data-theme=\"light\"] .landing-footer p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-footer"
+    },
+    {
+      "line": 444,
+      "selector": "[data-theme=\"light\"] .hero-copy>p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-copy"
+    },
+    {
+      "line": 444,
+      "selector": "[data-theme=\"light\"] .section-heading p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: section-heading"
+    },
+    {
+      "line": 444,
+      "selector": "[data-theme=\"light\"] .capability-grid p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-grid"
+    },
+    {
+      "line": 444,
+      "selector": "[data-theme=\"light\"] .hero-proof span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-proof"
+    },
+    {
+      "line": 445,
+      "selector": "[data-theme=\"light\"] .landing-register",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-register"
+    },
+    {
+      "line": 445,
+      "selector": "[data-theme=\"light\"] .hero-secondary",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-secondary"
+    },
+    {
+      "line": 446,
+      "selector": "[data-theme=\"light\"] .hero-secondary",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-secondary"
+    },
+    {
+      "line": 447,
+      "selector": "[data-theme=\"light\"] .hero-proof",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-proof"
+    },
+    {
+      "line": 447,
+      "selector": "[data-theme=\"light\"] .hero-proof div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-proof"
+    },
+    {
+      "line": 448,
+      "selector": "[data-theme=\"light\"] .hero-visual:before",
+      "reason": "Required class absent from source literals/dynamic class prefixes: hero-visual"
+    },
+    {
+      "line": 462,
+      "selector": "[data-theme=\"light\"] .mock-flow .done i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: done"
+    },
+    {
+      "line": 463,
+      "selector": "[data-theme=\"light\"] .mock-flow .done:after",
+      "reason": "Required class absent from source literals/dynamic class prefixes: done"
+    },
+    {
+      "line": 464,
+      "selector": "[data-theme=\"light\"] .visual-label",
+      "reason": "Required class absent from source literals/dynamic class prefixes: visual-label"
+    },
+    {
+      "line": 464,
+      "selector": "[data-theme=\"light\"] .visual-chip",
+      "reason": "Required class absent from source literals/dynamic class prefixes: visual-chip"
+    },
+    {
+      "line": 465,
+      "selector": "[data-theme=\"light\"] .landing-footer>button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-footer"
+    },
+    {
+      "line": 466,
+      "selector": "[data-theme=\"light\"] .landing-workflow",
+      "reason": "Required class absent from source literals/dynamic class prefixes: landing-workflow"
+    },
+    {
+      "line": 467,
+      "selector": "[data-theme=\"light\"] .workflow-steps",
+      "reason": "Required class absent from source literals/dynamic class prefixes: workflow-steps"
+    },
+    {
+      "line": 467,
+      "selector": "[data-theme=\"light\"] .workflow-steps article",
+      "reason": "Required class absent from source literals/dynamic class prefixes: workflow-steps"
+    },
+    {
+      "line": 468,
+      "selector": "[data-theme=\"light\"] .workflow-steps p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: workflow-steps"
+    },
+    {
+      "line": 469,
+      "selector": "[data-theme=\"light\"] .capability-grid article",
+      "reason": "Required class absent from source literals/dynamic class prefixes: capability-grid"
+    },
+    {
+      "line": 476,
+      "selector": "[data-theme=\"light\"] .login-options button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-options"
+    },
+    {
+      "line": 478,
+      "selector": "[data-theme=\"light\"] .login-options",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-options"
+    },
+    {
+      "line": 482,
+      "selector": "[data-theme=\"light\"] .register-grid select",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-grid"
+    },
+    {
+      "line": 484,
+      "selector": "[data-theme=\"light\"] .demo-note",
+      "reason": "Required class absent from source literals/dynamic class prefixes: demo-note"
+    },
+    {
+      "line": 486,
+      "selector": "[data-theme=\"light\"] .demo-note strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: demo-note"
+    },
+    {
+      "line": 487,
+      "selector": "[data-theme=\"light\"] .demo-note small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: demo-note"
+    },
+    {
+      "line": 487,
+      "selector": "[data-theme=\"light\"] .login-divider",
+      "reason": "Required class absent from source literals/dynamic class prefixes: login-divider"
+    },
+    {
+      "line": 488,
+      "selector": "[data-theme=\"light\"] .register-note",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-note"
+    },
+    {
+      "line": 488,
+      "selector": ".theme-root[data-theme=\"light\"] .register-note strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-note"
+    },
+    {
+      "line": 488,
+      "selector": ".theme-root[data-theme=\"light\"] .register-note small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: register-note"
+    },
+    {
+      "line": 492,
+      "selector": "[data-theme=\"light\"] .table-search",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-search"
+    },
+    {
+      "line": 495,
+      "selector": "[data-theme=\"light\"] .table-search input",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-search"
+    },
+    {
+      "line": 496,
+      "selector": "[data-theme=\"light\"] .table-search input::placeholder",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-search"
+    },
+    {
+      "line": 502,
+      "selector": "[data-theme=\"light\"] .count-badge",
+      "reason": "Required class absent from source literals/dynamic class prefixes: count-badge"
+    },
+    {
+      "line": 503,
+      "selector": "[data-theme=\"light\"] .heading-meta strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: heading-meta"
+    },
+    {
+      "line": 505,
+      "selector": "[data-theme=\"light\"] .quick-strip",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quick-strip"
+    },
+    {
+      "line": 506,
+      "selector": "[data-theme=\"light\"] .quick-strip button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quick-strip"
+    },
+    {
+      "line": 507,
+      "selector": "[data-theme=\"light\"] .quick-strip button.selected",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quick-strip"
+    },
+    {
+      "line": 508,
+      "selector": "[data-theme=\"light\"] .quick-strip b",
+      "reason": "Required class absent from source literals/dynamic class prefixes: quick-strip"
+    },
+    {
+      "line": 509,
+      "selector": "[data-theme=\"light\"] .metric-card",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card"
+    },
+    {
+      "line": 510,
+      "selector": "[data-theme=\"light\"] .metric-card.accent",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card, accent"
+    },
+    {
+      "line": 510,
+      "selector": "[data-theme=\"light\"] .workspace-stats article.featured",
+      "reason": "Required class absent from source literals/dynamic class prefixes: featured"
+    },
+    {
+      "line": 511,
+      "selector": "[data-theme=\"light\"] .metric-card:after",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card"
+    },
+    {
+      "line": 512,
+      "selector": "[data-theme=\"light\"] .metric-top",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-top"
+    },
+    {
+      "line": 512,
+      "selector": "[data-theme=\"light\"] .panel-head .eyebrow",
+      "reason": "Required class absent from source literals/dynamic class prefixes: panel-head"
+    },
+    {
+      "line": 513,
+      "selector": "[data-theme=\"light\"] .metric-top button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-top"
+    },
+    {
+      "line": 514,
+      "selector": "[data-theme=\"light\"] .metric-card>small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card"
+    },
+    {
+      "line": 514,
+      "selector": "[data-theme=\"light\"] .muted",
+      "reason": "Required class absent from source literals/dynamic class prefixes: muted"
+    },
+    {
+      "line": 515,
+      "selector": "[data-theme=\"light\"] .mini-chart i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: mini-chart"
+    },
+    {
+      "line": 515,
+      "selector": "[data-theme=\"light\"] .bar-chart i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: bar-chart"
+    },
+    {
+      "line": 516,
+      "selector": "[data-theme=\"light\"] .metric-card.accent .mini-chart i:nth-last-child(-n+3)",
+      "reason": "Required class absent from source literals/dynamic class prefixes: metric-card, accent, mini-chart"
+    },
+    {
+      "line": 517,
+      "selector": "[data-theme=\"light\"] .bar-chart i.hot",
+      "reason": "Required class absent from source literals/dynamic class prefixes: bar-chart, hot"
+    },
+    {
+      "line": 518,
+      "selector": "[data-theme=\"light\"] .trend",
+      "reason": "Required class absent from source literals/dynamic class prefixes: trend"
+    },
+    {
+      "line": 519,
+      "selector": "[data-theme=\"light\"] .material-item em.neutral",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-item, neutral"
+    },
+    {
+      "line": 520,
+      "selector": "[data-theme=\"light\"] .bar-chart",
+      "reason": "Required class absent from source literals/dynamic class prefixes: bar-chart"
+    },
+    {
+      "line": 521,
+      "selector": "[data-theme=\"light\"] .job-row",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-row"
+    },
+    {
+      "line": 521,
+      "selector": "[data-theme=\"light\"] .material-item",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-item"
+    },
+    {
+      "line": 521,
+      "selector": "[data-theme=\"light\"] .activity",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity"
+    },
+    {
+      "line": 521,
+      "selector": "[data-theme=\"light\"] .doc-row",
+      "reason": "Required class absent from source literals/dynamic class prefixes: doc-row"
+    },
+    {
+      "line": 522,
+      "selector": "[data-theme=\"light\"] .job-id strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-id"
+    },
+    {
+      "line": 522,
+      "selector": "[data-theme=\"light\"] .job-work strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-work"
+    },
+    {
+      "line": 522,
+      "selector": "[data-theme=\"light\"] .material-item strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-item"
+    },
+    {
+      "line": 522,
+      "selector": "[data-theme=\"light\"] .activity strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity"
+    },
+    {
+      "line": 523,
+      "selector": "[data-theme=\"light\"] .job-id span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-id"
+    },
+    {
+      "line": 523,
+      "selector": "[data-theme=\"light\"] .job-work span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: job-work"
+    },
+    {
+      "line": 523,
+      "selector": "[data-theme=\"light\"] .material-item small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: material-item"
+    },
+    {
+      "line": 523,
+      "selector": "[data-theme=\"light\"] .activity span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: activity"
+    },
+    {
+      "line": 524,
+      "selector": "[data-theme=\"light\"] .segmented",
+      "reason": "Required class absent from source literals/dynamic class prefixes: segmented"
+    },
+    {
+      "line": 525,
+      "selector": "[data-theme=\"light\"] .segmented button.active",
+      "reason": "Required class absent from source literals/dynamic class prefixes: segmented"
+    },
+    {
+      "line": 526,
+      "selector": "[data-theme=\"light\"] .table-tools",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-tools"
+    },
+    {
+      "line": 526,
+      "selector": "[data-theme=\"light\"] .data-row",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-row"
+    },
+    {
+      "line": 526,
+      "selector": "[data-theme=\"light\"] .table-footer",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-footer"
+    },
+    {
+      "line": 527,
+      "selector": "[data-theme=\"light\"] .table-footer",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-footer"
+    },
+    {
+      "line": 528,
+      "selector": "[data-theme=\"light\"] .table-footer button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-footer"
+    },
+    {
+      "line": 529,
+      "selector": "[data-theme=\"light\"] .table-footer button:hover",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-footer"
+    },
+    {
+      "line": 530,
+      "selector": "[data-theme=\"light\"] .table-footer button.active",
+      "reason": "Required class absent from source literals/dynamic class prefixes: table-footer"
+    },
+    {
+      "line": 531,
+      "selector": "[data-theme=\"light\"] .data-head",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-head"
+    },
+    {
+      "line": 533,
+      "selector": "[data-theme=\"light\"] .data-row span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-row"
+    },
+    {
+      "line": 533,
+      "selector": "[data-theme=\"light\"] .doc-row strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: doc-row"
+    },
+    {
+      "line": 534,
+      "selector": "[data-theme=\"light\"] .data-row span:first-child",
+      "reason": "Required class absent from source literals/dynamic class prefixes: data-row"
+    },
+    {
+      "line": 535,
+      "selector": "[data-theme=\"light\"] .cell-status",
+      "reason": "Required class absent from source literals/dynamic class prefixes: cell-status"
+    },
+    {
+      "line": 537,
+      "selector": "[data-theme=\"light\"] .customer-portal",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-portal"
+    },
+    {
+      "line": 538,
+      "selector": "[data-theme=\"light\"] .customer-nav",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav"
+    },
+    {
+      "line": 539,
+      "selector": "[data-theme=\"light\"] .customer-nav>nav button",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav"
+    },
+    {
+      "line": 540,
+      "selector": "[data-theme=\"light\"] .customer-nav>nav button.active",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-nav"
+    },
+    {
+      "line": 541,
+      "selector": "[data-theme=\"light\"] .customer-alert",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-alert"
+    },
+    {
+      "line": 541,
+      "selector": "[data-theme=\"light\"] .customer-profile>span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-profile"
+    },
+    {
+      "line": 542,
+      "selector": "[data-theme=\"light\"] .customer-profile strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-profile"
+    },
+    {
+      "line": 543,
+      "selector": "[data-theme=\"light\"] .customer-welcome p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-welcome"
+    },
+    {
+      "line": 543,
+      "selector": "[data-theme=\"light\"] .customer-summary span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-summary"
+    },
+    {
+      "line": 543,
+      "selector": "[data-theme=\"light\"] .customer-summary small",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-summary"
+    },
+    {
+      "line": 544,
+      "selector": "[data-theme=\"light\"] .customer-summary article",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-summary"
+    },
+    {
+      "line": 544,
+      "selector": "[data-theme=\"light\"] .customer-focus-card",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-focus-card"
+    },
+    {
+      "line": 544,
+      "selector": "[data-theme=\"light\"] .customer-action-card",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-action-card"
+    },
+    {
+      "line": 544,
+      "selector": "[data-theme=\"light\"] .customer-documents",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-documents"
+    },
+    {
+      "line": 545,
+      "selector": "[data-theme=\"light\"] .customer-summary article:first-child",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-summary"
+    },
+    {
+      "line": 545,
+      "selector": "[data-theme=\"light\"] .customer-action-card",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-action-card"
+    },
+    {
+      "line": 546,
+      "selector": "[data-theme=\"light\"] .customer-focus-meta span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-focus-meta"
+    },
+    {
+      "line": 547,
+      "selector": "[data-theme=\"light\"] .customer-progress-track",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-progress-track"
+    },
+    {
+      "line": 548,
+      "selector": "[data-theme=\"light\"] .customer-progress p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-progress"
+    },
+    {
+      "line": 548,
+      "selector": "[data-theme=\"light\"] .customer-steps>div",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-steps"
+    },
+    {
+      "line": 549,
+      "selector": "[data-theme=\"light\"] .customer-steps i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-steps"
+    },
+    {
+      "line": 550,
+      "selector": "[data-theme=\"light\"] .customer-steps .done i",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-steps, done"
+    },
+    {
+      "line": 551,
+      "selector": "[data-theme=\"light\"] .customer-link",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-link"
+    },
+    {
+      "line": 551,
+      "selector": "[data-theme=\"light\"] .customer-doc-row strong",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-doc-row"
+    },
+    {
+      "line": 552,
+      "selector": "[data-theme=\"light\"] .customer-doc-row",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-doc-row"
+    },
+    {
+      "line": 553,
+      "selector": "[data-theme=\"light\"] .customer-doc-row>span",
+      "reason": "Required class absent from source literals/dynamic class prefixes: customer-doc-row"
+    },
+    {
+      "line": 555,
+      "selector": "[data-theme=\"light\"] .modal-backdrop",
+      "reason": "Required class absent from source literals/dynamic class prefixes: modal-backdrop"
+    },
+    {
+      "line": 556,
+      "selector": "[data-theme=\"light\"] .modal",
+      "reason": "Required class absent from source literals/dynamic class prefixes: modal"
+    },
+    {
+      "line": 557,
+      "selector": "[data-theme=\"light\"] .modal-head",
+      "reason": "Required class absent from source literals/dynamic class prefixes: modal-head"
+    },
+    {
+      "line": 557,
+      "selector": "[data-theme=\"light\"] .modal-actions",
+      "reason": "Required class absent from source literals/dynamic class prefixes: modal-actions"
+    },
+    {
+      "line": 558,
+      "selector": "[data-theme=\"light\"] .modal p",
+      "reason": "Required class absent from source literals/dynamic class prefixes: modal"
+    },
+    {
+      "line": 558,
+      "selector": "[data-theme=\"light\"] .form-grid label",
+      "reason": "Required class absent from source literals/dynamic class prefixes: form-grid"
+    },
+    {
+      "line": 559,
+      "selector": "[data-theme=\"light\"] .form-grid input",
+      "reason": "Required class absent from source literals/dynamic class prefixes: form-grid"
+    },
+    {
+      "line": 559,
+      "selector": "[data-theme=\"light\"] .form-grid textarea",
+      "reason": "Required class absent from source literals/dynamic class prefixes: form-grid"
+    }
+  ],
+  "conservativelyKept": [
+    ".data-row:not(.data-head):hover",
+    ".customer-portal :is(h1, h2)",
+    "[data-theme=\"light\"] .data-row:not(.data-head):hover"
+  ]
+}

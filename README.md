@@ -20,11 +20,34 @@ npm run build
 npm start
 ```
 
-`npm start` requires a successful production build. The approved feature lives on `codex/cinematic-scrap-landing`; do not merge it into `develop` or deploy without the owner's direction.
+`npm start` requires a successful production build. The cinematic landing is merged into `develop`; this cleanup does not deploy the project or rewrite published history.
 
 Landing copy uses Noto Sans Thai via `next/font`; the wordmark and unchanged workspace retain Geist. The first build downloads the Thai font and then self-hosts it; no manual font file or new package is required.
-# Native tests
+
+## Native tests
 
 Run `npm test` from the project root. The dependency-free runner discovers all
 `.test.ts` and `.test.mjs` files recursively under `tests/` on Windows and Unix.
 Tests mirror feature/shared-code ownership; they do not live in App Router folders.
+
+## Source organization and checks
+
+- `app/`: unchanged route/special files, favicon, and the only global stylesheet.
+- `src/features/`: domain components, pure domain logic, configuration and owned CSS Modules.
+- `src/components/`, `src/hooks/`, `src/lib/`: shared UI, hooks, API transport/types and formatting.
+- `src/mocks/`: explicit mock transport, fictional data, and domain endpoint implementations.
+- `tests/`: mirrored tests plus route, permission and source-structure regression checks.
+
+```bash
+npm test
+npm run lint
+npm run audit:source
+npx --no-install tsc --noEmit
+node scripts/sync-design.mjs --check
+npm run build
+```
+
+No dependency was installed, removed or upgraded. The existing Tailwind setup is retained;
+custom component rules use CSS Modules, not a utility-class migration. Read
+`docs/refactor/README.md` for ownership, CSS compatibility choices, retained uncertainties
+and verification scope. `docs/refactor/files-changed.md` lists the changed/moved files.
