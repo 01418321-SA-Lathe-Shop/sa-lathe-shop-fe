@@ -1,5 +1,11 @@
 # Machine Shop Custom Manufacturing System — Frontend Guide
 
+## Public landing update — 2026-10-27
+
+The owner approved the cinematic landing on `codex/cinematic-scrap-landing`, branched from `develop`, then replaced its animation with a five-second robotic pickup → conveyor → furnace → finished ingot loop. The latest refinement adds mechanical detail, brushed surfaces and soft shadows, translates the public page to Thai, and removes the visible playback bar. This remains an illustrative metaphor, not a recycling-service claim or a new business process. Auth routes, API contracts, role screens, and UC1–UC9 remain unchanged. Workspace language/settings remain unchanged.
+
+Previously approved dependencies remain: `three`, React-19-compatible `@react-three/fiber` major9, `gsap`, and development `@types/three`; no dependency was added. Noto Sans Thai uses existing Next/font self-hosting and is scoped to the landing. `app/landing-config.ts` holds Thai copy; `app/process-config.ts` holds five durations, easings, loop default and render budgets. Geometry and shared brushed textures are procedural; no supplied `.glb` is needed. Final-frame WebPs provide reduced-motion/failed-WebGL fallback. Tap/click or keyboard-activate the illustration to pause/resume, with no visible action bar. Read `docs/landing-handoff.md` for source ownership, run instructions, provenance and actual verification limits. This supersedes historical animation descriptions, not business workflows.
+
 ## Current integration contract — Phase 10 (2026-10-25)
 
 This supersedes the Phase 9 scope below. The designed shell now runs on the real API client for AUTH and UC1–UC9, against backend `docs/UC1.md`–`UC9.md` and the Go DTOs at backend `develop` (UC9 `028dd88` and later). The fixture demo was removed. See `docs/11-phase-ten-handoff.md` for setup, mock accounts, the real-backend checklist and verification evidence.
