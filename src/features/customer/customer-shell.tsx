@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Noto_Sans_Thai } from "next/font/google";
-import { useRef, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useId, useRef, useSyncExternalStore, type ReactNode } from "react";
 import type { ApiSession } from "../auth/api-session";
 import { Icon, Logo } from "../../components/appearance/icons";
 import { subscribeAppearance } from "../../components/appearance/appearance-preferences";
 import { getCustomerTheme, getServerCustomerTheme } from "./customer-preferences";
 import { NotificationBell } from "./customer-notifications";
 import { CustomerContent } from "./customer-content";
+import { bindCustomerMenu } from "./customer-menu";
 import styles from "./customer.module.css";
 
 const thai = Noto_Sans_Thai({ subsets: ["thai", "latin"], display: "swap", variable: "--font-customer-thai" });
@@ -46,7 +47,13 @@ export default function CustomerShell({ session, mockControls, leave }: { sessio
   const query = useSearchParams();
   const router = useRouter();
   const menu = useRef<HTMLDialogElement>(null);
+  const menuTrigger = useRef<HTMLButtonElement>(null);
+  const menuId = useId();
   const theme = useSyncExternalStore(subscribeAppearance, getCustomerTheme, getServerCustomerTheme);
+
+  useEffect(() => {
+    if (menu.current && menuTrigger.current) return bindCustomerMenu(menu.current, menuTrigger.current);
+  }, []);
 
   const isSettings = query.get("view") === "settings";
   const initials = session.account.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || session.account.name.slice(0, 1) || "??";
@@ -152,16 +159,19 @@ export default function CustomerShell({ session, mockControls, leave }: { sessio
           </div>
         </header>
 
-        {/* Mobile Navbar: Visible only on <= 1020px */}
+        {/* Mobile Navbar: Visible only on <= 1024px */}
         <header className="cust-navbar">
           <div className="cust-nav-inner">
             <Logo onClick={() => router.push("/customer")} />
             <div className="cust-nav-actions">
               <NotificationBell api={session.api} beforeOpen={() => menu.current?.close()} />
               <button
+                ref={menuTrigger}
                 className="cust-menu-toggle"
                 aria-label="เปิดเมนู"
                 aria-haspopup="dialog"
+                aria-controls={menuId}
+                aria-expanded="false"
                 onClick={() => menu.current?.showModal()}
               >
                 <Icon name="grid" />
@@ -170,41 +180,42 @@ export default function CustomerShell({ session, mockControls, leave }: { sessio
           </div>
         </header>
 
-        {/* Mobile Menu Drawer Dialog */}
-        <dialog ref={menu} className="cust-mobile-menu" aria-label="เมนูลูกค้า">
-          <div className="cust-toolbar">
+        {/* Full-screen mobile/tablet navigation; native modal keeps focus inside. */}
+        <dialog ref={menu} id={menuId} className="cust-mobile-menu" aria-label="เมนูลูกค้า">
+          <div className="cust-toolbar cust-mobile-header">
             <h2>เมนู</h2>
             <button aria-label="ปิดเมนู" onClick={() => menu.current?.close()}>
               <Icon name="close" />
             </button>
           </div>
-          <div className="cust-mobile-user">
-            <span className="cust-avatar">{initials}</span>
-            <div>
-              <strong>{session.account.name}</strong>
-              <small>ลูกค้า · {session.account.username}</small>
+          <div className="cust-mobile-scroll">
+            <div className="cust-mobile-user">
+              <span className="cust-avatar">{initials}</span>
+              <div>
+                <strong>{session.account.name}</strong>
+                <small>ลูกค้า · {session.account.username}</small>
+              </div>
             </div>
+            <nav aria-label="เมนูมือถือ">
+              <span className="cust-sidebar-label">WORKSPACE</span>
+              {renderMobileLinks(workspaceItems)}
+
+              <span className="cust-sidebar-label">งานของฉัน</span>
+              {renderMobileLinks(orderItems)}
+
+              <span className="cust-sidebar-label">เอกสารและการชำระเงิน</span>
+              {renderMobileLinks(documentItems)}
+
+              <span className="cust-sidebar-label">บัญชี</span>
+              {renderMobileLinks(accountItems)}
+            </nav>
           </div>
-          <nav aria-label="เมนูมือถือ">
-            <span className="cust-sidebar-label">WORKSPACE</span>
-            {renderMobileLinks(workspaceItems)}
-
-            <span className="cust-sidebar-label">งานของฉัน</span>
-            {renderMobileLinks(orderItems)}
-
-            <span className="cust-sidebar-label">เอกสารและการชำระเงิน</span>
-            {renderMobileLinks(documentItems)}
-
-            <span className="cust-sidebar-label">บัญชี</span>
-            {renderMobileLinks(accountItems)}
-
-            <div className="cust-mobile-actions">
-              <button className="cust-danger" onClick={leave}>
-                <Icon name="logout" />
-                <span>ออกจากระบบ</span>
-              </button>
-            </div>
-          </nav>
+          <div className="cust-mobile-actions">
+            <button onClick={leave}>
+              <Icon name="logout" />
+              <span>ออกจากระบบ</span>
+            </button>
+          </div>
         </dialog>
 
         {/* Mobile Environment Notice */}

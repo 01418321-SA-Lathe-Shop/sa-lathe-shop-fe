@@ -79,7 +79,7 @@ components:
 
 # Lathe Shop Control — Design specification
 
-อัปเดตล่าสุด: 2026-10-27 · สถานะ: designed shell ใช้ session จริงหรือ mock backend ตามสัญญา API; cinematic landing และ feature-based cleanup อยู่บน develop; real-stack frontend verification ยังแยกจาก mock/browser checks
+อัปเดตล่าสุด: 2026-10-28 · สถานะ: designed shell ใช้ session จริงหรือ mock backend ตามสัญญา API; cinematic landing และ feature-based cleanup อยู่บน develop; real-stack frontend verification ยังแยกจาก mock/browser checks
 
 เอกสารนี้ใช้ส่งต่องานให้ designer และ developer เพื่อสร้าง UI ให้ตรงกับระบบปัจจุบัน อ่านคู่กับ `docs/02-frontend.md` ซึ่งเป็นแหล่งอ้างอิง Business Flow และ permission ข้อมูลบนหน้าปัจจุบันหลายส่วนเป็น mock data และยังไม่ใช่หลักฐานว่า Backend หรือ UC1–UC9 ทำงานครบ
 
@@ -153,7 +153,7 @@ Document/form surfaces use the frontmatter document padding and corner treatment
 
 ### Navigation
 
-Desktop navigation uses a persistent 17rem left sidebar drawer with background `#060707` matching the main background canvas, categorized sections (Workspace, งานของฉัน, เอกสารและการชำระเงิน, บัญชี), icons (`grid`, `file`, `machine`, `clock`, `layers`, `wallet`, `inbox`, `sun`), active page highlighting, and a user footer with avatar, name, and logout. Mobile navigation (≤1024px) retains the sticky top navbar header (`#060707`) and `<dialog className="cust-mobile-menu">` slide-out drawer (`#060707`). All links use client navigation to retain the memory-only session; the mobile dialog closes on link navigation.
+Desktop navigation uses a persistent 17rem left sidebar drawer with background `#060707` matching the main background canvas, categorized sections (Workspace, งานของฉัน, เอกสารและการชำระเงิน, บัญชี), icons (`grid`, `file`, `machine`, `clock`, `layers`, `wallet`, `inbox`, `sun`), active page highlighting, and a user footer with avatar, name, and logout. Mobile/tablet navigation (≤1024px) retains the sticky top navbar and opens a full-screen native `<dialog className="cust-mobile-menu">`, not a capped-width drawer. It fills the viewport with the existing theme, zero outer margin/border/radius, `width: 100%` and `height: 100dvh`. A fixed-within-dialog header holds the title and 44px close control; the middle profile/navigation region alone scrolls; a separate bottom region holds a quieter outlined logout action. Safe-area padding protects all edges; long identity/label text wraps. Navigation items remain at least 48px high and preserve active-page semantics. All links use client navigation to retain the memory-only session, closing the dialog on selection. Native modal behavior contains focus and supports Escape/return focus. Opening locks document/body scrolling; closing/unmount restores the previous inline overflow values. Moving above 1024px closes the modal and releases the lock. The trigger exposes its expanded state and dialog association. Entry motion is 180ms ease-out and is disabled under reduced motion. No routes, permissions, notification behavior, desktop layout or business rules change.
 
 ### Chips
 
@@ -457,6 +457,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Replace Customer mobile/tablet capped-width drawer with full-screen navigation; separate scroll region, safe-area header/footer, quiet logout, scroll-lock cleanup and desktop-resize close | Native lifecycle regression tests and scoped browser responsive/keyboard checks; no live-backend claim |
 | 2026-10-27 | Fix desktop notification bell crash by making the mobile-only pre-open callback optional; preserve mobile menu-close ordering | Regression tests exercise the actual bell click handler with and without the callback |
 | 2026-10-27 | Move Customer desktop navigation into persistent 17rem left sidebar drawer; keep sticky top navbar and dialog menu on mobile | Native tests, source audit, design sync check, and browser verification |
 | 2026-10-27 | Align Customer portal color palette with landing page dark aesthetic (`#060707` bg, `#111313`/`#191c1c` surfaces, `#343838` line, `#ff923f` burnt-orange action, dark default theme) | Native tests, source audit, design sync check, and browser verification |
@@ -1371,10 +1372,12 @@ src/features/workspace/workspace.module.css
 .root :global(.mock-switcher) { margin-left: auto; }
 .root :global(.mock-switcher summary) { min-height: 32px; padding: 4px 10px; color: var(--cust-ink); }
 .root :global(.cust-mobile-user) { display: flex; align-items: center; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--cust-line); margin-bottom: 12px; }
+.root :global(.cust-mobile-user > div) { min-width: 0; overflow-wrap: anywhere; }
+.root :global(.cust-mobile-user .cust-avatar) { flex-shrink: 0; }
 .root :global(.cust-mobile-user strong) { display: block; font-size: 0.9375rem; color: var(--cust-ink); }
 .root :global(.cust-mobile-user small) { color: var(--cust-muted); font-size: 0.8125rem; }
-.root :global(.cust-mobile-actions) { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--cust-line); }
-.root :global(.cust-mobile-actions button) { width: 100%; }
+.root :global(.cust-mobile-actions) { flex-shrink: 0; padding: 12px max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); border-top: 1px solid var(--cust-line); }
+.root :global(.cust-mobile-actions button) { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 48px; color: var(--cust-red); background: transparent; }
 .root :global(.cust-main) { width: 100%; max-width: 100%; box-sizing: border-box; min-height: calc(100dvh - 180px); padding: clamp(1.25rem, 2.5vw, 2.5rem) clamp(1rem, 2.5vw, 2.5rem) 4rem; margin: 0; }
 .root :global(.cust-heading) { margin-bottom: 32px; }
 .root :global(.cust-heading > div) { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
@@ -1443,10 +1446,15 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-inbox-footer) { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; border-top: 1px solid var(--cust-line); margin-top: 16px; }
 .root :global(.cust-inbox-panel > .cust-toolbar), .root :global(.cust-inbox-panel > .cust-tabs), .root :global(.cust-inbox-footer), .root :global(.cust-notification-help) { flex-shrink: 0; }
 .root :global(.cust-notification-help summary) { display: flex; align-items: center; color: var(--cust-muted); font-size: .875rem; }
-.root :global(.cust-mobile-menu) { inset: 0 0 0 auto; margin: 0; width: min(375px, 100%); height: 100dvh; max-height: 100dvh; max-width: 100%; border: 0; padding: 24px; background: var(--cust-bg); color: var(--cust-ink); }
-.root :global(.cust-mobile-menu::backdrop) { background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(4px); }
-.root :global(.cust-mobile-menu nav a), .root :global(.cust-mobile-menu nav button) { display: flex; align-items: center; width: 100%; min-height: 48px; padding: 8px 0; color: var(--cust-ink); border: 0; }
-.root :global(.cust-mobile-menu h3) { margin-top: 24px; font-size: .875rem; color: var(--cust-muted); }
+.root :global(.cust-mobile-menu) { position: fixed; inset: 0; margin: 0; width: 100%; max-width: 100%; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; padding: 0; overflow: hidden; background: var(--cust-bg); color: var(--cust-ink); }
+.root :global(.cust-mobile-menu[open]) { display: flex; flex-direction: column; animation: customer-menu-enter 180ms cubic-bezier(.16, 1, .3, 1); }
+.root :global(.cust-mobile-menu::backdrop) { background: var(--cust-bg); }
+.root :global(.cust-mobile-header) { flex-shrink: 0; margin: 0; padding: max(12px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 12px max(16px, env(safe-area-inset-left)); border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-mobile-header button) { width: 44px; height: 44px; display: grid; place-items: center; padding: 8px; }
+.root :global(.cust-mobile-scroll) { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 0 max(16px, env(safe-area-inset-right)) 16px max(16px, env(safe-area-inset-left)); scrollbar-width: thin; scrollbar-color: var(--cust-muted) var(--cust-bg); }
+.root :global(.cust-mobile-menu nav) { display: grid; gap: 4px; }
+.root :global(.cust-mobile-menu nav a) { min-height: 48px; padding: 10px 12px; color: var(--cust-ink); overflow-wrap: anywhere; }
+@keyframes customer-menu-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 .root :global(.cust-footer) { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; padding: 1.5rem clamp(1rem, 2.5vw, 2.5rem); width: 100%; max-width: 100%; box-sizing: border-box; margin: auto 0 0 0; border-top: 1px solid var(--cust-line); color: var(--cust-muted); font-size: .875rem; }
 .root :global(.cust-field) { display: grid; gap: 8px; margin-bottom: 20px; font-weight: 550; }
 .root :global(.cust-field small) { font-weight: 400; font-size: .875rem; }
@@ -1640,7 +1648,10 @@ src/features/workspace/workspace.module.css
   .root :global(.cust-inspection-decision), .root :global(.cust-account-profile), .root :global(.cust-settings-preview) { padding: 16px 0; }
 }
 
-@media (prefers-reduced-motion: reduce) { .root *, .root *::before, .root *::after { scroll-behavior: auto; transition: none; animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .root *, .root *::before, .root *::after { scroll-behavior: auto; transition: none; animation: none; }
+  .root :global(.cust-mobile-menu[open]) { animation: none; }
+}
 .root :global(.cust-related-links) { display: grid; justify-items: start; gap: 8px; }
 ```
 
