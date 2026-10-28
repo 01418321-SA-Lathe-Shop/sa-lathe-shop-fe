@@ -79,9 +79,19 @@ components:
 
 # Lathe Shop Control — Design specification
 
-อัปเดตล่าสุด: 2026-10-28 · สถานะ: designed shell ใช้ session จริงหรือ mock backend ตามสัญญา API; cinematic landing และ feature-based cleanup อยู่บน develop; real-stack frontend verification ยังแยกจาก mock/browser checks
+อัปเดตล่าสุด: 2026-10-28 · สถานะ: login และ workspace ใช้ real API เท่านั้น; นำ browser-mock shortcuts และ account-switch/reset controls ออกตามคำขอเจ้าของ; real-account verification ยังติด database readiness และ credentials
 
-เอกสารนี้ใช้ส่งต่องานให้ designer และ developer เพื่อสร้าง UI ให้ตรงกับระบบปัจจุบัน อ่านคู่กับ `docs/02-frontend.md` ซึ่งเป็นแหล่งอ้างอิง Business Flow และ permission ข้อมูลบนหน้าปัจจุบันหลายส่วนเป็น mock data และยังไม่ใช่หลักฐานว่า Backend หรือ UC1–UC9 ทำงานครบ
+เอกสารนี้ใช้ส่งต่องานให้ designer และ developer เพื่อสร้าง UI ให้ตรงกับระบบปัจจุบัน อ่านคู่กับ `docs/02-frontend.md` ซึ่งเป็นแหล่งอ้างอิง Business Flow และ permission การตรวจ frontend ด้วย unit tests ไม่ใช่หลักฐานว่า real Backend หรือ UC1–UC9 ทำงานครบ
+
+### Current authentication surface — 2026-10-28
+
+This supersedes historical mock-mode descriptions below. `/login` and `/register`
+use the configured real API only. Login has no sample-account shortcuts; Customer,
+Staff and Admin workspaces have no mock account switching, reset or lost-response
+simulation. All sessions remain memory-only, require login after reload, and keep
+existing server role checks, logout and expiry behavior. Existing error/empty
+states remain; unavailable backend data never becomes fictional records. Public
+landing illustrations and unit-test transport stubs are not browser demo access.
 
 ## Overview
 
@@ -653,6 +663,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Remove browser-mock login shortcuts and workspace controls; make sessions live-only without changing routes or role permissions | Native session regressions cover configured API login, /auth/me, connection failure without fallback and backend logout; real seeded-account browser verification remains blocked separately |
 | 2026-10-28 | Landing follows the shared Light/Dark preference; add warm light chrome, readable copper actions and a feathered scene boundary without recoloring machinery or changing animation | 134 native tests, lint, production build and actual settings switching at desktop/mobile; no API or workflow changes |
 | 2026-10-28 | Theme batch 2: theme-aware Customer chrome, shared Light text/action/status/focus palette, full-strength placeholders and matching Staff/Admin Light navigation; remove dashboard-only color patches | Palette contrast regressions plus scoped mock desktop/mobile route, menu, bell and preference checks; paper ink isolated while original document/PDF colors, API and business behavior are preserved |
 | 2026-10-28 | Theme batch 1: unify Customer/shared appearance snapshots, system-change subscriptions and current-page fallback when writes fail | Native regressions cover system/saved preference, failed writes with readable stale storage and subscriber cleanup; no API/session changes |

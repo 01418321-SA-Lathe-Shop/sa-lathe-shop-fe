@@ -2,23 +2,17 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { BackendApi, type Account } from "../../lib/api/backend-api";
-import type { MockBackend } from "../../mocks/core/mock-backend";
 
 // One memory-only session for the whole designed shell. Client navigation keeps
 // it; reload or sign-out discards it. Tokens never touch browser storage/URLs.
-// "mock" sessions talk to the explicit in-browser mock backend, never as a
-// fallback for live API failures.
-export type ApiMode = "live" | "mock";
-export type ApiSession = { api: BackendApi; account: Account; expiresAt: string; mode: ApiMode };
+// All sessions use the configured real backend; failures never select fixtures.
+export type ApiSession = { api: BackendApi; account: Account; expiresAt: string };
 type SessionContext = {
   session: ApiSession | null;
   notice: string;
   liveBase: string;
-  mock: MockBackend | null;
-  signIn: (username: string, password: string, mode: ApiMode) => Promise<ApiSession>;
+  signIn: (username: string, password: string) => Promise<ApiSession>;
   signOut: () => Promise<string>;
-  resetMock: () => void;
-  setLoseNextResponse: (value: boolean) => void;
 };
 
 const Context = createContext<SessionContext | null>(null);
@@ -27,9 +21,7 @@ export const LIVE_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localho
 export function ApiSessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<ApiSession | null>(null);
   const [notice, setNotice] = useState("");
-  const [mock, setMock] = useState<MockBackend | null>(null);
   const active = useRef<BackendApi | null>(null);
-  const mockRef = useRef<MockBackend | null>(null);
 
   useEffect(() => () => active.current?.close(), []);
   useEffect(() => {
@@ -39,19 +31,13 @@ export function ApiSessionProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(timer);
   }, [session]);
 
-  const signIn = useCallback(async (username: string, password: string, mode: ApiMode) => {
-    let backend = mockRef.current;
-    if (mode === "mock" && !backend) {
-      // Loaded on demand so live users never download the mock module.
-      const { createLatheMockBackend } = await import("../../mocks/data/mock-seed");
-      backend = mockRef.current = createLatheMockBackend(); setMock(backend);
-    }
-    const api = new BackendApi(mode === "mock" && backend ? backend.base : LIVE_BASE, () => { if (active.current === api) { active.current = null; setSession(null); setNotice("Session expired or revoked. Please sign in again."); } }, mode === "mock" && backend ? backend.transport : undefined);
+  const signIn = useCallback(async (username: string, password: string) => {
+    const api = new BackendApi(LIVE_BASE, () => { if (active.current === api) { active.current = null; setSession(null); setNotice("Session expired or revoked. Please sign in again."); } });
     try {
       const login = await api.login(username, password);
       const account = await api.call<Account>("/auth/me");
       active.current?.close(); active.current = api;
-      const next = { api, account, expiresAt: login.expires_at, mode };
+      const next = { api, account, expiresAt: login.expires_at };
       setNotice(""); setSession(next);
       return next;
     } catch (error) { api.close(); throw error; }
@@ -66,14 +52,7 @@ export function ApiSessionProvider({ children }: { children: ReactNode }) {
     setNotice(message); return message;
   }, []);
 
-  const resetMock = useCallback(() => {
-    if (session?.mode === "mock") { session.api.close(); active.current = null; setSession(null); }
-    mockRef.current = null; setMock(null); setNotice("Mock data reset. Choose a test account to start again.");
-  }, [session]);
-
-  // Mock controls change the backend object here, not through hook output.
-  const setLoseNextResponse = useCallback((value: boolean) => { if (mockRef.current) mockRef.current.loseNextResponse = value; }, []);
-  const value = useMemo(() => ({ session, notice, liveBase: LIVE_BASE, mock, signIn, signOut, resetMock, setLoseNextResponse }), [session, notice, mock, signIn, signOut, resetMock, setLoseNextResponse]);
+  const value = useMemo(() => ({ session, notice, liveBase: LIVE_BASE, signIn, signOut }), [session, notice, signIn, signOut]);
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 

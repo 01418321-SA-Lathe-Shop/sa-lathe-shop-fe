@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Noto_Sans_Thai } from "next/font/google";
-import { useEffect, useId, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useId, useRef, useSyncExternalStore } from "react";
 import type { ApiSession } from "../auth/api-session";
 import { Icon, Logo } from "../../components/appearance/icons";
 import { subscribeAppearance } from "../../components/appearance/appearance-preferences";
@@ -43,7 +43,7 @@ const accountItems: NavItem[] = [
   { href: "/customer?view=settings", label: "ตั้งค่า", icon: "sun" },
 ];
 
-export default function CustomerShell({ session, mockControls, leave }: { session: ApiSession; mockControls?: ReactNode; leave: () => void }) {
+export default function CustomerShell({ session, leave }: { session: ApiSession; leave: () => void }) {
   const pathname = usePathname();
   const query = useSearchParams();
   const router = useRouter();
@@ -150,10 +150,9 @@ export default function CustomerShell({ session, mockControls, leave }: { sessio
         {/* Desktop Topbar: Mode / Switcher & Notification Bell */}
         <header className="cust-topbar">
           <div className="cust-topbar-env">
-            <span className={`cust-mode ${session.mode}`}>
-              {session.mode === "mock" ? "ข้อมูลตัวอย่าง · ไม่ใช่ข้อมูลจริง" : "เชื่อมต่อข้อมูลจริง · รีโหลดหน้าต้องเข้าสู่ระบบใหม่"}
+            <span className="cust-mode live">
+              เชื่อมต่อข้อมูลจริง · รีโหลดหน้าต้องเข้าสู่ระบบใหม่
             </span>
-            {mockControls}
           </div>
           <div className="cust-topbar-actions">
             <NotificationBell api={session.api} />
@@ -221,10 +220,9 @@ export default function CustomerShell({ session, mockControls, leave }: { sessio
 
         {/* Mobile Environment Notice */}
         <div className="cust-environment">
-          <span className={`cust-mode ${session.mode}`}>
-            {session.mode === "mock" ? "ข้อมูลตัวอย่าง · ไม่ใช่ข้อมูลจริง" : "เชื่อมต่อข้อมูลจริง · รีโหลดหน้าต้องเข้าสู่ระบบใหม่"}
+          <span className="cust-mode live">
+            เชื่อมต่อข้อมูลจริง · รีโหลดหน้าต้องเข้าสู่ระบบใหม่
           </span>
-          {mockControls}
         </div>
 
         <main id="customer-content" className="cust-main" key={`${pathname}:${query.toString()}`}>

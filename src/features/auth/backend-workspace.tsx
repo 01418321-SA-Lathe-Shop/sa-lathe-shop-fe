@@ -7,26 +7,24 @@ import { useEffect,useRef,useState,type FormEvent } from "react";
 import { ThemeToggle } from "../../components/appearance/appearance";
 import { Icon,Logo } from "../../components/appearance/icons";
 
-import { MOCK_LOGINS,type MockLogin } from "../../mocks/data/mock-accounts";
 import { Feedback,passwordError,text } from "../../components/ui/backend-ui";
 import { useCommand } from "../../hooks/backend-hooks";
 import { BackendApi } from "../../lib/api/backend-api";
 import { API_ROLES } from "../workspace/workspace-access";
 import { ROLE_ROOTS } from "../workspace/workspace-routes";
-import { useApiSession,type ApiMode } from "./api-session";
+import { useApiSession } from "./api-session";
 
-// Designed Login/Register page. Real sign-in uses the live API; the test-account
-// buttons sign into the explicit in-browser mock backend. Both open the same shell.
+// Login and registration use only the configured real API.
 export default function BackendWorkspace({ initialRegister = false }: { initialRegister?: boolean }) {
   const router = useRouter();
   const { signIn, notice, liveBase } = useApiSession();
-  async function enter(username: string, password: string, mode: ApiMode) {
-    const session = await signIn(username, password, mode);
+  async function enter(username: string, password: string) {
+    const session = await signIn(username, password);
     router.push(ROLE_ROOTS[API_ROLES[session.account.role]]);
   }
-  return <LiveLogin key={initialRegister ? "register" : "login"} base={liveBase} notice={notice} initialRegister={initialRegister} onLogin={(username, password) => enter(username, password, "live")} onMock={(login) => enter(login.username, login.password, "mock")} />;
+  return <LiveLogin key={initialRegister ? "register" : "login"} base={liveBase} notice={notice} initialRegister={initialRegister} onLogin={enter} />;
 }
-function LiveLogin({ base, notice, initialRegister, onLogin, onMock }: { base: string; notice: string; initialRegister: boolean; onLogin: (username: string, password: string) => Promise<void>; onMock: (login: MockLogin) => Promise<void> }) {
+function LiveLogin({ base, notice, initialRegister, onLogin }: { base: string; notice: string; initialRegister: boolean; onLogin: (username: string, password: string) => Promise<void> }) {
   const router = useRouter();
   const [register, setRegister] = useState(initialRegister);
   const [type, setType] = useState("individual");
@@ -61,10 +59,6 @@ function LiveLogin({ base, notice, initialRegister, onLogin, onMock }: { base: s
         <button className="login-submit" type="submit">{register ? "สมัครบัญชี" : "เข้าสู่ระบบ"} <Icon name="arrow"/></button>
       </fieldset></form>
       <Feedback {...action}/><Link className="login-register-link" href={register ? "/login" : "/register"}>{register ? "มีบัญชีแล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครบัญชี"}</Link>
-      <details className="demo-bypass"><summary><span>บัญชีทดสอบ — Mock backend</span><i aria-hidden="true"/></summary><div className="demo-bypass-content">
-        <div className="bypass-actions">{MOCK_LOGINS.map((login) => <button type="button" key={login.username} disabled={action.busy} onClick={() => void action.run(() => onMock(login), "")}><Icon name={login.role === "worker" ? "machine" : login.role === "admin" ? "grid" : "file"}/><span><strong>ทดสอบ {login.label}</strong><small>{login.detail}</small></span><Icon name="arrow"/></button>)}</div>
-        <p className="demo-context">ใช้ mock backend ที่จำลองสัญญา API ในเบราว์เซอร์ ไม่เชื่อมข้อมูลจริง ข้อมูลใช้ร่วมกันระหว่างบัญชีทดสอบ และเริ่มใหม่เมื่อรีโหลดหน้า</p>
-      </div></details>
       <span className="auth-api">Connected API · {base}</span></div>
     </section>
   </main>;
