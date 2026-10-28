@@ -115,6 +115,15 @@ The main canvas and drawer navigation (`.cust-sidebar` and `.cust-mobile-menu`) 
 
 **The Surface Scope Rule.** Customer tokens must not replace Staff, Admin, Landing or Auth tokens.
 
+**Shared appearance preference (2026-10-28).** Customer, Staff, Admin and Auth read
+the same `lathe-theme` preference. Without a saved choice, all follow the system
+color scheme, including subsequent system changes; the stable SSR snapshot is
+dark. A failed storage write keeps the explicit choice in page memory, even if
+stale storage remains readable. Matching cross-tab storage changes refresh that
+preference. UI-size uses the same current-page fallback. This stores only display
+preferences, never session data. Landing retains its deliberately cinematic dark
+art direction, independently of the workspace preference.
+
 ## Typography
 
 Noto Sans Thai is self-hosted through Next/font for Customer only, with a sans-serif fallback. The frontmatter hierarchy records heading, section title, body and metadata roles. Rem text responds to the existing UI-size preference; most Customer spacing and target dimensions are currently fixed pixels, not a fully rem-scaled spacing system. The shared brand retains its existing identity styling.
@@ -606,6 +615,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Theme batch 1: unify Customer/shared appearance snapshots, system-change subscriptions and current-page fallback when writes fail | Native regressions cover system/saved preference, failed writes with readable stale storage and subscriber cleanup; no API/session changes |
 | 2026-10-28 | Overview quick-look layout: replace independent unequal columns with one equal two-column, row-aligned grid; four equal summary cells; compact previews with local expansion and unchanged authorized data | Native layout/expansion regressions and scoped responsive browser verification; same routes, APIs, due dates, money and permissions |
 | 2026-10-28 | Overview batch 2: task dashboard with existing-route quick actions, loaded-data summary, invoice due/balance rows, active production, completed/shipping readiness, factual chronological activity and dashboard-local Light link/focus/information contrast corrections | Scoped native/browser checks and limitations in docs/customer-overview-dashboard.md; targeted finish recheck SHIP on original three contrast findings; same API reads and business logic |
 | 2026-10-28 | Overview batch 1: presentation-only dashboard projections for authorized actions, invoice balance/due dates, production readiness and factual timestamped history | Domain regressions cover exact money, independent receipt/payment, original evidence gates, missing dates and private-event exclusion; visual dashboard follows separately |

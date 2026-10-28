@@ -1,9 +1,3 @@
-import type { Theme } from "../../components/appearance/appearance-preferences";
-
-// Honor a saved preference; the customer surface defaults to dark to match the landing page aesthetic.
-// Staff/Admin retain their existing default. No auth data is stored here.
-export function getCustomerTheme(): Theme {
-  try { const saved = window.localStorage.getItem("lathe-theme"); return saved === "light" ? "light" : "dark"; }
-  catch { return "dark"; }
-}
-export function getServerCustomerTheme(): Theme { return "dark"; }
+// All workspaces use the same preference, storage-failure fallback and system default.
+// Keep the Customer adapter names stable for existing consumers. No auth data is stored.
+export { getTheme as getCustomerTheme, getServerTheme as getServerCustomerTheme } from "../../components/appearance/appearance-preferences.ts";
