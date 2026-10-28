@@ -131,8 +131,8 @@ color scheme, including subsequent system changes; the stable SSR snapshot is
 dark. A failed storage write keeps the explicit choice in page memory, even if
 stale storage remains readable. Matching cross-tab storage changes refresh that
 preference. UI-size uses the same current-page fallback. This stores only display
-preferences, never session data. Landing retains its deliberately cinematic dark
-art direction, independently of the workspace preference.
+preferences, never session data. Landing now follows this same preference: warm
+light surfaces and dark ink in Light, original cinematic obsidian in Dark.
 Customer settings use per-instance `useId` radio-group names, so settings retained
 by App Router do not uncheck the currently visible theme or size controls.
 
@@ -200,7 +200,7 @@ not workspace chrome; no color inversion or modification of uploaded files is
 applied. Rendered quotation paper scopes primary/secondary ink to `#202623` and
 `#57615b`, with native Light color-scheme, so shared small-text rules cannot
 inherit pale Dark metadata ink onto white paper. The public cinematic landing
-retains its approved dark art direction.
+follows the shared Light/Dark preference without changing document content.
 
 ## Do's and Don'ts
 
@@ -424,7 +424,11 @@ Icon เป็น inline SVG viewBox `0 0 24 24`, fill none, stroke currentColor
 
 Brand mark เป็น CSS square สีส้มหมุน45° พร้อมกากบาทเข้ม ขนาด2.0625rem; ใช้ข้อความ LATHE / SHOP CONTROL ไม่มี logo image file. Landing ใช้ mark เดิมย่อเป็น1.8rem/1.5rem และ procedural Three.js machine แทน CSS illustration.
 
-### Cinematic public landing (2026-10-27)
+### Cinematic public landing (2026-10-28)
+
+Theme fix: `/` follows the existing shared `data-theme` preference, including saved/system changes, rather than forcing Dark. Light uses warm `#f6f3ef` background, `#241d18` ink, `#62574e` secondary text, white stat surfaces, `#d8cfc5` borders and copper `#943c0d` action/focus accents. Navbar, logo text, pills, CTA, captions, stats, workflow, capabilities and footer all adapt. The metallic 3D machine, orange furnace, animation timing, transparent canvas and fallback artwork remain unchanged; these are illustrative content, not inverted images. No new theme state or storage is introduced.
+
+Historical baseline below describes the original Dark implementation; the shared-theme behavior above supersedes its fixed-dark restriction. In Light only, a vertical alpha mask feathers the illustration band's outer edges into the warm page without altering the original artwork.
 
 Only `/` changes. `src/features/landing/landing.module.css` scopes a fixed dark `#060707` world without changing saved workspace appearance. The public page is now Thai, including navigation, calls to action, descriptions, loading/error states and accessible names. Noto Sans Thai is self-hosted by Next/font and scoped to the landing; the existing LATHE / SHOP CONTROL brand retains Geist. Thai headline line-height1.28 and tracking−.015em leave room for marks; desktop size3–5.5rem and mobile2.25–4.5rem. Auth links, logo/pill navigation, caption and two glass stats remain. Counts (9 workflows, 3 roles) are product facts, not recycling or delivery guarantees. The furnace sequence is illustrative, not a statement of shop services. The desktop hero is at least47rem/100svh; the 3D band sits between49% from the top and16% from the bottom, below the headline. The camera remains fixed near-side-on, now slightly higher to reveal depth. No captions or text-reveal delays interrupt the story.
 
@@ -649,6 +653,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Landing follows the shared Light/Dark preference; add warm light chrome, readable copper actions and a feathered scene boundary without recoloring machinery or changing animation | 134 native tests, lint, production build and actual settings switching at desktop/mobile; no API or workflow changes |
 | 2026-10-28 | Theme batch 2: theme-aware Customer chrome, shared Light text/action/status/focus palette, full-strength placeholders and matching Staff/Admin Light navigation; remove dashboard-only color patches | Palette contrast regressions plus scoped mock desktop/mobile route, menu, bell and preference checks; paper ink isolated while original document/PDF colors, API and business behavior are preserved |
 | 2026-10-28 | Theme batch 1: unify Customer/shared appearance snapshots, system-change subscriptions and current-page fallback when writes fail | Native regressions cover system/saved preference, failed writes with readable stale storage and subscriber cleanup; no API/session changes |
 | 2026-10-28 | Overview quick-look layout: replace independent unequal columns with one equal two-column, row-aligned grid; four equal summary cells; compact previews with local expansion and unchanged authorized data | Native layout/expansion regressions and scoped responsive browser verification; same routes, APIs, due dates, money and permissions |
@@ -1501,6 +1506,40 @@ src/features/workspace/workspace.module.css
 :where(.scope) :global(.cinematic-sr-only) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 :where(.scope) :global(.cinematic-scene-toggle) { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; background: transparent; border: 0; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
 :global(.cinematic-page):where(.scope) :global(.cinematic-scene-toggle):focus-visible { outline-offset: -8px; border-radius: 1rem; }
+
+/* Follow the shared appearance preference without changing the cinematic scene. */
+:global([data-theme="light"]) :global(.cinematic-page):where(.scope) {
+  --text: #241d18; --muted: #62574e; --lime: #bd5314; --bg: #f6f3ef;
+  --surface: #ffffff; --surface-2: #eee8e1; --line: #d8cfc5;
+  color-scheme: light;
+}
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-hero) { background: var(--bg); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-art) { mask-image: linear-gradient(transparent, #000 12%, #000 82%, transparent); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-horizon) { background: radial-gradient(ellipse 60% 18% at 53% 104%, #f8ad71 0%, #f8ad7140 38%, transparent 75%), linear-gradient(0deg, #e6d9cc 0%, #f0e8df 14%, #f6f3ef 46%); }
+:global([data-theme="light"]) :global(.cinematic-page):where(.scope) :global(.brand) b { color: var(--text); }
+:global([data-theme="light"]) :global(.cinematic-page):where(.scope) :global(.brand) small { color: var(--muted); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-nav-pills) a { color: var(--muted); background: #ffffff80; border-color: var(--line); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-nav-pills) a:hover { color: var(--text); background: var(--surface-2); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-workspace) { border-color: var(--line); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-workspace):hover { background: var(--surface-2); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-description) p,
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-bottom-copy) a,
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-stats) dt,
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-scene-notice) { color: var(--muted); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-primary) { color: #ffffff !important; background: #943c0d; }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-primary):hover { background: #742e08; }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-bottom-copy)::before { background: linear-gradient(90deg, #f6f3eff5 65%, #f6f3ef00); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-stats) > div { background: #fffffff0; box-shadow: 0 .75rem 2rem #49321b14; }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-stats) dd span,
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-step-number),
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-capabilities) article > span,
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-bottom-copy) a:hover { color: #943c0d; }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-process),
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-process-list) li,
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-capabilities) article,
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-footer) { border-color: var(--line); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-footer) :global(.settings-trigger) { color: var(--text); border-color: var(--line); }
+:global([data-theme="light"]) :global(.cinematic-page):where(.scope) :is(a, button):focus-visible { outline-color: #943c0d; }
 ```
 
 ### A4. Customer wireframe surface — src/features/customer/customer.module.css

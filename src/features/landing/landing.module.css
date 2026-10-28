@@ -123,3 +123,37 @@
 :where(.scope) :global(.cinematic-sr-only) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 :where(.scope) :global(.cinematic-scene-toggle) { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; background: transparent; border: 0; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
 :global(.cinematic-page):where(.scope) :global(.cinematic-scene-toggle):focus-visible { outline-offset: -8px; border-radius: 1rem; }
+
+/* Follow the shared appearance preference without changing the cinematic scene. */
+:global([data-theme="light"]) :global(.cinematic-page):where(.scope) {
+  --text: #241d18; --muted: #62574e; --lime: #bd5314; --bg: #f6f3ef;
+  --surface: #ffffff; --surface-2: #eee8e1; --line: #d8cfc5;
+  color-scheme: light;
+}
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-hero) { background: var(--bg); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-art) { mask-image: linear-gradient(transparent, #000 12%, #000 82%, transparent); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-horizon) { background: radial-gradient(ellipse 60% 18% at 53% 104%, #f8ad71 0%, #f8ad7140 38%, transparent 75%), linear-gradient(0deg, #e6d9cc 0%, #f0e8df 14%, #f6f3ef 46%); }
+:global([data-theme="light"]) :global(.cinematic-page):where(.scope) :global(.brand) b { color: var(--text); }
+:global([data-theme="light"]) :global(.cinematic-page):where(.scope) :global(.brand) small { color: var(--muted); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-nav-pills) a { color: var(--muted); background: #ffffff80; border-color: var(--line); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-nav-pills) a:hover { color: var(--text); background: var(--surface-2); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-workspace) { border-color: var(--line); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-workspace):hover { background: var(--surface-2); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-description) p,
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-bottom-copy) a,
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-stats) dt,
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-scene-notice) { color: var(--muted); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-primary) { color: #ffffff !important; background: #943c0d; }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-primary):hover { background: #742e08; }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-bottom-copy)::before { background: linear-gradient(90deg, #f6f3eff5 65%, #f6f3ef00); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-stats) > div { background: #fffffff0; box-shadow: 0 .75rem 2rem #49321b14; }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-stats) dd span,
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-step-number),
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-capabilities) article > span,
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-bottom-copy) a:hover { color: #943c0d; }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-process),
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-process-list) li,
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-capabilities) article,
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-footer) { border-color: var(--line); }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-footer) :global(.settings-trigger) { color: var(--text); border-color: var(--line); }
+:global([data-theme="light"]) :global(.cinematic-page):where(.scope) :is(a, button):focus-visible { outline-color: #943c0d; }
