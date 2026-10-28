@@ -571,6 +571,7 @@ and native preview support still require verification on the real deployment.
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Overview batch 1: presentation-only dashboard projections for authorized actions, invoice balance/due dates, production readiness and factual timestamped history | Domain regressions cover exact money, independent receipt/payment, original evidence gates, missing dates and private-event exclusion; visual dashboard follows separately |
 | 2026-10-28 | Job-list batch 2: reuse request-card presentation for Customer jobs, real status tabs/counts, literal search and robust local paging; preserve detail/history/inspection/payment views | Native card and domain regressions plus scoped browser checks; no new API or business transitions |
 | 2026-10-28 | Job-list batch 1: presentation-only literal search and real production-status counts over existing authorized data | Native tests cover int64 references, literal matching, preserved order and missing request metadata; UI follows separately |
 | 2026-10-28 | Document batch 2: Customer-safe quotation document/native print and private UC4 PO preview; preserve original decision and evidence writes, evidence history and existing navigation | Native preview security/whitelist tests and scoped mock/browser checks; full evidence and real-stack limitations in docs/customer-documents-handoff.md |
