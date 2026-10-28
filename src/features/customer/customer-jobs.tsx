@@ -13,6 +13,7 @@ import { customerHref, dateTH, DELIVERY_LABELS, INVOICE_LABELS, JOB_LABELS, mone
 import { Badge, Empty, Field, Limited, LocalPages, PageTitle, ResourceFeedback } from "./customer-ui";
 import { OrderTabs } from "./customer-requests";
 import { CustomerInspection, CustomerInvoice } from "./customer-job-actions";
+import { CustomerJobList } from "./customer-job-list";
 
 export function CustomerJobs({ api, mode = "jobs" }: { api: BackendApi; mode?: "jobs" | "payments" | "inspection" }) {
   const query = useSearchParams(); const history = query.get("view") === "history"; const jobs = useCollection<FulfillmentJob>(api, "/fulfillment/jobs"); const requests = useCollection<JobRequest>(api, "/requests");
@@ -22,6 +23,7 @@ export function CustomerJobs({ api, mode = "jobs" }: { api: BackendApi; mode?: "
   const archived = requests.data?.items.filter((request) => ["completed", "canceled"].includes(request.status)) ?? [];
   const labels = mode === "payments" ? INVOICE_LABELS : mode === "inspection" ? DELIVERY_LABELS : JOB_LABELS;
   const section = mode === "payments" ? "payments" : mode === "inspection" ? "delivery-payment" : "jobs";
+  if (mode === "jobs" && !history) return <CustomerJobList jobs={jobs} requests={requests} />;
   return <>{mode === "jobs" && <OrderTabs active={history ? "history" : "jobs"} />}<PageTitle title={history ? "ประวัติการสั่งงาน" : mode === "payments" ? "ใบแจ้งหนี้และการชำระเงิน" : mode === "inspection" ? "ตรวจรับงาน" : "งานผลิต"} description={history ? "คำขอที่เสร็จสิ้นหรือยกเลิก เชื่อมกลับข้อมูลเดิม" : mode === "payments" ? "ตรวจยอดคงเหลือ กำหนดชำระ และประวัติหลักฐาน" : mode === "inspection" ? "ตรวจงานที่ร้านส่งมอบ ก่อนยืนยันรับหรือส่งคืนเพื่อแก้ไข" : "งานที่ร้านรับเข้าคิวหลังอนุมัติหลักฐานแล้ว"} />
     <ResourceFeedback {...jobs} /><ResourceFeedback {...requests} /><Limited complete={jobs.data?.complete && requests.data?.complete} />
     {history ? <>{archived.map((request) => <article className="cust-document-row" key={request.id}><div><h2>{request.description}</h2><p>คำขอ #{request.no_request}</p><Badge value={request.status} labels={REQUEST_LABELS} /></div><Link href={customerHref("requests", { request: request.id })}>ดูคำขอและเอกสาร →</Link></article>)}{requests.data && !requests.loading && !requests.error && !archived.length && <Empty title="ยังไม่มีประวัติงานที่ปิดแล้ว">คำขอจะเสร็จสิ้นเมื่อรับงานแล้วและชำระครบ</Empty>}</> : <>

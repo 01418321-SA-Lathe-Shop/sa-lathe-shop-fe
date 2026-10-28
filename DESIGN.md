@@ -125,13 +125,13 @@ On desktop (>1024px), Customer navigation docks on the left as a 17rem persisten
 
 On tablet/mobile (≤1024px), the desktop sidebar is hidden, the stage margin is reset (`width: 100%`), and the sticky top navbar (`.cust-navbar`, background `#060707`) with logo, notifications, and menu toggle takes over. The existing full-screen mobile drawer dialog (`.cust-mobile-menu`) uses the same background as the canvas and remains unchanged by the request-list adaptation. At tablet breakpoint (≤880px), multi-column task layouts stack into single columns with fluid gaps, sticky side summaries unstick to inline/top order, and filter toolbars wrap responsively. On mobile (≤640px), content padding becomes 1rem (16px), buttons and actions take full width, notification dialogs become full-screen sheets (`100dvh`), and quotation decisions sit above the safe-area edge with reserved content space.
 
-The request list is a scoped exception to the general tablet stacking breakpoint: its full-width card grid has two columns above 640px and one column at 640px and below. Grid gaps are 24px/16px and card padding is 24px/20px respectively, with 16px corners. Search stays above wrapping real-status pill navigation; loaded-query count badges do not imply global totals. The existing query-selected document detail replaces the list; no permanent detail panel or new detail drawer is introduced.
+The Request and normal Job lists are scoped exceptions to the general tablet stacking breakpoint: their full-width card grids have two columns above 640px and one column at 640px and below. Grid gaps are 24px/16px and card padding is 24px/20px respectively, with 16px corners. Search stays above wrapping real-status pill navigation; loaded-query count badges do not imply global totals. The existing query-selected detail replaces each list; no permanent detail panel or new detail drawer is introduced.
 
-Overview prioritizes attention and recent work; requests use responsive record cards and separate document details; quotations use a price/decision rail; Deposit/PO uses an evidence checklist; jobs use a timeline; receipt uses a focused decision form; invoices prioritize balance; account/settings use split task layouts. These are Customer surface patterns, not prescriptions for Landing or Staff.
+Overview prioritizes attention and recent work; requests use responsive record cards and separate document details; quotations use a price/decision rail; Deposit/PO uses an evidence checklist; normal jobs use record cards while unchanged Job details use a timeline; receipt uses a focused decision form; invoices prioritize balance; account/settings use split task layouts. These are Customer surface patterns, not prescriptions for Landing or Staff.
 
 ## Elevation & Depth
 
-Customer surfaces are predominantly flat: solid fills and thin dividers provide hierarchy. Request-list cards are a scoped exception, with a restrained resting shadow and a shadow-only hover treatment as recorded in their presentation guidance below. Native dialogs occupy the browser top layer and use translucent backdrops. Motion does not carry task meaning; reduced motion disables Customer transitions and animations.
+Customer surfaces are predominantly flat: solid fills and thin dividers provide hierarchy. Request and normal Job list cards are scoped exceptions, with a restrained resting shadow and a shadow-only hover treatment as recorded in their presentation guidance below. Native dialogs occupy the browser top layer and use translucent backdrops. Motion does not carry task meaning; reduced motion disables Customer transitions and animations.
 
 ## Shapes
 
@@ -149,7 +149,7 @@ Inputs use a 48px minimum height and a muted-tone 1px border; textarea height st
 
 ### Cards / Containers
 
-Document/form surfaces use the frontmatter document padding and corner treatment, reduced to 20px padding on mobile. Attention uses a bordered surface. Divider-separated rows remain the default for record lists other than the scoped request-list card grid described in Layout; this exception does not restyle other Customer lists.
+Document/form surfaces use the frontmatter document padding and corner treatment, reduced to 20px padding on mobile. Attention uses a bordered surface. Divider-separated rows remain the default for record lists other than the scoped Request and normal Job list card grids described in Layout; lists outside those two adaptations remain unchanged.
 
 ### Navigation
 
@@ -456,7 +456,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 ### Request-list presentation — 2026-10-28
 
 Owner-approved reference adaptation changes composition, not the Customer palette.
-The request list alone has a wrapping status-pill navigation with count badges,
+The request list has a wrapping status-pill navigation with count badges,
 plus its existing applied search form. Filters retain `q/status` URLs, literal
 matching, newest-first sorting, 20-record pagination and all four request states
 (pending/ongoing/completed/canceled). Counts describe loaded records matching the
@@ -473,7 +473,7 @@ only shadow, never position/scale. Fills and text retain existing Customer
 variables and saved Light/Dark preferences; the existing `#ffb16d` focus outline
 is reused. A list-local primary-link hover correction restores its intended
 existing `#121514` foreground instead of inheriting the generic link hover color;
-it is a state-cascade fix, not a palette change. Request-only pill badge geometry retains the shared badge's exact
+it is a state-cascade fix, not a palette change. Request-card pill badge geometry (also reused by Jobs) retains the shared badge's exact
 value, wording and color mapping, including its existing neutral canceled tone.
 
 Cards show exact request number/quantity, a two-line description (full text in
@@ -501,14 +501,23 @@ The scope, finish-review findings, evidence and limitations are recorded in
 
 ### Job-list adaptation — 2026-10-28
 
-The Customer job list is being aligned with the incumbent request-card pattern,
-not a new identity. The first checkpoint adds presentation-only literal search
-and query-scoped counts using the existing authorized jobs/requests collections.
+The Customer job list uses the incumbent request-card pattern and the same scoped
+CSS Module, not a new identity or duplicated card stylesheet. Presentation-only
+literal search and query-scoped counts use the existing authorized jobs/requests collections.
 Production status remains queued/in_progress/completed/cancelled; delivery and
 invoice status are separate. Preserve server job order, exact request references
 and missing-metadata fallbacks. No new API, business transition or date is added.
-The following UI checkpoint composes the existing request-card styling; job
-details, history, inspection and payment screens remain outside this adaptation.
+The same 2-column grid (1 column at 640px), spacing, corner/shadow, status pills,
+existing machine/date icons and keyboard-focus treatment align both lists. Cards
+open the unchanged job detail with a stretched native Link; no drawer is added.
+They show request reference/name/quantity, actual request creation/requested dates,
+production badge, rework note and separate delivery summary. Missing dates are
+explicit, never job creation dates or shop-confirmed promises; no progress is
+invented. Search/status URLs reset/clamp the existing 20-item local pagination;
+clearing filters resets the input. Counts distinguish loading/failed/partial
+reads; four static skeletons share one announcement. Job details, history,
+inspection and payment screens, all commands and the original two list reads
+remain unchanged. No Customer inventory/cost/supplier access is introduced.
 
 ### Customer documents — approved Customer-only UC4/quotation adaptation
 
@@ -562,6 +571,7 @@ and native preview support still require verification on the real deployment.
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Job-list batch 2: reuse request-card presentation for Customer jobs, real status tabs/counts, literal search and robust local paging; preserve detail/history/inspection/payment views | Native card and domain regressions plus scoped browser checks; no new API or business transitions |
 | 2026-10-28 | Job-list batch 1: presentation-only literal search and real production-status counts over existing authorized data | Native tests cover int64 references, literal matching, preserved order and missing request metadata; UI follows separately |
 | 2026-10-28 | Document batch 2: Customer-safe quotation document/native print and private UC4 PO preview; preserve original decision and evidence writes, evidence history and existing navigation | Native preview security/whitelist tests and scoped mock/browser checks; full evidence and real-stack limitations in docs/customer-documents-handoff.md |
 | 2026-10-28 | Document batch 1: shared Customer quotation/UC4 lists with actual-status pills, loaded-query counts, applied filters/chips/sort and URL paging; separate UC4 obligations from uploaded PO evidence | Domain tests for exact money, Bangkok dates, original identifiers and authorized projections; document preview/print follows in batch 2 |
