@@ -12,7 +12,7 @@
 .list .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 24px; }
 .list .card { position: relative; min-width: 0; display: flex; flex-direction: column; padding: 24px; border-radius: 16px; background: var(--cust-surface); box-shadow: 0 4px 16px rgba(0, 0, 0, .12); transition: box-shadow 180ms ease-out; }
 .list .card:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
-.list .card:has(.openCard:focus-visible) { outline: 2px solid #ffb16d; outline-offset: 3px; }
+.list .card:has(.openCard:focus-visible) { outline: 2px solid var(--cust-focus); outline-offset: 3px; }
 .list .cardHeader { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
 .list .cardHeader > div { min-width: 0; }
 .list .cardHeader strong { display: block; color: var(--cust-ink); font-size: 1.0625rem; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }

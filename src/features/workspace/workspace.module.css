@@ -114,10 +114,10 @@
 :global([data-theme="light"]) :where(.scope) :global(.mock-flow) i { border-color: #d8cec4; background: #fff; color: var(--muted); }
 
 :global([data-theme="light"]) :global(.app-shell):where(.scope) { background: radial-gradient(circle at 88% -10%,rgba(223,116,30,.13),transparent 30%),var(--bg); }
-:global([data-theme="light"]) :where(.scope) :global(.sidebar) { border-color: var(--line); background: rgba(248,250,245,.97); }
+:global([data-theme="light"]) :where(.scope) :global(.sidebar) { border-color: var(--line); background: var(--bg); }
 :global([data-theme="light"]) :where(.scope) :global(.staff-space), :global([data-theme="light"]) :where(.scope) :global(.status-ribbon)>span, :global([data-theme="light"]) :where(.scope) :global(.search), :global([data-theme="light"]) :where(.scope) :global(.icon-button) { border-color: var(--line); background: #fff; color: #5f695f; }
 :global([data-theme="light"]) :where(.scope) :global(.staff-space) strong, :global([data-theme="light"]) :where(.scope) :global(.status-ribbon)>span:first-child { color: #4d574e; }
-:global([data-theme="light"]) :where(.scope) :global(.topbar) { border-color: var(--line); background: rgba(245,247,241,.88); }
+:global([data-theme="light"]) :where(.scope) :global(.topbar) { border-color: var(--line); background: var(--bg); }
 :global([data-theme="light"]) :where(.scope) :global(.search) input { color: #202921; }
 :global([data-theme="light"]) :where(.scope) :global(.search) input::placeholder { color: #8b948b; }
 :global([data-theme="light"]) :where(.scope) :global(.nav-list) :is(button, a) { color: #5f695f; }

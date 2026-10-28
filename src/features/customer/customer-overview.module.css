@@ -73,10 +73,6 @@
 .dashboard .skeleton > span:nth-child(3) { width: 40%; }
 .dashboard .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .dashboard .footnote { color: var(--cust-muted); font-size: .875rem; margin: 32px 0 0; }
-:global([data-customer-theme="light"]) .dashboard { --cust-blue: #166c70; }
-:global([data-customer-theme="light"]) .dashboard a:not(:global(.cust-primary)),
-:global([data-customer-theme="light"]) .dashboard a:not(:global(.cust-primary)):hover { color: #954711; }
-:global([data-customer-theme="light"]) .dashboard :global(:focus-visible) { outline: 2px solid #954711; outline-offset: 3px; }
 @media (max-width: 1200px) {
   .dashboard .actionEnd { flex-direction: column; align-items: flex-end; gap: 8px; }
   .dashboard .panelGrid { grid-template-columns: minmax(0, 1fr); }

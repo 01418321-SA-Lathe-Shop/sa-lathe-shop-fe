@@ -32,7 +32,7 @@
 .scope :global(.cust-document-navigation) > div { display: flex; flex-wrap: wrap; gap: 16px; }
 .scope .quotationLayout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); gap: 32px; align-items: start; }
 .scope .quotationLayout > * { min-width: 0; }
-.paper { margin: 16px 0 24px; padding: 32px; background: #fff; color: #202623; box-shadow: 0 8px 24px rgb(0 0 0 / .06); border-radius: 12px; overflow-wrap: anywhere; font-size: .9375rem; }
+.paper { --cust-ink: #202623; --cust-muted: #57615b; color-scheme: light; margin: 16px 0 24px; padding: 32px; background: #fff; color: #202623; box-shadow: 0 8px 24px rgb(0 0 0 / .06); border-radius: 12px; overflow-wrap: anywhere; font-size: .9375rem; }
 .paper h2 { font-size: 1.5rem; font-weight: 700; margin: 0 0 12px; }
 .paper h3 { font-size: 1rem; font-weight: 650; margin: 0 0 16px; }
 .paper p { margin: 8px 0; }

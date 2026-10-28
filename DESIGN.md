@@ -89,7 +89,7 @@ components:
 
 The Customer portal uses the same dark industrial palette as the cinematic landing page: deep obsidian background (`#060707`) shared by both the main workspace and navigation drawer, dark metal surfaces (`#111313` / `#191c1c`), precise boundary lines (`#343838`), glowing burnt-orange action accents (`#ff923f`, hover `#ffaa66`), and high-legibility light text (`#f4f4f1`, muted `#a5aaa7`).
 
-The frontmatter and the eight canonical sections here apply only to the authenticated Customer surface. Staff, Admin, Landing and Auth retain their existing visual systems and specifications below. Source authority is `src/features/customer/customer.module.css` and `customer-shell.tsx`; the frontmatter records reused light-theme primitives, while the stylesheet remains authoritative for dark overrides and complete component states.
+The frontmatter and the eight canonical sections here apply only to the authenticated Customer surface. Staff, Admin, Landing and Auth retain their existing visual systems and specifications below. Source authority is `src/features/customer/customer.module.css` and `customer-shell.tsx`; the frontmatter records the dark baseline, while the stylesheet defines both palettes and complete component states.
 
 The `.impeccable/design.json` sidecar extends these tokens with source-derived component previews and breakpoints. Its eight-step tonal ramps are synthesized preview aids, not additional shipped CSS tokens. Preview snippets resolve Customer-local variables to literals because those variables are not declared on the document root; runtime typography uses the self-hosted font, while standalone previews use the same family name with the documented fallback.
 
@@ -103,11 +103,21 @@ The `.impeccable/design.json` sidecar extends these tokens with source-derived c
 
 ### Primary
 
-Burnt Orange (`customer-action`) identifies actions and selected states; its deeper hover tone is reserved for filled primary actions. Pale Workshop Tint separates attention and confirmation regions without competing with the document.
+Burnt Orange (`customer-action`) identifies actions and selected states; its separate hover tone is reserved for filled primary actions. Pale Workshop Tint separates attention and confirmation regions without competing with the document.
 
 ### Secondary
 
-Information Blue identifies focus, information and informational statuses. Workshop Green and Signal Red communicate success and danger together with text, never color alone.
+Information Blue identifies information and informational statuses; keyboard focus uses the orange/copper token described under Buttons. Workshop Green and Signal Red communicate success and danger together with text, never color alone.
+
+Light mode uses warm canvas `#f6f3ef`, white surface `#ffffff`, secondary surface
+`#faf8f5`, ink `#241d18`, muted text `#746b64` and line `#ded8d1`. Copper text
+`#954711` (hover `#78380d`) is deliberately separate from filled actions
+`#df741e` (hover `#ed8734`, dark foreground `#121514`). Light informational,
+success and danger text use `#166c70`, `#1f7048`, `#ab3933`; badge backgrounds
+mix the current semantic color at 10% over the surface, with 35% mixed borders.
+Filled danger uses white text in Light and dark text in Dark. Shared links,
+tabs, status labels, avatars and timelines inherit these tokens on every
+Customer route; the previous dashboard-only Light color patch is unnecessary.
 
 ### Neutral
 
@@ -123,6 +133,8 @@ stale storage remains readable. Matching cross-tab storage changes refresh that
 preference. UI-size uses the same current-page fallback. This stores only display
 preferences, never session data. Landing retains its deliberately cinematic dark
 art direction, independently of the workspace preference.
+Customer settings use per-instance `useId` radio-group names, so settings retained
+by App Router do not uncheck the currently visible theme or size controls.
 
 ## Typography
 
@@ -150,11 +162,13 @@ Fields have gently rounded corners, controls slightly fuller corners, and docume
 
 ### Buttons
 
-Primary and danger actions have a 48px minimum height, while ordinary buttons and links have a 44px minimum target. Primary hover deepens the action color. Focus uses a 3px Information Blue outline offset by 3px; disabled ordinary controls use muted text on the page background. Secondary and text-link actions retain a quieter visual role.
+Primary and danger actions have a 48px minimum height, while ordinary buttons and links have a 44px minimum target. Primary hover uses the theme's separate filled-action hover tone without changing to pale link text. Focus uses a 2px outline offset by 3px: `#ffb16d` in Dark, copper `#954711` in Light. Request/Job card keyboard focus uses the same token. Disabled ordinary controls use muted text on the secondary surface with reduced opacity. Secondary and text-link actions retain a quieter visual role.
 
 ### Inputs / Fields
 
 Inputs use a 48px minimum height and a muted-tone 1px border; textarea height starts at 110px and resizes vertically. Labels stay visible. Checkbox/radio controls retain native semantics and are paired with larger labeled targets.
+
+Placeholder text uses the full muted color rather than an extra opacity layer.
 
 ### Cards / Containers
 
@@ -167,6 +181,26 @@ Desktop navigation uses a persistent 17rem left sidebar drawer with background `
 ### Chips
 
 Compact status badges pair a written status with a colored dot. Their color is semantic, not a substitute for the status label or an invented backend state.
+
+### Theme coverage (2026-10-28)
+
+The shared preference applies across routes, not just the settings preview.
+Customer sidebar, desktop topbar, mobile navbar, full-screen menu and footer
+use the current canvas and boundary tokens; dialogs, notifications, panels,
+forms and secondary buttons inherit current surfaces and ink. The desktop
+topbar no longer has a hard-coded black translucent fill. Staff/Admin Light
+sidebar and topbar also use the existing warm canvas token instead of unrelated
+green-tinted fills. Global `color-scheme` is explicitly set for both themes.
+The earlier dark-only background descriptions in Layout/Navigation describe
+Dark mode, not a fixed color in Light mode.
+
+The rendered quotation paper, uploaded PO image/PDF and printed documents keep
+their original white/document colors in either theme. They are document content,
+not workspace chrome; no color inversion or modification of uploaded files is
+applied. Rendered quotation paper scopes primary/secondary ink to `#202623` and
+`#57615b`, with native Light color-scheme, so shared small-text rules cannot
+inherit pale Dark metadata ink onto white paper. The public cinematic landing
+retains its approved dark art direction.
 
 ## Do's and Don'ts
 
@@ -615,6 +649,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Theme batch 2: theme-aware Customer chrome, shared Light text/action/status/focus palette, full-strength placeholders and matching Staff/Admin Light navigation; remove dashboard-only color patches | Palette contrast regressions plus scoped mock desktop/mobile route, menu, bell and preference checks; paper ink isolated while original document/PDF colors, API and business behavior are preserved |
 | 2026-10-28 | Theme batch 1: unify Customer/shared appearance snapshots, system-change subscriptions and current-page fallback when writes fail | Native regressions cover system/saved preference, failed writes with readable stale storage and subscriber cleanup; no API/session changes |
 | 2026-10-28 | Overview quick-look layout: replace independent unequal columns with one equal two-column, row-aligned grid; four equal summary cells; compact previews with local expansion and unchanged authorized data | Native layout/expansion regressions and scoped responsive browser verification; same routes, APIs, due dates, money and permissions |
 | 2026-10-28 | Overview batch 2: task dashboard with existing-route quick actions, loaded-data summary, invoice due/balance rows, active production, completed/shipping readiness, factual chronological activity and dashboard-local Light link/focus/information contrast corrections | Scoped native/browser checks and limitations in docs/customer-overview-dashboard.md; targeted finish recheck SHIP on original three contrast findings; same API reads and business logic |
@@ -674,6 +709,7 @@ Preserve order and media-query context when reproducing the design.
 @import "tailwindcss";
 
 :root {
+  color-scheme: dark;
   --ui-scale: 1;
   --bg: #0a0b0b;
   --surface: #111313;
@@ -1007,10 +1043,10 @@ src/features/workspace/workspace.module.css
 :global([data-theme="light"]) :where(.scope) :global(.mock-flow) i { border-color: #d8cec4; background: #fff; color: var(--muted); }
 
 :global([data-theme="light"]) :global(.app-shell):where(.scope) { background: radial-gradient(circle at 88% -10%,rgba(223,116,30,.13),transparent 30%),var(--bg); }
-:global([data-theme="light"]) :where(.scope) :global(.sidebar) { border-color: var(--line); background: rgba(248,250,245,.97); }
+:global([data-theme="light"]) :where(.scope) :global(.sidebar) { border-color: var(--line); background: var(--bg); }
 :global([data-theme="light"]) :where(.scope) :global(.staff-space), :global([data-theme="light"]) :where(.scope) :global(.status-ribbon)>span, :global([data-theme="light"]) :where(.scope) :global(.search), :global([data-theme="light"]) :where(.scope) :global(.icon-button) { border-color: var(--line); background: #fff; color: #5f695f; }
 :global([data-theme="light"]) :where(.scope) :global(.staff-space) strong, :global([data-theme="light"]) :where(.scope) :global(.status-ribbon)>span:first-child { color: #4d574e; }
-:global([data-theme="light"]) :where(.scope) :global(.topbar) { border-color: var(--line); background: rgba(245,247,241,.88); }
+:global([data-theme="light"]) :where(.scope) :global(.topbar) { border-color: var(--line); background: var(--bg); }
 :global([data-theme="light"]) :where(.scope) :global(.search) input { color: #202921; }
 :global([data-theme="light"]) :where(.scope) :global(.search) input::placeholder { color: #8b948b; }
 :global([data-theme="light"]) :where(.scope) :global(.nav-list) :is(button, a) { color: #5f695f; }
@@ -1435,6 +1471,11 @@ src/features/workspace/workspace.module.css
   --cust-blue: #69d5d6;
   --cust-green: #52c480;
   --cust-red: #ef786f;
+  --cust-action: #ff923f;
+  --cust-action-hover: #ffaa66;
+  --cust-link-hover: #ffaa66;
+  --cust-focus: #ffb16d;
+  --cust-on-danger: #121514;
   min-height: 100dvh;
   background: var(--cust-bg);
   color: var(--cust-ink);
@@ -1453,6 +1494,11 @@ src/features/workspace/workspace.module.css
   --cust-blue: #69d5d6;
   --cust-green: #52c480;
   --cust-red: #ef786f;
+  --cust-action: #ff923f;
+  --cust-action-hover: #ffaa66;
+  --cust-link-hover: #ffaa66;
+  --cust-focus: #ffb16d;
+  --cust-on-danger: #121514;
   color-scheme: dark;
 }
 .root[data-customer-theme="light"] {
@@ -1462,11 +1508,16 @@ src/features/workspace/workspace.module.css
   --cust-ink: #241d18;
   --cust-muted: #746b64;
   --cust-line: #ded8d1;
-  --cust-accent: #df741e;
+  --cust-accent: #954711;
+  --cust-action: #df741e;
+  --cust-action-hover: #ed8734;
+  --cust-link-hover: #78380d;
+  --cust-focus: #954711;
+  --cust-on-danger: #ffffff;
   --cust-tint: #fff2e6;
-  --cust-blue: #258f94;
-  --cust-green: #1f7a4d;
-  --cust-red: #c74e49;
+  --cust-blue: #166c70;
+  --cust-green: #1f7048;
+  --cust-red: #ab3933;
   color-scheme: light;
 }
 .root *, .root *::before, .root *::after { box-sizing: border-box; }
@@ -1477,21 +1528,21 @@ src/features/workspace/workspace.module.css
 .root :global(h2) { font-size: 1.25rem; line-height: 1.5; font-weight: 650; }
 .root :global(h3) { font-size: 1.0625rem; font-weight: 650; }
 .root :global(a) { display: inline-flex; align-items: center; min-height: 44px; color: var(--cust-accent); text-decoration: none; text-underline-offset: 4px; }
-.root :global(a:hover) { text-decoration: underline; color: #ffaa66; }
+.root :global(a:hover) { text-decoration: underline; color: var(--cust-link-hover); }
 .root :global(button), .root :global(input), .root :global(textarea), .root :global(select) { font: inherit; }
 .root :global(button), .root :global(summary) { min-height: 44px; cursor: pointer; }
 .root :global(button) { border: 1px solid var(--cust-line); background: var(--cust-surface); color: var(--cust-ink); padding: 9px 16px; border-radius: 10px; transition: border-color .2s, background .2s; }
 .root :global(button:hover:not(:disabled)) { border-color: var(--cust-accent); }
 .root :global(button:disabled) { cursor: not-allowed; color: var(--cust-muted); background: var(--cust-surface-2); border-color: var(--cust-line); opacity: 0.6; }
-.root :global(:focus-visible) { outline: 2px solid #ffb16d; outline-offset: 3px; }
+.root :global(:focus-visible) { outline: 2px solid var(--cust-focus); outline-offset: 3px; }
 .root :global(input), .root :global(textarea), .root :global(select) { width: 100%; min-height: 48px; background: var(--cust-surface); color: var(--cust-ink); border: 1px solid var(--cust-line); border-radius: 8px; padding: 10px 12px; caret-color: var(--cust-accent); transition: border-color .2s; }
 .root :global(input:focus), .root :global(textarea:focus), .root :global(select:focus) { border-color: var(--cust-accent); outline: none; }
-.root :global(input::placeholder), .root :global(textarea::placeholder) { color: var(--cust-muted); opacity: 0.7; }
+.root :global(input::placeholder), .root :global(textarea::placeholder) { color: var(--cust-muted); opacity: 1; }
 .root :global(textarea) { resize: vertical; min-height: 110px; }
 .root :global(input[type="checkbox"]), .root :global(input[type="radio"]) { width: 20px; height: 20px; min-height: 20px; flex: 0 0 20px; accent-color: var(--cust-accent); }
-.root :global(.cust-primary) { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 11px 20px; border-radius: 10px; font-weight: 600; border: 0; background: var(--cust-accent); color: #121514; text-decoration: none; transition: background .2s, transform .2s; }
-.root :global(.cust-primary:hover) { background: #ffaa66; text-decoration: none; }
-.root :global(.cust-danger) { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 11px 20px; border-radius: 10px; font-weight: 600; border: 0; background: var(--cust-red); color: #121514; text-decoration: none; transition: opacity .2s; }
+.root :global(.cust-primary) { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 11px 20px; border-radius: 10px; font-weight: 600; border: 0; background: var(--cust-action); color: #121514; text-decoration: none; transition: background .2s, transform .2s; }
+.root :global(.cust-primary:hover) { background: var(--cust-action-hover); color: #121514; text-decoration: none; }
+.root :global(.cust-danger) { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 11px 20px; border-radius: 10px; font-weight: 600; border: 0; background: var(--cust-red); color: var(--cust-on-danger); text-decoration: none; transition: opacity .2s; }
 .root :global(.cust-danger:hover) { opacity: .9; }
 .root :global(.cust-link) { display: inline-flex; align-items: center; gap: 8px; border: 0; background: transparent; color: var(--cust-accent); padding: 8px 0; min-height: 44px; }
 .root :global(.cust-muted), .root :global(small) { color: var(--cust-muted); }
@@ -1518,7 +1569,7 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-sidebar-footer button) { min-height: 44px; width: 44px; padding: 0; display: grid; place-items: center; background: transparent; border: 1px solid transparent; border-radius: 0.5rem; color: var(--cust-muted); }
 .root :global(.cust-sidebar-footer button:hover) { color: var(--cust-red); border-color: var(--cust-line); background: var(--cust-surface-2); }
 .root :global(.cust-stage) { min-height: 100dvh; margin-left: 17rem; width: calc(100% - 17rem); max-width: calc(100% - 17rem); min-width: 0; display: flex; flex-direction: column; }
-.root :global(.cust-topbar) { position: sticky; top: 0; z-index: 20; height: 64px; width: 100%; padding: 0 clamp(1rem, 2.5vw, 2.5rem); display: flex; align-items: center; justify-content: space-between; background: rgba(6, 7, 7, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--cust-line); }
+.root :global(.cust-topbar) { position: sticky; top: 0; z-index: 20; height: 64px; width: 100%; padding: 0 clamp(1rem, 2.5vw, 2.5rem); display: flex; align-items: center; justify-content: space-between; background: var(--cust-bg); border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-topbar-env) { display: flex; align-items: center; gap: 16px; font-size: .8125rem; color: var(--cust-muted); min-width: 0; flex-wrap: wrap; }
 .root :global(.cust-topbar-actions) { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
 .root :global(.cust-navbar) { display: none; }
@@ -1526,14 +1577,14 @@ src/features/workspace/workspace.module.css
 .root :global(.brand) { flex-shrink: 0; width: auto; cursor: pointer; border: 0; padding: 0; background: transparent; color: var(--cust-ink); display: inline-flex; align-items: center; gap: 0.6875rem; font-family: var(--font-geist-sans), sans-serif; }
 .root :global(.brand b) { color: var(--cust-ink); font-size: 1rem; letter-spacing: .18em; }
 .root :global(.brand small) { color: var(--cust-muted); font-size: 0.5rem; letter-spacing: .2em; display: block; }
-.root :global(.brand-mark) { position: relative; width: 1.8125rem; height: 1.8125rem; border-radius: 0.5rem; background: var(--cust-accent); transform: rotate(45deg); box-shadow: 0 0 1.75rem rgba(255,146,63,.2); flex-shrink: 0; }
+.root :global(.brand-mark) { position: relative; width: 1.8125rem; height: 1.8125rem; border-radius: 0.5rem; background: var(--cust-action); transform: rotate(45deg); box-shadow: 0 0 1.75rem rgba(255,146,63,.2); flex-shrink: 0; }
 .root :global(.brand-mark):before, .root :global(.brand-mark):after { content: ""; position: absolute; background: #121514; border-radius: 0.1875rem; }
 .root :global(.brand-mark):before { width: 0.8125rem; height: 0.25rem; left: 0.5rem; top: 0.75rem; }
 .root :global(.brand-mark):after { width: 0.25rem; height: 0.8125rem; left: 0.75rem; top: 0.5rem; }
 .root :global(.cust-nav-actions) { display: flex; align-items: center; gap: 16px; }
 .root :global(.cust-avatar) { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--cust-tint); color: var(--cust-accent); font-weight: 650; }
 .root :global(.cust-bell) { display: grid; place-items: center; position: relative; width: 44px; height: 44px; padding: 8px; border: 0; background: transparent; }
-.root :global(.cust-bell > span) { position: absolute; top: -2px; right: -7px; min-width: 21px; padding: 0 4px; border-radius: 12px; background: var(--cust-accent); color: #121514; font-weight: 700; font-size: .75rem; }
+.root :global(.cust-bell > span) { position: absolute; top: -2px; right: -7px; min-width: 21px; padding: 0 4px; border-radius: 12px; background: var(--cust-action); color: #121514; font-weight: 700; font-size: .75rem; }
 .root :global(.cust-menu-toggle) { display: none; }
 .root :global(.cust-environment) { display: none; }
 .root :global(.cust-mode.mock) { color: var(--cust-accent); }
@@ -1572,9 +1623,9 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-recent-row a > *) { display: block; }
 .root :global(.cust-recent-row a > span) { color: var(--cust-muted); font-size: .875rem; }
 .root :global(.cust-badge) { display: inline-flex; width: fit-content; align-items: center; gap: 7px; padding: 4px 10px; border-radius: 6px; background: var(--cust-surface-2); border: 1px solid var(--cust-line); color: var(--cust-muted); font-size: .875rem; font-weight: 550; }
-.root :global(.cust-badge.success) { color: var(--cust-green); border-color: rgba(82, 196, 128, 0.35); background: rgba(82, 196, 128, 0.12); }
-.root :global(.cust-badge.info) { color: var(--cust-blue); border-color: rgba(105, 213, 214, 0.35); background: rgba(105, 213, 214, 0.12); }
-.root :global(.cust-badge.danger) { color: var(--cust-red); border-color: rgba(239, 120, 111, 0.35); background: rgba(239, 120, 111, 0.12); }
+.root :global(.cust-badge.success) { color: var(--cust-green); border-color: color-mix(in srgb, var(--cust-green) 35%, var(--cust-surface)); background: color-mix(in srgb, var(--cust-green) 10%, var(--cust-surface)); }
+.root :global(.cust-badge.info) { color: var(--cust-blue); border-color: color-mix(in srgb, var(--cust-blue) 35%, var(--cust-surface)); background: color-mix(in srgb, var(--cust-blue) 10%, var(--cust-surface)); }
+.root :global(.cust-badge.danger) { color: var(--cust-red); border-color: color-mix(in srgb, var(--cust-red) 35%, var(--cust-surface)); background: color-mix(in srgb, var(--cust-red) 10%, var(--cust-surface)); }
 .root :global(.cust-status-dot) { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .root :global(.cust-page-end) { display: flex; justify-content: space-between; align-items: center; gap: 16px; color: var(--cust-muted); font-size: .875rem; margin-top: 48px; }
 .root :global(.cust-alert) { padding: 16px; border: 1px solid var(--cust-line); border-radius: 10px; margin: 16px 0; background: var(--cust-surface); overflow-wrap: anywhere; }
@@ -1664,7 +1715,7 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-stepper li) { display: flex; align-items: center; gap: 8px; color: var(--cust-muted); flex-shrink: 0; }
 .root :global(.cust-stepper span) { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; background: var(--cust-surface); border: 1px solid var(--cust-line); }
 .root :global(.cust-stepper [aria-current="step"]) { color: var(--cust-accent); font-weight: 650; }
-.root :global(.cust-stepper [aria-current="step"] span) { background: var(--cust-accent); color: #121514; border: 0; font-weight: 700; }
+.root :global(.cust-stepper [aria-current="step"] span) { background: var(--cust-action); color: #121514; border: 0; font-weight: 700; }
 .root :global(.cust-stepper .done span) { border-color: var(--cust-green); color: var(--cust-green); }
 .root :global(.cust-wizard-grid) { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(300px, 420px); gap: clamp(1.5rem, 2.5vw, 2.5rem); align-items: start; }
 .root :global(.cust-wizard-summary) { padding: 24px 0; position: sticky; top: 104px; }
@@ -1840,7 +1891,7 @@ src/features/workspace/workspace.module.css
 .list .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 24px; }
 .list .card { position: relative; min-width: 0; display: flex; flex-direction: column; padding: 24px; border-radius: 16px; background: var(--cust-surface); box-shadow: 0 4px 16px rgba(0, 0, 0, .12); transition: box-shadow 180ms ease-out; }
 .list .card:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
-.list .card:has(.openCard:focus-visible) { outline: 2px solid #ffb16d; outline-offset: 3px; }
+.list .card:has(.openCard:focus-visible) { outline: 2px solid var(--cust-focus); outline-offset: 3px; }
 .list .cardHeader { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
 .list .cardHeader > div { min-width: 0; }
 .list .cardHeader strong { display: block; color: var(--cust-ink); font-size: 1.0625rem; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
@@ -1915,7 +1966,7 @@ src/features/workspace/workspace.module.css
 .scope :global(.cust-document-navigation) > div { display: flex; flex-wrap: wrap; gap: 16px; }
 .scope .quotationLayout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); gap: 32px; align-items: start; }
 .scope .quotationLayout > * { min-width: 0; }
-.paper { margin: 16px 0 24px; padding: 32px; background: #fff; color: #202623; box-shadow: 0 8px 24px rgb(0 0 0 / .06); border-radius: 12px; overflow-wrap: anywhere; font-size: .9375rem; }
+.paper { --cust-ink: #202623; --cust-muted: #57615b; color-scheme: light; margin: 16px 0 24px; padding: 32px; background: #fff; color: #202623; box-shadow: 0 8px 24px rgb(0 0 0 / .06); border-radius: 12px; overflow-wrap: anywhere; font-size: .9375rem; }
 .paper h2 { font-size: 1.5rem; font-weight: 700; margin: 0 0 12px; }
 .paper h3 { font-size: 1rem; font-weight: 650; margin: 0 0 16px; }
 .paper p { margin: 8px 0; }
@@ -2043,10 +2094,6 @@ src/features/workspace/workspace.module.css
 .dashboard .skeleton > span:nth-child(3) { width: 40%; }
 .dashboard .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .dashboard .footnote { color: var(--cust-muted); font-size: .875rem; margin: 32px 0 0; }
-:global([data-customer-theme="light"]) .dashboard { --cust-blue: #166c70; }
-:global([data-customer-theme="light"]) .dashboard a:not(:global(.cust-primary)),
-:global([data-customer-theme="light"]) .dashboard a:not(:global(.cust-primary)):hover { color: #954711; }
-:global([data-customer-theme="light"]) .dashboard :global(:focus-visible) { outline: 2px solid #954711; outline-offset: 3px; }
 @media (max-width: 1200px) {
   .dashboard .actionEnd { flex-direction: column; align-items: flex-end; gap: 8px; }
   .dashboard .panelGrid { grid-template-columns: minmax(0, 1fr); }
