@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Icon } from "../../components/appearance/icons";
-import type { RefObject } from "react";
+import { useId, type RefObject } from "react";
 import type { BackendApi } from "../../lib/api/backend-api";
 import { formatBangkok } from "../../lib/formatting/display";
 import { countText, dayLabel, exactCount, jobsPath, STATUSES, STATUS_LABELS, type Filter, type JobReport, type OverviewReport } from "./overview-domain";
@@ -10,9 +10,10 @@ import styles from "./overview.module.css";
 
 export function OverviewJobs({ api, admin, filter, setFilter, counts, heading }: { api: BackendApi; admin: boolean; filter: Filter; setFilter: (value: Filter) => void; counts?: OverviewReport["counts"]; heading: RefObject<HTMLHeadingElement | null> }) {
   const resource = useReport<JobReport>(api, jobsPath(filter));
+  const id = useId();
   const data = resource.data;
-  return <section className={`${styles.panel} ${styles.jobs}`} aria-labelledby="staff-jobs-title" aria-busy={resource.loading}>
-    <div className={styles.sectionHead}><div><h2 id="staff-jobs-title" tabIndex={-1} ref={heading}>{filter.day ? "งานที่ผลิตเสร็จครั้งแรกในวันที่เลือก" : "รายการงานผลิต"}</h2><p className={styles.muted}>{filter.day ? dayLabel(filter.day) : "สถานะปัจจุบันของงานที่เปิดในช่วงที่เลือก"}</p></div><button onClick={resource.reload} disabled={resource.loading}>รีเฟรชรายการ</button></div>
+  return <section className={`${styles.panel} ${styles.jobs}`} aria-labelledby={id} aria-busy={resource.loading}>
+    <div className={styles.sectionHead}><div><h2 id={id} tabIndex={-1} ref={heading}>{filter.day ? "งานที่ผลิตเสร็จครั้งแรกในวันที่เลือก" : "รายการงานผลิต"}</h2><p className={styles.muted}>{filter.day ? dayLabel(filter.day) : "สถานะปัจจุบันของงานที่เปิดในช่วงที่เลือก"}</p></div><button onClick={resource.reload} disabled={resource.loading}>รีเฟรชรายการ</button></div>
     {filter.day ? <div className={styles.filterChip}><span>ผลิตเสร็จครั้งแรก: {dayLabel(filter.day, true)}</span><button onClick={() => setFilter({ ...filter, day: "", status: "", offset: 0 })}>ล้างตัวกรองวันที่</button></div> : <nav className={styles.tabs} aria-label="กรองสถานะงานผลิต">{["", ...STATUSES].map(status => <button key={status} aria-pressed={filter.status === status} onClick={() => setFilter({ ...filter, status: status as Filter["status"], offset: 0 })}>{status ? STATUS_LABELS[status as keyof typeof STATUS_LABELS] : "ทั้งหมด"}<span>{counts ? countText(counts[status ? status as keyof typeof counts : "total"]) : "—"}</span></button>)}</nav>}
     <ReportError error={resource.error} retry={resource.reload} />
     {resource.loading && !data ? <Skeleton label="กำลังโหลดรายการงานผลิต" /> : data && data.items.length ? <>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useId } from "react";
 import { Icon } from "../../components/appearance/icons";
 import { countText, STATUSES, STATUS_LABELS, type JobStatus, type OverviewReport } from "./overview-domain";
 import styles from "./overview.module.css";
@@ -22,15 +23,17 @@ export function SummaryCards({ data, loading, selected, choose }: { data?: Overv
   </section>;
 }
 export function PriorityQueue({ data, admin }: { data?: OverviewReport; admin: boolean }) {
+  const id = useId();
   const root = admin ? "/admin" : "/staff";
   const tasks = [
     { label: "คำขอรอประเมิน", hint: admin ? "ติดตามคิวคำขอและใบเสนอราคา" : "เปิดคิวเพื่อประเมินราคา", value: data?.queue.pending_requests, href: `${root}/${admin ? "requests" : "quotations"}`, icon: "file" as const },
     { label: "งานรอเริ่มผลิต", hint: "ตรวจแผนวัตถุดิบก่อนเริ่มงาน", value: data?.queue.queued_jobs, href: `${root}/production`, icon: "machine" as const },
     { label: "วัตถุดิบรอรับเข้า", hint: "คำสั่งซื้อที่ Supplier ตอบรับแล้ว", value: data?.queue.receiving_orders, href: `${root}/receiving`, icon: "layers" as const },
   ];
-  return <section className={`${styles.panel} ${styles.queue}`} aria-labelledby="staff-priorities"><h2 id="staff-priorities">ต้องจัดการ</h2><p className={styles.muted}>คิวปัจจุบันทั้งหมด · ไม่จำกัดช่วงเวลา</p><div className={styles.priorityList}>{tasks.map(task => <Link href={task.href} key={task.label}><Icon name={task.icon} size={20} /><div><strong>{task.label}</strong><small>{task.hint}</small></div><span>{task.value === undefined ? "—" : countText(task.value)}</span><Icon name="arrow" size={16} /></Link>)}</div></section>;
+  return <section className={`${styles.panel} ${styles.queue}`} aria-labelledby={id}><h2 id={id}>ต้องจัดการ</h2><p className={styles.muted}>คิวปัจจุบันทั้งหมด · ไม่จำกัดช่วงเวลา</p><div className={styles.priorityList}>{tasks.map(task => <Link href={task.href} key={task.label}><Icon name={task.icon} size={20} /><div><strong>{task.label}</strong><small>{task.hint}</small></div><span>{task.value === undefined ? "—" : countText(task.value)}</span><Icon name="arrow" size={16} /></Link>)}</div></section>;
 }
 export function QuickActions({ admin }: { admin: boolean }) {
+  const id = useId();
   const root = admin ? "/admin" : "/staff";
   const actions = [
     { label: "เปิดงานผลิต", href: `${root}/production`, icon: "machine" as const },
@@ -38,5 +41,5 @@ export function QuickActions({ admin }: { admin: boolean }) {
     { label: "รับเข้าวัตถุดิบ", href: `${root}/receiving`, icon: "inbox" as const },
     { label: admin ? "จัดการพนักงาน" : "คิวใบเสนอราคา", href: `${root}/${admin ? "workers" : "quotations"}`, icon: "grid" as const },
   ];
-  return <section className={`${styles.panel} ${styles.quick}`} aria-labelledby="staff-shortcuts"><h2 id="staff-shortcuts">ไปทำงานต่อ</h2><p className={styles.muted}>{admin ? "ติดตามงานและจัดการร้าน" : "เปิดพื้นที่ทำงานที่ใช้บ่อย"}</p><nav className={styles.shortcuts} aria-label="ทางลัดการทำงาน">{actions.map(action => <Link href={action.href} key={action.href}><Icon name={action.icon} size={22} /><span>{action.label}</span><Icon name="arrow" size={16} /></Link>)}</nav>{admin && <Link className={styles.textLink} href="/admin/orders">สั่งซื้อวัตถุดิบ<Icon name="arrow" size={16} /></Link>}</section>;
+  return <section className={`${styles.panel} ${styles.quick}`} aria-labelledby={id}><h2 id={id}>ไปทำงานต่อ</h2><p className={styles.muted}>{admin ? "ติดตามงานและจัดการร้าน" : "เปิดพื้นที่ทำงานที่ใช้บ่อย"}</p><nav className={styles.shortcuts} aria-label="ทางลัดการทำงาน">{actions.map(action => <Link href={action.href} key={action.href}><Icon name={action.icon} size={22} /><span>{action.label}</span><Icon name="arrow" size={16} /></Link>)}</nav>{admin && <Link className={styles.textLink} href="/admin/orders">สั่งซื้อวัตถุดิบ<Icon name="arrow" size={16} /></Link>}</section>;
 }

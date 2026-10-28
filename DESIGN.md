@@ -704,19 +704,41 @@ default 30 days; priority backlog is separately labelled all dates. No fabricate
 trend, ETA, stock readiness or finance appears. Reports use the new read-only
 backend dashboard contract, never first-100 counts or a live-error mock fallback.
 
-Overview alone fills the available stage, with 32px desktop/16px mobile side
-padding, compact 28px heading, 18px section titles, 16px body and 14px metadata.
+At the default Medium/16px base, Overview alone fills the available stage, with
+32px desktop/16px mobile side padding, compact 28px heading, 18px section titles,
+16px body and 14px metadata (all implemented as rem-scaled dimensions).
 Its CSS Module inherits Staff/Admin theme/scale tokens. At >=1280px the main/rail
-split is 2:1; the main has equal 2x2 metrics, 4 across >=1440px. Below 1280px the
+split uses a 2fr main and minmax(17rem, 1fr) rail; the main has equal 2x2 metrics,
+4 across >=1440px. Below 1280px the
 priority queue follows the metrics; below 704px the named table becomes rows.
-Panels use 16px corners, 24px padding and restrained borders. Quick links differ
+Panels use 1rem corners, 1.5rem padding (1.25rem at <=44rem) and restrained
+borders. Summary values use 2rem; completion-summary values 1.25rem; weekday axes
+use .75rem and calendar cells .1875rem corners. Pills use 2rem corners. These
+are Staff-local data/graphic scales, not additions to Customer frontmatter.
+Quick links differ
 by confirmed role; Admin worker management is navigation only. Existing production
 details accept a validated optional job UUID selector under Suspense; no command
 or form changes. Loading, stale refresh, empty/filter-empty and retry errors are
-distinct. This first UI batch reserves the heatmap region without invented data;
-interactive history is the following batch. See docs/staff-overview-surface.md.
+distinct. The heatmap is independent rolling twelve-month first-completion
+history, not current-cycle completed_at or a fictional productivity chart.
+Its 35rem minimum calendar scrolls within its own labelled region, never the
+page; Monday-first weeks pad only with noninteractive out-of-period blanks. Month
+labels and five neutral-to-orange intensity levels retain both palettes. Exact
+period captions include both years. On narrow viewports the calendar initially
+shows the newest days; subsequent manual pointer/wheel/key positioning is kept
+through resize, with a mobile scroll/date-input hint. Hovered-day counts derive
+from the latest report rather than retaining an obsolete day object. Exact
+date/count labels, roving arrow/Home/End keys, Enter selection, Escape dismissal
+and a native 44px date input make daily details available beyond color or hover.
+Day names load only on intent (140ms delay, cancelable reads, first three names
+plus full-day pagination); no startup per-job reads. Four summary facts show
+total, latest tied best day, today/yesterday-ending streak and weekly average.
+Missing audit history is disclosed and streak/average stay unavailable. Section
+IDs use useId to avoid cached App Router tree collisions. No new library/raster.
+See docs/staff-overview-surface.md.
 
-Change log: 2026-10-28 — Staff/Admin shared-queue reporting layout and named list;
+Change log: 2026-10-28 — Staff/Admin shared-queue reporting layout, named list and
+accessible first-completion heatmap;
 preserved Customer, navbar/drawer and shared Light/Dark preferences.
 
 ## Generated source appendix
@@ -2195,7 +2217,39 @@ src/features/workspace/workspace.module.css
 .quick > .textLink { margin-top: 1rem; }
 .textLink { display: inline-flex; align-items: center; min-height: 2.75rem; gap: .5rem; font-size: .875rem; font-weight: 600; }
 .activity { grid-area: activity; min-height: 12rem; }
-.activity > p:last-child { margin-top: 1.5rem; }
+.heatmap { margin-top: 1.5rem; }
+.heatmapMeta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; font-size: .875rem; color: var(--muted); }
+.calendarScroll { overflow-x: auto; max-width: 100%; margin-top: 1.25rem; padding: .25rem .25rem .75rem; scrollbar-color: var(--line) var(--surface); overscroll-behavior-x: contain; }
+.calendarScroll:focus-visible { outline: 2px solid var(--lime-soft); outline-offset: 2px; }
+.calendarFrame { min-width: 35rem; }
+.months { display: grid; grid-template-columns: repeat(var(--weeks), minmax(0, 1fr)); gap: .1875rem; margin-left: 1.75rem; margin-bottom: .5rem; font-size: .875rem; color: var(--muted); }
+.months span { white-space: nowrap; }
+.calendarBody { display: flex; gap: .5rem; }
+.weekdays { flex: 0 0 1.25rem; display: flex; flex-direction: column; justify-content: space-around; font-size: .75rem; color: var(--muted); }
+.calendar { display: grid; grid-template-columns: repeat(var(--weeks), minmax(0, 1fr)); gap: .1875rem; width: 100%; align-items: start; }
+.week { display: grid; grid-template-rows: repeat(7, minmax(0, 1fr)); gap: .1875rem; }
+.week > span { aspect-ratio: 1; }
+.dashboard .day { position: relative; min-height: 0; height: auto; width: 100%; aspect-ratio: 1; border: 1px solid color-mix(in srgb, var(--line) 50%, transparent); padding: 0; border-radius: .1875rem; background: var(--surface-2); }
+.dashboard .day[data-level="1"], .legend i[data-level="1"] { background: color-mix(in srgb, var(--lime) 25%, var(--surface-2)); }
+.dashboard .day[data-level="2"], .legend i[data-level="2"] { background: color-mix(in srgb, var(--lime) 45%, var(--surface-2)); }
+.dashboard .day[data-level="3"], .legend i[data-level="3"] { background: color-mix(in srgb, var(--lime) 70%, var(--surface-2)); }
+.dashboard .day[data-level="4"], .legend i[data-level="4"] { background: var(--lime); }
+.dashboard .day[data-selected="true"] { outline: 2px solid var(--text); outline-offset: 1px; }
+.dashboard .day:focus-visible { z-index: 1; outline: 2px solid var(--text); outline-offset: 2px; }
+.legend { display: flex; align-items: center; justify-content: end; gap: .375rem; font-size: .875rem; color: var(--muted); margin: .5rem 0 1.5rem; }
+.legend i { display: block; width: .75rem; height: .75rem; background: var(--surface-2); border-radius: .1875rem; }
+.calendarHint { display: none; color: var(--muted); font-size: .875rem; margin-bottom: 1.25rem !important; }
+.completionStats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; gap: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--line-soft); }
+.completionStats dt { color: var(--muted); font-size: .875rem; }
+.completionStats dd { font-size: 1.25rem; font-weight: 650; margin: .375rem 0 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.completionStats dd small { font-size: .875rem; color: var(--muted); font-weight: 400; }
+.noHistory, .historyWarning { margin-top: 1.25rem !important; font-size: .875rem; color: var(--muted); }
+.datePicker { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--line-soft); font-size: .875rem; }
+.datePicker input { min-height: 2.75rem; max-width: 100%; padding: .5rem .75rem; background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: .625rem; font-size: 1rem; }
+.dayPreview { margin-top: 1rem; padding: 1rem; background: var(--surface-2); border-radius: .625rem; font-size: .875rem; }
+.dayPreview ul { margin: .75rem 0; padding-left: 1.25rem; }
+.dayPreview li { margin-top: .375rem; overflow-wrap: anywhere; }
+.previewActions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .75rem; }
 .jobs { grid-area: jobs; }
 .sectionHead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: 1rem; }
 .sectionHead p { margin-top: .375rem; }
@@ -2248,6 +2302,7 @@ src/features/workspace/workspace.module.css
   :global(.page-content):has(.dashboard) { padding: 1.5rem 1rem 2.5rem; }
   .dashboard { gap: 1rem; }
   .panel { padding: 1.25rem; }
+  .calendarHint { display: block; }
   .summary { gap: .75rem; }
   .dashboard .metric { padding: 1rem; }
   .metric > span svg { display: none; }

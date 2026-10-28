@@ -19,5 +19,8 @@ Signature interaction: selecting a metric/day focuses the matching named list;
 no dashboard mutation shortcuts or speculative ETA/readiness. No entrance motion.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
-First UI batch includes summary/list/priority/navigation and honest report errors;
-interactive heatmap follows in the next logical batch. No raster assets needed.
+Implemented surface includes summary/list/priority/navigation, report errors and
+the interactive twelve-month first-completion calendar. No raster assets needed.
+Calendar days support arrow/Home/End navigation, named day previews, a native
+date alternative and the same filtered job list. Dense cells have a separate
+44px date control; page scrolling never expands to calendar width.
