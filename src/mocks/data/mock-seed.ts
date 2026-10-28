@@ -6,6 +6,7 @@ import { salesRoutes } from "../routes/mock-routes-sales.ts";
 import { stockRoutes } from "../routes/mock-routes-stock.ts";
 import { jobRoutes } from "../routes/mock-routes-jobs.ts";
 import { MOCK_PASSWORD } from "./mock-accounts.ts";
+import { dashboardRoutes } from "../routes/mock-dashboard.ts";
 
 export { MOCK_LOGINS, MOCK_PASSWORD } from "./mock-accounts.ts";
 
@@ -162,5 +163,5 @@ function seedScenario(db: Db, run: Run) {
 
 // A fresh, seeded in-memory backend. Reloading the page discards it.
 export function createLatheMockBackend() {
-  return createMockBackend([...salesRoutes, ...stockRoutes, ...jobRoutes], (db, run) => { seedAccounts(db); seedScenario(db, run); db.notifications.forEach((n, i) => { if (i % 3 === 2) n.read_at = n.created_at; }); });
+  return createMockBackend([...salesRoutes, ...stockRoutes, ...jobRoutes, ...dashboardRoutes], (db, run) => { seedAccounts(db); seedScenario(db, run); db.notifications.forEach((n, i) => { if (i % 3 === 2) n.read_at = n.created_at; }); });
 }
