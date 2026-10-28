@@ -499,6 +499,17 @@ this local restyle is not a global accessibility/palette audit or a full AA clai
 The scope, finish-review findings, evidence and limitations are recorded in
 `docs/customer-request-list-restyle.md`.
 
+### Job-list adaptation — 2026-10-28
+
+The Customer job list is being aligned with the incumbent request-card pattern,
+not a new identity. The first checkpoint adds presentation-only literal search
+and query-scoped counts using the existing authorized jobs/requests collections.
+Production status remains queued/in_progress/completed/cancelled; delivery and
+invoice status are separate. Preserve server job order, exact request references
+and missing-metadata fallbacks. No new API, business transition or date is added.
+The following UI checkpoint composes the existing request-card styling; job
+details, history, inspection and payment screens remain outside this adaptation.
+
 ### Customer documents — approved Customer-only UC4/quotation adaptation
 
 Quotation and UC4 lists share a scoped document workspace. Real Customer-visible
@@ -551,6 +562,7 @@ and native preview support still require verification on the real deployment.
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Job-list batch 1: presentation-only literal search and real production-status counts over existing authorized data | Native tests cover int64 references, literal matching, preserved order and missing request metadata; UI follows separately |
 | 2026-10-28 | Document batch 2: Customer-safe quotation document/native print and private UC4 PO preview; preserve original decision and evidence writes, evidence history and existing navigation | Native preview security/whitelist tests and scoped mock/browser checks; full evidence and real-stack limitations in docs/customer-documents-handoff.md |
 | 2026-10-28 | Document batch 1: shared Customer quotation/UC4 lists with actual-status pills, loaded-query counts, applied filters/chips/sort and URL paging; separate UC4 obligations from uploaded PO evidence | Domain tests for exact money, Bangkok dates, original identifiers and authorized projections; document preview/print follows in batch 2 |
 | 2026-10-28 | Request-list batch 2: responsive record cards, existing machine icon, date rows, membership footer, accessible whole-card link and static skeleton; unknown counts remain distinct from zero; restore existing primary-link hover foreground and reconcile active layout prose | 83 native tests; Chrome 375/640/768/1280/1440px Dark plus 375/1280px Light; synthetic loading/read-error/empty/31-record pagination checks and scoped finish review. Build/check evidence and remaining limitations are recorded in the request-list handoff; not Go/PostgreSQL/S3 verification |
