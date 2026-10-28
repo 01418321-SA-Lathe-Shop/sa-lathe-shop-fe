@@ -50,8 +50,7 @@ export function CustomerOverview({ api }: { api: BackendApi }) {
       <div className={styles.sectionHead}><h2 id="overview-attention">สิ่งที่คุณต้องทำ</h2><span>{!loading ? `${data.attention.length} รายการ${!complete || hasError ? "ที่พบ" : ""}` : "กำลังตรวจสอบ"}</span></div>
       {loading && !data.attention.length ? <PanelState loading /> : !data.attention.length && hasError ? <PanelState unavailable /> : <OverviewAttention items={data.attention} complete={complete && !hasError} />}
     </section>
-    <div className={styles.columns}>
-      <div className={styles.column}>
+    <div className={styles.panelGrid}>
         <section className={styles.panel} aria-labelledby="overview-payments">
           <div className={styles.sectionHead}><h2 id="overview-payments">การชำระเงินที่ต้องจัดการ</h2><Link href="/customer/payments">ดูทั้งหมด<Icon name="arrow" size={16} /></Link></div>
           <p className={styles.hint}>ยอดคงเหลือและกำหนดชำระตามใบแจ้งหนี้ · ชำระเป็นงวดได้</p>
@@ -62,13 +61,10 @@ export function CustomerOverview({ api }: { api: BackendApi }) {
           {!jobsKnown ? <PanelState loading={jobs.loading} unavailable={Boolean(jobs.error)} /> : <OverviewWork items={data.activeJobs} />}
           {salesKnown && sales.records.some(record => !record.fulfillment?.job && !["completed", "canceled"].includes(record.request.status)) && <Link className={styles.bottomLink} href="/customer/requests">ดูคำขอที่ยังไม่เปิดงานผลิต<Icon name="arrow" size={16} /></Link>}
         </section>
-      </div>
-      <div className={styles.column}>
         <section className={styles.panel} aria-labelledby="overview-ready">
           <div className={styles.sectionHead}><h2 id="overview-ready">งานผลิตเสร็จ / รอรับงาน</h2><Icon name="truck" size={22} /></div>
           <p className={styles.hint}>ดูว่างานไหนจัดส่งแล้ว หรืองานไหนผลิตเสร็จ</p>
           {!jobsKnown ? <PanelState loading={jobs.loading} unavailable={Boolean(jobs.error)} /> : <OverviewReady items={data.ready} />}
-          {data.ready.length > 4 && <Link className={styles.bottomLink} href="/customer/jobs">ดูงานผลิตทั้งหมด · พบงานผลิตเสร็จ / รอรับ {data.ready.length} งาน<Icon name="arrow" size={16} /></Link>}
           <p className={styles.dateNote}><Icon name="clock" size={16} />ยังไม่มีวันรับงานที่ร้านยืนยันในข้อมูลนี้ ไม่ใช้วันที่ลูกค้าต้องการแทนกำหนดส่ง</p>
         </section>
         <section className={styles.panel} aria-labelledby="overview-updates">
@@ -76,7 +72,6 @@ export function CustomerOverview({ api }: { api: BackendApi }) {
           <p className={styles.hint}>ประวัติตามเวลาที่บันทึก · ไม่ใช่ฟีดแบบเรียลไทม์</p>
           {loading && !data.updates.length ? <PanelState loading /> : !data.updates.length && hasError ? <PanelState unavailable /> : <OverviewActivity items={data.updates} now={now} />}
         </section>
-      </div>
     </div>
     <p className={styles.footnote}>เวลาแสดงตามประเทศไทย · เงินบาท · ไม่มี VAT</p>
   </div>;
