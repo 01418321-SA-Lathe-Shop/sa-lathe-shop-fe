@@ -127,7 +127,7 @@ On tablet/mobile (≤1024px), the desktop sidebar is hidden, the stage margin is
 
 The Request and normal Job lists are scoped exceptions to the general tablet stacking breakpoint: their full-width card grids have two columns above 640px and one column at 640px and below. Grid gaps are 24px/16px and card padding is 24px/20px respectively, with 16px corners. Search stays above wrapping real-status pill navigation; loaded-query count badges do not imply global totals. The existing query-selected detail replaces each list; no permanent detail panel or new detail drawer is introduced.
 
-Overview prioritizes attention and recent work; requests use responsive record cards and separate document details; quotations use a price/decision rail; Deposit/PO uses an evidence checklist; normal jobs use record cards while unchanged Job details use a timeline; receipt uses a focused decision form; invoices prioritize balance; account/settings use split task layouts. These are Customer surface patterns, not prescriptions for Landing or Staff.
+Overview is an operational dashboard with quick-action navigation, an inline four-part summary, an attention queue, invoice due/balance rows, active work, completed/shipping readiness and a chronological work-history feed. Its two asymmetric columns stack at 1200px; summary cells become two columns at 640px. Requests use responsive record cards and separate document details; quotations use a price/decision rail; Deposit/PO uses an evidence checklist; normal jobs use record cards while unchanged Job details use a timeline; receipt uses a focused decision form; invoices prioritize balance; account/settings use split task layouts. These are Customer surface patterns, not prescriptions for Landing or Staff.
 
 ## Elevation & Depth
 
@@ -567,10 +567,40 @@ Preview/upload completion is not evidence approval. No PDF library, API endpoint
 supplier screen, status, pricing formula or permission is added. Storage GET CORS
 and native preview support still require verification on the real deployment.
 
+### Customer Overview dashboard — 2026-10-28
+
+`/customer` uses `customer-overview.module.css`, isolated from all other screens.
+An inline shortcut rail leads to the existing jobs, quotations and payments
+pages; the primary button opens the existing request wizard. A divider-separated
+four-cell summary covers loaded work, sent quotations, inspectable deliveries
+and exact invoice balance only. Unknown values use a dash, partial reads are
+explicit, and failed refreshes retain earlier values with a warning.
+
+The full-width attention queue initially shows three actions, expanding locally.
+Below, 1.35:1 columns (>1200px) hold invoice due/balance and work on the left,
+readiness and a commit-style chronological activity rail on the right. Columns
+stack at 1200px; summary becomes two columns at 640px. Task panels have 16px
+corners, 24px gaps/padding, 20px mobile padding and solid existing-theme fills.
+Text uses the existing .875/1/1.25/1.75rem hierarchy; static skeletons have 8px
+corners. Six factual dated activities show initially, expanding six at a time.
+Dashboard-local light overrides use copper `#954711` for secondary links/hover
+and focus outlines and teal `#166c70` for informational badge text, for readable
+contrast on white. Filled primary actions and all other surfaces keep their
+existing tokens; these are not a global theme migration.
+
+Invoice rows show actual `due_at`, approved-current balance and pending-proof
+warning. Deposit/PO stays separate in Attention. Readiness means actual completed
+or shipping state, not an invented delivery forecast: the Customer DTO still
+lacks a shop-confirmed arrival date. Customer-requested dates do not substitute
+for that date. Activity uses timestamped authorized DTO facts, excludes private
+raw event/actor data, and explicitly does not claim real-time notification.
+Details, business writes, navbar notifications, APIs and dependencies are unchanged.
+
 ### Change log
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Overview batch 2: task dashboard with existing-route quick actions, loaded-data summary, invoice due/balance rows, active production, completed/shipping readiness, factual chronological activity and dashboard-local Light link/focus/information contrast corrections | Scoped native/browser checks and limitations in docs/customer-overview-dashboard.md; targeted finish recheck SHIP on original three contrast findings; same API reads and business logic |
 | 2026-10-28 | Overview batch 1: presentation-only dashboard projections for authorized actions, invoice balance/due dates, production readiness and factual timestamped history | Domain regressions cover exact money, independent receipt/payment, original evidence gates, missing dates and private-event exclusion; visual dashboard follows separately |
 | 2026-10-28 | Job-list batch 2: reuse request-card presentation for Customer jobs, real status tabs/counts, literal search and robust local paging; preserve detail/history/inspection/payment views | Native card and domain regressions plus scoped browser checks; no new API or business transitions |
 | 2026-10-28 | Job-list batch 1: presentation-only literal search and real production-status counts over existing authorized data | Native tests cover int64 references, literal matching, preserved order and missing request metadata; UI follows separately |
@@ -1915,6 +1945,113 @@ src/features/workspace/workspace.module.css
   .paperTotal { grid-template-columns: minmax(0, 1fr); }
   .scope .filePreview object { height: 480px; }
   .scope .previewFallback { padding: 20px; }
+}
+```
+
+### A7. Customer overview dashboard — src/features/customer/customer-overview.module.css
+
+```css
+.dashboard { min-width: 0; }
+.dashboard a:global(.cust-primary):hover { color: #121514; }
+.dashboard .quickActions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 0 0 24px; }
+.dashboard .quickActions > span { color: var(--cust-muted); font-size: .875rem; }
+.dashboard .quickActions a { gap: 8px; padding: 8px 12px; border: 1px solid var(--cust-line); border-radius: 10px; color: var(--cust-ink); background: var(--cust-surface); font-size: .875rem; }
+.dashboard .quickActions a:hover { border-color: var(--cust-accent); background: var(--cust-surface-2); text-decoration: none; }
+.dashboard .quickActions button { display: inline-flex; gap: 8px; align-items: center; margin-left: auto; font-size: .875rem; }
+.dashboard .summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.5fr); padding: 24px 0; border-top: 1px solid var(--cust-line); border-bottom: 1px solid var(--cust-line); margin: 0; }
+.dashboard .summary > div { padding: 0 24px; min-width: 0; border-right: 1px solid var(--cust-line); }
+.dashboard .summary > div:first-child { padding-left: 0; }
+.dashboard .summary > div:last-child { padding-right: 0; border: 0; }
+.dashboard .summary dt { font-size: .875rem; color: var(--cust-muted); }
+.dashboard .summary dd { margin: 8px 0 0; font-size: 1.75rem; font-weight: 650; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.dashboard .summary dd > span { font-size: .875rem; font-weight: 400; color: var(--cust-muted); margin-left: 8px; }
+.dashboard .summary .money { font-size: 1.25rem; }
+.dashboard .scope { color: var(--cust-muted); font-size: .875rem; margin: 12px 0 32px; }
+.dashboard .attention { padding: 24px; background: var(--cust-surface); border-radius: 16px; margin-bottom: 24px; }
+.dashboard .sectionHead { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; margin-bottom: 8px; }
+.dashboard .sectionHead h2 { font-size: 1.25rem; line-height: 1.5; margin: 0; }
+.dashboard .sectionHead > span { color: var(--cust-muted); font-size: .875rem; }
+.dashboard .sectionHead > a { gap: 4px; font-size: .875rem; }
+.dashboard .sectionHead > svg { color: var(--cust-muted); flex-shrink: 0; }
+.dashboard .columns { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); align-items: start; gap: 24px; }
+.dashboard .column { min-width: 0; display: grid; align-content: start; gap: 24px; }
+.dashboard .panel { min-width: 0; background: var(--cust-surface); padding: 24px; border-radius: 16px; }
+.dashboard .hint { color: var(--cust-muted); font-size: .875rem; margin: 4px 0 16px; }
+.dashboard .empty { color: var(--cust-muted); font-size: 1rem; margin: 16px 0 8px; max-width: 65ch; }
+.dashboard .rows, .dashboard .actionList { list-style: none; margin: 0; padding: 0; }
+.dashboard .rows > li, .dashboard .actionList > li { padding: 20px 0; border-bottom: 1px solid var(--cust-line); }
+.dashboard .rows > li:last-child, .dashboard .actionList > li:last-child { border-bottom: 0; padding-bottom: 4px; }
+.dashboard .actionList > li { display: flex; justify-content: space-between; align-items: center; gap: 16px 32px; }
+.dashboard .actionList > li > div { min-width: 0; }
+.dashboard .workName { margin: 4px 0; overflow-wrap: anywhere; }
+.dashboard small { display: block; font-size: .875rem; overflow-wrap: anywhere; }
+.dashboard .actionEnd { display: flex; align-items: center; gap: 16px 24px; flex-shrink: 0; max-width: 48%; }
+.dashboard .actionEnd small { text-align: right; }
+.dashboard .actionEnd time { display: block; color: var(--cust-ink); }
+.dashboard .outlineAction { gap: 8px; padding: 8px 14px; border: 1px solid var(--cust-line); border-radius: 10px; color: var(--cust-ink); font-size: .875rem; white-space: nowrap; }
+.dashboard .outlineAction:hover { border-color: var(--cust-accent); color: var(--cust-ink); text-decoration: none; background: var(--cust-surface-2); }
+.dashboard .paymentRow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .85fr); align-items: start; gap: 16px; }
+.dashboard .paymentRow :global(.cust-badge) { margin-top: 8px; }
+.dashboard .documentLink { color: var(--cust-ink); font-weight: 650; gap: 8px; }
+.dashboard .paymentEnd { text-align: right; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.dashboard .paymentEnd strong { display: block; font-size: 1.25rem; margin: 8px 0; }
+.dashboard .paymentEnd time { display: block; font-size: .875rem; color: var(--cust-muted); }
+.dashboard .paymentEnd small { margin-top: 8px; }
+.dashboard .due, .dashboard .overdue { font-size: .875rem; }
+.dashboard .overdue { color: var(--cust-red); font-weight: 650; }
+.dashboard .due { color: var(--cust-muted); }
+.dashboard .readyRow { display: grid; justify-items: start; gap: 8px; }
+.dashboard .readyRow p { font-size: .875rem; margin: 0; color: var(--cust-muted); }
+.dashboard .workLink { color: var(--cust-ink); font-weight: 600; gap: 8px; overflow-wrap: anywhere; }
+.dashboard .workLink svg, .dashboard .activity a svg { flex-shrink: 0; }
+.dashboard .dateNote { display: flex; align-items: flex-start; gap: 8px; color: var(--cust-muted); font-size: .875rem; margin: 24px 0 0; }
+.dashboard .dateNote svg { flex-shrink: 0; margin-top: 4px; }
+.dashboard .workRow { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.dashboard .workRow > div { min-width: 0; }
+.dashboard .workRow > :global(.cust-badge) { flex-shrink: 0; margin-top: 8px; }
+.dashboard .bottomLink { gap: 8px; font-size: .875rem; margin-top: 8px; }
+.dashboard .activity { list-style: none; margin: 24px 0 0; padding: 0; }
+.dashboard .activity li { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 16px; padding: 0 0 24px; position: relative; }
+.dashboard .activity li:not(:last-child)::before { content: ""; position: absolute; left: 15px; top: 32px; bottom: 0; width: 1px; background: var(--cust-line); }
+.dashboard .marker { width: 32px; height: 32px; display: grid; place-items: center; color: var(--cust-muted); background: var(--cust-surface-2); border-radius: 50%; }
+.dashboard .activity strong { font-size: 1rem; display: block; }
+.dashboard .activity a { gap: 4px; color: var(--cust-ink); font-size: .875rem; overflow-wrap: anywhere; }
+.dashboard .activity time { display: block; margin-top: 4px; font-size: .875rem; color: var(--cust-muted); }
+.dashboard .more { min-height: 44px; width: 100%; margin-top: 16px; font-size: .875rem; }
+.dashboard .skeleton { display: grid; gap: 16px; padding: 24px 0; }
+.dashboard .skeleton > span:not(.srOnly) { height: 16px; width: 85%; background: var(--cust-surface-2); border-radius: 8px; }
+.dashboard .skeleton > span:nth-child(2) { width: 65%; }
+.dashboard .skeleton > span:nth-child(3) { width: 40%; }
+.dashboard .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.dashboard .footnote { color: var(--cust-muted); font-size: .875rem; margin: 32px 0 0; }
+:global([data-customer-theme="light"]) .dashboard { --cust-blue: #166c70; }
+:global([data-customer-theme="light"]) .dashboard a:not(:global(.cust-primary)),
+:global([data-customer-theme="light"]) .dashboard a:not(:global(.cust-primary)):hover { color: #954711; }
+:global([data-customer-theme="light"]) .dashboard :global(:focus-visible) { outline: 2px solid #954711; outline-offset: 3px; }
+@media (max-width: 1200px) {
+  .dashboard .actionEnd { flex-direction: column; align-items: flex-end; gap: 8px; }
+  .dashboard .columns { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .dashboard .quickActions { gap: 8px; }
+  .dashboard .quickActions > span { width: 100%; }
+  .dashboard .quickActions > a { width: auto; flex: 1 1 auto; justify-content: center; }
+  .dashboard .quickActions button { width: 100%; margin: 8px 0 0; justify-content: center; }
+  .dashboard .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; }
+  .dashboard .summary > div { padding: 0; border: 0; }
+  .dashboard .summary dd { font-size: 1.75rem; }
+  .dashboard .summary .money { font-size: 1.25rem; }
+  .dashboard .summary dt { font-size: .875rem; }
+  .dashboard .attention, .dashboard .panel { padding: 20px; }
+  .dashboard .actionList > li { flex-direction: column; align-items: stretch; }
+  .dashboard .actionEnd { max-width: none; align-items: stretch; }
+  .dashboard .actionEnd small { text-align: left; }
+  .dashboard .outlineAction { justify-content: center; }
+  .dashboard .paymentRow { grid-template-columns: minmax(0, 1fr); }
+  .dashboard .paymentEnd { text-align: left; }
+  .dashboard .workRow { flex-direction: column; gap: 4px; }
+  .dashboard .readyRow { justify-items: stretch; }
+  .dashboard .readyRow > :global(.cust-badge) { justify-self: start; }
 }
 ```
 

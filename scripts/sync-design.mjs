@@ -40,6 +40,8 @@ const snapshot = [
   fence('css', read('src/features/customer/customer-requests.module.css')),
   '### A6. Customer document workspaces — src/features/customer/customer-documents.module.css',
   fence('css', read('src/features/customer/customer-documents.module.css')),
+  '### A7. Customer overview dashboard — src/features/customer/customer-overview.module.css',
+  fence('css', read('src/features/customer/customer-overview.module.css')),
   '### B. Font loading and root layout — app/layout.tsx',
   fence('tsx', read('app/layout.tsx')),
   '### B2. Scoped Thai landing font — src/features/landing/landing-page.tsx',
