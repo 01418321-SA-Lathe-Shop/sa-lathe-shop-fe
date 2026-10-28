@@ -1,4 +1,5 @@
 import type { Login, Attachment, SignedLink, Transport } from './types';
+import { readPrivatePreview } from './private-preview.ts';
 export type * from './types';
 
 
@@ -119,6 +120,10 @@ export class BackendApi {
     return this.call<T>(completePath(link.attachment_id), "POST", undefined, signal);
   }
   // Requests a short-lived private link and opens it without keeping the URL in state.
+  async preview(file: Attachment, signal?: AbortSignal): Promise<Blob> {
+    const combined = signal ? AbortSignal.any([signal, this.controller.signal]) : this.controller.signal;
+    return readPrivatePreview(file, () => this.call<SignedLink>(`/attachments/${file.id}/download`, "GET", undefined, combined), this.transport, combined);
+  }
   async download(path: string, fileName?: string, signal?: AbortSignal): Promise<void> {
     const link = await this.call<SignedLink>(path, "GET", undefined, signal);
     const url = new URL(link.url);

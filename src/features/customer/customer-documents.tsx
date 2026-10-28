@@ -55,6 +55,7 @@ function DocumentListRow({ row, api, view, href, capture }: { row: DocumentRow; 
     <div><span className={styles.label}>{view === "po" ? "ส่ง PO เมื่อ" : view === "tasks" ? "ตอบรับเมื่อ" : "ส่งใบเสนอราคาเมื่อ"}</span><time dateTime={row.date}>{dateTH(row.date)}</time>{view === "tasks" && row.fulfillment && <p>ส่งหลักฐานภายใน {dateTH(row.fulfillment.terms.documents_due_at)}</p>}</div>
     <div className={styles.rowActions}>{row.amount && <><strong>{moneyTH(row.amount)}</strong><small>ราคารวมทั้งงาน · ไม่มี VAT</small></>}
       <Link className="cust-link" href={href} onClick={capture}>{view === "tasks" ? "ดูและส่งหลักฐาน" : view === "po" ? "ดูรายละเอียด PO" : "ดูรายละเอียดใบเสนอราคา"} →</Link>
+      {view === "quotes" && <><span className={styles.desktopDownload}><Link className="cust-link" href={`${href}&print=1`} onClick={capture} aria-label={`พิมพ์หรือบันทึก PDF ใบเสนอราคา #${row.quote.quotation_no}`}>พิมพ์ / PDF</Link></span><details className={styles.mobileMore}><summary>ตัวเลือกเอกสาร</summary><Link href={`${href}&print=1`} onClick={capture}>พิมพ์ / บันทึกเป็น PDF</Link></details></>}
       {row.evidence && <div className={styles.desktopDownload}><PrivateFile api={api} path={`/attachments/${row.evidence.attachment_id}/download`} name="ดาวน์โหลดไฟล์ PO เดิม" /></div>}
       {row.evidence && <details className={styles.mobileMore}><summary>ตัวเลือกเอกสาร</summary><PrivateFile api={api} path={`/attachments/${row.evidence.attachment_id}/download`} name="ดาวน์โหลดไฟล์ PO เดิม" /></details>}
     </div>

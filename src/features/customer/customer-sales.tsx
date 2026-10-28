@@ -12,6 +12,7 @@ import { CustomerDepositDetail } from "./customer-deposits";
 import { CustomerWriteRetry } from "./customer-write";
 import { DocumentList } from "./customer-documents";
 import { DocumentDetailNavigation } from "./customer-document-navigation";
+import { QuotationDocument, QuotationPrint } from "./customer-quotation-document";
 import documentStyles from "./customer-documents.module.css";
 
 export function CustomerDocumentList({ api, mode }: { api: BackendApi; mode: "quotes" | "deposit" }) {
@@ -22,7 +23,7 @@ export function CustomerSalesDetail({ api, requestId, quotationId, deposit = fal
   const request = useResource<JobRequest>(api, `/requests/${requestId}`); const quotes = useCollection<Quotation>(api, `/requests/${requestId}/quotations`);
   const current = latestQuote(quotes.data?.items ?? []);
   const quote = quotationId ? quotes.data?.items.find((item) => item.id === quotationId) : deposit ? quotes.data?.items.find((item) => item.status === "approved") : current;
-  return <section className={documentStyles.scope}><DocumentDetailNavigation /><ResourceFeedback {...request} /><ResourceFeedback {...quotes} /><Limited complete={quotes.data?.complete} />
+  return <section className={documentStyles.scope}>{(deposit || !quote || !request.data) && <DocumentDetailNavigation />}<ResourceFeedback {...request} /><ResourceFeedback {...quotes} /><Limited complete={quotes.data?.complete} />
     {quote && request.data ? deposit ? quote.status === "approved" ? <CustomerDepositDetail api={api} request={request.data} quote={quote} /> : <Empty title="ยังไม่มีเงื่อนไขที่ตอบรับ" action={<Link href={customerHref("quotations", { request: requestId, quotation: quote.id })}>พิจารณาใบเสนอราคา</Link>}>ตอบรับใบเสนอราคาก่อนส่งหลักฐาน</Empty> : <QuotationDetail key={`${quote.id}:${quote.lock_version}`} api={api} request={request.data} quote={quote} latest={current?.id === quote.id} reload={() => { quotes.reload(); request.reload(); }} /> : quotes.data && !quotes.loading && <Empty title="ไม่พบใบเสนอราคาที่เปิดดูได้" action={<Link href="/customer/quotations">กลับใบเสนอราคา</Link>}>อาจยังไม่มีใบเสนอราคา หรือคุณไม่มีสิทธิ์ดูรายการนี้</Empty>}
   </section>;
 }
@@ -34,6 +35,8 @@ function QuotationDetail({ api, request, quote, latest, reload }: { api: Backend
   const rejectionCount = Math.max(0, ...(history.data?.items.map((item) => item.rejection_count) ?? []));
   const profile = profiles.data?.items?.find((item) => item.id === request.customer_id);
   const preview = profile ? quotePreview(quote.final_price, profile.customer_type) : null;
+  const terms = history.data?.items.find((item) => item.quotation_id === quote.id && item.outcome === "accept")?.terms;
+  const printReady = Boolean(profile && !profiles.loading && !profiles.error && !write.frozen && (quote.status !== "approved" || terms && history.data?.complete && !history.loading && !history.error));
   const canDecide = latest && quote.status === "sent" && request.status !== "canceled" && history.data?.complete && !history.loading && !history.error;
   function decide() {
     write.submit(`/quotations/${quote.id}/decision`, "POST", () => {
@@ -42,9 +45,10 @@ function QuotationDetail({ api, request, quote, latest, reload }: { api: Backend
       return { outcome: choice, expected_lock_version: BigInt(quote.lock_version), ...(choice === "reject" ? { reason: trimmed } : {}) };
     }, "");
   }
-  return <><PageTitle title={request.description} description={`ใบเสนอราคา #${quote.quotation_no} · ฉบับที่ ${quote.version} · คำขอ #${request.no_request}`} back="/customer/quotations" />
+  return <><DocumentDetailNavigation blocked={write.frozen} /><PageTitle title={`ใบเสนอราคา #${quote.quotation_no}`} description={`${request.description} · ฉบับที่ ${quote.version} · คำขอ #${request.no_request}`} />
     {notice && <p role="status" className="cust-alert success">{notice}</p>}
-    <div className="cust-quotation-layout"><section className="cust-document"><h2>ขอบเขตงานที่เสนอ</h2><p className="cust-preserve">{request.description}</p><dl className="cust-definition"><div><dt>จำนวนทั้งงาน</dt><dd>{request.qty} ชิ้น</dd></div><div><dt>ข้อกำหนดวัตถุดิบ</dt><dd>{request.material_spec || "ไม่ระบุ"}</dd></div><div><dt>วันที่ลูกค้าต้องการ</dt><dd>{dateTH(request.deadline)}<small>ไม่ใช่กำหนดส่งที่ร้านยืนยัน</small></dd></div></dl><Link href={customerHref("requests", { request: request.id })}>ดูคำขอและไฟล์แนบ →</Link>
+    <ResourceFeedback {...profiles} loading={false} />
+    <div className={documentStyles.quotationLayout}><section><QuotationPrint ready={printReady}><QuotationDocument request={request} quote={quote} customer={profile} terms={terms} /></QuotationPrint><Link href={customerHref("requests", { request: request.id })}>ดูคำขอและไฟล์แนบ →</Link>
       <Disclosure title="เปรียบเทียบราคาและประวัติฉบับก่อน"><QuotationHistory api={api} requestId={request.id} current={quote.id} /></Disclosure>
       <section className="cust-section"><h2>ประวัติการตัดสินใจ</h2><ResourceFeedback {...history} /><Limited complete={history.data?.complete} />{history.data?.items.map((decision) => <article className="cust-history-row" key={decision.quotation_id}><strong>{decision.outcome === "accept" ? "ตอบรับแล้ว" : "ปฏิเสธแล้ว"}</strong><p>{dateTH(decision.decided_at)} · ปฏิเสธสะสม {decision.rejection_count} ครั้ง</p>{decision.reason && <p>{decision.reason}</p>}{decision.terms && <p>เงื่อนไขที่บันทึก: มัดจำ {decision.terms.deposit_required ? moneyTH(decision.terms.deposit_amount) : "ไม่ต้องวางมัดจำ"} · PO {decision.terms.po_required ? "ต้องส่ง" : "ไม่ต้องส่ง"} · ส่งหลักฐานภายใน {dateTH(decision.terms.documents_due_at)}</p>}</article>)}</section>
     </section><aside className="cust-price-panel"><Badge value={quote.status} labels={QUOTE_LABELS} /><p>ราคารวมทั้งงาน</p><strong className="cust-hero-price">{moneyTH(quote.final_price)}</strong><p className="cust-muted">จำนวน {request.qty} ชิ้น · ไม่มี VAT</p>

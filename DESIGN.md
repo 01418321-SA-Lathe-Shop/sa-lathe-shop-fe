@@ -512,15 +512,46 @@ Status counts, literal search, Bangkok date ranges, customer type, sort and
 global totals. Price filters compare exact decimal satang and are quote-only;
 PO amounts/numbers/issue dates are not invented. Existing /customers reads are
 used for list identity; existing fulfillment reads supply PO rows and terms.
-Filters persist in harmless URL parameters; an account-scoped, in-memory cache
+Filters persist in harmless URL parameters; controls remount from those applied
+parameters on chip removal, clear and history navigation, so stale draft values
+cannot silently reapply. An account-scoped, in-memory cache
 retains at most 20 list navigation contexts and restores list scroll after data
 and fonts settle. No session credentials or private file links are persisted.
-Batch 1 changes lists and navigation; document preview/print is a later checkpoint.
+Details remain full-page views on the existing query-selector URLs, not new
+routes or permanent list split panes. A rendered quotation uses an explicit
+Customer-visible field whitelist; no staff cost fields, invented issuer data,
+item lines or validity dates enter the document. Its paper surface remains white
+in either app theme for document fidelity: ink #202623, secondary #57615b, rules
+#dce1dd, 12px corners and a 0 8px 24px rgb(0 0 0 / .06) shadow. Body is .9375rem,
+labels .8125rem and headings/totals 1.5rem; 32px padding becomes 20px on mobile.
+The wide detail grid places the document beside the existing decision/price
+panel; at 1200px and below the action panel precedes the document. Price terms
+on accepted documents come from saved decisions, never a recalculation using a
+changed profile. Print/Save as PDF is native browser printing, including a quick
+list action. An ephemeral body-level print portal isolates only that same
+document, waits for fonts and required data, and removes itself after printing.
+It is not an original Backend PDF or a new quotation-content contract.
+
+Uploaded UC4 PO files have a separate preview/metadata region above the existing
+obligations, evidence form and history. It uses the authorized request attachment
+collection and selected PO evidence; an invalid selector never chooses another
+file. The narrow metadata rail stacks each label above its value rather than
+inheriting the wider generic definition grid. PDF/PNG/JPEG are native previews; other supported documents offer the
+original download without conversion. Loading/read failure, unsupported types
+and missing metadata have explicit recovery. A fresh signed GET is read with no
+cookies, API token or referrer, rejecting redirects and expired links. Bounded
+bytes, size and signatures are validated, then retyped from authorized metadata
+into memory-only Blob URLs, revoked on file switch/unmount. Reopening retries a
+read, not a business write. New evidence refreshes the attachment projection.
+Preview/upload completion is not evidence approval. No PDF library, API endpoint,
+supplier screen, status, pricing formula or permission is added. Storage GET CORS
+and native preview support still require verification on the real deployment.
 
 ### Change log
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Document batch 2: Customer-safe quotation document/native print and private UC4 PO preview; preserve original decision and evidence writes, evidence history and existing navigation | Native preview security/whitelist tests and scoped mock/browser checks; full evidence and real-stack limitations in docs/customer-documents-handoff.md |
 | 2026-10-28 | Document batch 1: shared Customer quotation/UC4 lists with actual-status pills, loaded-query counts, applied filters/chips/sort and URL paging; separate UC4 obligations from uploaded PO evidence | Domain tests for exact money, Bangkok dates, original identifiers and authorized projections; document preview/print follows in batch 2 |
 | 2026-10-28 | Request-list batch 2: responsive record cards, existing machine icon, date rows, membership footer, accessible whole-card link and static skeleton; unknown counts remain distinct from zero; restore existing primary-link hover foreground and reconcile active layout prose | 83 native tests; Chrome 375/640/768/1280/1440px Dark plus 375/1280px Light; synthetic loading/read-error/empty/31-record pagination checks and scoped finish review. Build/check evidence and remaining limitations are recorded in the request-list handoff; not Go/PostgreSQL/S3 verification |
 | 2026-10-28 | Request-list batch 1: replace the status select with wrapping pill navigation and loaded-record count badges; preserve applied search/status URLs and all four Request statuses | Literal-query/count unit tests plus existing checks; no API, theme or detail-view change |
@@ -1812,6 +1843,41 @@ src/features/workspace/workspace.module.css
 .scope .skeleton { height: 140px; background: var(--cust-surface); border-radius: 12px; }
 .scope :global(.cust-document-navigation) { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
 .scope :global(.cust-document-navigation) > div { display: flex; flex-wrap: wrap; gap: 16px; }
+.scope .quotationLayout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); gap: 32px; align-items: start; }
+.scope .quotationLayout > * { min-width: 0; }
+.paper { margin: 16px 0 24px; padding: 32px; background: #fff; color: #202623; box-shadow: 0 8px 24px rgb(0 0 0 / .06); border-radius: 12px; overflow-wrap: anywhere; font-size: .9375rem; }
+.paper h2 { font-size: 1.5rem; font-weight: 700; margin: 0 0 12px; }
+.paper h3 { font-size: 1rem; font-weight: 650; margin: 0 0 16px; }
+.paper p { margin: 8px 0; }
+.paperHeader { padding-bottom: 24px; border-bottom: 1px solid #dce1dd; }
+.documentFacts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: 24px 0; }
+.documentFacts > div { min-width: 0; }
+.documentFacts dt { color: #57615b; font-size: .8125rem; margin-bottom: 6px; }
+.documentFacts dd { margin: 0; font-weight: 600; }
+.documentFacts small { display: block; font-weight: 400; margin-top: 6px; font-size: .8125rem; color: #57615b; }
+.paperScope { margin-top: 32px; }
+.paperTotal { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 12px; padding: 24px 0; border-block: 1px solid #dce1dd; font-variant-numeric: tabular-nums; }
+.paperTotal strong { font-size: 1.5rem; }
+.paperTotal small { grid-column: 1 / -1; color: #57615b; }
+.paperFooter { margin-top: 32px; color: #57615b; font-size: .8125rem; }
+.scope .poSection { margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--cust-line); }
+.scope .documentToolbar { display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+.scope .documentToolbar h2 { margin-bottom: 12px; }
+.scope .previewLayout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); gap: 32px; align-items: start; }
+.scope .previewLayout > * { min-width: 0; }
+.scope .previewInfo { padding: 24px; border-radius: 12px; background: var(--cust-surface); overflow-wrap: anywhere; }
+.scope .previewInfo :global(.cust-definition > div) { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.scope .filePreview object { display: block; width: 100%; height: 680px; background: #fff; border: 0; border-radius: 12px; }
+.scope .filePreview > p { margin-top: 16px; }
+.scope .previewFallback { min-height: 280px; padding: 32px; display: flex; flex-direction: column; align-items: start; justify-content: center; gap: 16px; background: var(--cust-surface); border-radius: 12px; overflow-wrap: anywhere; }
+.printRoot { display: none; }
+@media print {
+  :global(body):has(.printRoot) > :not(.printRoot) { display: none !important; }
+  .printRoot { display: block !important; color: #202623; background: #fff; font-size: 11pt; }
+  .printRoot .paper { box-shadow: none; border-radius: 0; margin: 0; padding: 0; font-size: 11pt; }
+  .printRoot .paperHeader, .printRoot .paperTotal, .printRoot .documentFacts > div { break-inside: avoid; }
+}
+@media (max-width: 1200px) { .scope .quotationLayout, .scope .previewLayout { grid-template-columns: minmax(0, 1fr); } .scope .quotationLayout > aside { order: -1; position: static; } }
 @media (max-width: 1100px) { .scope .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .scope .row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); } .scope .rowActions { text-align: left; } .scope .rowActions a { justify-content: flex-start; } }
 @media (max-width: 640px) {
   .scope .filters { grid-template-columns: minmax(0, 1fr); padding: 16px; }
@@ -1821,6 +1887,11 @@ src/features/workspace/workspace.module.css
   .scope .desktopDownload { display: none; }
   .scope .mobileMore { display: block; }
   .scope .mobileMore summary { display: flex; align-items: center; min-height: 44px; color: var(--cust-accent); }
+  .paper { padding: 20px; }
+  .documentFacts { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .paperTotal { grid-template-columns: minmax(0, 1fr); }
+  .scope .filePreview object { height: 480px; }
+  .scope .previewFallback { padding: 20px; }
 }
 ```
 

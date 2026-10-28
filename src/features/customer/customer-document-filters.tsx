@@ -17,7 +17,7 @@ export function DocumentFilters({ section, params, view, labels, counts, loading
   const chipLabels: Record<string, string> = { q: "ค้นหา", status: "สถานะ", from: "ตั้งแต่", to: "ถึง", type: "ประเภท", min: "ราคาตั้งแต่", max: "ราคาไม่เกิน", view: "มุมมอง" };
   return <>
     {view !== "tasks" && <nav className={styles.tabs} aria-label="กรองสถานะเอกสาร">{[["", "ทั้งหมด"], ...Object.entries(labels)].map(([value, label]) => <Link key={value} href={href("status", value)} aria-current={filters.status === value ? "page" : undefined}><span>{label}</span><span className={styles.count}>{loading ? "…" : unavailable ? "—" : counts[value] ?? 0}</span></Link>)}</nav>}
-    <form className={styles.filters} onSubmit={submit}>
+    <form key={params.toString()} className={styles.filters} onSubmit={submit}>
       <Field label="ค้นหาเอกสาร"><input type="search" name="q" defaultValue={filters.q} placeholder="เลขใบเสนอราคา / คำขอ / ชื่องาน / ลูกค้า" /></Field>
       <Field label={view === "po" ? "วันที่ส่ง PO ตั้งแต่" : view === "tasks" ? "วันที่ตอบรับตั้งแต่" : "วันที่ส่งใบเสนอราคาตั้งแต่"}><input type="date" name="from" defaultValue={filters.from} /></Field>
       <Field label="ถึงวันที่"><input type="date" name="to" defaultValue={filters.to} /></Field>

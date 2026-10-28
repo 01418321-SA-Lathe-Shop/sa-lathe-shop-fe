@@ -30,6 +30,41 @@
 .scope .skeleton { height: 140px; background: var(--cust-surface); border-radius: 12px; }
 .scope :global(.cust-document-navigation) { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
 .scope :global(.cust-document-navigation) > div { display: flex; flex-wrap: wrap; gap: 16px; }
+.scope .quotationLayout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); gap: 32px; align-items: start; }
+.scope .quotationLayout > * { min-width: 0; }
+.paper { margin: 16px 0 24px; padding: 32px; background: #fff; color: #202623; box-shadow: 0 8px 24px rgb(0 0 0 / .06); border-radius: 12px; overflow-wrap: anywhere; font-size: .9375rem; }
+.paper h2 { font-size: 1.5rem; font-weight: 700; margin: 0 0 12px; }
+.paper h3 { font-size: 1rem; font-weight: 650; margin: 0 0 16px; }
+.paper p { margin: 8px 0; }
+.paperHeader { padding-bottom: 24px; border-bottom: 1px solid #dce1dd; }
+.documentFacts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: 24px 0; }
+.documentFacts > div { min-width: 0; }
+.documentFacts dt { color: #57615b; font-size: .8125rem; margin-bottom: 6px; }
+.documentFacts dd { margin: 0; font-weight: 600; }
+.documentFacts small { display: block; font-weight: 400; margin-top: 6px; font-size: .8125rem; color: #57615b; }
+.paperScope { margin-top: 32px; }
+.paperTotal { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 12px; padding: 24px 0; border-block: 1px solid #dce1dd; font-variant-numeric: tabular-nums; }
+.paperTotal strong { font-size: 1.5rem; }
+.paperTotal small { grid-column: 1 / -1; color: #57615b; }
+.paperFooter { margin-top: 32px; color: #57615b; font-size: .8125rem; }
+.scope .poSection { margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--cust-line); }
+.scope .documentToolbar { display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+.scope .documentToolbar h2 { margin-bottom: 12px; }
+.scope .previewLayout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); gap: 32px; align-items: start; }
+.scope .previewLayout > * { min-width: 0; }
+.scope .previewInfo { padding: 24px; border-radius: 12px; background: var(--cust-surface); overflow-wrap: anywhere; }
+.scope .previewInfo :global(.cust-definition > div) { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.scope .filePreview object { display: block; width: 100%; height: 680px; background: #fff; border: 0; border-radius: 12px; }
+.scope .filePreview > p { margin-top: 16px; }
+.scope .previewFallback { min-height: 280px; padding: 32px; display: flex; flex-direction: column; align-items: start; justify-content: center; gap: 16px; background: var(--cust-surface); border-radius: 12px; overflow-wrap: anywhere; }
+.printRoot { display: none; }
+@media print {
+  :global(body):has(.printRoot) > :not(.printRoot) { display: none !important; }
+  .printRoot { display: block !important; color: #202623; background: #fff; font-size: 11pt; }
+  .printRoot .paper { box-shadow: none; border-radius: 0; margin: 0; padding: 0; font-size: 11pt; }
+  .printRoot .paperHeader, .printRoot .paperTotal, .printRoot .documentFacts > div { break-inside: avoid; }
+}
+@media (max-width: 1200px) { .scope .quotationLayout, .scope .previewLayout { grid-template-columns: minmax(0, 1fr); } .scope .quotationLayout > aside { order: -1; position: static; } }
 @media (max-width: 1100px) { .scope .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .scope .row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); } .scope .rowActions { text-align: left; } .scope .rowActions a { justify-content: flex-start; } }
 @media (max-width: 640px) {
   .scope .filters { grid-template-columns: minmax(0, 1fr); padding: 16px; }
@@ -39,4 +74,9 @@
   .scope .desktopDownload { display: none; }
   .scope .mobileMore { display: block; }
   .scope .mobileMore summary { display: flex; align-items: center; min-height: 44px; color: var(--cust-accent); }
+  .paper { padding: 20px; }
+  .documentFacts { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .paperTotal { grid-template-columns: minmax(0, 1fr); }
+  .scope .filePreview object { height: 480px; }
+  .scope .previewFallback { padding: 20px; }
 }

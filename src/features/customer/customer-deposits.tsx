@@ -10,6 +10,7 @@ import { useNow } from "./customer-hooks";
 import { Badge, Field, PageTitle, PrivateFile, ResourceFeedback } from "./customer-ui";
 import { CustomerUpload } from "./customer-upload";
 import { CustomerWriteRetry } from "./customer-write";
+import { CustomerPoPreview } from "./customer-po-preview";
 
 export function DepositChecklist({ state }: { state: Fulfillment }) {
   return <ul className="cust-checklist">{(["deposit", "po"] as const).filter((kind) => kind === "deposit" ? state.terms.deposit_required : state.terms.po_required).map((kind) => {
@@ -23,8 +24,9 @@ export function CustomerDepositDetail({ api, request, quote }: { api: BackendApi
   const resource = useResource<Fulfillment>(api, `/quotations/${quote.id}/fulfillment`); const [kind, setKind] = useState<"deposit" | "po" | null>(null); const [notice, setNotice] = useState(""); const now = useNow();
   const state = resource.data; const available = state && now !== null && !resource.loading ? availableEvidenceKinds(state, now) : [];
   const activeKind = kind && available.includes(kind) ? kind : available[0];
-  return <><PageTitle title="หลักฐานมัดจำและ PO" description={`${request.description} · คำขอ #${request.no_request}`} back="/customer/deposit-po" /><ResourceFeedback {...resource} />
+  return <><PageTitle title="หลักฐานมัดจำและ PO" description={`${request.description} · คำขอ #${request.no_request}`} /><ResourceFeedback {...resource} />
     {notice && <p role="status" className="cust-alert success">{notice}</p>}
+    {state && <CustomerPoPreview key={`${quote.id}:${state.evidence?.map((item) => item.id).join(":")}`} api={api} request={request} state={state} />}
     {state && <div className="cust-payment-layout"><aside className="cust-side-summary"><h2>เงื่อนไขที่ตอบรับ</h2><dl className="cust-definition"><div><dt>ราคารวมทั้งงาน</dt><dd>{moneyTH(state.terms.final_price)}</dd></div><div><dt>ประเภทผู้สั่งที่ตอบรับ</dt><dd>{state.terms.customer_type === "company" ? "บริษัท" : "บุคคลทั่วไป"}</dd></div><div><dt>ส่งหลักฐานภายใน</dt><dd>{dateTH(state.terms.documents_due_at)}</dd></div></dl><DepositChecklist state={state} /><p className="cust-muted">อัปโหลดสำเร็จยังไม่ใช่การอนุมัติ เจ้าหน้าที่ต้องตรวจหลักฐานให้ครบก่อนเปิดงานผลิต</p><Link href={customerHref("quotations", { request: request.id, quotation: quote.id })}>ดูใบเสนอราคาที่ตอบรับ →</Link>
       {state.job && <section className="cust-section"><h2>เปิดงานผลิตแล้ว</h2><p>มัดจำที่อนุมัติจริง {moneyTH(state.job.deposit_amount)}</p><p>ยอดเปิดงานคงเหลือ {moneyTH(state.job.balance)}</p><Link className="cust-primary" href={customerHref("jobs", { job: state.job.id })}>ติดตามงานผลิต</Link></section>}
     </aside><section className="cust-document"><h2>{state.job ? "ประวัติหลักฐาน" : "ส่งหลักฐานให้ครบตามเงื่อนไข"}</h2>
