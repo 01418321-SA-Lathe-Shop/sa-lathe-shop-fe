@@ -1,4 +1,6 @@
 /* Locally owned styles; legacy descendant class contracts are intentionally preserved. */
+:where(.scope) :global(.integrated-topbar) { gap: .5rem; }
+:where(.scope) :global(.integrated-topbar) :global(.switch-account) { white-space: nowrap; flex-shrink: 0; }
 :global(.app-shell):where(.scope) { min-height: 100vh; background: radial-gradient(circle at 88% -10%, rgba(255,155,69,.07), transparent 28%), var(--bg); }
 :where(.scope) :global(.sidebar) { position: fixed; inset: 0 auto 0 0; z-index: 20; width: 15.25rem; padding: 1.625rem 1.125rem 1.25rem; display: flex; flex-direction: column; border-right: 0.0625rem solid var(--line); background: rgba(12,14,14,.97); }
 :where(.scope) :global(.nav-list) { display: flex; flex-direction: column; gap: 0.3125rem; }

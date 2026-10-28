@@ -7,10 +7,17 @@ import { getServerTheme,getServerUiSize,getTheme,getUiSize,saveTheme,saveUiSize,
 const ThemeContext = createContext<{ theme: Theme; onTheme: (theme: Theme) => void; uiSize: UiSize; onUiSize: (size: UiSize) => void }>({ theme: "dark", onTheme: () => {}, uiSize: "medium", onUiSize: () => {} });
 
 export function ThemeToggle() {
-  const { onTheme, onUiSize } = useContext(ThemeContext);
+  const { onTheme } = useContext(ThemeContext);
+  const theme = useSyncExternalStore(subscribeAppearance, getTheme, getServerTheme);
+  const next = theme === "dark" ? "light" : "dark";
+  const label = next === "light" ? "เปลี่ยนเป็นธีมสว่าง" : "เปลี่ยนเป็นธีมมืด";
+  return <button className="theme-quick-toggle" type="button" aria-label={label} title={label} onClick={() => onTheme(next)}><Icon name={next === "light" ? "sun" : "moon"}/></button>;
+}
+
+export function SettingsToggle() {
+  const { onUiSize } = useContext(ThemeContext);
   // This subtree can hydrate after the provider (inside the auth Suspense boundary).
   // Its own server snapshots keep the controlled radios in sync during hydration.
-  const theme = useSyncExternalStore(subscribeAppearance, getTheme, getServerTheme);
   const uiSize = useSyncExternalStore(subscribeAppearance, getUiSize, getServerUiSize);
   const preferenceId = useId();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -20,7 +27,6 @@ export function ThemeToggle() {
       <div className="settings-heading"><div><span className="eyebrow">PREFERENCES</span><h2>ตั้งค่าการแสดงผล</h2></div><button type="button" aria-label="ปิดการตั้งค่า" onClick={() => dialog.current?.close()}><Icon name="close"/></button></div>
       <p>ปรับการแสดงผลให้เหมาะกับการใช้งานของคุณ</p>
       <fieldset><legend>ขนาดการแสดงผล</legend><div className="settings-options">{([['small', 'เล็ก'], ['medium', 'กลาง'], ['large', 'ใหญ่']] as const).map(([value, label]) => <label key={value}><input type="radio" name={`ui-size-${preferenceId}`} value={value} checked={uiSize === value} onChange={() => onUiSize(value)}/><span>{label}</span></label>)}</div></fieldset>
-      <fieldset><legend>ธีม</legend><div className="settings-options">{([['light', 'สว่าง', 'sun'], ['dark', 'มืด', 'moon']] as const).map(([value, label, icon]) => <label key={value}><input type="radio" name={`appearance-theme-${preferenceId}`} value={value} checked={theme === value} onChange={() => onTheme(value)}/><span><Icon name={icon}/>{label}</span></label>)}</div></fieldset>
       <div className="settings-preview"><strong>ตัวอย่างการแสดงผล</strong><p>ติดตามงานผลิตและจัดการเอกสารได้ในที่เดียว</p></div>
       <small>ใช้กับทุกหน้า และจดจำไว้ในเบราว์เซอร์นี้</small>
       <button className="primary-button settings-done" type="button" onClick={() => dialog.current?.close()}>เสร็จสิ้น</button>

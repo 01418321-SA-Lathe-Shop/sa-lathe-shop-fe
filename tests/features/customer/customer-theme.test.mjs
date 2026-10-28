@@ -42,7 +42,8 @@ test("navigation, forms and badges use shared theme tokens instead of dark-only 
 test("Customer settings isolate native radio groups in retained App Router trees", () => {
   const source = readFileSync(new URL("../../../src/features/customer/customer-settings.tsx", import.meta.url), "utf8");
   assert.match(source, /const preferenceId = useId\(\)/);
-  for (const setting of ["size", "theme"]) assert(source.includes('name={`customer-' + setting + '-${preferenceId}`}'));
+  assert(source.includes('name={`customer-size-${preferenceId}`}'));
+  assert.doesNotMatch(source, /customer-theme-|saveTheme|<legend>ธีม/);
   assert.doesNotMatch(source, /name="customer-(?:size|theme)"/);
 });
 

@@ -72,6 +72,7 @@
 .root :global(button), .root :global(summary) { min-height: 44px; cursor: pointer; }
 .root :global(button) { border: 1px solid var(--cust-line); background: var(--cust-surface); color: var(--cust-ink); padding: 9px 16px; border-radius: 10px; transition: border-color .2s, background .2s; }
 .root :global(button:hover:not(:disabled)) { border-color: var(--cust-accent); }
+.root :global(.theme-quick-toggle) { padding: 0; }
 .root :global(button:disabled) { cursor: not-allowed; color: var(--cust-muted); background: var(--cust-surface-2); border-color: var(--cust-line); opacity: 0.6; }
 .root :global(:focus-visible) { outline: 2px solid var(--cust-focus); outline-offset: 3px; }
 .root :global(input), .root :global(textarea), .root :global(select) { width: 100%; min-height: 48px; background: var(--cust-surface); color: var(--cust-ink); border: 1px solid var(--cust-line); border-radius: 8px; padding: 10px 12px; caret-color: var(--cust-accent); transition: border-color .2s; }

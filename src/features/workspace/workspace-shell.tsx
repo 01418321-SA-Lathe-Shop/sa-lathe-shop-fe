@@ -4,7 +4,7 @@ import { workspaceStyles as styles } from "../../components/ui/style-scopes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ThemeToggle } from "../../components/appearance/appearance";
+import { SettingsToggle, ThemeToggle } from "../../components/appearance/appearance";
 import { Icon, Logo } from "../../components/appearance/icons";
 
 import { useApiSession } from "../auth/api-session";
@@ -54,12 +54,13 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
           {[{ id: "overview" as const }, ...items].map(item => <Link key={item.id} href={workspacePath(role, item.id)} className={workspaceId === item.id ? "active" : ""} aria-current={workspaceId === item.id ? "page" : undefined} onClick={() => setMenuOpen(false)}><span className="nav-icon"><Icon name={icons[item.id]}/></span><span>{PAGE_LABELS[item.id]}</span></Link>)}
         </nav>
       </div>
-      <div className="sidebar-theme"><ThemeToggle/></div>
+      <div className="sidebar-theme"><SettingsToggle/></div>
       <div className="sidebar-footer"><div className="avatar">{initials}</div><div><strong>{account.name}</strong><span>{role === "Admin" ? "ผู้ดูแลระบบ" : role === "Worker" ? "พนักงาน" : "ลูกค้า"} · {account.username}</span></div><button aria-label="ออกจากระบบ" onClick={leave}><Icon name="logout"/></button></div>
     </aside>
     <div className="app-stage">
       <header className="topbar integrated-topbar"><button id="navigation-toggle" className="mobile-navigation icon-button" aria-label="เปิดเมนู" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><Icon name="grid"/></button><span className="eyebrow">{ROLE_LABELS[role]} / {PAGE_LABELS[workspaceId]}</span>
         <span className="api-mode-badge live">Connected API</span>
+        <ThemeToggle/>
         <button className="secondary-button switch-account" onClick={leave}>ออกจากระบบ</button>
       </header>
       <main id="main-content" className={`page-content ${styles.scope}`}>

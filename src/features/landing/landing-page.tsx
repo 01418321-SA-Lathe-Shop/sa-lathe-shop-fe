@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Noto_Sans_Thai } from "next/font/google";
-import { ThemeToggle } from "../../components/appearance/appearance";
+import { SettingsToggle } from "../../components/appearance/appearance";
 import { Logo } from "../../components/appearance/icons";
 
 import { Hero } from "./landing-hero";
@@ -25,6 +25,6 @@ export default function LandingPage() {
         <article><h3>ติดตามการชำระเงินได้ชัดเจน</h3><p>รวมเงื่อนไขใบเสนอราคา เงินมัดจำ ใบแจ้งหนี้ หลักฐานการชำระ และยอดคงค้างไว้กับแต่ละงาน</p><span>จากใบเสนอราคาจนรับชำระ</span></article>
       </div>
     </section>
-    <footer className="cinematic-footer"><Link href="/" aria-label="หน้าหลัก Lathe Shop Control"><Logo /></Link><p>งานสั่งผลิต เชื่อมต่อครบในระบบเดียว</p><div><ThemeToggle /><Link href="/register">เริ่มสั่งผลิต <span aria-hidden="true">↗</span></Link></div></footer>
+    <footer className="cinematic-footer"><Link href="/" aria-label="หน้าหลัก Lathe Shop Control"><Logo /></Link><p>งานสั่งผลิต เชื่อมต่อครบในระบบเดียว</p><div><SettingsToggle /><Link href="/register">เริ่มสั่งผลิต <span aria-hidden="true">↗</span></Link></div></footer>
   </main>;
 }

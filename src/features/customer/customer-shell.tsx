@@ -6,6 +6,7 @@ import { Noto_Sans_Thai } from "next/font/google";
 import { useEffect, useId, useRef, useSyncExternalStore } from "react";
 import type { ApiSession } from "../auth/api-session";
 import { Icon, Logo } from "../../components/appearance/icons";
+import { ThemeToggle } from "../../components/appearance/appearance";
 import { subscribeAppearance } from "../../components/appearance/appearance-preferences";
 import { getCustomerTheme, getServerCustomerTheme } from "./customer-preferences";
 import { NotificationBell } from "./customer-notifications";
@@ -155,6 +156,7 @@ export default function CustomerShell({ session, leave }: { session: ApiSession;
             </span>
           </div>
           <div className="cust-topbar-actions">
+            <ThemeToggle />
             <NotificationBell api={session.api} />
           </div>
         </header>
@@ -164,6 +166,7 @@ export default function CustomerShell({ session, leave }: { session: ApiSession;
           <div className="cust-nav-inner">
             <Logo onClick={() => router.push("/customer")} />
             <div className="cust-nav-actions">
+              <ThemeToggle />
               <NotificationBell api={session.api} beforeOpen={() => menu.current?.close()} />
               <button
                 ref={menuTrigger}

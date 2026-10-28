@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "../../components/appearance/icons";
+import { ThemeToggle } from "../../components/appearance/appearance";
 
 
 export function Nav() {
@@ -10,6 +11,6 @@ export function Nav() {
       <a href="#materials">วัตถุดิบ</a>
       <a href="#capabilities">ระบบงาน</a>
     </div>
-    <Link href="/login" className="cinematic-workspace">เข้าสู่ระบบ <span aria-hidden="true">↗</span></Link>
+    <div className="cinematic-nav-actions"><ThemeToggle /><Link href="/login" className="cinematic-workspace">เข้าสู่ระบบ <span aria-hidden="true">↗</span></Link></div>
   </nav>;
 }

@@ -155,6 +155,10 @@ by App Router do not uncheck the currently visible theme or size controls.
 
 ## Typography
 
+### Separate appearance controls — 2026-10-28
+
+Theme is an icon-only 44px-minimum sun/moon quick action, not a Settings dialog trigger. Its Thai accessible name and native tooltip describe the destination theme. It uses the existing shared appearance store and transition, with no new storage or auth behavior. Landing places it beside sign-in, Customer beside the bell on desktop/mobile, Staff/Admin in the topbar, and Auth retains its existing toolbar position. Settings retains only text/display-size choices (Small/Medium/Large); Customer keeps its existing Settings page and other surfaces keep their existing Settings entry. No visible text accompanies the theme icon. This supersedes historical theme-radio descriptions below. Existing theme colors, routes and permissions remain unchanged.
+
 Noto Sans Thai is self-hosted through Next/font for Customer only, with a sans-serif fallback. The frontmatter hierarchy records heading, section title, body and metadata roles. Rem text responds to the existing UI-size preference; most Customer spacing and target dimensions are currently fixed pixels, not a fully rem-scaled spacing system. The shared brand retains its existing identity styling.
 
 ## Layout
@@ -670,6 +674,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Separate icon-only navbar theme action from Settings; retain text-size controls only inside Settings | Component regressions for destination labels, immediate action and size-only settings; desktop/mobile browser checks use controlled test responses, not real account verification |
 | 2026-10-28 | Add owner-approved username-only picker for six real-backend demo identities below the login form; no mock, stored password or automatic login | Component regressions and desktop/mobile browser checks cover selection, password clearing/focus, manual login and registration exclusion |
 | 2026-10-28 | Delete browser fixture implementation and mock-only tests/object resolver; remove 73 obsolete mock/bypass selectors while preserving live login/workspace styles | Source/import audit, native tests, production build and desktop/mobile login checks; no backend data or dependencies removed |
 | 2026-10-28 | Remove browser-mock login shortcuts and workspace controls; make sessions live-only without changing routes or role permissions | Native session regressions cover configured API login, /auth/me, connection failure without fallback and backend logout; real seeded-account browser verification remains blocked separately |
@@ -839,6 +844,10 @@ src/components/appearance/appearance.module.css
 
 ```css
 /* Locally owned styles; legacy descendant class contracts are intentionally preserved. */
+:where(.scope) :global(.theme-quick-toggle) { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 2.75rem; height: 2.75rem; min-width: 44px; min-height: 44px; padding: 0; border: 1px solid var(--cust-line, var(--line)); border-radius: .6875rem; background: var(--cust-surface, var(--surface)); color: var(--cust-ink, var(--text)); cursor: pointer; }
+:where(.scope) :global(.theme-quick-toggle):hover { background: var(--cust-surface-2, var(--surface-2)); }
+:where(.scope) :global(.theme-quick-toggle):focus-visible { outline: 2px solid var(--cust-accent, var(--lime)); outline-offset: 3px; }
+:where(.scope) :global(.theme-quick-toggle) svg { width: 1.25rem; height: 1.25rem; }
 :where(.scope) :global(.appearance-settings) { width: min(32.5rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); margin: auto; padding: 1.75rem; overflow: auto; border: 0.0625rem solid var(--line); border-radius: 1.5rem; background: var(--surface); color: var(--text); box-shadow: 0 1.5rem 5.625rem #0004; text-align: left; }
 :where(.scope) :global(.appearance-settings)::backdrop { background: #0008; backdrop-filter: blur(0.3125rem); }
 :where(.scope) :global(.settings-heading) { display: flex; justify-content: space-between; align-items: start; gap: 1rem; }
@@ -1005,6 +1014,8 @@ src/features/workspace/workspace.module.css
 
 ```css
 /* Locally owned styles; legacy descendant class contracts are intentionally preserved. */
+:where(.scope) :global(.integrated-topbar) { gap: .5rem; }
+:where(.scope) :global(.integrated-topbar) :global(.switch-account) { white-space: nowrap; flex-shrink: 0; }
 :global(.app-shell):where(.scope) { min-height: 100vh; background: radial-gradient(circle at 88% -10%, rgba(255,155,69,.07), transparent 28%), var(--bg); }
 :where(.scope) :global(.sidebar) { position: fixed; inset: 0 auto 0 0; z-index: 20; width: 15.25rem; padding: 1.625rem 1.125rem 1.25rem; display: flex; flex-direction: column; border-right: 0.0625rem solid var(--line); background: rgba(12,14,14,.97); }
 :where(.scope) :global(.nav-list) { display: flex; flex-direction: column; gap: 0.3125rem; }
@@ -1395,6 +1406,7 @@ src/features/workspace/workspace.module.css
 :where(.scope) :global(.cinematic-hero)[data-state="loading"] :global(.cinematic-poster) { opacity: .45; filter: blur(4px); }
 :where(.scope) :global(.cinematic-nav) { position: relative; z-index: 3; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 2.75rem; padding: 2rem 4.5%; }
 :where(.scope) :global(.cinematic-brand) { width: fit-content; }
+:where(.scope) :global(.cinematic-nav-actions) { display: flex; align-items: center; justify-content: flex-end; gap: .5rem; }
 :global(.cinematic-page):where(.scope) :global(.brand) { padding: 0; font-family: var(--font-geist-sans), sans-serif; }
 :global(.cinematic-page):where(.scope) :global(.brand) b { color: #f4f4f1; font-size: .875rem; }
 :global(.cinematic-page):where(.scope) :global(.brand) small { color: #b0b5b2; }
@@ -1611,6 +1623,7 @@ src/features/workspace/workspace.module.css
 .root :global(button), .root :global(summary) { min-height: 44px; cursor: pointer; }
 .root :global(button) { border: 1px solid var(--cust-line); background: var(--cust-surface); color: var(--cust-ink); padding: 9px 16px; border-radius: 10px; transition: border-color .2s, background .2s; }
 .root :global(button:hover:not(:disabled)) { border-color: var(--cust-accent); }
+.root :global(.theme-quick-toggle) { padding: 0; }
 .root :global(button:disabled) { cursor: not-allowed; color: var(--cust-muted); background: var(--cust-surface-2); border-color: var(--cust-line); opacity: 0.6; }
 .root :global(:focus-visible) { outline: 2px solid var(--cust-focus); outline-offset: 3px; }
 .root :global(input), .root :global(textarea), .root :global(select) { width: 100%; min-height: 48px; background: var(--cust-surface); color: var(--cust-ink); border: 1px solid var(--cust-line); border-radius: 8px; padding: 10px 12px; caret-color: var(--cust-accent); transition: border-color .2s; }
@@ -2389,7 +2402,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
 ```tsx
 import Link from "next/link";
 import { Noto_Sans_Thai } from "next/font/google";
-import { ThemeToggle } from "../../components/appearance/appearance";
+import { SettingsToggle } from "../../components/appearance/appearance";
 import { Logo } from "../../components/appearance/icons";
 
 import { Hero } from "./landing-hero";

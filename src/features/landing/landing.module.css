@@ -20,6 +20,7 @@
 :where(.scope) :global(.cinematic-hero)[data-state="loading"] :global(.cinematic-poster) { opacity: .45; filter: blur(4px); }
 :where(.scope) :global(.cinematic-nav) { position: relative; z-index: 3; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 2.75rem; padding: 2rem 4.5%; }
 :where(.scope) :global(.cinematic-brand) { width: fit-content; }
+:where(.scope) :global(.cinematic-nav-actions) { display: flex; align-items: center; justify-content: flex-end; gap: .5rem; }
 :global(.cinematic-page):where(.scope) :global(.brand) { padding: 0; font-family: var(--font-geist-sans), sans-serif; }
 :global(.cinematic-page):where(.scope) :global(.brand) b { color: #f4f4f1; font-size: .875rem; }
 :global(.cinematic-page):where(.scope) :global(.brand) small { color: #b0b5b2; }
