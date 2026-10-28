@@ -128,12 +128,9 @@ export class BackendApi {
     const link = await this.call<SignedLink>(path, "GET", undefined, signal);
     const url = new URL(link.url);
     if (!/^https?:$/.test(url.protocol) || url.username || url.password) throw new Error("Invalid private download link.");
-    const object = this.transport.objectFor?.(url.href);
-    const href = object ? URL.createObjectURL(object) : url.href;
-    const anchor = document.createElement("a"); anchor.href = href; anchor.rel = "noreferrer noopener"; anchor.referrerPolicy = "no-referrer";
+    const anchor = document.createElement("a"); anchor.href = url.href; anchor.rel = "noreferrer noopener"; anchor.referrerPolicy = "no-referrer";
     if (fileName) anchor.download = fileName;
     else anchor.target = "_blank"; // Viewing a private file must not replace the memory-only app session.
     document.body.append(anchor); anchor.click(); anchor.remove();
-    if (object) window.setTimeout(() => URL.revokeObjectURL(href), 60000);
   }
 }

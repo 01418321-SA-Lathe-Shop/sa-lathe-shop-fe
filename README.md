@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). If a dev server is already running for this checkout, use it instead of starting another. Real login/workspaces continue to use the existing backend setup; see `docs/11-phase-ten-handoff.md`.
+Open [http://localhost:3000](http://localhost:3000). If a dev server is already running for this checkout, use it instead of starting another. Login/workspaces now use only the real backend; browser mock accounts and controls were removed on 2026-10-28. See `docs/real-api-only.md` for setup, removal scope and verification limits.
 
 The page is Thai, with self-hosted Noto Sans Thai. Change copy in `src/features/landing/landing-config.ts`; change the five durations, easings, loop default and render budgets in `src/features/landing/process-config.ts`. There is no visible playback bar: tap/click the illustration or use Enter/Space when focused to pause/resume. Reduced motion shows the final-frame image without mounting WebGL. Brushed textures, fasteners, piston rods and soft shadows are procedural. See `docs/landing-handoff.md` for the storyboard, complete source map, asset origins and verification.
 
@@ -35,7 +35,6 @@ Tests mirror feature/shared-code ownership; they do not live in App Router folde
 - `app/`: unchanged route/special files, favicon, and the only global stylesheet.
 - `src/features/`: domain components, pure domain logic, configuration and owned CSS Modules.
 - `src/components/`, `src/hooks/`, `src/lib/`: shared UI, hooks, API transport/types and formatting.
-- `src/mocks/`: explicit mock transport, fictional data, and domain endpoint implementations.
 - `tests/`: mirrored tests plus route, permission and source-structure regression checks.
 
 ```bash

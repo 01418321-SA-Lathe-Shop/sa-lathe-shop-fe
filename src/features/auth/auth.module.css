@@ -23,7 +23,6 @@
 :where(.scope) :global(.login-field) :is(input, select):focus-visible { outline: none; }
 :where(.scope) :global(.login-submit) { width: 100%; height: 3.5rem; padding: 0 1.125rem; display: flex; align-items: center; justify-content: center; gap: 0.6875rem; border: 0.0625rem solid #ffc184; border-radius: 0.8125rem; background: var(--lime); color: #21150c; font-size: 0.8125rem; font-weight: 700; cursor: pointer; }
 :where(.scope) :global(.login-register-link) { width:100%; margin-top:1.0625rem; border:0; background:transparent; color:#747c75; font-size: 0.625rem; cursor:pointer }:where(.scope) :global(.login-register-link) strong { margin-left:0.25rem;color:var(--lime);font-weight:650 }
-:where(.scope) :global(.bypass-actions) { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem; }:where(.scope) :global(.bypass-actions) > button { min-height: 4.75rem; padding: 0 0.875rem; display: grid; grid-template-columns: 1.5rem 1fr 1rem; align-items: center; gap: 0.625rem; border: 0.0625rem solid #343936; border-radius: 0.75rem; background: #111412; color: #747c75; text-align: left; cursor: pointer; transition: border-color .2s,background .2s,transform .2s; }:where(.scope) :global(.bypass-actions) > button:hover{border-color:#8b5126;background:#211914;transform:translateY(-0.0625rem)}:where(.scope) :global(.bypass-actions) > button>span{display:flex;flex-direction:column;gap:0.25rem}:where(.scope) :global(.bypass-actions) strong{color:#c5cbc6;font-size: 0.6875rem}:where(.scope) :global(.bypass-actions) small{color:#626a63;font-size: 0.4375rem;line-height:1.4}:where(.scope) :global(.bypass-actions) button>:global(.icon):last-child{width:0.875rem;height:0.875rem}
 
 @media (max-width: 73.75rem) {
   :global(.login-page):where(.scope) { grid-template-columns: .9fr 1.1fr; }:where(.scope) :global(.login-showcase) { padding: 2.125rem; }:where(.scope) :global(.login-panel) { padding-left: 6vw; padding-right: 6vw; }
@@ -32,7 +31,7 @@
   :global(.login-page):where(.scope) { grid-template-columns: 1fr; }:where(.scope) :global(.login-showcase) { display:none; }:where(.scope) :global(.login-panel) { padding: 5.9375rem 1.375rem 3.125rem; }:where(.scope) :global(.login-back) { top: 1.75rem; }:where(.scope) :global(.login-card) { max-width: 33.75rem; }
 }
 @media (max-width: 35rem) {
-  :where(.scope) :global(.login-card) h2{font-size: 2.875rem}:where(.scope) :global(.bypass-actions){grid-template-columns:1fr}
+  :where(.scope) :global(.login-card) h2{font-size: 2.875rem}
 }
 :where(.scope) :global(.auth-toolbar) { display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%; margin-bottom: 2.5rem; }
 :where(.scope) :global(.auth-toolbar) :global(.login-back) { position: static; }
@@ -49,7 +48,3 @@
 :global([data-theme="light"]) :where(.scope) :global(.login-field)>div { border-color: #d2d8ce; background: #fff; color: #717b72; }
 :global([data-theme="light"]) :where(.scope) :global(.login-field) input { color: #1b241c; }
 :global([data-theme="light"]) :where(.scope) :global(.login-field) input::placeholder { color: #9aa29a; }
-:global([data-theme="light"]) :where(.scope) :global(.bypass-actions)>button { border-color: #d5dacF; background: #f4f6f0; color: #536053; }
-:global([data-theme="light"]) :where(.scope) :global(.bypass-actions)>button:hover { border-color: #e1995e; background: #fff0e6; }
-:global([data-theme="light"]) :where(.scope) :global(.bypass-actions) strong { color: #303a31; }
-:global([data-theme="light"]) :where(.scope) :global(.bypass-actions) small { color: #778078; }

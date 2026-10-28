@@ -5,7 +5,7 @@ import { ApiError, errorMessage, type BackendApi } from "../../lib/api/backend-a
 
 type State<T> = { path: string; revision: number; data?: T; error?: string };
 // Optional paths avoid speculative per-day requests. Reads are cancelable;
-// failures never select the mock transport and never become a zero count.
+// Failures never become fabricated data or a zero count.
 export function useReport<T>(api: BackendApi, path: string | null) {
   const [revision, setRevision] = useState(0);
   const [state, setState] = useState<State<T>>();

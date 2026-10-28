@@ -24,6 +24,14 @@ test("custom component styles are modules and app/globals.css is the only global
   assert.deepEqual(css.filter((file) => !file.endsWith(".module.css")).map((file) => slash(relative(root, file))), ["app/globals.css"]);
 });
 
+test("runtime contains no browser mock implementation or credential shortcuts", () => {
+  const sourceFiles = files(join(root, "src"));
+  assert.equal(sourceFiles.some((file) => slash(relative(root, file)).startsWith("src/mocks/")), false);
+  for (const file of sourceFiles.filter((file) => /\.(tsx?|css)$/.test(file))) {
+    assert.doesNotMatch(readFileSync(file, "utf8"), /MOCK_LOGINS|createLatheMockBackend|resetMock|setLoseNextResponse|objectFor|mock-switcher|demo-bypass|bypass-actions/, relative(root, file));
+  }
+});
+
 test("all relative source imports, exports and lazy imports resolve after the moves", () => {
   const missing = [];
   for (const file of [...files(join(root, "app")), ...files(join(root, "src"))].filter((file) => /\.tsx?$/.test(file))) {

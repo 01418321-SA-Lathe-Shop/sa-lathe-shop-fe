@@ -126,9 +126,6 @@
 .root :global(.cust-bell > span) { position: absolute; top: -2px; right: -7px; min-width: 21px; padding: 0 4px; border-radius: 12px; background: var(--cust-action); color: #121514; font-weight: 700; font-size: .75rem; }
 .root :global(.cust-menu-toggle) { display: none; }
 .root :global(.cust-environment) { display: none; }
-.root :global(.cust-mode.mock) { color: var(--cust-accent); }
-.root :global(.mock-switcher) { margin-left: auto; }
-.root :global(.mock-switcher summary) { min-height: 32px; padding: 4px 10px; color: var(--cust-ink); }
 .root :global(.cust-mobile-user) { display: flex; align-items: center; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--cust-line); margin-bottom: 12px; }
 .root :global(.cust-mobile-user > div) { min-width: 0; overflow-wrap: anywhere; }
 .root :global(.cust-mobile-user .cust-avatar) { flex-shrink: 0; }
@@ -377,7 +374,6 @@
 @media (max-width: 640px) {
   .root :global(.cust-nav-inner) { min-height: 64px; padding: 0 1rem; }
   .root :global(.cust-environment) { padding: 8px 1rem 0; flex-direction: column; align-items: flex-start; gap: 6px; }
-  .root :global(.cust-environment .mock-switcher summary) { max-width: 128px; font-size: .75rem; }
   .root :global(.cust-main) { padding: 1.25rem 1rem 2.5rem; }
   .root :global(.cust-heading > div) { align-items: flex-start; flex-direction: column; gap: 16px; }
   .root :global(.cust-heading > div > .cust-primary) { width: 100%; }

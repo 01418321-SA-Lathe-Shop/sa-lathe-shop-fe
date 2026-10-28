@@ -1,5 +1,20 @@
 # Frontend Implementation Plan
 
+## Browser mock removal — 2026-10-28
+
+- Owner-approved scope: remove browser-mock login, session branches, controls,
+  fictional data/routes, mock-only tests and private-object shortcuts. Preserve
+  real workflows, exact money/stock rules, roles, routes and test-only fetch stubs.
+- Batch 1 completed and pushed (`399000a`): real-only session/login and Customer/
+  Staff/Admin shells; regression tests plus desktop/mobile login failure checks.
+- Batch 2 completed: remove 35 mock source/test files and 73 obsolete CSS selectors;
+  keep real file-preview security/cancellation tests; update setup documentation
+  and guardrails. Remaining 124 tests, lint, TypeScript, source audit, production
+  build and desktop/mobile login/connection-failure checks pass.
+- No backend/DB mutations, migrations, seeds, deployments or dependency changes.
+  Real seeded-account verification remains separately blocked by operator database
+  readiness/private credentials. See `docs/real-api-only.md` for the handoff.
+
 ## Purpose and scope
 
 Build the frontend for the Machine Shop Custom Manufacturing System using the existing Next.js App Router project. The product workflow covers customer requests, quotations, production jobs, material purchasing and receiving, inventory, delivery, and payments. The business is not registered as a company and does not charge VAT.

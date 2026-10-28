@@ -47,10 +47,9 @@ test("checks actual byte count and signature even when storage declares octet-st
   assert.equal((await readPrivatePreview({ ...file, file_name: "po.png", content_type: "image/png", byte_size: png.size }, async () => link(), from(png), signal())).type, "image/png");
 });
 
-test("explicit mock resolves authorized bytes without storage fetch, cancellation cannot publish a preview", async () => {
+test("canceled preview never requests a private link or reads storage", async () => {
   const controller = new AbortController(); let links = 0;
-  const transport = { fetch: async () => { throw new Error("unexpected storage read"); }, objectFor: () => pdf };
-  assert.equal((await readPrivatePreview(file, async () => link(), transport, controller.signal)).size, pdf.size);
+  const transport = { fetch: async () => { throw new Error("unexpected storage read"); } };
   controller.abort(); await assert.rejects(readPrivatePreview(file, async () => { links++; return link(); }, transport, controller.signal), { name: "AbortError" });
   assert.equal(links, 0);
 });

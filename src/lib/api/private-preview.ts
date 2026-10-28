@@ -14,21 +14,18 @@ export async function readPrivatePreview(file: Attachment, getLink: () => Promis
   const link = await getLink(); const url = new URL(link.url);
   if (!/^https?:$/.test(url.protocol) || url.username || url.password || !Number.isFinite(Date.parse(link.expires_at)) || Date.parse(link.expires_at) <= Date.now()) throw new Error("ลิงก์ไฟล์ไม่พร้อมใช้งาน กรุณาลองอีกครั้ง");
   signal.throwIfAborted();
-  let object = transport.objectFor?.(url.href);
-  if (!object) {
-    const response = await transport.fetch(url.href, { method: "GET", credentials: "omit", redirect: "error", referrerPolicy: "no-referrer", cache: "no-store", signal });
-    if (!response.ok || !response.body) throw new Error("โหลดตัวอย่างไฟล์ไม่สำเร็จ กรุณาลองอีกครั้งหรือดาวน์โหลดต้นฉบับ");
-    const reader = response.body.getReader(); const chunks: Uint8Array<ArrayBuffer>[] = []; let size = 0;
-    try {
-      for (;;) {
-        const { done, value } = await reader.read(); if (done) break;
-        signal.throwIfAborted(); size += value.byteLength;
-        if (size > file.byte_size || size > 100000000) throw new Error("ขนาดไฟล์ไม่ตรงกับข้อมูลที่ตรวจสอบแล้ว");
-        chunks.push(new Uint8Array(value));
-      }
-      object = new Blob(chunks);
-    } finally { await reader.cancel().catch(() => {}); reader.releaseLock(); }
-  }
+  const response = await transport.fetch(url.href, { method: "GET", credentials: "omit", redirect: "error", referrerPolicy: "no-referrer", cache: "no-store", signal });
+  if (!response.ok || !response.body) throw new Error("โหลดตัวอย่างไฟล์ไม่สำเร็จ กรุณาลองอีกครั้งหรือดาวน์โหลดต้นฉบับ");
+  const reader = response.body.getReader(); const chunks: Uint8Array<ArrayBuffer>[] = []; let size = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read(); if (done) break;
+      signal.throwIfAborted(); size += value.byteLength;
+      if (size > file.byte_size || size > 100000000) throw new Error("ขนาดไฟล์ไม่ตรงกับข้อมูลที่ตรวจสอบแล้ว");
+      chunks.push(new Uint8Array(value));
+    }
+  } finally { await reader.cancel().catch(() => {}); reader.releaseLock(); }
+  const object = new Blob(chunks);
   signal.throwIfAborted();
   if (object.size !== file.byte_size) throw new Error("ขนาดไฟล์ไม่ตรงกับข้อมูลที่ตรวจสอบแล้ว");
   const bytes = new Uint8Array(await object.slice(0, 8).arrayBuffer());

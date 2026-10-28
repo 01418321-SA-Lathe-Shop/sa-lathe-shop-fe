@@ -17,6 +17,5 @@ export type Evidence = EvidenceSubmission & { id: string; quotation_id: string; 
 export type Fulfillment = { quotation_id: string; request_status: string; terms: Terms; evidence: Evidence[] | null; job: { id: string; quotation_id: string; request_id: string; status: string; deposit_amount: string; balance: string; due_at: string | null; created_at: string } | null; canceled_at: string | null };
 export type Page<T> = { items: T[] | null; limit: number; offset: number };
 export type SignedLink = { url: string; headers?: Record<string, string>; expires_at: string; attachment_id?: string };
-// The live transport is the browser fetch. The explicit in-browser mock backend
-// supplies its own fetch and a resolver for its private object links.
-export type Transport = { fetch: typeof fetch; objectFor?: (url: string) => Blob | undefined };
+// Browser fetch in the application; injectable fetch keeps transport tests isolated.
+export type Transport = { fetch: typeof fetch };

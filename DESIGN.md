@@ -92,6 +92,9 @@ simulation. All sessions remain memory-only, require login after reload, and kee
 existing server role checks, logout and expiry behavior. Existing error/empty
 states remain; unavailable backend data never becomes fictional records. Public
 landing illustrations and unit-test transport stubs are not browser demo access.
+The browser fixture modules, fixture-only tests, mock private-object resolver and
+73 obsolete mock/bypass CSS selectors are removed. Historical screenshots and
+phase notes remain archival; they do not describe an available mock login.
 
 ## Overview
 
@@ -663,6 +666,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Delete browser fixture implementation and mock-only tests/object resolver; remove 73 obsolete mock/bypass selectors while preserving live login/workspace styles | Source/import audit, native tests, production build and desktop/mobile login checks; no backend data or dependencies removed |
 | 2026-10-28 | Remove browser-mock login shortcuts and workspace controls; make sessions live-only without changing routes or role permissions | Native session regressions cover configured API login, /auth/me, connection failure without fallback and backend logout; real seeded-account browser verification remains blocked separately |
 | 2026-10-28 | Landing follows the shared Light/Dark preference; add warm light chrome, readable copper actions and a feathered scene boundary without recoloring machinery or changing animation | 134 native tests, lint, production build and actual settings switching at desktop/mobile; no API or workflow changes |
 | 2026-10-28 | Theme batch 2: theme-aware Customer chrome, shared Light text/action/status/focus palette, full-strength placeholders and matching Staff/Admin Light navigation; remove dashboard-only color patches | Palette contrast regressions plus scoped mock desktop/mobile route, menu, bell and preference checks; paper ink isolated while original document/PDF colors, API and business behavior are preserved |
@@ -955,7 +959,6 @@ src/features/auth/auth.module.css
 :where(.scope) :global(.login-field) :is(input, select):focus-visible { outline: none; }
 :where(.scope) :global(.login-submit) { width: 100%; height: 3.5rem; padding: 0 1.125rem; display: flex; align-items: center; justify-content: center; gap: 0.6875rem; border: 0.0625rem solid #ffc184; border-radius: 0.8125rem; background: var(--lime); color: #21150c; font-size: 0.8125rem; font-weight: 700; cursor: pointer; }
 :where(.scope) :global(.login-register-link) { width:100%; margin-top:1.0625rem; border:0; background:transparent; color:#747c75; font-size: 0.625rem; cursor:pointer }:where(.scope) :global(.login-register-link) strong { margin-left:0.25rem;color:var(--lime);font-weight:650 }
-:where(.scope) :global(.bypass-actions) { display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem; }:where(.scope) :global(.bypass-actions) > button { min-height: 4.75rem; padding: 0 0.875rem; display: grid; grid-template-columns: 1.5rem 1fr 1rem; align-items: center; gap: 0.625rem; border: 0.0625rem solid #343936; border-radius: 0.75rem; background: #111412; color: #747c75; text-align: left; cursor: pointer; transition: border-color .2s,background .2s,transform .2s; }:where(.scope) :global(.bypass-actions) > button:hover{border-color:#8b5126;background:#211914;transform:translateY(-0.0625rem)}:where(.scope) :global(.bypass-actions) > button>span{display:flex;flex-direction:column;gap:0.25rem}:where(.scope) :global(.bypass-actions) strong{color:#c5cbc6;font-size: 0.6875rem}:where(.scope) :global(.bypass-actions) small{color:#626a63;font-size: 0.4375rem;line-height:1.4}:where(.scope) :global(.bypass-actions) button>:global(.icon):last-child{width:0.875rem;height:0.875rem}
 
 @media (max-width: 73.75rem) {
   :global(.login-page):where(.scope) { grid-template-columns: .9fr 1.1fr; }:where(.scope) :global(.login-showcase) { padding: 2.125rem; }:where(.scope) :global(.login-panel) { padding-left: 6vw; padding-right: 6vw; }
@@ -964,7 +967,7 @@ src/features/auth/auth.module.css
   :global(.login-page):where(.scope) { grid-template-columns: 1fr; }:where(.scope) :global(.login-showcase) { display:none; }:where(.scope) :global(.login-panel) { padding: 5.9375rem 1.375rem 3.125rem; }:where(.scope) :global(.login-back) { top: 1.75rem; }:where(.scope) :global(.login-card) { max-width: 33.75rem; }
 }
 @media (max-width: 35rem) {
-  :where(.scope) :global(.login-card) h2{font-size: 2.875rem}:where(.scope) :global(.bypass-actions){grid-template-columns:1fr}
+  :where(.scope) :global(.login-card) h2{font-size: 2.875rem}
 }
 :where(.scope) :global(.auth-toolbar) { display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%; margin-bottom: 2.5rem; }
 :where(.scope) :global(.auth-toolbar) :global(.login-back) { position: static; }
@@ -981,10 +984,6 @@ src/features/auth/auth.module.css
 :global([data-theme="light"]) :where(.scope) :global(.login-field)>div { border-color: #d2d8ce; background: #fff; color: #717b72; }
 :global([data-theme="light"]) :where(.scope) :global(.login-field) input { color: #1b241c; }
 :global([data-theme="light"]) :where(.scope) :global(.login-field) input::placeholder { color: #9aa29a; }
-:global([data-theme="light"]) :where(.scope) :global(.bypass-actions)>button { border-color: #d5dacF; background: #f4f6f0; color: #536053; }
-:global([data-theme="light"]) :where(.scope) :global(.bypass-actions)>button:hover { border-color: #e1995e; background: #fff0e6; }
-:global([data-theme="light"]) :where(.scope) :global(.bypass-actions) strong { color: #303a31; }
-:global([data-theme="light"]) :where(.scope) :global(.bypass-actions) small { color: #778078; }
 ```
 
 src/features/workspace/workspace.module.css
@@ -1044,18 +1043,13 @@ src/features/workspace/workspace.module.css
 :where(.scope) :global(.workspace-stats) { gap: 1rem; margin-bottom: 1rem; }:where(.scope) :global(.workspace-stats) article { min-height: 8.75rem; padding: 1.3125rem; }:where(.scope) :global(.workspace-stats) span { font-size: 0.75rem; }:where(.scope) :global(.workspace-stats) strong { font-size: 2rem; }:where(.scope) :global(.workspace-stats) small { font-size: 0.5625rem; }
 :where(.scope) :global(.machine-orbit) { position: absolute; border: 0.0625rem solid rgba(255,155,69,.15); border-radius: 50%; }:where(.scope) :global(.orbit-one) { width: 33.75rem; height: 33.75rem; }:where(.scope) :global(.orbit-two) { width: 26.875rem; height: 26.875rem; border-color: rgba(255,255,255,.06); }
 :where(.scope) :global(.machine-core) { position:absolute; width:11.875rem; height:11.875rem; border:0.0625rem solid #4d3b2f; border-radius:50%; background:radial-gradient(circle at 42% 38%,#72513a 0,#2d2119 16%,#121512 42%,#090b0a 70%); box-shadow:0 0 0 1.75rem rgba(255,255,255,.012),0 0 5rem rgba(255,155,69,.12); }:where(.scope) :global(.machine-core):before, :where(.scope) :global(.machine-core):after{content:"";position:absolute;inset:1.6875rem;border:0.0625rem dashed #74543d;border-radius:50%}:where(.scope) :global(.machine-core):after{inset:3.8125rem;border-style:solid;background:#090b0a}:where(.scope) :global(.machine-core) span, :where(.scope) :global(.machine-core) i{position:absolute;z-index:2;top:5.75rem;left:-1.375rem;width:14.625rem;height:0.3125rem;border-radius:0.5625rem;background:linear-gradient(90deg,transparent,#bd6d31,var(--lime),#bd6d31,transparent);transform:rotate(45deg)}:where(.scope) :global(.machine-core) i{transform:rotate(-45deg)}
-:where(.scope) :global(.mock-dashboard) { position: relative; z-index: 3; width: min(42.5rem,94%); min-height: 24.0625rem; padding: 1.375rem; border: 0.0625rem solid rgba(255,255,255,.15); border-radius: 1.25rem; background: linear-gradient(145deg,rgba(29,32,29,.96),rgba(11,13,12,.97)); box-shadow: 0 3.125rem 6.25rem rgba(0,0,0,.45); transform: rotateY(-7deg) rotateX(4deg) rotateZ(-1deg); backdrop-filter: blur(1.25rem); }
-:where(.scope) :global(.mock-top) { display:flex; align-items:flex-start; justify-content:space-between; padding-bottom:1.125rem; border-bottom:0.0625rem solid var(--line); }:where(.scope) :global(.mock-top) div{display:flex;flex-direction:column}:where(.scope) :global(.mock-top) span{color:#6c746e;font-size: 0.5rem;letter-spacing:.16em}:where(.scope) :global(.mock-top) strong{margin-top:0.3125rem;font-size: 1.125rem}:where(.scope) :global(.mock-top) em{color:#69706c;font-size: 0.5rem;font-style:normal}
-:where(.scope) :global(.mock-job-focus) { min-height: 9.6875rem; margin-top: 1.125rem; padding: 1.4375rem; display: flex; align-items: flex-start; justify-content: space-between; gap: 1.5rem; border: 0.0625rem solid #65432b; border-radius: 0.9375rem; background: linear-gradient(145deg,#2a211a,#151411); }:where(.scope) :global(.mock-job-focus)>div { display:flex; flex-direction:column; }:where(.scope) :global(.mock-job-focus) span { color:var(--lime);font-size: 0.5rem;font-weight:750;letter-spacing:.14em }:where(.scope) :global(.mock-job-focus) strong { margin-top:1.125rem;font-size: 1.5625rem;letter-spacing:-.035em }:where(.scope) :global(.mock-job-focus) small { margin-top:0.5625rem;color:#747b76;font-size: 0.5625rem}:where(.scope) :global(.mock-job-focus) em { color:var(--lime);font-size: 2.375rem;font-style:normal;font-weight:730;line-height:1 }
-:where(.scope) :global(.mock-progress) { height: 0.4375rem; margin: -2.1875rem 1.4375rem 0; border-radius: 0.4375rem; background:#302a26; overflow:hidden }:where(.scope) :global(.mock-progress) i { display:block;width:78%;height:100%;border-radius:inherit;background:linear-gradient(90deg,#b86223,var(--lime)) }
-:where(.scope) :global(.mock-flow) { margin-top: 2.8125rem; display:grid;grid-template-columns:repeat(4,1fr) }:where(.scope) :global(.mock-flow)>div { position:relative;display:flex;flex-direction:column;align-items:center;gap:0.625rem;color:#6c746e;font-size: 0.5rem}:where(.scope) :global(.mock-flow)>div:after { content:"";position:absolute;top:0.9375rem;left:50%;width:100%;height:0.0625rem;background:#343936 }:where(.scope) :global(.mock-flow)>div:last-child:after { display:none }:where(.scope) :global(.mock-flow) i { position:relative;z-index:1;width:1.9375rem;height:1.9375rem;display:grid;place-items:center;border:0.0625rem solid #3a403c;border-radius:50%;background:#121513;color:#737b75;font-style:normal }
 
 @media (max-width: 70rem) { :where(.scope) :global(.sidebar) { width: 12.875rem; }:where(.scope) :global(.app-stage) { margin-left:12.875rem }:where(.scope) :global(.search) { width:13.75rem }:where(.scope) :global(.status-ribbon) span:nth-child(n+2){display:none} }
 @media (max-width: 56.25rem) { :where(.scope) :global(.sidebar) { position:relative; width:100%; height:auto; min-height:0; padding:1rem; border-right:0; border-bottom:0.0625rem solid var(--line) }:where(.scope) :global(.nav-list){margin-top:1rem;display:grid;grid-template-columns:repeat(4,minmax(7.5rem,1fr));overflow-x:auto;padding-bottom:0.25rem}:where(.scope) :global(.nav-label), :where(.scope) :global(.sidebar-footer){display:none}:where(.scope) :global(.nav-list) :is(button, a){min-width:7.5rem}:where(.scope) :global(.app-stage){margin-left:0}:where(.scope) :global(.topbar){height:4rem;padding:0 1rem}:where(.scope) :global(.status-ribbon){display:none}:where(.scope) :global(.search){width:auto;flex:1}:global(.page-content):where(.scope){padding:1.5625rem 1rem 2.8125rem}:where(.scope) :global(.page-heading){min-height:0}:where(.scope) :global(.page-heading) h1{font-size: 1.75rem}:where(.scope) :global(.workspace-stats){grid-template-columns:1fr} }
 @media (max-width: 30rem) {:where(.scope) :global(.page-heading){flex-direction:column}:where(.scope) :global(.workspace-stats){grid-template-columns:1fr} }
-@media (max-width: 47.5rem) {:where(.scope) :global(.machine-orbit):global(.orbit-one) { width: 24.375rem; height: 24.375rem; }:where(.scope) :global(.machine-orbit):global(.orbit-two) { width: 19.375rem; height: 19.375rem; }:where(.scope) :global(.machine-core) { width: 9.0625rem; height: 9.0625rem; }:where(.scope) :global(.machine-core):before{inset:1.375rem}:where(.scope) :global(.machine-core):after{inset:3rem}:where(.scope) :global(.machine-core) span, :where(.scope) :global(.machine-core) i{top:4.375rem;left:-0.875rem;width:10.75rem}:where(.scope) :global(.mock-dashboard) { min-height: 20.625rem; padding: 0.9375rem; }
+@media (max-width: 47.5rem) {:where(.scope) :global(.machine-orbit):global(.orbit-one) { width: 24.375rem; height: 24.375rem; }:where(.scope) :global(.machine-orbit):global(.orbit-two) { width: 19.375rem; height: 19.375rem; }:where(.scope) :global(.machine-core) { width: 9.0625rem; height: 9.0625rem; }:where(.scope) :global(.machine-core):before{inset:1.375rem}:where(.scope) :global(.machine-core):after{inset:3rem}:where(.scope) :global(.machine-core) span, :where(.scope) :global(.machine-core) i{top:4.375rem;left:-0.875rem;width:10.75rem}
 }
-@media (max-width: 30rem) {:where(.scope) :global(.mock-dashboard){width:100%;transform:rotateY(-4deg) rotateX(3deg)}:where(.scope) :global(.mock-job-focus){padding:1.125rem;min-height:9.0625rem}:where(.scope) :global(.mock-job-focus) strong{font-size: 1.25rem}:where(.scope) :global(.mock-job-focus) em{font-size: 1.9375rem}:where(.scope) :global(.mock-progress){margin-left:1.125rem;margin-right:1.125rem}:where(.scope) :global(.machine-orbit):global(.orbit-one){width:20.625rem;height:20.625rem}:where(.scope) :global(.machine-orbit):global(.orbit-two){width:16.25rem;height:16.25rem}
+@media (max-width: 30rem) {:where(.scope) :global(.machine-orbit):global(.orbit-one){width:20.625rem;height:20.625rem}:where(.scope) :global(.machine-orbit):global(.orbit-two){width:16.25rem;height:16.25rem}
 }
 :where(.scope) :global(.staff-space) { margin: 1.875rem 0 1.375rem; padding: 0.875rem 0.9375rem; display: flex; flex-direction: column; gap: 0.25rem; border: 0.0625rem solid var(--line); border-radius: 0.75rem; background: #111412; }
 :where(.scope) :global(.staff-space) span { color: var(--lime); font-size: 0.5rem; font-weight: 700; letter-spacing: .16em; }
@@ -1096,14 +1090,6 @@ src/features/workspace/workspace.module.css
 :global([data-theme="light"]) :where(.scope) :global(.machine-core) { border-color: #dfc4ae; background: radial-gradient(circle at 42% 38%,#fff 0,#f7e6d7 28%,#eee1d5 70%); box-shadow: 0 0 0 1.75rem rgba(223,116,30,.025),0 0 5rem rgba(223,116,30,.08); }
 :global([data-theme="light"]) :where(.scope) :global(.machine-core):before { border-color: #cba17e; }
 :global([data-theme="light"]) :where(.scope) :global(.machine-core):after { border-color: #d4b699; background: #faf3ec; }
-:global([data-theme="light"]) :where(.scope) :global(.mock-dashboard) { border-color: var(--line); background: linear-gradient(145deg,#fff,#faf6f1); color: var(--text); box-shadow: 0 1.875rem 4.375rem rgba(80,53,32,.14); }
-:global([data-theme="light"]) :where(.scope) :global(.mock-top) span, :global([data-theme="light"]) :where(.scope) :global(.mock-top) em, :global([data-theme="light"]) :where(.scope) :global(.mock-job-focus) small { color: var(--muted); }
-:global([data-theme="light"]) :where(.scope) :global(.mock-job-focus) { border-color: #edc7a8; background: linear-gradient(145deg,#fff4e9,#fffaf5); }
-:global([data-theme="light"]) :where(.scope) :global(.mock-job-focus) span, :global([data-theme="light"]) :where(.scope) :global(.mock-job-focus) em { color: #ac4e0b; }
-:global([data-theme="light"]) :where(.scope) :global(.mock-progress) { background: #eddfd3; }
-:global([data-theme="light"]) :where(.scope) :global(.mock-flow)>div { color: var(--muted); }
-:global([data-theme="light"]) :where(.scope) :global(.mock-flow)>div:after { background: #d8cec4; }
-:global([data-theme="light"]) :where(.scope) :global(.mock-flow) i { border-color: #d8cec4; background: #fff; color: var(--muted); }
 
 :global([data-theme="light"]) :global(.app-shell):where(.scope) { background: radial-gradient(circle at 88% -10%,rgba(223,116,30,.13),transparent 30%),var(--bg); }
 :global([data-theme="light"]) :where(.scope) :global(.sidebar) { border-color: var(--line); background: var(--bg); }
@@ -1291,23 +1277,13 @@ src/features/workspace/workspace.module.css
 :where(.scope) :global(.auth-availability) { color:var(--muted); font-size:.85rem; line-height:1.8; padding:1rem; border:1px solid var(--line); border-radius:.75rem; margin:1.5rem 0; }
 :where(.scope) :global(.login-card) :global(.live-fields) { gap:0; }
 :where(.scope) :global(.login-card) :global(.login-submit) { margin-top:1.5rem; }
-:where(.scope) :global(.login-card) :global(.bypass-actions) { grid-template-columns:1fr; gap:.75rem; }
-:where(.scope) :global(.login-card) :global(.bypass-actions) button { min-height:4.5rem; }
 :where(.scope) :global(.login-register-link) { display:block; margin-top:1rem; text-align:center; line-height:1.5; }
-:where(.scope) :global(.demo-bypass) { margin-top:1.75rem; border-top:.0625rem solid var(--line); border-bottom:.0625rem solid var(--line); }
-:where(.scope) :global(.demo-bypass) summary { display:flex; align-items:center; justify-content:space-between; gap:1rem; min-height:3.5rem; color:var(--muted); font-size:.6875rem; cursor:pointer; list-style:none; }
-:where(.scope) :global(.demo-bypass) summary::-webkit-details-marker { display:none; }
-:where(.scope) :global(.demo-bypass) summary i { width:.625rem; height:.625rem; flex:none; border-right:.09375rem solid currentColor; border-bottom:.09375rem solid currentColor; transform:rotate(45deg); transition:transform .2s ease; }
-:where(.scope) :global(.demo-bypass)[open] summary i { transform:rotate(225deg); }
-:where(.scope) :global(.demo-bypass-content) { padding:0 0 1rem; }
-:where(.scope) :global(.demo-bypass) :global(.demo-context) { margin-bottom:0; }
 :where(.scope) :global(.login-field) select { width:100%; border:0; outline:0; background:transparent; color:var(--text); font:inherit; font-size:.8125rem; }
 :where(.scope) :global(.login-field) select:focus,
 :where(.scope) :global(.login-field) select:focus-visible { outline: 0; }
 :where(.scope) :global(.auth-help), :where(.scope) :global(.auth-api) { display:block; color:var(--muted); font-size:.6875rem; line-height:1.6; }
 :where(.scope) :global(.auth-help) { margin:.625rem 0 0; }
 :where(.scope) :global(.auth-api) { margin-top:1rem; text-align:center; opacity:.7; }
-@media(prefers-reduced-motion:reduce) { :where(.scope) :global(.demo-bypass) summary i { transition:none; } }
 @media(max-width:75rem) { :where(.scope) :global(.workspace-links) { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:900px) {
   :where(.scope) :global(.integrated-shell) :global(.integrated-sidebar) { width:min(20rem,88vw); transform:translateX(-100%); visibility:hidden; z-index:45; padding:1rem; }
@@ -1360,20 +1336,10 @@ src/features/workspace/workspace.module.css
 :where(.scope) :global(.live-review-confirm) input { width:1.25rem; min-height:1.25rem; flex:none; margin-top:.1875rem; accent-color:var(--lime); }
 @media(max-width:37.5rem) { :where(.scope) :global(.live-workspace) :global(.detail-grid) { grid-template-columns:1fr; } }
 
-/* Connected shell (2026-10-24): session mode badge and mock-only account switcher. */
+/* Connected shell: real API badge and sign-out. */
 :where(.scope) :global(.integrated-topbar) :global(.api-mode-badge) { margin-left:auto; padding:.3125rem .625rem; border:.0625rem solid var(--line); border-radius:62.4375rem; color:var(--muted); font-size:.6875rem; font-weight:700; letter-spacing:.08em; text-transform:uppercase; white-space:nowrap; }
-:where(.scope) :global(.integrated-topbar) :global(.api-mode-badge):global(.mock) { color:var(--warning); border-color:color-mix(in srgb,var(--warning) 45%,var(--line)); }
 :where(.scope) :global(.integrated-topbar) :global(.api-mode-badge):global(.live) { color:var(--cyan); border-color:color-mix(in srgb,var(--cyan) 45%,var(--line)); }
-:where(.scope) :global(.integrated-topbar) :global(.api-mode-badge) + :global(.switch-account), :where(.scope) :global(.integrated-topbar) :global(.api-mode-badge) + :global(.mock-switcher) { margin-left:.75rem; }
-:where(.scope) :global(.mock-switcher) { position:relative; }
-:where(.scope) :global(.mock-switcher) summary { list-style:none; cursor:pointer; }
-:where(.scope) :global(.mock-switcher) summary::-webkit-details-marker { display:none; }
-:where(.scope) :global(.mock-switcher-menu) { position:absolute; right:0; top:calc(100% + .5rem); z-index:30; width:min(22rem,calc(100vw - 2rem)); display:grid; gap:.5rem; padding:.75rem; border:.0625rem solid var(--line); border-radius:1rem; background:var(--surface); box-shadow:0 1.5rem 5.625rem #0004; }
-:where(.scope) :global(.mock-switcher-menu) > button { display:grid; gap:.125rem; justify-items:start; text-align:left; min-height:3rem; padding:.625rem .75rem; border:.0625rem solid var(--line); border-radius:.75rem; background:var(--surface-2); color:var(--text); }
-:where(.scope) :global(.mock-switcher-menu) > button[aria-current="true"] { border-color:var(--lime); }
-:where(.scope) :global(.mock-switcher-menu) > button small { color:var(--muted); font-size:.75rem; }
-:where(.scope) :global(.mock-switcher-menu) :global(.mock-toggle) { display:flex; gap:.625rem; align-items:start; font-size:.75rem; line-height:1.5; color:var(--muted); padding:.25rem .125rem; }
-:where(.scope) :global(.mock-switcher-menu) :global(.mock-toggle) input { width:1.125rem; min-height:1.125rem; flex:none; accent-color:var(--lime); }
+:where(.scope) :global(.integrated-topbar) :global(.api-mode-badge) + :global(.switch-account) { margin-left:.75rem; }
 :where(.scope) :global(.live-workspace) button:not([class]) { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; border:.0625rem solid var(--line); border-radius:.75rem; background:var(--surface); color:var(--text); font:inherit; font-size:.875rem; font-weight:600; cursor:pointer; }
 :where(.scope) :global(.live-workspace) button:not([class]):hover:not(:disabled) { border-color:var(--lime); }
 @media(max-width:37.5rem) { :where(.scope) :global(.integrated-topbar) :global(.api-mode-badge) { padding:.25rem .5rem; font-size:.5625rem; letter-spacing:.04em; } }
@@ -1684,9 +1650,6 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-bell > span) { position: absolute; top: -2px; right: -7px; min-width: 21px; padding: 0 4px; border-radius: 12px; background: var(--cust-action); color: #121514; font-weight: 700; font-size: .75rem; }
 .root :global(.cust-menu-toggle) { display: none; }
 .root :global(.cust-environment) { display: none; }
-.root :global(.cust-mode.mock) { color: var(--cust-accent); }
-.root :global(.mock-switcher) { margin-left: auto; }
-.root :global(.mock-switcher summary) { min-height: 32px; padding: 4px 10px; color: var(--cust-ink); }
 .root :global(.cust-mobile-user) { display: flex; align-items: center; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--cust-line); margin-bottom: 12px; }
 .root :global(.cust-mobile-user > div) { min-width: 0; overflow-wrap: anywhere; }
 .root :global(.cust-mobile-user .cust-avatar) { flex-shrink: 0; }
@@ -1935,7 +1898,6 @@ src/features/workspace/workspace.module.css
 @media (max-width: 640px) {
   .root :global(.cust-nav-inner) { min-height: 64px; padding: 0 1rem; }
   .root :global(.cust-environment) { padding: 8px 1rem 0; flex-direction: column; align-items: flex-start; gap: 6px; }
-  .root :global(.cust-environment .mock-switcher summary) { max-width: 128px; font-size: .75rem; }
   .root :global(.cust-main) { padding: 1.25rem 1rem 2.5rem; }
   .root :global(.cust-heading > div) { align-items: flex-start; flex-direction: column; gap: 16px; }
   .root :global(.cust-heading > div > .cust-primary) { width: 100%; }

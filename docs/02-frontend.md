@@ -1,5 +1,20 @@
 # Machine Shop Custom Manufacturing System — Frontend Guide
 
+## Current access: real API only — 2026-10-28
+
+The owner requested complete browser-mock removal. Login, registration and all
+workspaces now use the real API only. Sample accounts, in-browser fixture routes,
+reset/account-switch/lost-response controls and mock private-object resolution
+are removed. Memory-only Bearer sessions, logout/expiry, role boundaries and live
+empty/error states are unchanged. Historical prototype/mock descriptions below
+are retained as history, not instructions to restore a demo bypass.
+
+Use `NEXT_PUBLIC_API_BASE_URL` (public API origin only). Real seeded demo accounts
+require an operator-prepared dedicated database and private passwords; no real
+password belongs in frontend source/config. Account-only seeds contain no
+workflows, so initial empty lists are expected. See `real-api-only.md` for scope
+and verification; real-account browser testing is not implied by unit tests.
+
 ## Customer wireframe implementation — 2026-10-27
 
 The owner approved replacing all authenticated Customer screens with the Thai,
