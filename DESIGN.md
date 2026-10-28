@@ -86,7 +86,11 @@ components:
 ### Current authentication surface — 2026-10-28
 
 This supersedes historical mock-mode descriptions below. `/login` and `/register`
-use the configured real API only. Login has no sample-account shortcuts; Customer,
+use the configured real API only. Login has a collapsed, explicitly labelled
+real-backend demo-account picker approved by the owner. Its six public fictional
+usernames only fill the username field, clear the password and focus it. It does
+not submit, store passwords, select a role or bypass authentication; registration
+does not show the picker. Buttons disable during sign-in. Customer,
 Staff and Admin workspaces have no mock account switching, reset or lost-response
 simulation. All sessions remain memory-only, require login after reload, and keep
 existing server role checks, logout and expiry behavior. Existing error/empty
@@ -666,6 +670,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Add owner-approved username-only picker for six real-backend demo identities below the login form; no mock, stored password or automatic login | Component regressions and desktop/mobile browser checks cover selection, password clearing/focus, manual login and registration exclusion |
 | 2026-10-28 | Delete browser fixture implementation and mock-only tests/object resolver; remove 73 obsolete mock/bypass selectors while preserving live login/workspace styles | Source/import audit, native tests, production build and desktop/mobile login checks; no backend data or dependencies removed |
 | 2026-10-28 | Remove browser-mock login shortcuts and workspace controls; make sessions live-only without changing routes or role permissions | Native session regressions cover configured API login, /auth/me, connection failure without fallback and backend logout; real seeded-account browser verification remains blocked separately |
 | 2026-10-28 | Landing follows the shared Light/Dark preference; add warm light chrome, readable copper actions and a feathered scene boundary without recoloring machinery or changing animation | 134 native tests, lint, production build and actual settings switching at desktop/mobile; no API or workflow changes |
@@ -935,6 +940,16 @@ src/features/auth/auth.module.css
 
 ```css
 /* Locally owned styles; legacy descendant class contracts are intentionally preserved. */
+:where(.scope) :global(.auth-account-picker) { margin-top: 1.5rem; border-top: 1px solid var(--line); color: var(--text); }
+:where(.scope) :global(.auth-account-picker) summary { min-height: 44px; padding: .75rem 0; cursor: pointer; font-size: .875rem; font-weight: 600; }
+:where(.scope) :global(.auth-account-picker) p { margin: 0 0 .75rem; color: var(--muted); font-size: .8125rem; line-height: 1.7; }
+:where(.scope) :global(.auth-account-list) { display: grid; gap: .5rem; }
+:where(.scope) :global(.auth-account-list) button { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .25rem .75rem; min-height: 44px; padding: .75rem; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); text-align: left; font: inherit; cursor: pointer; }
+:where(.scope) :global(.auth-account-list) strong { font-size: .875rem; overflow-wrap: anywhere; }
+:where(.scope) :global(.auth-account-list) span { color: var(--muted); font-size: .8125rem; }
+:where(.scope) :global(.auth-account-list) button:hover:not(:disabled) { border-color: var(--lime); background: var(--surface-2); }
+:where(.scope) :global(.auth-account-picker) :is(summary, button):focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+:where(.scope) :global(.auth-account-list) button:disabled { opacity: .6; cursor: wait; }
 :global(.login-page):where(.scope) { min-height: 100vh; display: grid; grid-template-columns: minmax(30rem,1.08fr) minmax(30rem,.92fr); background: #090b0a; }
 :where(.scope) :global(.login-showcase) { position: relative; min-height: 100vh; overflow: hidden; padding: 2.375rem 3.375rem; display: flex; flex-direction: column; background: radial-gradient(circle at 70% 48%,rgba(255,155,69,.16),transparent 27%),linear-gradient(145deg,#15120f,#080a09 72%); border-right: 0.0625rem solid var(--line); }
 :where(.scope) :global(.login-showcase):before { content:""; position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent 0,transparent 4.3125rem,rgba(255,255,255,.025) 4.375rem),repeating-linear-gradient(90deg,transparent 0,transparent 4.3125rem,rgba(255,255,255,.025) 4.375rem); mask-image:linear-gradient(90deg,#000,transparent 90%); }

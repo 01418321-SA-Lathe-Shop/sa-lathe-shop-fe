@@ -13,6 +13,7 @@ import { BackendApi } from "../../lib/api/backend-api";
 import { API_ROLES } from "../workspace/workspace-access";
 import { ROLE_ROOTS } from "../workspace/workspace-routes";
 import { useApiSession } from "./api-session";
+import { DemoAccountPicker } from "./demo-account-picker";
 
 // Login and registration use only the configured real API.
 export default function BackendWorkspace({ initialRegister = false }: { initialRegister?: boolean }) {
@@ -31,6 +32,7 @@ function LiveLogin({ base, notice, initialRegister, onLogin }: { base: string; n
   const [companyMode, setCompanyMode] = useState("new");
   const action = useCommand();
   const registrationApi = useRef<BackendApi | null>(null);
+  const loginForm = useRef<HTMLFormElement>(null);
   useEffect(() => () => registrationApi.current?.close(), []);
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); const form = event.currentTarget; const data = new FormData(form);
@@ -51,7 +53,7 @@ function LiveLogin({ base, notice, initialRegister, onLogin }: { base: string; n
     <section className="login-panel"><div className="auth-toolbar"><Link className="login-back" href="/">← กลับหน้าแรก</Link><ThemeToggle/></div>
       <div className="login-card"><span className="eyebrow">{register ? "CREATE ACCOUNT" : "WELCOME BACK"}</span><h2>{register ? "สมัครบัญชี" : "เข้าสู่ระบบ"}</h2><p>{register ? "สร้างบัญชีลูกค้าเพื่อส่งคำขอผลิตและติดตามงาน" : "ลูกค้า Staff และ Admin ใช้หน้าเข้าสู่ระบบเดียวกัน"}</p>
       {notice && <p className="workflow-success" role="status">{notice}</p>}
-      <form onSubmit={submit} aria-busy={action.busy}><fieldset disabled={action.busy} className="live-fields">
+      <form ref={loginForm} onSubmit={submit} aria-busy={action.busy}><fieldset disabled={action.busy} className="live-fields">
         {register && <label className="login-field"><span>ชื่อผู้ติดต่อ</span><div><Icon name="file"/><input name="name" required maxLength={200} autoComplete="name" placeholder="ชื่อผู้ติดต่อ"/></div></label>}
         <label className="login-field"><span>ชื่อผู้ใช้</span><div><Icon name="inbox"/><input name="username" required minLength={3} maxLength={64} pattern="[A-Za-z0-9_.\-]+" autoComplete="username" placeholder="username"/></div></label>
         <label className="login-field"><span>รหัสผ่าน</span><div><Icon name="clock"/><input name="password" type="password" required autoComplete={register ? "new-password" : "current-password"} placeholder="กรอกรหัสผ่าน"/></div></label>
@@ -59,6 +61,14 @@ function LiveLogin({ base, notice, initialRegister, onLogin }: { base: string; n
         <button className="login-submit" type="submit">{register ? "สมัครบัญชี" : "เข้าสู่ระบบ"} <Icon name="arrow"/></button>
       </fieldset></form>
       <Feedback {...action}/><Link className="login-register-link" href={register ? "/login" : "/register"}>{register ? "มีบัญชีแล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครบัญชี"}</Link>
+      {!register && <DemoAccountPicker disabled={action.busy} onSelect={(username) => {
+        const form = loginForm.current;
+        if (!form) return;
+        (form.elements.namedItem("username") as HTMLInputElement).value = username;
+        const password = form.elements.namedItem("password") as HTMLInputElement;
+        password.value = "";
+        password.focus();
+      }} />}
       <span className="auth-api">Connected API · {base}</span></div>
     </section>
   </main>;

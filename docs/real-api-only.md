@@ -14,7 +14,11 @@ Date: 2026-10-28. Owner approved deleting the frontend browser mock.
   the real backend. Expiry/revocation closes the client and clears the session.
 - A failed read/login/save never selects sample records. Existing empty/error
   feedback and uncertain-write/idempotency flows are preserved.
-- No account shortcuts, mock switcher, fixture reset or lost-response toggle remain.
+- The owner-approved `/login` picker lists the six public fictional usernames
+  from the backend seed handoff. Selection fills only the username, clears/focuses
+  the password and never submits. Enter the privately provided password manually.
+  This is not the deleted browser mock; it cannot create accounts or choose roles.
+  Registration has no picker. No mock switcher/reset/lost-response toggle remains.
 - Attachments use authorized signed links and real storage, never a mock Blob
   resolver. File viewers still enforce size/type/signature and cancellation checks.
 
@@ -23,7 +27,8 @@ Date: 2026-10-28. Owner approved deleting the frontend browser mock.
 Backend `develop` at `16cdd66` documents operator setup in `docs/015-demo-seed.md`
 and `docs/016-frontend-demo-handoff.md`. It seeds six fictional identities into a
 dedicated real PostgreSQL database, not frontend fixtures. Passwords are privately
-provided; frontend usernames/UUIDs/passwords are not configured constants.
+provided. Only the six public demo usernames are listed by owner approval;
+account UUIDs and passwords are not frontend constants.
 
 The account-only seed contains no requests, quotations, jobs, stock, invoices or
 attachments. Empty lists are expected. Operator setup must make `/health/ready`
@@ -37,6 +42,11 @@ sharing/isolation verification remains pending readiness and private credentials
 
 ## Verification scope
 
+- Username-picker follow-up: 126 native tests plus lint, TypeScript, audit and
+  production build pass. Chrome at 1280px/390px in Dark/Light verifies all six
+  username choices, password clearing/focus, no automatic request, required
+  manual password, busy disabling and registration exclusion. Test login requests
+  were deliberately aborted; private real passwords were not used.
 - Final removal checks: 124 native tests pass; lint, TypeScript, source/import
   audit, design snapshot, whitespace checks and production build pass. All 37
   generated routes remain. Runtime dependencies and lockfile are unchanged.

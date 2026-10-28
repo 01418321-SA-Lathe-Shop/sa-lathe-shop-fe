@@ -9,6 +9,10 @@ are removed. Memory-only Bearer sessions, logout/expiry, role boundaries and liv
 empty/error states are unchanged. Historical prototype/mock descriptions below
 are retained as history, not instructions to restore a demo bypass.
 
+Owner-approved follow-up: `/login` now offers a collapsed username-only picker
+for the six real-backend demo accounts. It clears/focuses the password field;
+password entry and real authentication remain manual. No mock is restored.
+
 Use `NEXT_PUBLIC_API_BASE_URL` (public API origin only). Real seeded demo accounts
 require an operator-prepared dedicated database and private passwords; no real
 password belongs in frontend source/config. Account-only seeds contain no

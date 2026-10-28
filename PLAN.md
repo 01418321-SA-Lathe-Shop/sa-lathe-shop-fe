@@ -1,5 +1,14 @@
 # Frontend Implementation Plan
 
+## Real-backend username picker — 2026-10-28
+
+- Owner approved a collapsed `/login` picker for six public seeded usernames.
+  It fills username only, clears/focuses password, disables while busy and never
+  submits, selects a role or restores the browser mock. Registration excludes it.
+- 126 native tests, lint, TypeScript, source audit and production build pass.
+  Desktop/mobile Dark/Light checks pass for all six choices and manual sign-in
+  with an intentionally aborted request; this is not real-account verification.
+
 ## Browser mock removal — 2026-10-28
 
 - Owner-approved scope: remove browser-mock login, session branches, controls,

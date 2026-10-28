@@ -1,4 +1,14 @@
 /* Locally owned styles; legacy descendant class contracts are intentionally preserved. */
+:where(.scope) :global(.auth-account-picker) { margin-top: 1.5rem; border-top: 1px solid var(--line); color: var(--text); }
+:where(.scope) :global(.auth-account-picker) summary { min-height: 44px; padding: .75rem 0; cursor: pointer; font-size: .875rem; font-weight: 600; }
+:where(.scope) :global(.auth-account-picker) p { margin: 0 0 .75rem; color: var(--muted); font-size: .8125rem; line-height: 1.7; }
+:where(.scope) :global(.auth-account-list) { display: grid; gap: .5rem; }
+:where(.scope) :global(.auth-account-list) button { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .25rem .75rem; min-height: 44px; padding: .75rem; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); text-align: left; font: inherit; cursor: pointer; }
+:where(.scope) :global(.auth-account-list) strong { font-size: .875rem; overflow-wrap: anywhere; }
+:where(.scope) :global(.auth-account-list) span { color: var(--muted); font-size: .8125rem; }
+:where(.scope) :global(.auth-account-list) button:hover:not(:disabled) { border-color: var(--lime); background: var(--surface-2); }
+:where(.scope) :global(.auth-account-picker) :is(summary, button):focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+:where(.scope) :global(.auth-account-list) button:disabled { opacity: .6; cursor: wait; }
 :global(.login-page):where(.scope) { min-height: 100vh; display: grid; grid-template-columns: minmax(30rem,1.08fr) minmax(30rem,.92fr); background: #090b0a; }
 :where(.scope) :global(.login-showcase) { position: relative; min-height: 100vh; overflow: hidden; padding: 2.375rem 3.375rem; display: flex; flex-direction: column; background: radial-gradient(circle at 70% 48%,rgba(255,155,69,.16),transparent 27%),linear-gradient(145deg,#15120f,#080a09 72%); border-right: 0.0625rem solid var(--line); }
 :where(.scope) :global(.login-showcase):before { content:""; position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent 0,transparent 4.3125rem,rgba(255,255,255,.025) 4.375rem),repeating-linear-gradient(90deg,transparent 0,transparent 4.3125rem,rgba(255,255,255,.025) 4.375rem); mask-image:linear-gradient(90deg,#000,transparent 90%); }
