@@ -1,42 +1,30 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import type { BackendApi, Customer, Decision, JobRequest, Quotation } from "../../lib/api/backend-api";
 import { useResource, useRetryableWrite } from "../../hooks/backend-hooks";
 import { useCollection } from "./customer-hooks";
-import { useSalesIndex } from "./customer-sales-data";
 import { customerHref, dateTH, latestQuote, moneyTH, QUOTE_LABELS } from "./customer-domain";
 import { quotePreview } from "./customer-request-domain";
-import { Badge, ConfirmChoice, Disclosure, Empty, Field, Limited, LocalPages, PageTitle, ResourceFeedback } from "./customer-ui";
-import { CustomerDepositDetail, DepositChecklist } from "./customer-deposits";
+import { Badge, ConfirmChoice, Disclosure, Empty, Field, Limited, PageTitle, ResourceFeedback } from "./customer-ui";
+import { CustomerDepositDetail } from "./customer-deposits";
 import { CustomerWriteRetry } from "./customer-write";
+import { DocumentList } from "./customer-documents";
+import { DocumentDetailNavigation } from "./customer-document-navigation";
+import documentStyles from "./customer-documents.module.css";
 
 export function CustomerDocumentList({ api, mode }: { api: BackendApi; mode: "quotes" | "deposit" }) {
-  const data = useSalesIndex(api); const params = useSearchParams(); const [page, setPage] = useState(0); const history = params.get("view") === "history";
-  const section = mode === "quotes" ? "quotations" : "deposit-po";
-  const rows = data.records.flatMap((record) => record.quotations.filter((quote) => mode === "deposit" ? quote.status === "approved" : history ? quote.status !== "sent" : quote.status === "sent").map((quote) => ({ ...record, quote })));
-  return <><PageTitle title={mode === "quotes" ? "ใบเสนอราคา" : "มัดจำและ PO"} description={mode === "quotes" ? "พิจารณาราคาและเงื่อนไขก่อนตอบรับ" : "ตรวจสิ่งที่ต้องส่งและกำหนดเวลาจากเงื่อนไขที่ตอบรับ"} />
-    {mode === "quotes" && <nav className="cust-tabs" aria-label="กรองใบเสนอราคา"><Link href="/customer/quotations" aria-current={!history ? "page" : undefined}>รอพิจารณา</Link><Link href="/customer/quotations?view=history" aria-current={history ? "page" : undefined}>ประวัติ</Link></nav>}
-    <ResourceFeedback {...data} />{data.data && !data.loading && <Limited complete={data.complete} />}
-    <div className={mode === "quotes" ? "cust-quote-inbox" : "cust-deposit-list"}>{rows.slice(page * 20, page * 20 + 20).map(({ request, quote, fulfillment }) => <article className="cust-document-row" key={quote.id}>
-      <div><p className="cust-muted cust-small">คำขอ #{request.no_request} · ใบเสนอราคา #{quote.quotation_no} · ฉบับที่ {quote.version}</p><h2>{request.description}</h2><Badge value={quote.status} labels={QUOTE_LABELS} />
-        {mode === "deposit" && fulfillment && <><p className="cust-due">ส่งหลักฐานภายใน <strong>{dateTH(fulfillment.terms.documents_due_at)}</strong></p><DepositChecklist state={fulfillment} /></>}
-      </div><div className="cust-document-action">{mode === "quotes" && <><strong className="cust-list-price">{moneyTH(quote.final_price)}</strong><p className="cust-muted">ราคารวมทั้งงาน · ไม่มี VAT</p></>}<Link className="cust-link" href={customerHref(section, { request: request.id, quotation: quote.id })}>{mode === "quotes" ? "ดูรายละเอียดใบเสนอราคา" : fulfillment?.job ? "ดูหลักฐานและงานผลิต" : "ดูและส่งหลักฐาน"} →</Link></div>
-    </article>)}</div>
-    {data.data && !data.loading && !data.error && !rows.length && <Empty title={!data.complete ? "ยังตรวจรายการเอกสารได้ไม่ครบ" : mode === "quotes" ? history ? "ยังไม่มีประวัติใบเสนอราคา" : "ไม่มีใบเสนอราคาที่รอพิจารณา" : "ยังไม่มีรายการมัดจำหรือ PO"} action={!data.complete ? <button onClick={data.reload}>ลองโหลดอีกครั้ง</button> : <Link href="/customer/requests">ดูคำขอผลิต</Link>}>{!data.complete ? "บางรายการยังโหลดไม่ได้ จึงยังยืนยันไม่ได้ว่าไม่มีเอกสาร" : mode === "deposit" ? "รายการจะปรากฏหลังคุณตอบรับใบเสนอราคา" : "เมื่อร้านส่งใบเสนอราคา คุณจะเปิดพิจารณาได้ที่นี่"}</Empty>}
-    <LocalPages count={rows.length} page={page} setPage={setPage} />
-  </>;
+  return <DocumentList api={api} mode={mode} />;
 }
 
 export function CustomerSalesDetail({ api, requestId, quotationId, deposit = false }: { api: BackendApi; requestId: string; quotationId?: string; deposit?: boolean }) {
   const request = useResource<JobRequest>(api, `/requests/${requestId}`); const quotes = useCollection<Quotation>(api, `/requests/${requestId}/quotations`);
   const current = latestQuote(quotes.data?.items ?? []);
   const quote = quotationId ? quotes.data?.items.find((item) => item.id === quotationId) : deposit ? quotes.data?.items.find((item) => item.status === "approved") : current;
-  return <><ResourceFeedback {...request} /><ResourceFeedback {...quotes} /><Limited complete={quotes.data?.complete} />
+  return <section className={documentStyles.scope}><DocumentDetailNavigation /><ResourceFeedback {...request} /><ResourceFeedback {...quotes} /><Limited complete={quotes.data?.complete} />
     {quote && request.data ? deposit ? quote.status === "approved" ? <CustomerDepositDetail api={api} request={request.data} quote={quote} /> : <Empty title="ยังไม่มีเงื่อนไขที่ตอบรับ" action={<Link href={customerHref("quotations", { request: requestId, quotation: quote.id })}>พิจารณาใบเสนอราคา</Link>}>ตอบรับใบเสนอราคาก่อนส่งหลักฐาน</Empty> : <QuotationDetail key={`${quote.id}:${quote.lock_version}`} api={api} request={request.data} quote={quote} latest={current?.id === quote.id} reload={() => { quotes.reload(); request.reload(); }} /> : quotes.data && !quotes.loading && <Empty title="ไม่พบใบเสนอราคาที่เปิดดูได้" action={<Link href="/customer/quotations">กลับใบเสนอราคา</Link>}>อาจยังไม่มีใบเสนอราคา หรือคุณไม่มีสิทธิ์ดูรายการนี้</Empty>}
-  </>;
+  </section>;
 }
 
 function QuotationDetail({ api, request, quote, latest, reload }: { api: BackendApi; request: JobRequest; quote: Quotation; latest: boolean; reload: () => void }) {

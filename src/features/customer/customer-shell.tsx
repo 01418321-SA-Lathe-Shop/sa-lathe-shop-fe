@@ -11,6 +11,7 @@ import { getCustomerTheme, getServerCustomerTheme } from "./customer-preferences
 import { NotificationBell } from "./customer-notifications";
 import { CustomerContent } from "./customer-content";
 import { bindCustomerMenu } from "./customer-menu";
+import { DocumentNavigationProvider } from "./customer-document-navigation";
 import styles from "./customer.module.css";
 
 const thai = Noto_Sans_Thai({ subsets: ["thai", "latin"], display: "swap", variable: "--font-customer-thai" });
@@ -106,7 +107,7 @@ export default function CustomerShell({ session, mockControls, leave }: { sessio
   const content = <CustomerContent api={session.api} account={session.account} />;
 
   return (
-    <div className={`${styles.root} ${thai.variable}`} data-customer-theme={theme}>
+    <DocumentNavigationProvider><div className={`${styles.root} ${thai.variable}`} data-customer-theme={theme}>
       <a className="cust-skip" href="#customer-content">ข้ามไปเนื้อหา</a>
 
       {/* Persistent Left Sidebar Drawer for Desktop */}
@@ -236,6 +237,6 @@ export default function CustomerShell({ session, mockControls, leave }: { sessio
           <span>เวลาไทย · เงินบาท · ไม่มี VAT</span>
         </footer>
       </div>
-    </div>
+    </div></DocumentNavigationProvider>
   );
 }

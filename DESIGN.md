@@ -499,10 +499,29 @@ this local restyle is not a global accessibility/palette audit or a full AA clai
 The scope, finish-review findings, evidence and limitations are recorded in
 `docs/customer-request-list-restyle.md`.
 
+### Customer documents — approved Customer-only UC4/quotation adaptation
+
+Quotation and UC4 lists share a scoped document workspace. Real Customer-visible
+quotation states are sent/approved/rejected (no draft/canceled/requote tab). UC4
+keeps obligations, including deposit-only and not-yet-uploaded cases, separate
+from the uploaded-PO view; PO revisions use their own pending/approved/rejected
+evidence state. No Supplier UC6 screen, palette, navigation drawer or business
+rule is changed. Lists use full-width desktop rows and mobile cards at 640px.
+Status counts, literal search, Bangkok date ranges, customer type, sort and
+20-item URL pagination describe the existing bounded loaded collection, never
+global totals. Price filters compare exact decimal satang and are quote-only;
+PO amounts/numbers/issue dates are not invented. Existing /customers reads are
+used for list identity; existing fulfillment reads supply PO rows and terms.
+Filters persist in harmless URL parameters; an account-scoped, in-memory cache
+retains at most 20 list navigation contexts and restores list scroll after data
+and fonts settle. No session credentials or private file links are persisted.
+Batch 1 changes lists and navigation; document preview/print is a later checkpoint.
+
 ### Change log
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-28 | Document batch 1: shared Customer quotation/UC4 lists with actual-status pills, loaded-query counts, applied filters/chips/sort and URL paging; separate UC4 obligations from uploaded PO evidence | Domain tests for exact money, Bangkok dates, original identifiers and authorized projections; document preview/print follows in batch 2 |
 | 2026-10-28 | Request-list batch 2: responsive record cards, existing machine icon, date rows, membership footer, accessible whole-card link and static skeleton; unknown counts remain distinct from zero; restore existing primary-link hover foreground and reconcile active layout prose | 83 native tests; Chrome 375/640/768/1280/1440px Dark plus 375/1280px Light; synthetic loading/read-error/empty/31-record pagination checks and scoped finish review. Build/check evidence and remaining limitations are recorded in the request-list handoff; not Go/PostgreSQL/S3 verification |
 | 2026-10-28 | Request-list batch 1: replace the status select with wrapping pill navigation and loaded-record count badges; preserve applied search/status URLs and all four Request statuses | Literal-query/count unit tests plus existing checks; no API, theme or detail-view change |
 | 2026-10-28 | Replace Customer mobile/tablet capped-width drawer with full-screen navigation; separate scroll region, safe-area header/footer, quiet logout, scroll-lock cleanup and desktop-resize close | Native lifecycle regression tests and scoped browser responsive/keyboard checks; no live-backend claim |
@@ -1756,6 +1775,53 @@ src/features/workspace/workspace.module.css
   .list .card { padding: 20px; }
 }
 @media (prefers-reduced-motion: reduce) { .list .card { transition: none; } }
+```
+
+### A6. Customer document workspaces — src/features/customer/customer-documents.module.css
+
+```css
+.scope { min-width: 0; }
+.scope a:global(.cust-primary):hover { color: #121514; }
+.scope .total { color: var(--cust-muted); margin: -12px 0 24px; }
+.scope .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.scope .tabs a { gap: 10px; padding: 8px 14px; min-height: 44px; background: var(--cust-surface); color: var(--cust-muted); border-radius: 999px; text-decoration: none; }
+.scope .tabs a:hover { color: var(--cust-ink); background: var(--cust-surface-2); }
+.scope .tabs a[aria-current="page"] { color: var(--cust-accent); background: var(--cust-tint); }
+.scope .count { min-width: 24px; padding: 0 6px; background: var(--cust-surface-2); color: var(--cust-ink); border-radius: 999px; text-align: center; font-variant-numeric: tabular-nums; }
+.scope .filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: end; padding: 24px; background: var(--cust-surface); border-radius: 12px; margin-bottom: 16px; }
+.scope .filters > label { min-width: 0; margin: 0; }
+.scope .filters > label:first-child { grid-column: span 2; }
+.scope .filterActions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.scope .filterActions button { min-height: 48px; }
+.scope .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.scope .chips a { max-width: 100%; padding: 6px 12px; gap: 12px; background: var(--cust-tint); color: var(--cust-ink); border-radius: 999px; overflow-wrap: anywhere; }
+.scope .rows { display: grid; margin-top: 24px; }
+.scope .row { display: grid; grid-template-columns: minmax(140px, 1fr) minmax(0, 1.7fr) minmax(130px, .9fr) minmax(150px, 1fr); gap: 24px; padding: 28px 0; border-bottom: 1px solid var(--cust-line); align-items: start; }
+.scope .row > div { min-width: 0; overflow-wrap: anywhere; }
+.scope .rowTitle { display: block; color: var(--cust-ink); font-weight: 650; margin-bottom: 12px; }
+.scope .rowTitle:hover { color: var(--cust-accent); }
+.scope .row p { margin-top: 8px; color: var(--cust-muted); font-size: .875rem; }
+.scope .workName { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.scope .label { display: block; color: var(--cust-muted); font-size: .875rem; margin-bottom: 8px; }
+.scope .row time { font-size: .875rem; }
+.scope .rowActions { text-align: right; }
+.scope .rowActions > strong, .scope .rowActions > small { display: block; }
+.scope .rowActions a { justify-content: flex-end; }
+.scope .mobileMore { display: none; }
+.scope .skeletons { display: grid; gap: 16px; margin: 24px 0; }
+.scope .skeleton { height: 140px; background: var(--cust-surface); border-radius: 12px; }
+.scope :global(.cust-document-navigation) { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+.scope :global(.cust-document-navigation) > div { display: flex; flex-wrap: wrap; gap: 16px; }
+@media (max-width: 1100px) { .scope .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .scope .row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); } .scope .rowActions { text-align: left; } .scope .rowActions a { justify-content: flex-start; } }
+@media (max-width: 640px) {
+  .scope .filters { grid-template-columns: minmax(0, 1fr); padding: 16px; }
+  .scope .filters > label:first-child { grid-column: auto; }
+  .scope .row { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 20px; border: 0; border-radius: 12px; background: var(--cust-surface); }
+  .scope .rows { gap: 16px; }
+  .scope .desktopDownload { display: none; }
+  .scope .mobileMore { display: block; }
+  .scope .mobileMore summary { display: flex; align-items: center; min-height: 44px; color: var(--cust-accent); }
+}
 ```
 
 ### B. Font loading and root layout — app/layout.tsx

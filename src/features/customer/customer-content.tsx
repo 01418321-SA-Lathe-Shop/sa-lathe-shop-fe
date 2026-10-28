@@ -16,7 +16,7 @@ import { CustomerSettings } from "./customer-settings";
 export function CustomerContent({ api, account }: { api: BackendApi; account: Account }) {
   const path = usePathname(); const query = useSearchParams();
   const request = query.get("request") ?? ""; const quotation = query.get("quotation") ?? "";
-  const badId = ["request", "quotation", "job", "company"].some((key) => query.has(key) && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(query.get(key) ?? ""));
+  const badId = ["request", "quotation", "job", "company", "evidence"].some((key) => query.has(key) && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(query.get(key) ?? ""));
   if (badId) return <Empty title="ลิงก์รายการไม่ถูกต้อง" action={<Link href="/customer">กลับภาพรวม</Link>}>เปิดรายการจากเมนูหรือการแจ้งเตือนอีกครั้ง</Empty>;
   if (path === "/customer" && query.get("view") === "settings") return <CustomerSettings />;
   if (path === "/customer") return <CustomerOverview api={api} />;
