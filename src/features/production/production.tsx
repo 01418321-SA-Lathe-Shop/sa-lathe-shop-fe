@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { Suspense, useState, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 import { BackendApi, displayMoney, type Account, type JobRequest } from "../../lib/api/backend-api";
 import { useCommand, useResource, useRetryableWrite } from "../../hooks/backend-hooks";
 import { inventoryDisplay, type InventoryPlan } from "../inventory/inventory-domain";
@@ -15,7 +16,14 @@ const short = (id: string) => id.slice(0, 8);
 // UC8: any active Staff starts/records/completes any job; Admin monitors,
 // sees costs and enters actual labor cost only.
 export function LiveProduction({ api, account }: { api: BackendApi; account: Account }) {
-  const [offset, setOffset] = useState(0); const [selected, setSelected] = useState("");
+  return <Suspense fallback={<p role="status">กำลังเปิดงานผลิต…</p>}><ProductionWorkspace api={api} account={account} /></Suspense>;
+}
+function ProductionWorkspace({ api, account }: { api: BackendApi; account: Account }) {
+  const params = useSearchParams();
+  const raw = params.get("job") ?? "";
+  const queryJob = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw) && !/^0{8}-0{4}-0{4}-0{4}-0{12}$/.test(raw) ? raw : "";
+  const [offset, setOffset] = useState(0); const [choice, setChoice] = useState({ key: queryJob, id: queryJob });
+  const selected = choice.key === queryJob ? choice.id : queryJob;
   const jobs = useResource<{ items: ProductionSummary[] | null }>(api, `/production/jobs?limit=20&offset=${offset}`);
   return <section>
     <div className="workflow-toolbar"><h2>Production jobs</h2><button onClick={jobs.reload}>Refresh jobs</button></div>
@@ -23,7 +31,7 @@ export function LiveProduction({ api, account }: { api: BackendApi; account: Acc
     <Feedback busy={jobs.loading} error={jobs.error} />
     <div className="record-layout"><div className="record-list" aria-label="Production job list">
       {jobs.data && !jobs.data.items?.length && <p>No jobs yet. A job opens after the required Deposit/PO approvals.</p>}
-      {jobs.data?.items?.map((job) => <button key={job.job_id} className={`record-list-item ${selected === job.job_id ? "selected" : ""}`} onClick={() => setSelected(job.job_id)}>
+      {jobs.data?.items?.map((job) => <button key={job.job_id} className={`record-list-item ${selected === job.job_id ? "selected" : ""}`} onClick={() => setChoice({ key: queryJob, id: job.job_id })}>
         <span className="record-code">Job {short(job.job_id)} · cycle {String(job.cycle)}</span><strong>Request {short(job.request_id)}</strong><span><Status value={job.status} /></span><span>{job.completed_at ? `Completed ${formatBangkok(job.completed_at)}` : job.started_at ? `Started ${formatBangkok(job.started_at)}` : "Not started"}</span>
       </button>)}
       {jobs.data && <Paging offset={offset} count={jobs.data.items?.length ?? 0} busy={jobs.loading} setOffset={setOffset} />}

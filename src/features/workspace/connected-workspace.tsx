@@ -24,12 +24,13 @@ import { getWorkspaces, type Role, type WorkspaceId } from "./workspace-access";
 import { PAGE_LABELS, workspacePath } from "./workspace-routes";
 
 import { workspaceIcons as icons } from "./workspace-icons";
+import { StaffOverview } from "../staff-overview/staff-overview";
 export type ProductionSummary = { job_id: string; request_id: string; status: string; version: number | string; material_plan_version: number | string; cycle: number | string; started_at?: string; completed_at?: string };
 
 export default function ConnectedWorkspace({ role, workspaceId, session }: { role: Role; workspaceId: WorkspaceId; session: ApiSession }) {
   const { api, account } = session;
   switch (workspaceId) {
-    case "overview": return <Overview role={role} api={api} />;
+    case "overview": return role === "Customer" ? <Overview role={role} api={api} /> : <StaffOverview api={api} admin={role === "Admin"} />;
     case "requests": return <LiveRequests api={api} account={account} focus={role === "Customer" ? "request" : "all"} />;
     case "quotations": return <LiveRequests api={api} account={account} focus={role === "Customer" ? "quotations" : "all"} />;
     case "deposit-po": return <LiveRequests api={api} account={account} focus="fulfillment" />;
@@ -69,7 +70,7 @@ function JobPlans({ api, session }: { api: BackendApi; session: ApiSession }) {
 function Overview({ role, api }: { role: Role; api: BackendApi }) {
   const items = getWorkspaces(role);
   return <>
-    <section className="workspace-stats">{role === "Customer" ? <CustomerStats api={api} /> : <StaffStats api={api} admin={role === "Admin"} />}</section>
+    <section className="workspace-stats"><CustomerStats api={api} /></section>
     <section className="workspace-links">{items.map(item => <Link key={item.id} className="panel workspace-link-card" href={workspacePath(role, item.id)}><span className="workspace-card-icon"><Icon name={icons[item.id]} size={25}/></span><span className="eyebrow">{item.useCase}</span><h2>{PAGE_LABELS[item.id]}</h2><p>{item.description}</p><span className="workspace-card-action">เปิดพื้นที่ทำงาน <Icon name="arrow"/></span></Link>)}</section>
   </>;
 }
@@ -85,16 +86,5 @@ function CustomerStats({ api }: { api: BackendApi }) {
     <Stat label="คำขอที่กำลังดำเนินการ" value={list.filter((r) => r.status === "pending" || r.status === "ongoing").length} loading={requests.loading} error={requests.error} />
     <Stat label="งานที่รอตรวจรับ / ค้างชำระ" value={(jobs.data?.items ?? []).filter((j) => j.deliveries.at(-1)?.status === "shipping" || (j.invoice && j.invoice.status !== "paid")).length} loading={jobs.loading} error={jobs.error} />
     <Stat label="การแจ้งเตือนที่ยังไม่อ่าน" value={(inbox.data?.items ?? []).filter((n) => !n.read_at).length} loading={inbox.loading} error={inbox.error} />
-  </>;
-}
-function StaffStats({ api, admin }: { api: BackendApi; admin: boolean }) {
-  const requests = useResource<Page<JobRequest>>(api, "/requests?limit=100");
-  const jobs = useResource<{ items: ProductionSummary[] | null }>(api, "/production/jobs?limit=100");
-  const receiving = useResource<{ items: { status: string }[] | null }>(api, "/receiving/orders?limit=100");
-  const list = jobs.data?.items ?? [];
-  return <>
-    <Stat label="คำขอใหม่รอประเมินราคา" value={(requests.data?.items ?? []).filter((r) => r.status === "pending").length} loading={requests.loading} error={requests.error} />
-    <Stat label={admin ? "งานที่กำลังผลิต" : "งานรอผลิต / กำลังผลิต"} value={list.filter((j) => (admin ? ["in_progress"] : ["queued", "in_progress"]).includes(j.status)).length} loading={jobs.loading} error={jobs.error} />
-    <Stat label="คำสั่งซื้อรอรับของ" value={(receiving.data?.items ?? []).filter((o) => o.status !== "received").length} loading={receiving.loading} error={receiving.error} />
   </>;
 }

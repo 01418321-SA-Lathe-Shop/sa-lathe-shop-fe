@@ -694,6 +694,31 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 | 2026-10-16 | ทำส่วนบัญชีทดสอบใต้ฟอร์มให้ collapse ได้และปิดเป็นค่าเริ่มต้น | Browser keyboard/state + production build |
 | 2026-10-16 | Initial implemented-design baseline: themes, UI scale, scrollable sidebar, Settings border state, typography, routes and source snapshot | Source comparison and snapshot check |
 
+### Staff/Admin Overview — 2026-10-28
+
+The owner-pinned reference changes only the Overview content, not the navbar,
+navigation drawer, production forms or Customer portal. Both roles use a shared
+shop queue (no personal assignments). Four Job-only current-status buttons select
+the named filtered list. Creation-cohort ranges use Bangkok calendar boundaries,
+default 30 days; priority backlog is separately labelled all dates. No fabricated
+trend, ETA, stock readiness or finance appears. Reports use the new read-only
+backend dashboard contract, never first-100 counts or a live-error mock fallback.
+
+Overview alone fills the available stage, with 32px desktop/16px mobile side
+padding, compact 28px heading, 18px section titles, 16px body and 14px metadata.
+Its CSS Module inherits Staff/Admin theme/scale tokens. At >=1280px the main/rail
+split is 2:1; the main has equal 2x2 metrics, 4 across >=1440px. Below 1280px the
+priority queue follows the metrics; below 704px the named table becomes rows.
+Panels use 16px corners, 24px padding and restrained borders. Quick links differ
+by confirmed role; Admin worker management is navigation only. Existing production
+details accept a validated optional job UUID selector under Suspense; no command
+or form changes. Loading, stale refresh, empty/filter-empty and retry errors are
+distinct. This first UI batch reserves the heatmap region without invented data;
+interactive history is the following batch. See docs/staff-overview-surface.md.
+
+Change log: 2026-10-28 — Staff/Admin shared-queue reporting layout and named list;
+preserved Customer, navbar/drawer and shared Light/Dark preferences.
+
 ## Generated source appendix
 
 อย่าแก้เนื้อหาระหว่าง markers ด้วยมือ CSS snapshot รักษาทุก declaration ตามลำดับ รวม selector เก่าที่อาจไม่ได้ render อยู่ จึงใช้ประกอบกับ component markup
@@ -2118,6 +2143,125 @@ src/features/workspace/workspace.module.css
   .dashboard .workRow { flex-direction: column; gap: 4px; }
   .dashboard .readyRow { justify-items: stretch; }
   .dashboard .readyRow > :global(.cust-badge) { justify-self: start; }
+}
+```
+
+### A8. Staff/Admin overview — src/features/staff-overview/overview.module.css
+
+```css
+.dashboard { display: grid; grid-template-columns: minmax(0, 2fr) minmax(17rem, 1fr); grid-template-areas: "toolbar toolbar" "summary rail" "activity rail" "jobs rail"; align-items: start; gap: 1.5rem; color: var(--text); font-size: 1rem; line-height: 1.6; }
+.dashboard, .dashboard * { min-width: 0; }
+.dashboard h2, .dashboard h3, .dashboard p { margin: 0; }
+.dashboard h2 { font-size: 1.125rem; line-height: 1.5; font-weight: 650; }
+.dashboard h3 { font-size: 1rem; }
+.dashboard button, .dashboard select { min-height: 2.75rem; border: 1px solid var(--line); border-radius: .625rem; padding: .5rem .75rem; background: var(--surface); color: var(--text); font-size: .875rem; cursor: pointer; }
+.dashboard button:hover:not(:disabled), .dashboard select:hover { border-color: var(--lime); }
+.dashboard button:disabled { cursor: default; opacity: .6; }
+.dashboard :is(a, button, select, input):focus-visible { outline: 2px solid var(--lime-soft); outline-offset: 3px; }
+.dashboard a { color: inherit; text-decoration: none; text-underline-offset: .2em; }
+.dashboard a:hover { text-decoration: underline; }
+.dashboard ::selection { background: var(--lime); color: var(--bg); }
+.dashboard input { accent-color: var(--lime); caret-color: var(--text); }
+.toolbar { grid-area: toolbar; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; }
+.toolbar > .error, .toolbar > [role="status"] { flex-basis: 100%; }
+.controls { display: flex; align-items: end; flex-wrap: wrap; gap: .75rem; }
+.controls label { display: grid; gap: .25rem; font-size: .875rem; color: var(--muted); }
+.controls select { min-width: 8rem; }
+.controls button { display: flex; align-items: center; gap: .5rem; }
+.muted { color: var(--muted); font-size: .875rem; }
+.summary { grid-area: summary; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.dashboard .metric { padding: 1.25rem; min-height: 8.5rem; display: grid; gap: .5rem; text-align: left; border-radius: 1rem; background: var(--surface); }
+.metric > span { display: flex; justify-content: space-between; gap: .5rem; font-size: .875rem; }
+.metric > span svg { color: var(--muted); flex-shrink: 0; }
+.metric strong { font-size: 2rem; font-weight: 650; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; line-height: 1.2; }
+.metric small { font-size: .875rem; color: var(--muted); }
+.dashboard .metric[data-selected="true"] { border-color: var(--lime-soft); background: color-mix(in srgb, var(--lime) 8%, var(--surface)); }
+.panel { padding: 1.5rem; background: var(--surface); border: 1px solid var(--line); border-radius: 1rem; }
+.panel > .muted { margin-top: .375rem; }
+.rail { grid-area: rail; display: grid; gap: 1.5rem; }
+.priorityList { display: grid; margin-top: 1.5rem; }
+.priorityList a { display: grid; grid-template-columns: 1.25rem minmax(0, 1fr) auto 1rem; gap: .75rem; padding: 1.125rem 0; align-items: start; border-bottom: 1px solid var(--line-soft); }
+.priorityList a:last-child { border: 0; padding-bottom: 0; }
+.priorityList a:first-child { padding-top: 0; }
+.priorityList svg { margin-top: .2rem; color: var(--lime-soft); }
+.priorityList strong { font-size: .875rem; font-weight: 600; }
+.priorityList small { display: block; margin-top: .375rem; color: var(--muted); font-size: .875rem; }
+.priorityList a > span { font-size: 1.125rem; font-weight: 650; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.shortcuts { display: grid; margin-top: 1.5rem; }
+.shortcuts a { display: flex; gap: .75rem; align-items: center; min-height: 3.25rem; border-bottom: 1px solid var(--line-soft); font-size: .875rem; }
+.shortcuts a > svg:first-child { color: var(--lime-soft); }
+.shortcuts a > svg:last-child { margin-left: auto; }
+.shortcuts a:last-child { border: 0; }
+.quick > .textLink { margin-top: 1rem; }
+.textLink { display: inline-flex; align-items: center; min-height: 2.75rem; gap: .5rem; font-size: .875rem; font-weight: 600; }
+.activity { grid-area: activity; min-height: 12rem; }
+.activity > p:last-child { margin-top: 1.5rem; }
+.jobs { grid-area: jobs; }
+.sectionHead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: 1rem; }
+.sectionHead p { margin-top: .375rem; }
+.sectionHead h2 { scroll-margin-top: 7rem; }
+.tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.25rem 0 .5rem; }
+.dashboard .tabs button { display: flex; gap: .5rem; align-items: center; border-radius: 2rem; background: transparent; }
+.tabs button span { padding: 0 .375rem; background: var(--surface-2); border-radius: 1rem; font-size: .875rem; font-variant-numeric: tabular-nums; }
+.dashboard .tabs button[aria-pressed="true"] { border-color: var(--lime-soft); background: color-mix(in srgb, var(--lime) 10%, var(--surface)); }
+.table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 1rem; }
+.table th, .table td { text-align: left; vertical-align: top; padding: 1rem .5rem; border-bottom: 1px solid var(--line-soft); font-size: .875rem; overflow-wrap: anywhere; }
+.table th:first-child { width: 40%; padding-left: 0; }
+.table th:last-child { width: 16%; padding-right: 0; }
+.table thead th { color: var(--muted); font-weight: 400; }
+.table tbody th { font-weight: 600; }
+.table tbody th > a { display: block; min-height: 2.75rem; }
+.table tbody th > small { display: block; font-size: .875rem; color: var(--muted); font-weight: 400; margin-top: .5rem; }
+.badge { display: inline-flex; align-items: center; gap: .4rem; padding: .25rem .5rem; background: var(--surface-2); border-radius: 2rem; color: var(--text); font-size: .875rem; font-weight: 400; }
+.badge i { width: .4rem; height: .4rem; border-radius: 50%; flex-shrink: 0; background: var(--muted); }
+.badge[data-status="queued"] i { background: var(--warning); }
+.badge[data-status="in_progress"] i { background: var(--cyan); }
+.badge[data-status="completed"] i { background: var(--lime); }
+.badge[data-status="cancelled"] i { background: var(--danger); }
+.pagination { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin-top: 1.25rem; font-size: .875rem; color: var(--muted); }
+.pagination > div { display: flex; gap: .5rem; }
+.filterChip { display: flex; flex-wrap: wrap; gap: .75rem; align-items: center; margin-top: 1rem; font-size: .875rem; }
+.filterChip > span { padding: .5rem .75rem; background: var(--surface-2); border-radius: .625rem; }
+.empty { padding: 2rem 0; display: grid; justify-items: start; gap: 1rem; }
+.empty p { color: var(--muted); font-size: .875rem; max-width: 65ch; }
+.error { border: 1px solid var(--danger); background: var(--surface); border-radius: .625rem; padding: 1rem; font-size: .875rem; }
+.error p, .error button { margin-top: .75rem; }
+.skeleton { display: grid; gap: .75rem; padding: 1.5rem 0; }
+.skeleton > span:not(.srOnly) { background: var(--surface-2); border-radius: .5rem; height: 1.25rem; }
+.skeleton > span:nth-child(2) { width: 70%; }
+.srOnly { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+:global(.page-content):has(.dashboard) { max-width: none; padding: 2rem; }
+:global(.page-content):has(.dashboard) > :global(.page-heading) { min-height: 0; margin-bottom: 1.25rem; }
+:global(.page-content):has(.dashboard) > :global(.page-heading) h1 { font-size: 1.75rem; line-height: 1.4; letter-spacing: -.02em; }
+@media (min-width: 90rem) { .summary { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 79.999rem) {
+  .dashboard { grid-template-columns: minmax(0, 1fr); grid-template-areas: "toolbar" "summary" "queue" "activity" "jobs" "quick"; }
+  .rail { display: contents; }
+  .queue { grid-area: queue; }
+  .quick { grid-area: quick; }
+  .priorityList { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+  .priorityList a { border-bottom: 0; padding: 0; grid-template-columns: 1.25rem minmax(0, 1fr) auto; }
+  .priorityList a > svg:last-child { display: none; }
+  .shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1.5rem; }
+}
+@media (max-width: 44rem) {
+  :global(.page-content):has(.dashboard) { padding: 1.5rem 1rem 2.5rem; }
+  .dashboard { gap: 1rem; }
+  .panel { padding: 1.25rem; }
+  .summary { gap: .75rem; }
+  .dashboard .metric { padding: 1rem; }
+  .metric > span svg { display: none; }
+  .controls { width: 100%; }
+  .controls label { flex: 1; }
+  .priorityList { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .priorityList a { padding: 1rem 0; border-bottom: 1px solid var(--line-soft); }
+  .table, .table tbody { display: block; }
+  .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .table tr { display: grid; grid-template-columns: minmax(0, 1fr); padding: 1rem 0; gap: .625rem; border-bottom: 1px solid var(--line); }
+  .table th, .table td { display: block; width: 100% !important; padding: 0; border: 0; }
+  .table td[data-label]::before { content: attr(data-label); display: block; color: var(--muted); margin-bottom: .25rem; }
+  .table td:last-child a { width: 100%; }
+  .pagination { align-items: start; }
 }
 ```
 

@@ -15,8 +15,17 @@ construction. The explicitly selected in-browser mock mirrors the new reads
 from its existing shared records/events; no hardcoded chart totals or random
 history is added. Live errors must never switch to this transport.
 
-This first frontend batch adds contract models and mock/domain tests only.
-The dashboard UI and keyboard heatmap follow in separately verified commits.
-All 131 native tests, TypeScript, ESLint and the 37-route production build pass.
+Frontend batch 1 adds contract models and mock/domain tests (131 native tests,
+TypeScript, ESLint and the 37-route production build passed). Batch 2 replaces
+the Staff/Admin menu-directory overview with the responsive report shell,
+four status filters, named paginated list, current priority backlog and role-safe
+quick links. The navbar/drawer and Customer portal are unchanged. A validated
+optional job query selects the existing production detail, including jobs beyond
+the first page; all operational forms and permissions remain unchanged.
+
+The report hook cancels superseded reads, preserves same-path data during refresh,
+and distinguishes missing reporting APIs from normal errors. Failures are not
+zero counts and never trigger mock fallback. The heatmap region is explicitly
+marked as pending the next logical batch, without placeholder chart data.
 Backend SQL passed an isolated PostgreSQL minimal-reporting fixture with 125
 jobs; that is not full UC1–UC9/S3/browser-to-live-stack verification.

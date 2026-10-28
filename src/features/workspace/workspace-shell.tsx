@@ -64,7 +64,7 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
         {mode === "mock" ? <MockSwitcher current={account.username} /> : <button className="secondary-button switch-account" onClick={leave}>ออกจากระบบ</button>}
       </header>
       <main id="main-content" className={`page-content ${styles.scope}`}>
-        <section className="page-heading"><div><span className="eyebrow">{ROLE_LABELS[role].toUpperCase()} / {workspaceId.toUpperCase()}</span><h1 id="workspace-title" tabIndex={-1}>{overview ? role === "Admin" ? "ศูนย์จัดการระบบ" : role === "Worker" ? "ศูนย์ควบคุมงานผลิต" : "งานของคุณในที่เดียว" : PAGE_LABELS[workspaceId]}</h1><p>{overview ? descriptions[role] : items.find((item) => item.id === workspaceId)?.description}</p></div></section>
+        <section className="page-heading"><div>{!overview && <span className="eyebrow">{ROLE_LABELS[role].toUpperCase()} / {workspaceId.toUpperCase()}</span>}<h1 id="workspace-title" tabIndex={-1}>{overview ? "ภาพรวมการผลิต" : PAGE_LABELS[workspaceId]}</h1><p>{overview ? descriptions[role] : items.find((item) => item.id === workspaceId)?.description}</p></div></section>
         {mode === "mock" ? <p className="demo-context">Mock backend ในเบราว์เซอร์ · ข้อมูลตัวอย่างร่วมกันระหว่างบัญชีทดสอบ · รีโหลดหน้าเพื่อเริ่มใหม่ · ไม่ใช่ข้อมูลจริง</p> : <p className="demo-context">ข้อมูลจริงจาก backend · เวลา Asia/Bangkok · เงินบาท ไม่รวม VAT · รีโหลดหน้าต้องเข้าสู่ระบบใหม่</p>}
         <div className="workflow-content live-workspace"><ConnectedWorkspace key={`${account.id}:${workspaceId}`} role={role} workspaceId={workspaceId} session={session} /></div>
       </main>
