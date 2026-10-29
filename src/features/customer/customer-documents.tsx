@@ -34,7 +34,7 @@ export function DocumentList({ api, mode }: { api: BackendApi; mode: "quotes" | 
   return <section className={styles.scope}>
     <PageTitle title={mode === "quotes" ? "ใบเสนอราคา" : "มัดจำและ PO"} description={mode === "quotes" ? "พิจารณาราคาและเงื่อนไขก่อนตอบรับ" : "ตรวจสิ่งที่ต้องส่งและกำหนดเวลาจากเงื่อนไขที่ตอบรับ"} />
     <p className={styles.total} role="status">{busy ? "กำลังโหลดจำนวนเอกสาร…" : unavailable ? "ยังโหลดจำนวนเอกสารไม่ได้" : `${view === "tasks" ? "รายการเงื่อนไข" : "เอกสาร"} ${filtered.length} รายการที่โหลดสำเร็จ`}</p>
-    {mode === "deposit" && <nav className="cust-tabs" aria-label="มุมมองมัดจำและ PO"><Link href="/customer/deposit-po" aria-current={view === "tasks" ? "page" : undefined}>สิ่งที่ต้องส่ง</Link><Link href={documentListHref(section, poView)} aria-current={view === "po" ? "page" : undefined}>เอกสาร PO</Link></nav>}
+    {mode === "deposit" && <nav className={styles.tabs} aria-label="มุมมองมัดจำและ PO"><Link href="/customer/deposit-po" aria-current={view === "tasks" ? "page" : undefined}>สิ่งที่ต้องส่ง</Link><Link href={documentListHref(section, poView)} aria-current={view === "po" ? "page" : undefined}>เอกสาร PO</Link></nav>}
     <DocumentFilters section={section} params={params} view={view} labels={view === "po" ? EVIDENCE_LABELS : QUOTATION_STATUSES} counts={counts} loading={busy} unavailable={unavailable} />
     {error && <p role="alert" className="cust-alert danger">{error}</p>}
     <ResourceFeedback {...data} loading={false} /><ResourceFeedback {...profiles} loading={false} />

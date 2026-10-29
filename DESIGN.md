@@ -161,6 +161,10 @@ by App Router do not uncheck the currently visible theme or size controls.
 
 ## Typography
 
+### Deposit/PO quotation-style alignment — 2026-10-29
+
+Customer Deposit/PO reuses Quotation's document layout: the main column contains the existing original PO preview, upload form and evidence history, with a right-hand `cust-price-panel` showing the accepted full-job price, quantity/no-VAT label, saved customer type, evidence deadline and required-evidence checklist. It uses the same `quotationLayout` grid, 32px gap, 260–320px rail and <=1200px summary-first stack as Quotation. Nested PO preview information stacks under the original document to avoid squeezing it beside a second rail. Deposit/PO list view choices now use the same document pill tabs as quotation status tabs; existing list/filter/pagination components remain shared. Original PO content, statuses, API calls, upload and uncertain-write handling, deadline and approval gates are unchanged; no fabricated deposit document, PDF or internal costs are introduced.
+
 ### Local-test account switching — 2026-10-29
 
 “สลับบัญชีทดสอบ” appears in Staff/Admin sidebar settings and Customer desktop sidebar/mobile menu only when the active session was created via guarded Local test login and the existing loopback opt-in is enabled. Ordinary password sessions, even with a demo username, do not show it. The UI-only provenance marker stays in session memory and is never an authorization claim. Clicking expands an inline six-account list without signing out or visiting login. Selecting an account authenticates it through the existing local-test endpoint, confirms `/auth/me`, revokes the previous session and replaces the workspace by server role. The current account is labelled/disabled; all choices disable while pending. Cancel/Escape closes the list and restores focus without changing accounts. Failed replacement login keeps the current account and shows an inline error. If old-session logout cannot be confirmed, clear local state, clean up the candidate best-effort and show the existing expiry/revocation warning at login rather than silently switching. Staff mobile navigation closes after success; Customer shell remounts by account ID. Normal logout remains separate. No password, persisted token, automatic retry, browser mock or new endpoint is added.
@@ -755,6 +759,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-29 | Match Customer Deposit/PO detail and view tabs to Quotation document layout and price rail | Presentation regressions, responsive/theme browser checks, lint and build; existing evidence logic preserved |
 | 2026-10-29 | Landing: remove the capability card (materials table now sits beside its heading); pair the Deposit/PO card with a full-width order-facts card; rewrite all public Thai copy in a natural shop voice; reveal tall items as soon as they enter the viewport | Type check, lint, native tests, build; Chrome walks at 1440 and 360px: no overflow, no stuck reveals |
 | 2026-10-29 | Fill landing hero stats with owner-confirmed figures: 30 years of experience, 837 jobs delivered | Type check, landing lint, served-HTML check |
 | 2026-10-29 | Shop-first landing: new hero copy, services, materials/tolerances, gallery, why-us, 5-step process with Deposit/PO rules, FAQ accordion with JSON-LD, contact/map facade; smooth scrolling, scroll reveals, sticky section bar, progress line and hero parallax; placeholders for unconfirmed facts | 145 native tests, type check, lint, source audit, production build; real-GPU Chrome walks at 1440/390/360px in Dark/Light, reduced motion and JavaScript off: no overflow, no stuck reveals, keyboard FAQ, valid JSON-LD |
@@ -2346,6 +2351,10 @@ src/features/workspace/workspace.module.css
 .scope :global(.cust-document-navigation) > div { display: flex; flex-wrap: wrap; gap: 16px; }
 .scope .quotationLayout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); gap: 32px; align-items: start; }
 .scope .quotationLayout > * { min-width: 0; }
+.scope .depositLayout .previewLayout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+.scope .depositLayout :global(.cust-document) > h2 { margin-bottom: 24px; }
+.scope .depositLayout :global(.cust-price-panel) :global(.cust-definition) > div { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+.scope .depositLayout :global(.cust-price-panel) :global(.cust-checklist li) { flex-wrap: wrap; gap: 8px; }
 .paper { --cust-ink: #202623; --cust-muted: #57615b; color-scheme: light; margin: 16px 0 24px; padding: 32px; background: #fff; color: #202623; box-shadow: 0 8px 24px rgb(0 0 0 / .06); border-radius: 12px; overflow-wrap: anywhere; font-size: .9375rem; }
 .paper h2 { font-size: 1.5rem; font-weight: 700; margin: 0 0 12px; }
 .paper h3 { font-size: 1rem; font-weight: 650; margin: 0 0 16px; }
