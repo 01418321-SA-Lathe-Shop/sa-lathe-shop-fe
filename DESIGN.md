@@ -459,67 +459,12 @@ Icon เป็น inline SVG viewBox `0 0 24 24`, fill none, stroke currentColor
 
 Brand mark เป็น CSS square สีส้มหมุน45° พร้อมกากบาทเข้ม ขนาด2.0625rem; ใช้ข้อความ LATHE / SHOP CONTROL ไม่มี logo image file. Landing ใช้ mark เดิมย่อเป็น1.8rem/1.5rem และ procedural Three.js machine แทน CSS illustration.
 
-### Landing lathe turning scene (2026-10-29)
+### Landing animation restored to the furnace scene (2026-10-29)
 
-Supersedes the robot-arm/conveyor/furnace animation described in the historical subsection below. The hero band, poster/fallback lifecycle, reduced-motion, no-JavaScript, offscreen pause and Light/Dark behavior keep their existing rules. Page copy and sections are unchanged in this batch.
+At the owner's request the short-lived procedural lathe turning scene (commit `74c21a7`) is withdrawn. The robot arm → conveyor → furnace → finished ingot loop described in the historical subsection below is the current scene again, with its original timings, posters and tests. Two refinements from the lathe batch are kept:
 
-**Story (16.0 s loop, `latheConfig.stages`).**
-
-| Stage | Duration | Action |
-|---|---|---|
-| load | 1.8 s | The bar feeds out of the spindle bore with a damped settle. |
-| clamp | 1.0 s | Three stepped jaws close onto the bar with a small overshoot and ring-out. |
-| spinUp | 2.0 s | First-order spindle lag; the coolant valve opens over the last 0.4 s. |
-| approach | 1.0 s | Rapid traverse with a settle, then a slower feed-in. |
-| turn | 5.2 s | A diagonal entry onto the chamfer, then a constant-feed contour pass along a stepped shaft with a groove. The cut boundary is exactly at the tip. |
-| retract | 1.2 s | The tool backs off, coolant stops and drips follow. |
-| spinDown | 2.4 s | A slower coast-down (lag 0.45 s, versus 0.35 s for spin-up). |
-| eject | 1.4 s | The jaws open, the part slides clear and falls into the trough. |
-
-The tray keeps an identical finished part from the second cycle on, and the next bar feeds from inside the headstock, so the loop has no fade or pop.
-
-**Mechanics.**
-- The sampler is pure and closed-form: minimum-jerk moves, windowed damped settles, trapezoidal feed and exponential spindle lag. There is no per-frame integration, physics or randomness, so pause, seam and tests are deterministic.
-- Displayed spin is capped at 1.6 rev/s to avoid wagon-wheel aliasing. Above about 2 rev/s the jaws fade into a swept annulus that stands in for rotational motion blur.
-
-**Look.**
-- The camera is a 3/4 telephoto (position 5.4, 4.6, 13.6) with a ±0.55 sine drift per cycle and no zooms.
-- Desktop depth of field follows the tool tip with a 0.6 s damped focus.
-- Lighting is one warm key spot (the only shadow caster, map size 1024/512), a cool rim, a low front fill, a hemisphere, a warm floor bounce, and a tip glow that is present only while cutting.
-- Reflections come from a procedural dark-bay PMREM (dim walls, cool high-bay strips, one warm lamp, low warm horizon) in place of RoomEnvironment.
-
-**Materials and parts.**
-- Painted castings are dielectric (`#36403c` / `#1f2524`, rough paint).
-- The ground ways and chuck OD are steel.
-- The chuck face has radial UVs plus anisotropy for the turned-face streak.
-- The workpiece is `MeshPhysicalMaterial`:
-  - Turning-mark roughness, axial anisotropy, and a duller, darker mill-finish raw stock.
-  - A wet low-roughness band behind the tip while coolant runs.
-  - The vertex shader chooses the raw or finished radius per vertex from the tool position, with a matching depth material so the shadow shrinks too.
-- Insert: gold TiN (`#c9a24a`). Coolant hose: segmented orange-brown.
-
-**Particles.** All instanced and time-sampled:
-- Curled helical-ribbon chips are emitted only while cutting and land in the trough (72 desktop / 18 mobile; about 15% have a straw heat tint).
-- Coolant is a jet cylinder, stretched splash droplets and post-shut-off drips (110 / 36).
-- Lamp-lit mist and dust use additive points (60, desktop only).
-
-**Budgets.**
-
-| | Desktop | Mobile (<768px) |
-|---|---|---|
-| Pixel ratio | 1.5 | 1 |
-| Segments | 96 | 48 |
-| Shadow map | 1024 | 512 |
-| Camera | drift, depth of field | fixed, no depth of field, no mist |
-
-**Playback control.** The invisible full-scene toggle is replaced by a visible top-right pill (`.cinematic-scene-toggle`).
-- Inline pause/play SVG plus Thai label หยุดชั่วคราว/เล่นต่อ.
-- 44px minimum height, `aria-pressed`, and the existing focus ring.
-- Translucent `#0b0d0dcc` in Dark; white with `--line` border in Light.
-
-**Posters.** `landing-final-{desktop,mobile}.webp` are now transparent-alpha captures (1440×315 and 390×240) of the 14.2 s frame: the finished shaft in the chuck. They carry provenance EXIF.
-
-**Limits.** This is stylised-realistic procedural geometry, not photorealism. Chips and coolant are particle approximations, not fluid or fracture simulation. The tailstock is static context.
+- **Visible pause control.** The invisible full-scene toggle stays replaced by a top-right pill (`.cinematic-scene-toggle`): inline pause/play SVG, Thai label หยุดชั่วคราว/เล่นต่อ, a minimum height of 44px, `aria-pressed` and the existing focus ring. It is translucent `#0b0d0dcc` in Dark, and white with a `--line` border in Light. This supersedes the "no visible controls" sentence below.
+- **Shadow type.** The renderer requests `PCFShadowMap`, because three r186 removed `PCFSoftShadowMap` and already fell back to it with a console warning.
 
 ### Cinematic public landing (2026-10-28)
 
@@ -750,6 +695,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-29 | Restore the robot arm → conveyor → furnace → ingot landing animation at the owner's request; keep the visible pause pill and use `PCFShadowMap` | Restored timeline tests pass; type check, lint and production build pass; real-GPU browser walk at 1440/390/360px |
 | 2026-10-29 | Replace landing robot/furnace loop with a 16 s procedural lathe turning scene (bar feed, jaw clamp, spindle inertia, shader-driven cut, chips, coolant, mist, eject); procedural dark-bay reflections; visible pause pill; regenerate transparent posters | 149 native tests (9 new timeline tests), lint, source audit, production build; real-GPU Chrome captures at 1440/390/360px, paused-frame identity, reduced-motion still, no horizontal overflow |
 | 2026-10-29 | Replace switch-to-login redirect with an inline local-test account list; confirm new identity before old-session revocation and direct role navigation | 145 native tests, real six-account browser chain, old-token 401 checks, mobile same-role menu close, cancel and simulated failure preservation; normal logout still works |
 | 2026-10-29 | Add test-session-only account switch in sidebar/mobile menu and focus the login picker after sign-out | Provenance/visibility/logout regressions, scoped browser checks, lint and production build |

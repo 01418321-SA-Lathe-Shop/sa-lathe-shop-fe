@@ -4,7 +4,7 @@ Next.js App Router, React, TypeScript and Tailwind CSS. Read `docs/02-frontend.m
 
 ## Cinematic landing
 
-The public homepage shows a 16-second lathe turning loop (bar feed → chuck clamp → spindle spin-up → contour turning with chips and coolant → coast-down → part ejected into the trough), using procedural Three.js, React Three Fiber and one GSAP clock. Timings live in `src/features/landing/process-config.ts`. All models are generated in code; no `.glb` files, paid assets, backend endpoint, or additional environment variables are required for the landing page.
+The public homepage demonstrates a five-second loop: robotic pickup → conveyor → furnace → cooling ingot, using procedural Three.js, React Three Fiber and one GSAP clock. This is an illustrative process, not a claim about the shop's services. All models are generated in code; no `.glb` files, paid assets, backend endpoint, or additional environment variables are required for the landing page.
 
 ```bash
 npm ci

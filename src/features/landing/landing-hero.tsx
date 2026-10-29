@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Component, useCallback, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
 import { landingConfig } from "./landing-config";
-import { latheConfig, type ProcessMotion } from "./process-config";
+import { processConfig, type ProcessMotion } from "./process-config";
 import type { ProcessClock } from "./process-clock";
 import { Nav } from "./landing-nav";
 import { StatCards } from "./landing-stat-cards";
@@ -27,7 +27,7 @@ function useMedia(query: string) {
 
 export function Hero() {
   const root = useRef<HTMLElement>(null);
-  const motion = useRef<ProcessMotion>({ time: 0, cycle: 0, loop: latheConfig.loop });
+  const motion = useRef<ProcessMotion>({ time: 0, cycle: 0, loop: processConfig.loop });
   const clock = useRef<ProcessClock | null>(null);
   const stateRef = useRef("loading");
   const [state, setState] = useState<"loading" | "playing" | "paused" | "complete" | "failed">("loading");
@@ -86,7 +86,7 @@ export function Hero() {
   return <section ref={root} className="cinematic-hero" data-state={staticMode ? "static" : state} aria-labelledby="cinematic-title">
     <div className="cinematic-horizon" aria-hidden="true" />
     <div className="cinematic-art">
-      <p id="cinematic-scene-description" className="cinematic-sr-only">ภาพจำลองเครื่องกลึง: ป้อนแท่งโลหะเข้าหัวจับ จับยึด เร่งรอบ มีดกลึงเดินกินเนื้องานพร้อมเศษโลหะและน้ำหล่อเย็น จนได้เพลาขั้นสำเร็จ</p>
+      <p id="cinematic-scene-description" className="cinematic-sr-only">ภาพจำลองแขนกลหยิบเศษโลหะวางบนสายพาน ลำเลียงเข้าเตาหลอม และขึ้นรูปเป็นแท่งโลหะสำเร็จ</p>
       <picture className="cinematic-poster"><source media="(max-width: 767px)" srcSet="/landing-final-mobile.webp" /><img src="/landing-final-desktop.webp" alt="" width="1440" height="315" fetchPriority="high" /></picture>
       {reduced === false && mobile !== null && state !== "failed" && <div className="cinematic-canvas" data-ready={ready} aria-hidden="true">
         <SceneLoadBoundary onError={onError}><Scene motion={motion} mobile={mobile} playing={state === "playing"} frameState={state} visible={visible} onReady={onReady} onError={onError} /></SceneLoadBoundary>
