@@ -8,7 +8,7 @@ THESIS: Raw potential becomes finished work through one readable five-second pro
 
 OWN-WORLD: Near-black, copper/orange glow, brushed metallic surfaces, mechanical fasteners/pistons and soft contact shadows. Thai Noto Sans typography with the existing Geist wordmark. Only the two reference-matching bottom stat cards use glass.
 
-STORY: A robotic gripper lifts a bent offcut, places it on a left-to-right conveyor, feeds it into a glowing furnace, pours molten metal and releases a cooling ingot. This is an illustrative concept, not a recycling-service claim. Nine workflows and three roles remain factual product proof.
+STORY (2026-10-29, supersedes the furnace loop): a bar feeds through the spindle, three jaws clamp it, the spindle spins up with inertia, a turret tool contour-turns a stepped shaft with chips and coolant, the spindle coasts down and the finished part drops into the trough. This is the shop's real process (turning), shown as a stylised-realistic procedural scene.
 
 FIRST VIEWPORT: Preserve logo/pills, three-line headline, paragraph/CTA and bottom caption/stats, translated to Thai. A fixed near-side camera frames the entire production line in a lower band. No playback action bar. Mobile stacks real text above a lighter scene.
 

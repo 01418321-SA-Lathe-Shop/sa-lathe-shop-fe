@@ -122,8 +122,9 @@
   :where(.scope) :global(.cinematic-hero) :global(.cinematic-poster) { opacity: 1; filter: none; }
 }
 :where(.scope) :global(.cinematic-sr-only) { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-:where(.scope) :global(.cinematic-scene-toggle) { position: absolute; z-index: 1; inset: 0; width: 100%; height: 100%; background: transparent; border: 0; pointer-events: auto; -webkit-tap-highlight-color: transparent; }
-:global(.cinematic-page):where(.scope) :global(.cinematic-scene-toggle):focus-visible { outline-offset: -8px; border-radius: 1rem; }
+:where(.scope) :global(.cinematic-scene-toggle) { position: absolute; z-index: 1; top: .5rem; right: 4.5%; display: inline-flex; align-items: center; gap: .5rem; min-height: 2.75rem; padding: 0 .9rem; border: 1px solid #ffffff26; border-radius: 999px; background: #0b0d0dcc; color: #d6dad7; font: inherit; font-size: .75rem; pointer-events: auto; backdrop-filter: blur(8px); transition: background .2s, color .2s; }
+:where(.scope) :global(.cinematic-scene-toggle):hover { background: #1a1d1dee; color: #fff; }
+:global([data-theme="light"]) :where(.scope) :global(.cinematic-scene-toggle) { background: #fffffff0; color: var(--text); border-color: var(--line); }
 
 /* Follow the shared appearance preference without changing the cinematic scene. */
 :global([data-theme="light"]) :global(.cinematic-page):where(.scope) {

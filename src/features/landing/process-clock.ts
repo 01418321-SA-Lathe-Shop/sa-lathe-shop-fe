@@ -1,5 +1,5 @@
 import { gsap } from "gsap";
-import { processDuration, type ProcessMotion } from "./process-config";
+import { latheDuration as processDuration, type ProcessMotion } from "./process-config";
 
 /** Looping the clock, not React renders, keeps every phase on the same timebase. */
 export function createProcessClock(motion: ProcessMotion, onComplete: () => void) {

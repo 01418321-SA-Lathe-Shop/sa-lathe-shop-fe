@@ -1,5 +1,8 @@
 // Narrow scene facade; each mechanical responsibility has its own component.
-export { RobotArm } from './machine/robot-arm';
-export { Conveyor } from './machine/conveyor';
-export { ScrapAndIngot } from './machine/workpiece';
-export { Furnace } from './machine/furnace';
+export { LatheBed } from './machine/lathe-bed';
+export { HeadstockChuck } from './machine/headstock-chuck';
+export { CarriageTool } from './machine/carriage-tool';
+export { Workpiece } from './machine/workpiece';
+export { Chips } from './machine/chips';
+export { Coolant } from './machine/coolant';
+export { Mist } from './machine/mist';
