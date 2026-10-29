@@ -5,7 +5,7 @@ import test from "node:test";
 import { runInNewContext } from "node:vm";
 import ts from "typescript";
 
-const require = createRequire(import.meta.url);
+const require = createRequire(new URL("../../../src/features/auth/demo-account-picker.tsx", import.meta.url));
 const source = readFileSync(new URL("../../../src/features/auth/demo-account-picker.tsx", import.meta.url), "utf8");
 const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX } });
 const componentModule = { exports: {} };

@@ -3,6 +3,18 @@
 :where(.scope) :global(.demo-account-switch):focus-visible { outline: 2px solid var(--cust-accent, var(--lime)); outline-offset: 3px; }
 :where(.scope) :global(.demo-account-switch):hover:not(:disabled) { background: var(--cust-surface-2, var(--surface-2)); }
 :where(.scope) :global(.demo-account-switch):disabled { opacity: .6; cursor: wait; }
+:where(.scope) :global(.demo-account-switcher) { width: 100%; }
+:where(.scope) :global(.demo-account-switcher) > summary { list-style: none; }
+:where(.scope) :global(.demo-account-switcher) > summary::-webkit-details-marker { display: none; }
+:where(.scope) :global(.demo-account-switch)[aria-disabled="true"] { opacity: .6; cursor: wait; }
+:where(.scope) :global(.demo-switch-panel) { display: grid; gap: .5rem; max-height: min(30rem, 65dvh); overflow-y: auto; margin-bottom: .75rem; padding: .5rem; border: 1px solid var(--cust-line, var(--line)); border-radius: 10px; color: var(--cust-ink, var(--text)); background: var(--cust-surface, var(--surface)); }
+:where(.scope) :global(.demo-switch-panel) p { margin: .25rem; font-size: .8125rem; line-height: 1.6; }
+:where(.scope) :global(.demo-switch-panel) button { display: grid; gap: .25rem; min-height: 44px; padding: .625rem; border: 1px solid var(--cust-line, var(--line)); border-radius: 8px; background: var(--cust-surface-2, var(--surface-2)); color: inherit; text-align: left; font: inherit; cursor: pointer; }
+:where(.scope) :global(.demo-switch-panel) button span { font-size: .8125rem; color: var(--cust-muted, var(--muted)); }
+:where(.scope) :global(.demo-switch-panel) button:disabled { opacity: .6; cursor: default; }
+:where(.scope) :global(.demo-switch-panel) button:hover:not(:disabled) { border-color: var(--cust-accent, var(--lime)); }
+:where(.scope) :global(.demo-switch-panel) button:focus-visible { outline: 2px solid var(--cust-accent, var(--lime)); outline-offset: 2px; }
+:where(.scope) :global(.demo-switch-panel) [role="alert"] { color: var(--cust-danger, var(--danger)); }
 :where(.scope) :global(.theme-quick-toggle) { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 2.75rem; height: 2.75rem; min-width: 44px; min-height: 44px; padding: 0; border: 1px solid var(--cust-line, var(--line)); border-radius: .6875rem; background: var(--cust-surface, var(--surface)); color: var(--cust-ink, var(--text)); cursor: pointer; }
 :where(.scope) :global(.theme-quick-toggle):hover { background: var(--cust-surface-2, var(--surface-2)); }
 :where(.scope) :global(.theme-quick-toggle):focus-visible { outline: 2px solid var(--cust-accent, var(--lime)); outline-offset: 3px; }

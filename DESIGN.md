@@ -163,7 +163,7 @@ by App Router do not uncheck the currently visible theme or size controls.
 
 ### Local-test account switching — 2026-10-29
 
-“สลับบัญชีทดสอบ” appears in Staff/Admin sidebar settings and Customer desktop sidebar/mobile menu only when the active session was created via guarded Local test login and the existing loopback opt-in is enabled. Ordinary password sessions, even with a demo username, do not show it. The UI-only provenance marker stays in session memory and is never an authorization claim. Clicking disables the action, uses existing sign-out/revocation and redirects to `/login?accounts=test`, where the existing picker expands and receives focus. The query selects presentation only, never an account or permission. Existing logout-failure notice is preserved; no automatic login/retry, credentials, browser mock or new endpoint is added.
+“สลับบัญชีทดสอบ” appears in Staff/Admin sidebar settings and Customer desktop sidebar/mobile menu only when the active session was created via guarded Local test login and the existing loopback opt-in is enabled. Ordinary password sessions, even with a demo username, do not show it. The UI-only provenance marker stays in session memory and is never an authorization claim. Clicking expands an inline six-account list without signing out or visiting login. Selecting an account authenticates it through the existing local-test endpoint, confirms `/auth/me`, revokes the previous session and replaces the workspace by server role. The current account is labelled/disabled; all choices disable while pending. Cancel/Escape closes the list and restores focus without changing accounts. Failed replacement login keeps the current account and shows an inline error. If old-session logout cannot be confirmed, clear local state, clean up the candidate best-effort and show the existing expiry/revocation warning at login rather than silently switching. Staff mobile navigation closes after success; Customer shell remounts by account ID. Normal logout remains separate. No password, persisted token, automatic retry, browser mock or new endpoint is added.
 
 ### Staff/Admin navbar alignment — 2026-10-29
 
@@ -688,6 +688,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-29 | Replace switch-to-login redirect with an inline local-test account list; confirm new identity before old-session revocation and direct role navigation | 145 native tests, real six-account browser chain, old-token 401 checks, mobile same-role menu close, cancel and simulated failure preservation; normal logout still works |
 | 2026-10-29 | Add test-session-only account switch in sidebar/mobile menu and focus the login picker after sign-out | Provenance/visibility/logout regressions, scoped browser checks, lint and production build |
 | 2026-10-29 | Align Staff/Admin navbar with Customer's grouped desktop/mobile layout; retain role inbox and sidebar sign-out | Scoped responsive/theme/keyboard browser checks with test-only network responses, native tests, lint and build |
 | 2026-10-29 | Connect six demo buttons to real password-free local-test API behind explicit loopback UI opt-in; preserve normal login and memory-only sessions | Real browser login/me/role navigation/logout/revocation passed for all six accounts at desktop/mobile; company membership boundary reads passed; simulated error checks are recorded separately |
@@ -865,6 +866,18 @@ src/components/appearance/appearance.module.css
 :where(.scope) :global(.demo-account-switch):focus-visible { outline: 2px solid var(--cust-accent, var(--lime)); outline-offset: 3px; }
 :where(.scope) :global(.demo-account-switch):hover:not(:disabled) { background: var(--cust-surface-2, var(--surface-2)); }
 :where(.scope) :global(.demo-account-switch):disabled { opacity: .6; cursor: wait; }
+:where(.scope) :global(.demo-account-switcher) { width: 100%; }
+:where(.scope) :global(.demo-account-switcher) > summary { list-style: none; }
+:where(.scope) :global(.demo-account-switcher) > summary::-webkit-details-marker { display: none; }
+:where(.scope) :global(.demo-account-switch)[aria-disabled="true"] { opacity: .6; cursor: wait; }
+:where(.scope) :global(.demo-switch-panel) { display: grid; gap: .5rem; max-height: min(30rem, 65dvh); overflow-y: auto; margin-bottom: .75rem; padding: .5rem; border: 1px solid var(--cust-line, var(--line)); border-radius: 10px; color: var(--cust-ink, var(--text)); background: var(--cust-surface, var(--surface)); }
+:where(.scope) :global(.demo-switch-panel) p { margin: .25rem; font-size: .8125rem; line-height: 1.6; }
+:where(.scope) :global(.demo-switch-panel) button { display: grid; gap: .25rem; min-height: 44px; padding: .625rem; border: 1px solid var(--cust-line, var(--line)); border-radius: 8px; background: var(--cust-surface-2, var(--surface-2)); color: inherit; text-align: left; font: inherit; cursor: pointer; }
+:where(.scope) :global(.demo-switch-panel) button span { font-size: .8125rem; color: var(--cust-muted, var(--muted)); }
+:where(.scope) :global(.demo-switch-panel) button:disabled { opacity: .6; cursor: default; }
+:where(.scope) :global(.demo-switch-panel) button:hover:not(:disabled) { border-color: var(--cust-accent, var(--lime)); }
+:where(.scope) :global(.demo-switch-panel) button:focus-visible { outline: 2px solid var(--cust-accent, var(--lime)); outline-offset: 2px; }
+:where(.scope) :global(.demo-switch-panel) [role="alert"] { color: var(--cust-danger, var(--danger)); }
 :where(.scope) :global(.theme-quick-toggle) { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 2.75rem; height: 2.75rem; min-width: 44px; min-height: 44px; padding: 0; border: 1px solid var(--cust-line, var(--line)); border-radius: .6875rem; background: var(--cust-surface, var(--surface)); color: var(--cust-ink, var(--text)); cursor: pointer; }
 :where(.scope) :global(.theme-quick-toggle):hover { background: var(--cust-surface-2, var(--surface-2)); }
 :where(.scope) :global(.theme-quick-toggle):focus-visible { outline: 2px solid var(--cust-accent, var(--lime)); outline-offset: 3px; }

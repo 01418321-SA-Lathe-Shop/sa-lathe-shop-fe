@@ -1,5 +1,19 @@
 # Frontend Implementation Plan
 
+## Direct local-test account switching — 2026-10-29
+
+- `91c94c5` pushed: confirm replacement identity before revoking previous session;
+  preserve current account on candidate failure, guard concurrent sign-out and
+  handle unconfirmed old-session logout with local clear/warning/candidate cleanup.
+- UI completed: inline six-account selection instead of login-page redirect;
+  shared public username list, disabled current/pending choices, cancel/Escape,
+  inline errors and mobile menu close. Normal logout and local-test guards remain.
+- 145 tests, lint, TypeScript, source audit and build pass. Real browser switching
+  traversed all six accounts with correct roles and old-token revocation, without
+  intermediate login. Separate simulated failures/cancel retained the current
+  account. No backend/business-data/dependency/route changes. See the local-test
+  handoff for verification scope and remaining full-workflow limits.
+
 ## Password-free local-test integration — 2026-10-29
 
 - Batch 1 pushed (`1d5468b`): real API/session method, shared memory-only session

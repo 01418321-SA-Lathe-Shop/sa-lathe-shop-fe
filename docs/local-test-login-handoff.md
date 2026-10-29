@@ -37,12 +37,42 @@ not existing sessions; those still require revocation or expiry.
 Sessions created through Local test login have an in-memory UI-only provenance
 marker. Only those sessions, with the existing loopback opt-in enabled, show
 **สลับบัญชีทดสอบ** in the Staff/Admin sidebar or Customer sidebar/mobile menu.
-Normal password sessions never show it, even for the same username. The button
-disables while using existing logout, then opens `/login?accounts=test` with the
-existing picker expanded/focused. This query controls presentation only. Selecting
-the next account remains explicit; there is no automatic login, new endpoint,
-credential persistence, browser mock or changed role permission. Existing logout
-failure notices remain visible if server revocation cannot be confirmed.
+Normal password sessions never show it, even for the same username. It now opens
+an inline account list, not a login-page redirect. Selecting another account calls
+the existing local-test endpoint and `/auth/me` first; only after success does it
+revoke the previous session and replace the active workspace by server role.
+There is no intermediate signed-out state or login-page visit on success.
+
+The current account is disabled/labelled. While pending, all choices disable.
+Cancel/Escape closes the list and restores focus without changing accounts.
+Failed candidate login leaves the current session usable and displays an error;
+an authenticated candidate rejected by `/auth/me` is logged out best-effort.
+If previous-account logout itself fails, clear local state, clean up the candidate
+best-effort and require sign-in with an unconfirmed-revocation warning. Never
+pretend both sessions were revoked when the network cannot confirm it. Concurrent
+sign-out prevents an in-flight replacement from restoring a session.
+Normal logout remains separate; no new endpoint, password, persisted credential,
+mock or automatic retry is added. Staff mobile navigation closes after success;
+Customer session-keyed remounts discard prior account UI/data.
+
+#### Direct-switch verification — 2026-10-29
+
+- Real browser chain on `localhost:3000` -> real API `localhost:8080`:
+  Pim -> Anan -> Kittipong -> Nida -> Ploy -> Somchai. Each selected account
+  returned login/me 200 with the correct server role; no intermediate `/login`
+  navigation or normal password-login request occurred. Old sessions returned
+  401 after replacement; final ordinary logout returned 204 then me 401.
+- Desktop 1280px and mobile 390px covered cross-role and same-role switches.
+  Staff mobile navigation closes after Worker -> Worker switching. No runtime
+  errors, horizontal overflow or token values in browser storage were observed.
+- Cancel sent no authentication/logout request. Intercepted 404/401/429/offline
+  failures stayed on the current Admin workspace and its real `/auth/me` still
+  returned 200. These failure responses were simulated; real API config was not
+  changed. All issued browser-test sessions were cleaned up.
+- 145 native tests, lint, TypeScript, source audit and production build pass.
+  Unit tests also cover candidate cleanup, unconfirmed old-session logout and
+  concurrent sign-out. Dependencies, routes and backend files are unchanged;
+  this task created no business records, migrations, seeds or deployments.
 
 1. Open `/login` and expand **บัญชีทดสอบ Local · เข้าสู่ระบบทันที**.
 2. Select one of the six accounts. Clear the normal form's password; disable the
@@ -105,6 +135,9 @@ password login and private S3 workflows were not reverified in this follow-up.
 
 ## Changes and commits
 
+- `91c94c5`: safe local session replacement and old-token revocation regressions.
+- Direct-switch UI follow-up: shared public username list, inline menu, current/
+  pending/cancel/error states, direct server-role navigation and documentation.
 - `1d5468b`: real local-test API/session layer, guarded opt-in/error messages/tests.
 - UI follow-up: connect the existing buttons, label local-only access, preserve
   manual-password mode when not opted in, and update current guidance/tests.

@@ -16,6 +16,12 @@ and clears/focuses password for normal login. Backend must separately enable its
 guarded route; no mock is restored. See `local-test-login-handoff.md` for setup,
 real six-account browser verification and limits.
 
+Local-test workspace switching now uses an inline account list. Choosing a new
+account verifies its real session, revokes the old one and navigates directly by
+server role without returning to login. Cancel or a failed candidate login keeps
+the current account. Normal logout remains separate; a failed old-session logout
+requires sign-in with the existing unconfirmed-revocation warning.
+
 Use `NEXT_PUBLIC_API_BASE_URL` (public API origin only). Real seeded demo accounts
 require an operator-prepared dedicated database and private passwords; no real
 password belongs in frontend source/config. Account-only seeds contain no
