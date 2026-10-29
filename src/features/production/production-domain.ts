@@ -30,8 +30,3 @@ export function timePayload(command: Command, minutes: string, note: string) {
 }
 
 export function laborPayload(command: Command, amount: string) { return { ...command, amount: moneyInput(amount.trim()) }; }
-
-export function formatMinutes(total: number): string {
-  const hours = Math.floor(total / 60); const minutes = total % 60;
-  return hours ? `${hours} h ${minutes} min` : `${minutes} min`;
-}

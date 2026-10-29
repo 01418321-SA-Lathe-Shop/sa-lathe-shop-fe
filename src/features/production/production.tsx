@@ -1,165 +1,138 @@
 "use client";
 
-import { Suspense, useState, type ReactNode } from "react";
-import { useSearchParams } from "next/navigation";
-import { BackendApi, displayMoney, type Account, type JobRequest } from "../../lib/api/backend-api";
-import { useCommand, useResource, useRetryableWrite } from "../../hooks/backend-hooks";
-import { inventoryDisplay, type InventoryPlan } from "../inventory/inventory-domain";
-import { MaterialSearch } from "../inventory/inventory";
-import { formatMinutes, laborPayload, timePayload, usagePayload, type ProductionState, type UsageDraft } from "./production-domain";
-import { Feedback, Field, Paging, PrivateUpload, RetryNote, Status, text, type ReadyFile } from "../../components/ui/backend-ui";
-import { formatBangkok } from "../../lib/formatting/display";
-import type { ProductionSummary } from "../workspace/connected-workspace";
+import Link from "next/link";
+import { Suspense, useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Icon } from "../../components/appearance/icons";
+import type { Account, BackendApi, JobRequest } from "../../lib/api/backend-api";
+import { useResource } from "../../hooks/backend-hooks";
+import { dateTH, dateTimeTH, requestedDayCountdown } from "../../components/staff-ui/staff-format";
+import { JOB_STATUS } from "../../components/staff-ui/staff-labels";
+import { Button, EmptyState, LoadError, SearchForm, Skeleton, StatusBadge, StatusTabs, Toast, ToneBadge, TruncatedNotice } from "../../components/staff-ui/staff-ui";
+import { useCollection, useNow } from "../customer/customer-hooks";
+import type { InventoryPlan } from "../inventory/inventory-domain";
+import { ProductionDetail } from "./production-detail";
+import { defaultProductionTab, planReadiness, productionCounts, productionRows, productionTab, type ProductionSummary, type ProductionTab, type Readiness } from "./production-list-domain";
+import styles from "./production.module.css";
 
-const short = (id: string) => id.slice(0, 8);
+// UC8: any active Staff plans, starts, records and completes any job; Admin
+// monitors, reads plans and costs, and enters actual labor cost only.
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const EMPTY: Record<ProductionTab, [string, string]> = {
+  queued: ["ไม่มีงานรอเริ่ม", "งานจะเข้าคิวเมื่อมัดจำ/PO ผ่านการตรวจแล้ว"],
+  in_progress: ["ไม่มีงานที่กำลังผลิต", "เริ่มงานได้จากแท็บรอเริ่มงาน"],
+  completed: ["ยังไม่มีงานที่ผลิตเสร็จ", "งานที่ปิดแล้วจะแสดงที่นี่"],
+  all: ["ยังไม่มีงานผลิต", "งานจะเข้าคิวเมื่อมัดจำ/PO ผ่านการตรวจแล้ว"],
+};
 
-// UC8: any active Staff starts/records/completes any job; Admin monitors,
-// sees costs and enters actual labor cost only.
 export function LiveProduction({ api, account }: { api: BackendApi; account: Account }) {
-  return <Suspense fallback={<p role="status">กำลังเปิดงานผลิต…</p>}><ProductionWorkspace api={api} account={account} /></Suspense>;
+  return <Suspense fallback={<Skeleton label="กำลังเปิดงานผลิต…" />}><ProductionWorkspace api={api} account={account} /></Suspense>;
 }
+
+// Plan readiness for every queued job, read six at a time (bounded fan-out).
+function usePlanReadiness(api: BackendApi, jobs: ProductionSummary[] | undefined) {
+  const [state, setState] = useState<{ source?: ProductionSummary[]; map: Map<string, Readiness | null> }>({ map: new Map() });
+  useEffect(() => {
+    if (!jobs) return;
+    const controller = new AbortController(); const queued = jobs.filter((job) => job.status === "queued");
+    void (async () => {
+      const map = new Map<string, Readiness | null>();
+      for (let start = 0; start < queued.length; start += 6) {
+        await Promise.all(queued.slice(start, start + 6).map(async (job) => {
+          try { map.set(job.job_id, planReadiness(await api.call<InventoryPlan>(`/jobs/${job.job_id}/materials`, "GET", undefined, controller.signal), job)); }
+          catch { map.set(job.job_id, null); }
+        }));
+        if (controller.signal.aborted) return;
+      }
+      setState({ source: jobs, map });
+    })();
+    return () => controller.abort();
+  }, [api, jobs]);
+  return state.source === jobs ? state.map : undefined;
+}
+
 function ProductionWorkspace({ api, account }: { api: BackendApi; account: Account }) {
-  const params = useSearchParams();
-  const raw = params.get("job") ?? "";
-  const queryJob = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw) && !/^0{8}-0{4}-0{4}-0{4}-0{12}$/.test(raw) ? raw : "";
-  const [offset, setOffset] = useState(0); const [choice, setChoice] = useState({ key: queryJob, id: queryJob });
-  const selected = choice.key === queryJob ? choice.id : queryJob;
-  const jobs = useResource<{ items: ProductionSummary[] | null }>(api, `/production/jobs?limit=20&offset=${offset}`);
-  return <section>
-    <div className="workflow-toolbar"><h2>Production jobs</h2><button onClick={jobs.reload}>Refresh jobs</button></div>
-    <p className="workflow-note">{account.role === "admin" ? "Monitor production and record the actual labor cost. Production actions belong to Staff." : "Start a job once its saved plan is fully reserved. Record actual material use and labor minutes as you go; completion releases unused reservations."}</p>
-    <Feedback busy={jobs.loading} error={jobs.error} />
-    <div className="record-layout"><div className="record-list" aria-label="Production job list">
-      {jobs.data && !jobs.data.items?.length && <p>No jobs yet. A job opens after the required Deposit/PO approvals.</p>}
-      {jobs.data?.items?.map((job) => <button key={job.job_id} className={`record-list-item ${selected === job.job_id ? "selected" : ""}`} onClick={() => setChoice({ key: queryJob, id: job.job_id })}>
-        <span className="record-code">Job {short(job.job_id)} · cycle {String(job.cycle)}</span><strong>Request {short(job.request_id)}</strong><span><Status value={job.status} /></span><span>{job.completed_at ? `Completed ${formatBangkok(job.completed_at)}` : job.started_at ? `Started ${formatBangkok(job.started_at)}` : "Not started"}</span>
-      </button>)}
-      {jobs.data && <Paging offset={offset} count={jobs.data.items?.length ?? 0} busy={jobs.loading} setOffset={setOffset} />}
+  const params = useSearchParams(); const pathname = usePathname(); const router = useRouter(); const now = useNow();
+  const worker = account.role === "worker";
+  const raw = params.get("job") ?? ""; const selected = UUID.test(raw) && !/^0{8}-/.test(raw) ? raw : "";
+  const q = params.get("q") ?? "";
+  const jobs = useCollection<ProductionSummary>(api, "/production/jobs");
+  const requests = useCollection<JobRequest>(api, "/requests");
+  const items = jobs.data?.items; const requestItems = requests.data?.items ?? [];
+  const readiness = usePlanReadiness(api, items);
+  const counts = productionCounts(items ?? [], requestItems, q);
+  const tab = productionTab(params.get("tab")) ?? defaultProductionTab(counts);
+  const rows = productionRows(items ?? [], requestItems, tab, q);
+  const lookup = new Map(requestItems.map((request) => [request.id, request]));
+  const selectedJob = items?.find((job) => job.job_id === selected);
+  const [toast, setToast] = useState(""); const clearToast = () => setToast("");
+  const href = (changes: Record<string, string | undefined>) => {
+    const next = new URLSearchParams(params);
+    for (const [key, value] of Object.entries(changes)) if (value) next.set(key, value); else next.delete(key);
+    const query = next.toString(); return query ? `${pathname}?${query}` : pathname;
+  };
+  const listLoading = jobs.loading && !jobs.data;
+  const tabs = [
+    { key: "queued", label: "รอเริ่มงาน", count: counts.queued, attention: worker },
+    { key: "in_progress", label: "กำลังผลิต", count: counts.in_progress },
+    { key: "completed", label: "ผลิตเสร็จ", count: counts.completed },
+    { key: "all", label: "ทั้งหมด", count: counts.all },
+  ];
+  return <section className={styles.page}>
+    <div className={styles.toolbar}>
+      <StatusTabs label="สถานะงานผลิต" tabs={tabs} current={tab} href={(key) => href({ tab: key, job: undefined })} loading={listLoading} unavailable={Boolean(jobs.error && !jobs.data)} />
+      <div className={styles.toolbarEnd}>
+        <SearchForm label="ค้นหางานผลิต" placeholder="เลขคำขอหรือชื่องาน" value={q} onSearch={(value) => router.replace(href({ q: value || undefined, job: undefined }), { scroll: false })} />
+        <Button onClick={() => { jobs.reload(); requests.reload(); }} disabled={jobs.loading}>อัปเดตข้อมูล</Button>
+      </div>
     </div>
-    {selected ? <ProductionDetail key={selected} api={api} account={account} id={selected} onChanged={jobs.reload} /> : <section className="record-detail"><h2>Select a job</h2><p>Open a job to see its materials, actual use, labor time and photos.</p></section>}
+    {jobs.error && !jobs.data && <LoadError title="โหลดงานผลิตไม่สำเร็จ" onRetry={jobs.reload} />}
+    {requests.error && <p className={styles.warning}>โหลดรายละเอียดคำขอได้ไม่ครบ ชื่องานและการค้นหาบางรายการอาจยังไม่แสดง <Button variant="text" onClick={requests.reload}>ลองอีกครั้ง</Button></p>}
+    <TruncatedNotice show={jobs.data?.complete === false || requests.data?.complete === false} />
+    {q && <p className={styles.filterNote}>ผลการค้นหา “{q}” <Link href={href({ q: undefined, job: undefined })} scroll={false}>ล้างการค้นหา</Link></p>}
+    <div className={styles.layout} data-detail={selected ? "open" : undefined}>
+      <div className={styles.list} role="region" aria-label="รายการงานผลิต">
+        {listLoading && <Skeleton label="กำลังโหลดงานผลิต…" />}
+        {rows.map(({ job, request }) => <JobCard key={job.job_id} job={job} request={request} requestLoading={requests.loading} readiness={readiness ? readiness.get(job.job_id) ?? null : undefined} now={now} worker={worker} selected={selected === job.job_id} href={href({ job: job.job_id, tab })} />)}
+        {jobs.data && !rows.length && <EmptyState title={q ? "ไม่พบงานที่ค้นหา" : EMPTY[tab][0]}>{q ? "ลองค้นด้วยเลขคำขอหรือคำอื่น" : EMPTY[tab][1]}</EmptyState>}
+      </div>
+      <div className={styles.detail}>
+        {selected ? <ProductionDetail key={selected} api={api} account={account} id={selected} request={selectedJob ? lookup.get(selectedJob.request_id) : undefined} requestLoading={requests.loading} now={now} backHref={href({ job: undefined })} onChanged={(message) => { setToast(message); jobs.reload(); }} />
+          : <div className={styles.placeholder}><EmptyState title="เลือกงานจากรายการ">เปิดงานเพื่อเตรียมวัตถุดิบ เริ่มผลิต หรือบันทึกงาน</EmptyState></div>}
+      </div>
     </div>
+    <Toast message={toast} onDone={clearToast} />
   </section>;
 }
 
-function ProductionDetail({ api, account, id, onChanged }: { api: BackendApi; account: Account; id: string; onChanged: () => void }) {
-  const resource = useResource<ProductionState>(api, `/production/jobs/${id}`);
-  const [notice, setNotice] = useState("");
-  // Forms render only from settled data so a landing reload cannot clear input.
-  const job = resource.data; const settled = !resource.loading; const worker = account.role === "worker" && settled;
-  function saved(message: string) { setNotice(message); resource.reload(); onChanged(); }
-  return <section className="record-detail"><button onClick={() => { setNotice(""); resource.reload(); }}>Reload job</button><Feedback busy={resource.loading} error={resource.error} message={notice} />
-    {job && <>
-      <h2>Job {short(job.job_id)} <Status value={job.status} /></h2><RequestLabel api={api} id={job.request_id} /><p className="record-id">{job.job_id} · production version {String(job.version)} · plan version {String(job.material_plan_version)}</p>
-      <dl className="detail-grid">
-        <div><dt>Production cycle</dt><dd>{String(job.cycle)}{Number(job.cycle) > 1 ? " (reopened for free rework)" : ""}</dd></div>
-        <div><dt>Started (ICT)</dt><dd>{job.started_at ? formatBangkok(job.started_at) : "Not started"}</dd></div>
-        <div><dt>Completed (ICT)</dt><dd>{job.completed_at ? formatBangkok(job.completed_at) : "Not completed"}</dd></div>
-        <div><dt>Labor recorded</dt><dd>{formatMinutes(job.labor_minutes)}</dd></div>
-      </dl>
-      <h3>Materials</h3>
-      {!job.materials?.length ? <p>No planned or used materials.</p> : <div className="table-scroll"><table className="workflow-table"><thead><tr><th scope="col">Material</th><th scope="col">Planned</th><th scope="col">Reserved now</th><th scope="col">Used from reservation</th><th scope="col">Total used</th><th scope="col">Released</th></tr></thead>
-        <tbody>{job.materials.map((m) => <tr key={m.material_id}><th scope="row">{m.name || short(m.material_id)}</th><td>{inventoryDisplay(m.required)} {m.unit_name}</td><td>{inventoryDisplay(m.reserved)}</td><td>{inventoryDisplay(m.reservation_consumed)}</td><td>{inventoryDisplay(m.used)}</td><td>{inventoryDisplay(m.released)}</td></tr>)}</tbody></table></div>}
-      {worker && job.status === "queued" && <StartJob api={api} job={job} onSaved={() => saved("Production started. Materials are consumed only when you record actual use.")} />}
-      {worker && job.status === "in_progress" && <>
-        <UsageForm key={`usage:${job.version}`} api={api} job={job} onSaved={() => saved("Actual use recorded and stock issued.")} />
-        <TimeForm key={`time:${job.version}`} api={api} job={job} onSaved={() => saved("Labor minutes recorded.")} />
-        <PhotoForm api={api} job={job} onSaved={() => saved("Photo validated and attached privately.")} />
-        <CompleteJob api={api} job={job} onSaved={() => saved("Job completed. Unused reservations were released; physical stock did not change.")} />
-      </>}
-      {account.role === "admin" && settled && <AdminCost api={api} job={job} onSaved={() => saved("Actual labor cost saved.")} />}
-      <History job={job} admin={account.role === "admin"} api={api} />
-    </>}
-  </section>;
+function readinessText(readiness: Readiness | null | undefined) {
+  if (readiness === undefined) return "กำลังตรวจวัตถุดิบ…";
+  if (readiness === null) return "ตรวจสถานะวัตถุดิบไม่ได้";
+  if (readiness.state === "ready") return "วัตถุดิบพร้อม";
+  if (readiness.state === "empty") return "ยังไม่มีแผนวัตถุดิบ";
+  if (readiness.state === "changed") return "แผนเปลี่ยน กรุณาอัปเดตข้อมูล";
+  return readiness.short ? `วัตถุดิบยังไม่ครบ ${readiness.short} รายการ` : "วัตถุดิบยังจองไม่ครบ";
 }
 
-// One read for the opened job only; the job list stays a single request.
+function JobCard({ job, request, requestLoading, readiness, now, worker, selected, href }: { job: ProductionSummary; request?: JobRequest; requestLoading: boolean; readiness: Readiness | null | undefined; now: number | null; worker: boolean; selected: boolean; href: string }) {
+  const open = job.status === "queued" || job.status === "in_progress";
+  const countdown = open ? requestedDayCountdown(request?.deadline, now) : null;
+  const next = !worker ? (job.status === "completed" ? "ดูสรุปและต้นทุน" : "ดูงาน")
+    : job.status === "queued" ? (readiness?.state === "ready" ? "เริ่มผลิต" : "เตรียมวัตถุดิบ") : job.status === "in_progress" ? "บันทึกงาน" : "ดูสรุปงาน";
+  return <Link href={href} scroll={false} className={styles.card} aria-current={selected ? "true" : undefined}>
+    <span className={styles.cardTop}><strong>{request ? `คำขอ #${request.no_request}` : requestLoading ? "กำลังโหลดคำขอ…" : "คำขอผลิต"}</strong><StatusBadge map={JOB_STATUS} value={job.status} /></span>
+    <span className={styles.cardTitle}>{request?.description ?? "รายละเอียดงานยังไม่พร้อม"}</span>
+    <span className={styles.cardMeta}>{request ? `${request.qty} ชิ้น` : ""}{Number(job.cycle) > 1 ? `${request ? " · " : ""}รอบแก้ไขที่ ${Number(job.cycle) - 1} (แก้ไขฟรี)` : ""}</span>
+    {open && <span className={styles.cardMeta}>{request?.deadline ? <>ลูกค้าต้องการ {dateTH(request.deadline)}{countdown && <ToneBadge tone={countdown.tone}>{countdown.text}</ToneBadge>}</> : request ? "ลูกค้าไม่ได้ระบุวันที่ต้องการ" : ""}</span>}
+    {job.status === "queued" && <span className={styles.readiness} data-state={readiness === null ? "error" : readiness?.state}>{readinessText(readiness)}</span>}
+    {job.status === "in_progress" && <span className={styles.cardMeta}>เริ่มผลิต {dateTimeTH(job.started_at)}</span>}
+    {job.status === "completed" && <span className={styles.cardMeta}>ผลิตเสร็จ {dateTimeTH(job.completed_at)}</span>}
+    <span className={styles.cardNext}>{next} <Icon name="arrow" size={14} /></span>
+  </Link>;
+}
+
+// One read for the opened job only; the delivery job list stays a single request.
 export function RequestLabel({ api, id }: { api: BackendApi; id: string }) {
   const request = useResource<JobRequest>(api, `/requests/${id}`);
   return <p className="live-description">{request.data ? `Request #${request.data.no_request} · ${request.data.description} · Qty ${request.data.qty}` : request.error ? "Request details unavailable" : "Loading request…"}</p>;
-}
-
-function Section({ title, children }: { title: string; children: ReactNode }) { return <section className="live-editor"><h3>{title}</h3>{children}</section>; }
-
-function StartJob({ api, job, onSaved }: { api: BackendApi; job: ProductionState; onSaved: () => void }) {
-  const plan = useResource<InventoryPlan>(api, `/jobs/${job.job_id}/materials`);
-  const write = useRetryableWrite(api, onSaved);
-  const ready = plan.data?.ready && String(plan.data.version) === String(job.material_plan_version);
-  return <Section title="Start production">
-    <Feedback busy={plan.loading} error={plan.error} />
-    {plan.data && !ready && <p className="workflow-note">The saved plan must be nonempty and fully reserved before starting. Open สต๊อกวัตถุดิบ → Job material plans to save or recheck it.</p>}
-    <button className="button-primary" disabled={!ready || write.frozen} onClick={() => write.submit(`/production/jobs/${job.job_id}/start`, "POST", () => window.confirm("Start production? The plan is locked; materials are consumed only when actual use is recorded.") ? { idempotency_key: crypto.randomUUID(), expected_version: job.version, expected_plan_version: BigInt(job.material_plan_version) } : null, "")}>Start production</button>
-    <Feedback error={write.error} />{write.uncertain && <RetryNote busy={write.busy} label="Retry identical start" onRetry={write.retry} onDiscard={() => { write.discard(); plan.reload(); }} />}
-  </Section>;
-}
-
-function UsageForm({ api, job, onSaved }: { api: BackendApi; job: ProductionState; onSaved: () => void }) {
-  const [rows, setRows] = useState<UsageDraft[]>(() => (job.materials ?? []).map((m) => ({ material_id: m.material_id, label: `${m.name} (${m.unit_name}) · reserved ${inventoryDisplay(m.reserved)}`, quantity: "" })));
-  const write = useRetryableWrite(api, onSaved); const [adding, setAdding] = useState(false);
-  return <Section title="Record actual material use">
-    <form aria-busy={write.busy} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); write.submit(`/production/jobs/${job.job_id}/usage`, "POST", () => usagePayload({ idempotency_key: crypto.randomUUID(), expected_version: job.version }, text(data, "note"), rows), ""); }}>
-      <p>Enter only what was used since the last entry. This job&apos;s reservation is used first, then free stock; other jobs&apos; reservations stay protected. Inactive materials can use only what this job already reserved.</p>
-      <fieldset className="live-fields" disabled={write.frozen}>
-        {rows.map((row, index) => <Field key={row.material_id} label={`Used now · ${row.label}`}><input inputMode="decimal" value={row.quantity} onChange={(event) => setRows((current) => current.map((value, i) => i === index ? { ...value, quantity: event.target.value } : value))} /></Field>)}
-        <Field label="Usage note (optional)"><textarea name="note" maxLength={2000} /></Field>
-        <div className="form-actions"><button className="button-primary" type="submit">Record actual use</button><button type="button" onClick={() => setAdding((value) => !value)}>{adding ? "Close material search" : "Add extra / unplanned material"}</button></div>
-      </fieldset>
-    </form>
-    {adding && <MaterialSearch api={api} disabled={write.frozen} isAdded={(materialId) => rows.some((row) => row.material_id === materialId)} onAdd={(m) => setRows((current) => [...current, { material_id: m.id, label: `${m.name} (${m.unit_name}) · unplanned, free ${inventoryDisplay(m.qty_available)}`, quantity: "" }])} label="Find extra material" />}
-    <Feedback error={write.error} />{write.uncertain && <RetryNote busy={write.busy} label="Retry identical usage" onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(); }}>The response failed; stock may already be issued. Reload the job before entering usage again. Retrying sends the same key, so it cannot issue stock twice; a new entry would.</RetryNote>}
-  </Section>;
-}
-
-function TimeForm({ api, job, onSaved }: { api: BackendApi; job: ProductionState; onSaved: () => void }) {
-  const write = useRetryableWrite(api, onSaved);
-  return <Section title="Record labor minutes">
-    <form aria-busy={write.busy} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); write.submit(`/production/jobs/${job.job_id}/time`, "POST", () => timePayload({ idempotency_key: crypto.randomUUID(), expected_version: job.version }, text(data, "minutes"), text(data, "note")), ""); }}>
-      <fieldset className="live-fields" disabled={write.frozen}><Field label="Minutes worked (whole number)"><input name="minutes" required inputMode="numeric" /></Field><Field label="Time note (optional)"><input name="note" maxLength={2000} /></Field><button type="submit">Add labor minutes</button></fieldset>
-      <p>Minutes are added to the job&apos;s total; this is not a stopwatch and no hourly rate is applied.</p>
-    </form>
-    <Feedback error={write.error} />{write.uncertain && <RetryNote busy={write.busy} label="Retry identical time entry" onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(); }} />}
-  </Section>;
-}
-
-function PhotoForm({ api, job, onSaved }: { api: BackendApi; job: ProductionState; onSaved: () => void }) {
-  const [ready, setReady] = useState<ReadyFile | null>(null);
-  return <Section title="Production photos (optional)">
-    <PrivateUpload api={api} images label="Job photo (JPEG/PNG)" intentPath={`/production/jobs/${job.job_id}/photos/uploads`} completePath={(photoId) => `/job-photos/${photoId}/complete`} ready={ready} onReady={(file) => { setReady(null); if (file) onSaved(); }} />
-  </Section>;
-}
-
-function CompleteJob({ api, job, onSaved }: { api: BackendApi; job: ProductionState; onSaved: () => void }) {
-  const write = useRetryableWrite(api, onSaved);
-  return <Section title="Complete production">
-    <p>Completion releases every unused reservation (no physical stock is added) and closes usage/time entry for this cycle. Recording all usage first is your responsibility; nothing is consumed automatically.</p>
-    <button className="button-primary" disabled={write.frozen} onClick={() => write.submit(`/production/jobs/${job.job_id}/complete`, "POST", () => window.confirm("Complete this job? Unused reservations will be released and no more usage or time can be added.") ? { idempotency_key: crypto.randomUUID(), expected_version: job.version } : null, "")}>Complete job</button>
-    <Feedback error={write.error} />{write.uncertain && <RetryNote busy={write.busy} label="Retry identical completion" onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(); }} />}
-  </Section>;
-}
-
-function AdminCost({ api, job, onSaved }: { api: BackendApi; job: ProductionState; onSaved: () => void }) {
-  const write = useRetryableWrite(api, onSaved); const finance = job.finance;
-  return <Section title="Actual cost (Admin)">
-    {finance && <dl className="detail-grid"><div><dt>Material cost (issue-time valuation)</dt><dd>{displayMoney(finance.material_cost)}</dd></div><div><dt>Labor cost</dt><dd>{finance.labor_cost === null ? "Not entered" : displayMoney(finance.labor_cost)}</dd></div><div><dt>Total actual cost</dt><dd>{finance.total_cost === null ? "Known after labor cost is entered" : displayMoney(finance.total_cost)}</dd></div></dl>}
-    {["in_progress", "completed"].includes(job.status) ? <form aria-busy={write.busy} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); write.submit(`/production/jobs/${job.job_id}/labor-cost`, "PUT", () => laborPayload({ idempotency_key: crypto.randomUUID(), expected_version: job.version }, text(data, "amount")), ""); }}>
-      <fieldset className="live-fields" disabled={write.frozen}><Field label={`Actual labor cost for ${formatMinutes(job.labor_minutes)} recorded (THB)`}><input name="amount" required inputMode="decimal" defaultValue={finance?.labor_cost ?? ""} /></Field><button type="submit">{finance?.labor_cost === null ? "Save labor cost" : "Revise labor cost"}</button></fieldset>
-      <p>Enter the actual total, including an explicit 0.00 if appropriate. No hourly rate is assumed. Revisions keep the earlier value in the audit history.</p>
-    </form> : <p>Labor cost can be entered once production has started.</p>}
-    <Feedback error={write.error} />{write.uncertain && <RetryNote busy={write.busy} label="Retry identical labor cost" onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(); }} />}
-  </Section>;
-}
-
-function History({ job, admin, api }: { job: ProductionState; admin: boolean; api: BackendApi }) {
-  const download = useCommand();
-  return <>
-    <h3>Actual use</h3>
-    {!job.usage?.length ? <p>No actual use recorded.</p> : <div className="table-scroll"><table className="workflow-table"><thead><tr><th scope="col">Time (ICT)</th><th scope="col">Material</th><th scope="col">Quantity</th><th scope="col">From reservation</th>{admin && <><th scope="col">Unit cost</th><th scope="col">Amount</th></>}</tr></thead>
-      <tbody>{job.usage.map((u) => <tr key={u.id}><td>{formatBangkok(u.created_at)}</td><th scope="row">{u.material_name}</th><td>{inventoryDisplay(u.quantity)} {u.unit_name}</td><td>{inventoryDisplay(u.reservation_used)}</td>{admin && <><td>{u.unit_cost ? inventoryDisplay(u.unit_cost) : "—"}</td><td>{u.total_amount ? displayMoney(u.total_amount) : "—"}</td></>}</tr>)}</tbody></table></div>}
-    <h3>Labor entries</h3>
-    {!job.time_entries?.length ? <p>No labor minutes recorded.</p> : <ol className="payment-history">{job.time_entries.map((t) => <li key={t.id}><strong>{formatMinutes(t.minutes)}</strong> · {formatBangkok(t.created_at)}{t.note ? ` · ${t.note}` : ""}</li>)}</ol>}
-    <h3>Photos</h3>
-    {!job.photos?.length ? <p>No photos.</p> : job.photos.map((photo) => <div className="attachment-row" key={photo.id}><span>{photo.file_name} · {photo.byte_size} bytes</span><button disabled={download.busy} onClick={() => void download.run((signal) => api.download(`/job-photos/${photo.id}/download`, photo.file_name, signal), "Private photo download requested.")}>Download</button></div>)}
-    <Feedback {...download} />
-    <h3>Events</h3>
-    <ol className="payment-history">{job.events?.map((e) => <li key={e.id}><strong>{e.action}</strong> · v{String(e.version)} · {formatBangkok(e.created_at)}</li>)}</ol>
-  </>;
 }

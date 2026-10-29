@@ -18,6 +18,7 @@
   --violet: #8d7ef6;
   --warning: #e6b967;
   --danger: #ef786f;
+  --success: #52c480;
 }
 html { font-size: calc(100% * var(--ui-scale)); }
 html[data-ui-size="small"] { --ui-scale: .9; }
@@ -50,5 +51,6 @@ html[data-theme="light"] {
   --violet: #6855d4;
   --warning: #a97013;
   --danger: #c74e49;
+  --success: #1f7048;
 }
 :root { --foreground: var(--text); --border: var(--line); --accent: var(--lime); }

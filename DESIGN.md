@@ -175,6 +175,14 @@ Step 0 of the approved Staff/Admin redesign (Overview content unchanged). The si
 
 The navbar bell now matches Customer: a 44px button with an orange count badge (all loaded notifications, `•`/`99+` when the read is incomplete), opening a native dialog — a 25rem dropdown under the navbar on desktop and a full-screen sheet at ≤700px. It lists the eight newest notifications with Thai wording for the backend's five fixed titles (display only), request number and relative Bangkok time, unread tint and dot, "อ่านทั้งหมด" (only after a complete read), close, and "ดูการแจ้งเตือนทั้งหมด" to the role inbox. Opening an item marks it read then opens the role's request page with `?request=`. Focus returns to the bell on close. This supersedes the bell-as-link sentence below. Known behavior: after client navigation Next.js keeps the previous route mounted but hidden (Cache Components), so a hidden second shell can exist in the DOM.
 
+### Staff/Admin shared page kit and งานผลิต — 2026-10-29
+
+Step 1 of the approved Staff/Admin redesign. New pages share `src/components/staff-ui/` (Thai labels and formatting plus components): pill `StatusTabs` with counts and an orange count badge where the role must act, a search form (48px input with icon plus ค้นหา), 48px buttons (primary orange / secondary outline / danger / text), `Field` with hint and error, `NextAction` panel, numbered `Steps` (done ✓ in `--success`, current orange), `Collapsible`, native `ConfirmDialog` (centred, ≤32rem; optional checklist must be fully ticked before the confirm button enables; full-width stacked buttons on phones), `RetryPanel` for uncertain writes (ส่งซ้ำแบบเดิม keeps the original key/payload; โหลดข้อมูลล่าสุด re-reads), success `Toast` (5s), skeleton, empty and load-error states, and a notice when a list stops at the 1,000-row read cap. Rules are prefixed with `.live-workspace` so they win over legacy workflow button styles. A `--success` token (dark `#52c480`, light `#1f7048`) is added to both themes for done/ready states only.
+
+งานผลิต (`/staff/production`, `/admin/production`) is a prioritized list beside a detail panel (24rem list column, 24px gap; one column at ≤64rem where the list and detail swap and a กลับรายการ link appears). The toolbar has two rows: tabs รอเริ่มงาน / กำลังผลิต / ผลิตเสร็จ / ทั้งหมด (counts from the full job list read 100 per call; Staff see an attention badge on รอเริ่มงาน), then search (literal request number or description) and อัปเดตข้อมูล. Open work is sorted by the customer-requested date, labelled "ลูกค้าต้องการ … (ไม่ใช่กำหนดส่งที่ร้านยืนยัน)", with a day-countdown chip; undated jobs come last; finished jobs sort newest first. Each card is one link showing request number, status, description, quantity, rework cycle, material readiness for queued jobs (read per job, six at a time: พร้อม ✓ / ยังไม่ครบ N รายการ / ยังไม่มีแผน / แผนเปลี่ยน) and the next action. The selected job, tab and search live in the URL (`?tab=&q=&job=`).
+
+The detail shows facts, the four steps, then one task panel by status. Queued: material plan lines with names, units and shortages, the material-plan editor (moved here from the materials page and the request opened-job section) with the shared material picker, จองเพิ่มตามแผนเดิม, and เริ่มผลิต (enabled only when the saved plan is ready at the job's plan version, confirmed in a dialog). In progress (Staff): segments ใช้วัตถุดิบ (prefill "ใช้ตามที่จองไว้", extra materials via picker), เวลาทำงาน (+15/+30/+60 chips with a running "จะเพิ่ม…" summary), รูปงาน (image upload with อัปโหลดอีกครั้ง after failure), and ปิดงาน behind a two-item checklist dialog. Completed: a NextAction to ส่งมอบ. Admin sees the same list and detail read-only, plus the actual-cost section and labor-cost form; no Staff write buttons are rendered. History and system events are collapsed. Endpoints, payloads, idempotency, version checks, statuses and permissions are unchanged; the separate “Job material plans” list on สต๊อกวัตถุดิบ and the plan panel inside the request opened-job section are removed because the plan now lives in production.
+
 ### Staff/Admin navbar alignment — 2026-10-29
 
 Staff/Admin now follow Customer's navbar composition: a 64px desktop bar with muted real-connection/session notice left and one right-aligned action group (icon theme switch and bell). At the existing Staff mobile navigation breakpoint (900px), a 72px bar shows the logo left and theme/bell/menu right. The bell links to the existing role-scoped inbox; it does not reuse Customer notification targets, add API reads or fabricate unread counts. Sign-out remains in the sidebar/footer on desktop and mobile. Removed scattered breadcrumb/API-pill/topbar-sign-out controls; page headings and sidebar retain current location/role information. Existing sidebar/menu behavior and role permissions remain unchanged. Shared Light/Dark variables govern the whole bar.
@@ -765,6 +773,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-29 | Staff/Admin redesign Step 1: shared Thai staff-ui kit (tabs, search, buttons, steps, confirm dialog, retry panel, toast, states), `--success` token, shared material picker; งานผลิต rebuilt as prioritized list + detail with readiness, plan editor moved in from the materials page and request opened-job section, segmented work recording and checklist close; Admin read-only plus labor cost | Production list/format domain tests, 163 native tests, type check, lint, source audit, build; Chrome real local API with every write intercepted (no DB writes) as anan.staff, kittipong.staff and pim.admin at 1280px Dark and 390px Light: correct usage/time/complete payloads and versions, Start disabled on short plan, close gated by checklist, no overflow or console errors |
 | 2026-10-29 | Staff/Admin redesign Step 0: workflow-grouped Thai sidebar with separated Admin section, shared คำขอและใบเสนอราคา label, Thai eyebrows/descriptions, Customer-style notification bell with unread count and dropdown; remove unused inbox-link CSS | Navigation/notification tests (every permitted page grouped once, Thai titles), 154 native tests, type check, lint, source audit, build; Chrome real local API read-only as anan.staff and pim.admin at 1280px Dark/Light and 390px: no overflow or console errors, focus returns to bell |
 | 2026-10-29 | Customer invoices: summary tiles, status pills with counts, cards with paid progress and due-day chips; detail balance hero, numbered bank-payment steps with fill-balance and inline amount guidance, sticky ledger and payment timeline; remove unused `.cust-payment-layout`/`.cust-invoice-summary`/`.cust-list-price` rules | Invoice domain tests (exact cents, Bangkok days, pending excluded), 151 native tests, type check, lint, source audit, build; Chrome real local API (somchai unpaid, nida.company paid) at 1280/390px Dark and 1280px Light: no overflow or console errors, over-balance message, fill chip, submit gated on upload |
 | 2026-10-29 | Match Customer Deposit/PO detail and view tabs to Quotation document layout and price rail | Presentation regressions, responsive/theme browser checks, lint and build; existing evidence logic preserved |
@@ -905,6 +914,7 @@ Preserve order and media-query context when reproducing the design.
   --violet: #8d7ef6;
   --warning: #e6b967;
   --danger: #ef786f;
+  --success: #52c480;
 }
 html { font-size: calc(100% * var(--ui-scale)); }
 html[data-ui-size="small"] { --ui-scale: .9; }
@@ -937,6 +947,7 @@ html[data-theme="light"] {
   --violet: #6855d4;
   --warning: #a97013;
   --danger: #c74e49;
+  --success: #1f7048;
 }
 :root { --foreground: var(--text); --border: var(--line); --accent: var(--lime); }
 ```
@@ -2699,6 +2710,237 @@ src/features/workspace/workspace.module.css
   .table td:last-child a { width: 100%; }
   .pagination { align-items: start; }
 }
+```
+
+### A9. Staff/Admin shared page components — src/components/staff-ui/staff-ui.module.css
+
+```css
+/* Shared Staff/Admin components. Rules are prefixed with the page container so
+   they deterministically outrank the legacy `.live-workspace button` defaults. */
+.visuallyHidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+/* Buttons: 48px primary/secondary for shop-floor use, 44px text buttons. */
+:global(.live-workspace) :is(.primary, .secondary, .danger) { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 10px 20px; border-radius: 10px; font: inherit; font-size: 0.9375rem; font-weight: 650; line-height: 1.3; text-align: center; cursor: pointer; transition: background-color .15s, border-color .15s; }
+:global(.live-workspace) .primary { border: 1px solid transparent; background: var(--lime); color: #160e08; }
+:global(.live-workspace) .primary:hover:not(:disabled) { background: color-mix(in srgb, var(--lime) 85%, #fff); }
+:global(.live-workspace) .secondary { border: 1px solid var(--line); background: var(--surface); color: var(--text); }
+:global(.live-workspace) .secondary:hover:not(:disabled) { border-color: var(--lime); }
+:global(.live-workspace) .danger { border: 1px solid var(--danger); background: color-mix(in srgb, var(--danger) 12%, var(--surface)); color: var(--danger); }
+:global(.live-workspace) .text { min-height: 44px; padding: 8px 4px; border: 0; background: transparent; color: var(--lime); font: inherit; font-size: 0.9375rem; font-weight: 600; cursor: pointer; }
+:global(.live-workspace) :is(.primary, .secondary, .danger, .text):disabled { opacity: .5; cursor: not-allowed; }
+:global(.live-workspace) :is(.primary, .secondary, .danger, .text):focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+:global([data-theme="light"]) :global(.live-workspace) .text { color: var(--lime-soft); }
+
+/* Status badge: Thai text plus a shaped dot (never colour alone). */
+.badge { display: inline-flex; align-items: center; gap: 7px; width: fit-content; min-height: 28px; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-2); color: var(--muted); font-size: 0.8125rem; font-weight: 600; line-height: 1.3; white-space: nowrap; }
+.dot { width: 8px; height: 8px; flex-shrink: 0; border-radius: 50%; background: currentColor; }
+.badge[data-tone="action"], .badge[data-tone="today"] { color: var(--lime); border-color: color-mix(in srgb, var(--lime) 40%, var(--line)); background: color-mix(in srgb, var(--lime) 10%, var(--surface)); }
+.badge[data-tone="action"] .dot, .badge[data-tone="today"] .dot { border-radius: 2px; transform: rotate(45deg); }
+.badge[data-tone="progress"] { color: var(--cyan); border-color: color-mix(in srgb, var(--cyan) 40%, var(--line)); background: color-mix(in srgb, var(--cyan) 10%, var(--surface)); }
+.badge[data-tone="done"] { color: var(--success); border-color: color-mix(in srgb, var(--success) 40%, var(--line)); background: color-mix(in srgb, var(--success) 10%, var(--surface)); }
+.badge[data-tone="problem"], .badge[data-tone="danger"] { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--line)); background: color-mix(in srgb, var(--danger) 10%, var(--surface)); }
+.badge[data-tone="problem"] .dot, .badge[data-tone="danger"] .dot { border-radius: 1px; }
+:global([data-theme="light"]) :is(.badge[data-tone="action"], .badge[data-tone="today"]) { color: var(--lime-soft); }
+
+/* Status tabs with counts (same pattern as Customer lists). */
+.tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+:global(.live-workspace) .tabs a { flex-shrink: 0; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: 0.875rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
+:global(.live-workspace) .tabs a:hover { color: var(--text); border-color: var(--lime); }
+:global(.live-workspace) .tabs a[aria-current="page"] { color: var(--text); border-color: var(--lime); background: color-mix(in srgb, var(--lime) 12%, var(--surface)); }
+:global(.live-workspace) .tabs a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.count { min-width: 24px; padding: 0 7px; border-radius: 999px; background: var(--surface-2); color: var(--text); text-align: center; font-variant-numeric: tabular-nums; }
+.count[data-attention] { background: var(--lime); color: #160e08; }
+
+/* Search */
+.search { display: flex; gap: 8px; min-width: min(100%, 22rem); }
+.search label { position: relative; flex: 1; display: flex; align-items: center; min-width: 0; }
+.search label > svg { position: absolute; left: 14px; color: var(--muted); pointer-events: none; }
+:global(.live-workspace) .search input { width: 100%; min-height: 48px; padding: 10px 14px 10px 42px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); font: inherit; font-size: 0.9375rem; }
+:global(.live-workspace) .search input:focus { outline: none; border-color: var(--lime); }
+
+/* Form fields */
+.field { display: grid; gap: 6px; min-width: 0; }
+.field > span { font-size: 0.9375rem; font-weight: 600; }
+.field small { color: var(--muted); font-size: 0.8125rem; }
+.field .fieldError { color: var(--danger); }
+:global(.live-workspace) .field :is(input, textarea, select) { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); font: inherit; font-size: 1rem; }
+:global(.live-workspace) .field textarea { min-height: 88px; resize: vertical; }
+:global(.live-workspace) .field :is(input, textarea, select):focus { outline: none; border-color: var(--lime); }
+:global(.live-workspace) .field input[aria-invalid="true"] { border-color: var(--danger); }
+
+/* Next-action card and step indicator */
+.nextAction { display: grid; gap: 16px; padding: clamp(1rem, 2vw, 1.5rem); border: 1px solid color-mix(in srgb, var(--lime) 45%, var(--line)); border-radius: 16px; background: color-mix(in srgb, var(--lime) 6%, var(--surface)); }
+.nextAction > h3 { margin: 0; font-size: 1.125rem; }
+.steps { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 0; padding: 0; list-style: none; font-size: 0.875rem; color: var(--muted); }
+.steps li { display: inline-flex; align-items: center; gap: 8px; }
+.steps li > span { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); font-weight: 700; font-size: 0.8125rem; }
+.steps li[data-state="done"] { color: var(--text); }
+.steps li[data-state="done"] > span { border-color: var(--success); background: var(--success); color: var(--surface); }
+.steps li[data-state="current"] { color: var(--text); font-weight: 650; }
+.steps li[data-state="current"] > span { border-color: var(--lime); background: var(--lime); color: #160e08; }
+
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+
+/* Collapsible history */
+.collapsible { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.collapsible > summary { display: flex; align-items: center; min-height: 52px; padding: 0 16px; font-weight: 650; cursor: pointer; list-style-position: inside; }
+.collapsible > summary:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.collapsible > div { display: grid; gap: 20px; padding: 4px 16px 16px; }
+
+/* Confirmation dialog */
+.dialog { width: min(32rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); margin: auto; padding: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--text); box-shadow: 0 24px 64px rgba(0, 0, 0, .4); }
+.dialog::backdrop { background: rgba(0, 0, 0, .5); }
+.dialog form { display: grid; gap: 16px; padding: 24px; }
+.dialog h2 { margin: 0; font-size: 1.25rem; }
+.dialogBody { color: var(--text); line-height: 1.6; }
+.dialogBody p { margin: 0; }
+.check { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.check input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--lime); flex-shrink: 0; }
+.dialogActions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; }
+:global(.live-workspace) .dialogActions > button { min-width: 8rem; }
+
+/* Feedback */
+.retry { display: grid; gap: 8px; padding: 16px; border: 1px solid color-mix(in srgb, var(--warning) 50%, var(--line)); border-radius: 12px; background: color-mix(in srgb, var(--warning) 8%, var(--surface)); }
+.retry p { margin: 0; color: var(--text); font-size: 0.9375rem; }
+.error { margin: 0; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--line)); border-radius: 10px; background: color-mix(in srgb, var(--danger) 8%, var(--surface)); color: var(--danger); font-size: 0.9375rem; }
+.toast { position: fixed; z-index: 60; left: 50%; bottom: 24px; transform: translateX(-50%); max-width: calc(100vw - 2rem); }
+.toast:not(:empty) { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border: 1px solid color-mix(in srgb, var(--success) 45%, var(--line)); border-radius: 12px; background: var(--surface); color: var(--text); font-weight: 600; box-shadow: 0 12px 32px rgba(0, 0, 0, .3); }
+.toast > span { color: var(--success); font-weight: 700; }
+.notice { margin: 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: var(--text); font-size: 0.875rem; }
+
+/* Loading, empty and error states */
+.skeleton { display: grid; gap: 12px; }
+.skeleton > span { display: block; height: 104px; border-radius: 14px; background: linear-gradient(90deg, var(--surface) 0%, var(--surface-2) 50%, var(--surface) 100%); background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; }
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+.empty { display: grid; justify-items: center; gap: 8px; padding: 40px 24px; border: 1px dashed var(--line); border-radius: 14px; color: var(--muted); text-align: center; }
+.empty h3 { margin: 4px 0 0; color: var(--text); font-size: 1.0625rem; }
+.empty p { margin: 0; max-width: 36ch; }
+.loadError { display: grid; justify-items: start; gap: 8px; padding: 16px; border: 1px solid color-mix(in srgb, var(--danger) 45%, var(--line)); border-radius: 12px; background: color-mix(in srgb, var(--danger) 6%, var(--surface)); }
+.loadError p { margin: 0; color: var(--muted); }
+
+@media (max-width: 640px) {
+  .dialogActions { flex-direction: column-reverse; }
+  :global(.live-workspace) .dialogActions > button { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .skeleton > span { animation: none; } }
+```
+
+### A10. Staff/Admin production — src/features/production/production.module.css
+
+```css
+/* งานผลิต (UC8): prioritized queue + detail. Uses the shared theme tokens. */
+.page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; min-width: 0; }
+.visuallyHidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.toolbar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.toolbarEnd { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.toolbarEnd > form { flex: 1 1 20rem; max-width: 36rem; min-width: 0; }
+.warning { margin: 0; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--warning) 45%, var(--line)); border-radius: 10px; background: color-mix(in srgb, var(--warning) 8%, var(--surface)); color: var(--text); font-size: 0.9375rem; }
+.filterNote { margin: 0; color: var(--muted); font-size: 0.875rem; }
+:global(.live-workspace) .filterNote a { margin-left: 8px; color: var(--lime); }
+.muted { margin: 0; color: var(--muted); font-size: 0.9375rem; line-height: 1.6; }
+
+.layout { display: grid; grid-template-columns: minmax(18rem, 24rem) minmax(0, 1fr); gap: 24px; align-items: start; }
+.list { display: grid; gap: 12px; min-width: 0; }
+.detail { min-width: 0; }
+.placeholder { position: sticky; top: 96px; }
+
+/* Job cards: the whole card is one link (one tap target). */
+:global(.live-workspace) .card { display: grid; gap: 6px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--text); text-decoration: none; transition: border-color .15s, background-color .15s; }
+:global(.live-workspace) .card:hover { border-color: color-mix(in srgb, var(--lime) 60%, var(--line)); text-decoration: none; }
+:global(.live-workspace) .card[aria-current="true"] { border-color: var(--lime); background: color-mix(in srgb, var(--lime) 7%, var(--surface)); box-shadow: inset 4px 0 0 var(--lime); }
+:global(.live-workspace) .card:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.cardTop { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cardTop strong { font-size: 0.9375rem; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.cardTitle { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 1.0625rem; font-weight: 650; line-height: 1.45; overflow-wrap: anywhere; }
+.cardMeta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; color: var(--muted); font-size: 0.875rem; }
+.readiness { display: inline-flex; align-items: center; gap: 8px; width: fit-content; font-size: 0.875rem; font-weight: 650; color: var(--muted); }
+.readiness::before { content: "•"; font-weight: 700; }
+.readiness[data-state="ready"] { color: var(--success); }
+.readiness[data-state="ready"]::before { content: "✓"; }
+.readiness:is([data-state="short"], [data-state="empty"], [data-state="changed"]) { color: var(--lime); }
+.readiness:is([data-state="short"], [data-state="empty"], [data-state="changed"])::before { content: "!"; }
+.readiness[data-state="error"] { color: var(--danger); }
+.cardNext { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; color: var(--lime); font-size: 0.9375rem; font-weight: 650; }
+:global([data-theme="light"]) :is(.cardNext, .readiness:is([data-state="short"], [data-state="empty"], [data-state="changed"])) { color: var(--lime-soft); }
+
+/* Detail */
+.detailCard { display: grid; gap: 20px; padding: clamp(1rem, 2.2vw, 1.75rem); border: 1px solid var(--line); border-radius: 16px; background: var(--surface); min-width: 0; }
+:global(.live-workspace) .back { display: none; align-items: center; gap: 6px; min-height: 44px; width: fit-content; color: var(--lime); font-weight: 650; text-decoration: none; }
+.back svg { transform: rotate(180deg); }
+.detailHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.detailHeader h2 { margin: 0; font-size: clamp(1.25rem, 2vw, 1.5rem); line-height: 1.35; overflow-wrap: anywhere; }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 8px 0 0; color: var(--muted); font-size: 0.9375rem; }
+.meta small { font-size: 0.8125rem; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 12px; margin: 0; }
+.facts > div { padding: 12px 14px; border-radius: 12px; background: var(--surface-2); }
+.facts dt { color: var(--muted); font-size: 0.8125rem; }
+.facts dd { margin: 4px 0 0; font-weight: 650; overflow-wrap: anywhere; }
+:global(.live-workspace) .linkButton { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: fit-content; min-height: 48px; padding: 10px 20px; border-radius: 10px; background: var(--lime); color: #160e08; font-weight: 650; text-decoration: none; }
+:global(.live-workspace) .linkButton:hover { text-decoration: none; background: color-mix(in srgb, var(--lime) 85%, #fff); }
+
+.actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.planLines { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.planLines li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.planLines li[data-short] { border-color: color-mix(in srgb, var(--danger) 45%, var(--line)); }
+.planLines strong { flex: 1 1 12rem; overflow-wrap: anywhere; }
+.planLines span { color: var(--muted); font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+.planLines .short { color: var(--danger); font-weight: 650; }
+.editor, .form { display: grid; gap: 14px; min-width: 0; }
+.editor fieldset, .form fieldset { display: grid; gap: 14px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.editorLine { display: flex; align-items: flex-end; gap: 8px; }
+.editorLine > label { flex: 1; }
+.problem { margin: 0; color: var(--danger); font-weight: 600; }
+
+/* Work panel (in progress) */
+.segments { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+:global(.live-workspace) .segments button { flex: 1; min-width: 0; min-height: 44px; padding: 8px 6px; white-space: nowrap; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font: inherit; font-weight: 650; cursor: pointer; }
+:global(.live-workspace) .segments button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0, 0, 0, .2); }
+:global(.live-workspace) .segments button:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.usageRow { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+:global(.live-workspace) .fill { justify-self: start; min-height: 44px; font-size: 0.875rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.submitBar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: 12px; background: var(--surface-2); }
+.submitBar > span { color: var(--muted); font-size: 0.9375rem; overflow-wrap: anywhere; }
+:global(.live-workspace) .submit { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 10px 22px; border: 0; border-radius: 10px; background: var(--lime); color: #160e08; font: inherit; font-weight: 650; cursor: pointer; }
+:global(.live-workspace) .submit:hover:not(:disabled) { background: color-mix(in srgb, var(--lime) 85%, #fff); }
+:global(.live-workspace) .submit:disabled { opacity: .5; cursor: not-allowed; }
+:global(.live-workspace) .submit:focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+.closeJob { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px 16px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; }
+.closeJob h3 { margin: 0 0 4px; font-size: 1rem; }
+.closeJob > :is([role="alert"]) { grid-column: 1 / -1; }
+
+/* Materials and history */
+.section { display: grid; gap: 12px; }
+.section h3 { margin: 0; font-size: 1.0625rem; }
+.materials { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.materials li { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
+.materials small { color: var(--muted); font-weight: 400; }
+.materials dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.materials dt { color: var(--muted); font-size: 0.8125rem; }
+.materials dd { margin: 2px 0 0; font-weight: 650; font-variant-numeric: tabular-nums; }
+.materials dd small { display: block; font-size: 0.75rem; }
+.historyBlock { display: grid; gap: 8px; }
+.historyBlock h4 { margin: 0; font-size: 0.9375rem; }
+.timeline { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.timeline li { display: grid; gap: 2px; padding: 10px 0 10px 16px; border-left: 2px solid var(--line); }
+.timeline li span { color: var(--muted); font-size: 0.875rem; overflow-wrap: anywhere; }
+.timeline li.photoRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.code { margin: 0; color: var(--muted); font-size: 0.8125rem; overflow-wrap: anywhere; }
+
+@media (max-width: 64rem) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .layout[data-detail] .list, .layout:not([data-detail]) .detail { display: none; }
+  :global(.live-workspace) .back { display: inline-flex; }
+}
+@media (max-width: 40rem) {
+  .toolbarEnd > form { flex-basis: 100%; max-width: none; }
+  .detailHeader { flex-direction: column; }
+  .materials dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .closeJob { grid-template-columns: minmax(0, 1fr); }
+  .submitBar { flex-direction: column; align-items: stretch; }
+  :global(.live-workspace) .submit { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { :global(.live-workspace) .card { transition: none; } }
 ```
 
 ### B. Font loading and root layout — app/layout.tsx

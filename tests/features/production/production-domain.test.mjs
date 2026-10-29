@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { formatMinutes, laborPayload, timePayload, usagePayload } from "../../../src/features/production/production-domain.ts";
+import { laborPayload, timePayload, usagePayload } from "../../../src/features/production/production-domain.ts";
 
 const id = (n) => `10000000-0000-4000-8000-00000000000${n}`;
 const command = { idempotency_key: id(9), expected_version: 2 };
@@ -19,5 +19,4 @@ test("time is whole minutes 1–1,000,000; labor cost is two-place THB", () => {
   assert.equal(laborPayload(command, "1950").amount, "1950.00");
   assert.equal(laborPayload(command, "0").amount, "0.00");
   assert.throws(() => laborPayload(command, "12.345"));
-  assert.equal(formatMinutes(210), "3 h 30 min"); assert.equal(formatMinutes(45), "45 min");
 });

@@ -1,0 +1,8 @@
+.picker { display: grid; gap: 12px; padding: 16px; border: 1px dashed var(--line); border-radius: 12px; background: var(--surface-2); }
+.picker ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.picker li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.picker li > div { display: grid; gap: 2px; min-width: 0; }
+.picker li strong { overflow-wrap: anywhere; }
+.picker li span { color: var(--muted); font-size: 0.8125rem; }
+.note { margin: 0; color: var(--muted); font-size: 0.875rem; }
+.paging { display: flex; justify-content: flex-end; gap: 8px; }
