@@ -89,7 +89,7 @@ function EditMaterialForm({ api, material, onSaved }: { api: BackendApi; materia
     <fieldset disabled={command.busy}>
       <Field label="ชื่อวัตถุดิบ"><input name="name" required maxLength={200} defaultValue={material.name} /></Field>
       <p className={layout.muted}>หน่วย {material.unit_name} (เปลี่ยนไม่ได้)</p>
-      <label className={styles.toggle}><input name="is_active" type="checkbox" defaultChecked={material.is_active} />เปิดใช้งาน</label>
+      <label className={layout.toggle}><input name="is_active" type="checkbox" defaultChecked={material.is_active} />เปิดใช้งาน</label>
       <p className={layout.muted}>ปิดใช้งานแล้วสต๊อกและประวัติยังอยู่ แต่เพิ่มสต๊อกหรือจองเพิ่มให้งานใหม่ไม่ได้</p>
     </fieldset>
     {error && <p className={layout.problem} role="alert">{error}</p>}

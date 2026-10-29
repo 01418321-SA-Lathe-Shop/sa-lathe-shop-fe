@@ -86,7 +86,7 @@ function StockForm({ api, material, onSaved }: { api: BackendApi; material: Inve
       </div>
       {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />}
     </form>
-    <details className={styles.note}><summary>เงื่อนไข</summary><p>ปรับได้ไม่เกิน 12 หลัก ทศนิยม 6 ตำแหน่ง ไม่ปัดเศษ · แก้ยอดตามที่นับจะคงต้นทุนเฉลี่ยเดิม และตั้งยอดต่ำกว่าที่จองให้งานไว้ไม่ได้ · การรับของจากผู้ขายให้บันทึกที่หน้ารับเข้าวัตถุดิบ</p></details>
+    <details className={layout.note}><summary>เงื่อนไข</summary><p>ปรับได้ไม่เกิน 12 หลัก ทศนิยม 6 ตำแหน่ง ไม่ปัดเศษ · แก้ยอดตามที่นับจะคงต้นทุนเฉลี่ยเดิม และตั้งยอดต่ำกว่าที่จองให้งานไว้ไม่ได้ · การรับของจากผู้ขายให้บันทึกที่หน้ารับเข้าวัตถุดิบ</p></details>
     <ConfirmDialog open={confirming} title={mode === "addition" ? "เพิ่มสต๊อก?" : "แก้ยอดตามที่นับ?"} confirmLabel="ยืนยันปรับสต๊อก" checks={["ตรวจจำนวน หน่วย และเหตุผลแล้ว"]} onClose={() => setConfirming(false)} onConfirm={() => {
       setConfirming(false);
       write.submit(`/materials/${material.id}/stock`, "POST", () => ({ ...stockFields(material, mode, quantity.trim(), cost.trim(), reason), idempotency_key: crypto.randomUUID(), expected_version: material.version }), "");

@@ -39,7 +39,7 @@ function InventoryWorkspace({ api, account }: { api: BackendApi; account: Accoun
   const saved = (message: string) => { setToast(message); materials.reload(); };
   const listLoading = materials.loading && !materials.data;
   return <section className={layout.page}>
-    {admin && <nav className={styles.views} aria-label="มุมมอง">
+    {admin && <nav className={layout.views} aria-label="มุมมอง">
       <Link href={href({ view: undefined })} scroll={false} aria-current={view === "stock" ? "page" : undefined}>สต๊อก</Link>
       <Link href={href({ view: "catalog", filter: undefined, material: undefined })} scroll={false} aria-current={view === "catalog" ? "page" : undefined}>ข้อมูลหลัก (หน่วย/วัตถุดิบ)</Link>
     </nav>}

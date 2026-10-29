@@ -1,9 +1,4 @@
 /* สต๊อกวัตถุดิบ (UC5) page-specific rules; list/detail pieces come from staff-ui/staff-layout.module.css. */
-.views { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
-:global(.live-workspace) .views a { flex-shrink: 0; display: inline-flex; align-items: center; min-height: 48px; padding: 8px 16px; border-bottom: 3px solid transparent; color: var(--muted); font-weight: 650; text-decoration: none; white-space: nowrap; }
-:global(.live-workspace) .views a:hover { color: var(--text); }
-:global(.live-workspace) .views a[aria-current="page"] { color: var(--text); border-bottom-color: var(--lime); }
-:global(.live-workspace) .views a:focus-visible { outline: 2px solid var(--lime); outline-offset: -2px; }
 
 /* Stock table: a real table on desktop, one card per material on phones. */
 .stock { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); font-variant-numeric: tabular-nums; }
@@ -23,14 +18,10 @@
 .modeGroup { display: grid; gap: 6px; }
 .modeGroup > span { font-size: 0.9375rem; font-weight: 600; }
 .modes { display: flex; flex-wrap: wrap; gap: 8px; }
-.modes label, .toggle { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-weight: 600; cursor: pointer; }
+.modes label { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-weight: 600; cursor: pointer; }
 .modes label:has(input:checked) { border-color: var(--lime); background: color-mix(in srgb, var(--lime) 10%, var(--surface)); }
 .modes label:has(input:disabled) { opacity: .5; cursor: not-allowed; }
-.modes input, .toggle input { width: 20px; height: 20px; margin: 0; accent-color: var(--lime); }
-.toggle { width: fit-content; }
-.note { color: var(--muted); font-size: 0.875rem; }
-.note summary { min-height: 44px; display: flex; align-items: center; font-weight: 600; cursor: pointer; }
-.note p { margin: 0; line-height: 1.6; }
+.modes input { width: 20px; height: 20px; margin: 0; accent-color: var(--lime); }
 
 /* ข้อมูลหลัก */
 .catalog { display: grid; gap: 16px; }
