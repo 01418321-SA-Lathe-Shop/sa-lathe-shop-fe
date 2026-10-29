@@ -58,10 +58,14 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
       <div className="sidebar-footer"><div className="avatar">{initials}</div><div><strong>{account.name}</strong><span>{role === "Admin" ? "ผู้ดูแลระบบ" : role === "Worker" ? "พนักงาน" : "ลูกค้า"} · {account.username}</span></div><button aria-label="ออกจากระบบ" onClick={leave}><Icon name="logout"/></button></div>
     </aside>
     <div className="app-stage">
-      <header className="topbar integrated-topbar"><button id="navigation-toggle" className="mobile-navigation icon-button" aria-label="เปิดเมนู" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><Icon name="grid"/></button><span className="eyebrow">{ROLE_LABELS[role]} / {PAGE_LABELS[workspaceId]}</span>
-        <span className="api-mode-badge live">Connected API</span>
-        <ThemeToggle/>
-        <button className="secondary-button switch-account" onClick={leave}>ออกจากระบบ</button>
+      <header className="topbar integrated-topbar workspace-navbar">
+        <div className="workspace-navbar-environment">เชื่อมต่อข้อมูลจริง · รีโหลดหน้าต้องเข้าสู่ระบบใหม่</div>
+        <div className="workspace-navbar-brand"><Logo onClick={() => router.push(ROLE_ROOTS[role])}/></div>
+        <div className="workspace-navbar-actions">
+          <ThemeToggle/>
+          <Link className="workspace-navbar-inbox" href={workspacePath(role, "inbox")} aria-label="การแจ้งเตือน" title="การแจ้งเตือน"><Icon name="bell"/></Link>
+          <button id="navigation-toggle" className="mobile-navigation icon-button" aria-label="เปิดเมนู" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><Icon name="grid"/></button>
+        </div>
       </header>
       <main id="main-content" className={`page-content ${styles.scope}`}>
         <section className="page-heading"><div>{!overview && <span className="eyebrow">{ROLE_LABELS[role].toUpperCase()} / {workspaceId.toUpperCase()}</span>}<h1 id="workspace-title" tabIndex={-1}>{overview ? "ภาพรวมการผลิต" : PAGE_LABELS[workspaceId]}</h1><p>{overview ? descriptions[role] : items.find((item) => item.id === workspaceId)?.description}</p></div></section>

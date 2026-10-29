@@ -1,6 +1,20 @@
 /* Locally owned styles; legacy descendant class contracts are intentionally preserved. */
-:where(.scope) :global(.integrated-topbar) { gap: .5rem; }
-:where(.scope) :global(.integrated-topbar) :global(.switch-account) { white-space: nowrap; flex-shrink: 0; }
+:where(.scope) :global(.topbar.workspace-navbar) { height: 64px; padding: 0 clamp(1rem, 2.5vw, 2.5rem); gap: 16px; background: var(--bg); backdrop-filter: none; }
+:where(.scope) :global(.workspace-navbar-environment) { min-width: 0; color: var(--muted); font-size: .8125rem; }
+:where(.scope) :global(.workspace-navbar-brand) { display: none; }
+:where(.scope) :global(.workspace-navbar-actions) { display: flex; align-items: center; flex-shrink: 0; gap: 16px; margin-left: auto; }
+:where(.scope) :global(.workspace-navbar-inbox) { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px; color: var(--text); }
+:where(.scope) :global(.workspace-navbar-inbox):hover { background: var(--surface-2); }
+:where(.scope) :global(.workspace-navbar-inbox):focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+@media (max-width: 56.25rem) {
+  :where(.scope) :global(.topbar.workspace-navbar) { height: 72px; }
+  :where(.scope) :global(.workspace-navbar-environment) { display: none; }
+  :where(.scope) :global(.workspace-navbar-brand) { display: block; min-width: 0; }
+  :where(.scope) :global(.workspace-navbar-brand) :global(.brand) { padding: 0; }
+  :where(.scope) :global(.workspace-navbar-actions) { gap: 8px; }
+  :where(.scope) :global(.workspace-navbar-actions) :global(.mobile-navigation) { width: 44px; height: 44px; flex-shrink: 0; }
+  :where(.scope) :global(.integrated-sidebar) :global(.sidebar-footer) { display: flex; }
+}
 :global(.app-shell):where(.scope) { min-height: 100vh; background: radial-gradient(circle at 88% -10%, rgba(255,155,69,.07), transparent 28%), var(--bg); }
 :where(.scope) :global(.sidebar) { position: fixed; inset: 0 auto 0 0; z-index: 20; width: 15.25rem; padding: 1.625rem 1.125rem 1.25rem; display: flex; flex-direction: column; border-right: 0.0625rem solid var(--line); background: rgba(12,14,14,.97); }
 :where(.scope) :global(.nav-list) { display: flex; flex-direction: column; gap: 0.3125rem; }

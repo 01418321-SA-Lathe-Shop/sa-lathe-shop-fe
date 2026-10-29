@@ -161,6 +161,10 @@ by App Router do not uncheck the currently visible theme or size controls.
 
 ## Typography
 
+### Staff/Admin navbar alignment — 2026-10-29
+
+Staff/Admin now follow Customer's navbar composition: a 64px desktop bar with muted real-connection/session notice left and one right-aligned action group (icon theme switch and bell). At the existing Staff mobile navigation breakpoint (900px), a 72px bar shows the logo left and theme/bell/menu right. The bell links to the existing role-scoped inbox; it does not reuse Customer notification targets, add API reads or fabricate unread counts. Sign-out remains in the sidebar/footer on desktop and mobile. Removed scattered breadcrumb/API-pill/topbar-sign-out controls; page headings and sidebar retain current location/role information. Existing sidebar/menu behavior and role permissions remain unchanged. Shared Light/Dark variables govern the whole bar.
+
 ### Separate appearance controls — 2026-10-28
 
 Theme is an icon-only 44px-minimum sun/moon quick action, not a Settings dialog trigger. Its Thai accessible name and native tooltip describe the destination theme. It uses the existing shared appearance store and transition, with no new storage or auth behavior. Landing places it beside sign-in, Customer beside the bell on desktop/mobile, Staff/Admin in the topbar, and Auth retains its existing toolbar position. Settings retains only text/display-size choices (Small/Medium/Large); Customer keeps its existing Settings page and other surfaces keep their existing Settings entry. No visible text accompanies the theme icon. This supersedes historical theme-radio descriptions below. Existing theme colors, routes and permissions remain unchanged.
@@ -680,6 +684,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-29 | Align Staff/Admin navbar with Customer's grouped desktop/mobile layout; retain role inbox and sidebar sign-out | Scoped responsive/theme/keyboard browser checks with test-only network responses, native tests, lint and build |
 | 2026-10-29 | Connect six demo buttons to real password-free local-test API behind explicit loopback UI opt-in; preserve normal login and memory-only sessions | Real browser login/me/role navigation/logout/revocation passed for all six accounts at desktop/mobile; company membership boundary reads passed; simulated error checks are recorded separately |
 | 2026-10-28 | Separate icon-only navbar theme action from Settings; retain text-size controls only inside Settings | Component regressions for destination labels, immediate action and size-only settings; desktop/mobile browser checks use controlled test responses, not real account verification |
 | 2026-10-28 | Add owner-approved username-only picker for six real-backend demo identities below the login form; no mock, stored password or automatic login | Component regressions and desktop/mobile browser checks cover selection, password clearing/focus, manual login and registration exclusion |
@@ -1021,8 +1026,22 @@ src/features/workspace/workspace.module.css
 
 ```css
 /* Locally owned styles; legacy descendant class contracts are intentionally preserved. */
-:where(.scope) :global(.integrated-topbar) { gap: .5rem; }
-:where(.scope) :global(.integrated-topbar) :global(.switch-account) { white-space: nowrap; flex-shrink: 0; }
+:where(.scope) :global(.topbar.workspace-navbar) { height: 64px; padding: 0 clamp(1rem, 2.5vw, 2.5rem); gap: 16px; background: var(--bg); backdrop-filter: none; }
+:where(.scope) :global(.workspace-navbar-environment) { min-width: 0; color: var(--muted); font-size: .8125rem; }
+:where(.scope) :global(.workspace-navbar-brand) { display: none; }
+:where(.scope) :global(.workspace-navbar-actions) { display: flex; align-items: center; flex-shrink: 0; gap: 16px; margin-left: auto; }
+:where(.scope) :global(.workspace-navbar-inbox) { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px; color: var(--text); }
+:where(.scope) :global(.workspace-navbar-inbox):hover { background: var(--surface-2); }
+:where(.scope) :global(.workspace-navbar-inbox):focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+@media (max-width: 56.25rem) {
+  :where(.scope) :global(.topbar.workspace-navbar) { height: 72px; }
+  :where(.scope) :global(.workspace-navbar-environment) { display: none; }
+  :where(.scope) :global(.workspace-navbar-brand) { display: block; min-width: 0; }
+  :where(.scope) :global(.workspace-navbar-brand) :global(.brand) { padding: 0; }
+  :where(.scope) :global(.workspace-navbar-actions) { gap: 8px; }
+  :where(.scope) :global(.workspace-navbar-actions) :global(.mobile-navigation) { width: 44px; height: 44px; flex-shrink: 0; }
+  :where(.scope) :global(.integrated-sidebar) :global(.sidebar-footer) { display: flex; }
+}
 :global(.app-shell):where(.scope) { min-height: 100vh; background: radial-gradient(circle at 88% -10%, rgba(255,155,69,.07), transparent 28%), var(--bg); }
 :where(.scope) :global(.sidebar) { position: fixed; inset: 0 auto 0 0; z-index: 20; width: 15.25rem; padding: 1.625rem 1.125rem 1.25rem; display: flex; flex-direction: column; border-right: 0.0625rem solid var(--line); background: rgba(12,14,14,.97); }
 :where(.scope) :global(.nav-list) { display: flex; flex-direction: column; gap: 0.3125rem; }
