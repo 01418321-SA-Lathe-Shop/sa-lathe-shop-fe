@@ -32,3 +32,12 @@ test("every picker action is disabled while authentication is busy", () => {
   const picker = DemoAccountPicker({ disabled: true, onSelect() {} });
   for (const button of picker.props.children[2].props.children) assert.equal(button.props.disabled, true);
 });
+
+test("explicit local-test mode labels password-free access without changing username-only payloads", () => {
+  const selected = [];
+  const picker = DemoAccountPicker({ disabled: false, localTestEnabled: true, onSelect: (...args) => selected.push(args) });
+  assert.match(picker.props.children[0].props.children, /เข้าสู่ระบบทันที/);
+  assert.match(picker.props.children[1].props.children, /ไม่ใช้รหัสผ่าน/);
+  picker.props.children[2].props.children[0].props.onClick();
+  assert.deepEqual(selected, [["pim.admin"]]);
+});

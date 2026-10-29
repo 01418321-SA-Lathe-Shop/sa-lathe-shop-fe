@@ -79,18 +79,24 @@ components:
 
 # Lathe Shop Control — Design specification
 
-อัปเดตล่าสุด: 2026-10-28 · สถานะ: login และ workspace ใช้ real API เท่านั้น; นำ browser-mock shortcuts และ account-switch/reset controls ออกตามคำขอเจ้าของ; real-account verification ยังติด database readiness และ credentials
+อัปเดตล่าสุด: 2026-10-29 · สถานะ: login และ workspace ใช้ real API เท่านั้น; ปุ่ม Local test เชื่อม password-free endpoint เมื่อเปิด config เฉพาะ local; browser login จริงผ่านครบ 6 บัญชี ไม่ใช่การรับรอง workflow ทั้งหมด
 
 เอกสารนี้ใช้ส่งต่องานให้ designer และ developer เพื่อสร้าง UI ให้ตรงกับระบบปัจจุบัน อ่านคู่กับ `docs/02-frontend.md` ซึ่งเป็นแหล่งอ้างอิง Business Flow และ permission การตรวจ frontend ด้วย unit tests ไม่ใช่หลักฐานว่า real Backend หรือ UC1–UC9 ทำงานครบ
 
-### Current authentication surface — 2026-10-28
+### Current authentication surface — 2026-10-29
 
 This supersedes historical mock-mode descriptions below. `/login` and `/register`
 use the configured real API only. Login has a collapsed, explicitly labelled
-real-backend demo-account picker approved by the owner. Its six public fictional
-usernames only fill the username field, clear the password and focus it. It does
-not submit, store passwords, select a role or bypass authentication; registration
-does not show the picker. Buttons disable during sign-in. Customer,
+real-backend demo-account picker approved by the owner. With the explicit public
+UI flag enabled and a loopback API base, its summary is "บัญชีทดสอบ Local · เข้าสู่ระบบทันที".
+Each button clears the password and calls `/auth/local-test/login` with username
+only, then confirms `/auth/me` and navigates by server role. Without that opt-in,
+selection only fills username and clears/focuses password for normal sign-in.
+The panel explains privileged local-only access; no passwords or roles are sent
+by its buttons. Registration does not show the picker. Buttons and normal form
+disable during sign-in. Disabled endpoint (404), unavailable identity (401/403),
+rate limit (429) and network failure show feedback without automatic retry or
+fallback. Customer,
 Staff and Admin workspaces have no mock account switching, reset or lost-response
 simulation. All sessions remain memory-only, require login after reload, and keep
 existing server role checks, logout and expiry behavior. Existing error/empty
@@ -674,6 +680,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-29 | Connect six demo buttons to real password-free local-test API behind explicit loopback UI opt-in; preserve normal login and memory-only sessions | Real browser login/me/role navigation/logout/revocation passed for all six accounts at desktop/mobile; company membership boundary reads passed; simulated error checks are recorded separately |
 | 2026-10-28 | Separate icon-only navbar theme action from Settings; retain text-size controls only inside Settings | Component regressions for destination labels, immediate action and size-only settings; desktop/mobile browser checks use controlled test responses, not real account verification |
 | 2026-10-28 | Add owner-approved username-only picker for six real-backend demo identities below the login form; no mock, stored password or automatic login | Component regressions and desktop/mobile browser checks cover selection, password clearing/focus, manual login and registration exclusion |
 | 2026-10-28 | Delete browser fixture implementation and mock-only tests/object resolver; remove 73 obsolete mock/bypass selectors while preserving live login/workspace styles | Source/import audit, native tests, production build and desktop/mobile login checks; no backend data or dependencies removed |

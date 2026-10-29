@@ -15,8 +15,12 @@ Date: 2026-10-28. Owner approved deleting the frontend browser mock.
 - A failed read/login/save never selects sample records. Existing empty/error
   feedback and uncertain-write/idempotency flows are preserved.
 - The owner-approved `/login` picker lists the six public fictional usernames
-  from the backend seed handoff. Selection fills only the username, clears/focuses
-  the password and never submits. Enter the privately provided password manually.
+  from the backend seed handoff. With `NEXT_PUBLIC_LOCAL_TEST_LOGIN_ENABLED=true`
+  and a loopback API it signs in through real `/auth/local-test/login` using only
+  username. Backend separately requires `LOCAL_TEST_ACCOUNT_ENABLE=true` and an
+  active seed-owned identity. Without the frontend opt-in, selection only fills
+  username and clears/focuses the manually entered password. Do not enable the
+  privileged password-free endpoint publicly. See `local-test-login-handoff.md`.
   This is not the deleted browser mock; it cannot create accounts or choose roles.
   Registration has no picker. No mock switcher/reset/lost-response toggle remains.
 - Attachments use authorized signed links and real storage, never a mock Blob
@@ -36,12 +40,18 @@ return 200 and allow the exact frontend origin through CORS. Storage/file flows
 need separately configured private S3-compatible storage and bucket CORS.
 
 No migration, seed, backend configuration, deployment or data deletion was run
-by this frontend removal. Prior checks found API liveness 200, readiness 503 and
-CORS preflights permitting `http://localhost:3000`. Seeded-account login/company
-sharing/isolation verification remains pending readiness and private credentials.
+by this frontend work. Initial removal checks found readiness 503. On 2026-10-29,
+the operator's API became ready and real browser password-free login passed for
+all six accounts. Nida/Ploy share one company profile; Somchai does not have that
+membership. Workflow-record isolation still needs populated test data; membership
+reads are not proof of all business workflows. Normal real password login and
+private S3 workflows were not reverified by this local-test follow-up.
 
 ## Verification scope
 
+- Current local-test integration: real browser/API results and separate simulated
+  failure checks are in `local-test-login-handoff.md`. Earlier counts/checks below
+  describe their historical removal/username-picker checkpoints.
 - Username-picker follow-up: 126 native tests plus lint, TypeScript, audit and
   production build pass. Chrome at 1280px/390px in Dark/Light verifies all six
   username choices, password clearing/focus, no automatic request, required

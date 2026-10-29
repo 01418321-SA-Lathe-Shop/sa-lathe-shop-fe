@@ -18,14 +18,18 @@ import { DemoAccountPicker } from "./demo-account-picker";
 // Login and registration use only the configured real API.
 export default function BackendWorkspace({ initialRegister = false }: { initialRegister?: boolean }) {
   const router = useRouter();
-  const { signIn, notice, liveBase } = useApiSession();
+  const { signIn, signInLocalTest, localTestEnabled, notice, liveBase } = useApiSession();
   async function enter(username: string, password: string) {
     const session = await signIn(username, password);
     router.push(ROLE_ROOTS[API_ROLES[session.account.role]]);
   }
-  return <LiveLogin key={initialRegister ? "register" : "login"} base={liveBase} notice={notice} initialRegister={initialRegister} onLogin={enter} />;
+  async function enterLocalTest(username: string) {
+    const session = await signInLocalTest(username);
+    router.push(ROLE_ROOTS[API_ROLES[session.account.role]]);
+  }
+  return <LiveLogin key={initialRegister ? "register" : "login"} base={liveBase} notice={notice} initialRegister={initialRegister} onLogin={enter} localTestEnabled={localTestEnabled} onLocalLogin={enterLocalTest} />;
 }
-function LiveLogin({ base, notice, initialRegister, onLogin }: { base: string; notice: string; initialRegister: boolean; onLogin: (username: string, password: string) => Promise<void> }) {
+function LiveLogin({ base, notice, initialRegister, onLogin, localTestEnabled, onLocalLogin }: { base: string; notice: string; initialRegister: boolean; onLogin: (username: string, password: string) => Promise<void>; localTestEnabled: boolean; onLocalLogin: (username: string) => Promise<void> }) {
   const router = useRouter();
   const [register, setRegister] = useState(initialRegister);
   const [type, setType] = useState("individual");
@@ -61,13 +65,14 @@ function LiveLogin({ base, notice, initialRegister, onLogin }: { base: string; n
         <button className="login-submit" type="submit">{register ? "สมัครบัญชี" : "เข้าสู่ระบบ"} <Icon name="arrow"/></button>
       </fieldset></form>
       <Feedback {...action}/><Link className="login-register-link" href={register ? "/login" : "/register"}>{register ? "มีบัญชีแล้ว? เข้าสู่ระบบ" : "ยังไม่มีบัญชี? สมัครบัญชี"}</Link>
-      {!register && <DemoAccountPicker disabled={action.busy} onSelect={(username) => {
+      {!register && <DemoAccountPicker disabled={action.busy} localTestEnabled={localTestEnabled} onSelect={(username) => {
         const form = loginForm.current;
         if (!form) return;
         (form.elements.namedItem("username") as HTMLInputElement).value = username;
         const password = form.elements.namedItem("password") as HTMLInputElement;
         password.value = "";
-        password.focus();
+        if (localTestEnabled) void action.run(() => onLocalLogin(username), "");
+        else password.focus();
       }} />}
       <span className="auth-api">Connected API · {base}</span></div>
     </section>

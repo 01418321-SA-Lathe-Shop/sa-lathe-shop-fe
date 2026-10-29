@@ -1,5 +1,19 @@
 # Frontend Implementation Plan
 
+## Password-free local-test integration — 2026-10-29
+
+- Batch 1 pushed (`1d5468b`): real API/session method, shared memory-only session
+  lifecycle, explicit UI opt-in plus loopback restriction, failure guidance/tests.
+- Batch 2 completed: wire demo buttons and keep normal password login; development-only
+  ignored config enables this machine, example/production default stays off.
+- Real browser-to-API verification passed all six accounts, server roles, normal
+  logout/revocation and company membership boundaries. No new workflow records,
+  seeds, migrations, backend edits or deployments. Populated workflow isolation
+  and private S3 remain separate checks. See `docs/local-test-login-handoff.md`.
+- 136 native tests, lint, TypeScript, source audit and production build pass.
+  Simulated 404/401/429/offline UI recovery and production-default password-free
+  OFF behavior were verified separately; the temporary production preview stopped.
+
 ## Real-backend username picker — 2026-10-28
 
 - Owner approved a collapsed `/login` picker for six public seeded usernames.

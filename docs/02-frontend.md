@@ -9,9 +9,12 @@ are removed. Memory-only Bearer sessions, logout/expiry, role boundaries and liv
 empty/error states are unchanged. Historical prototype/mock descriptions below
 are retained as history, not instructions to restore a demo bypass.
 
-Owner-approved follow-up: `/login` now offers a collapsed username-only picker
-for the six real-backend demo accounts. It clears/focuses the password field;
-password entry and real authentication remain manual. No mock is restored.
+Owner-approved follow-up (2026-10-29): with explicit frontend local-test opt-in
+and a loopback API, `/login` demo buttons call real `/auth/local-test/login` with
+username only and confirm `/auth/me`. Otherwise the picker only fills username
+and clears/focuses password for normal login. Backend must separately enable its
+guarded route; no mock is restored. See `local-test-login-handoff.md` for setup,
+real six-account browser verification and limits.
 
 Use `NEXT_PUBLIC_API_BASE_URL` (public API origin only). Real seeded demo accounts
 require an operator-prepared dedicated database and private passwords; no real
