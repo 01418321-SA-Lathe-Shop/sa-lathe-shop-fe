@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { allowedActions, lineTotal, orderActionPayload, orderPayload, orderTotal, supplierFields } from "../../../src/features/procurement/procurement-domain.ts";
+import { allowedActions, defaultOrderTab, matchOrder, orderCounts, orderTab, orderTabOf, lineTotal, orderActionPayload, orderPayload, orderTotal, supplierFields } from "../../../src/features/procurement/procurement-domain.ts";
 
 const id = (n) => `10000000-0000-4000-8000-00000000000${n}`;
 
@@ -16,7 +16,7 @@ test("supplier contacts are optional but strictly formatted", () => {
   assert.deepEqual(supplierFields("A", "sales@example.com", "+66812345678").phone, "+66812345678");
   assert.throws(() => supplierFields("", "", ""));
   assert.throws(() => supplierFields("A", "Sales <sales@example.com>", ""));
-  assert.throws(() => supplierFields("A", "", "081-234-5678"), /Remove spaces/);
+  assert.throws(() => supplierFields("A", "", "081-234-5678"), /ไม่ต้องเว้นวรรค/);
 });
 
 test("order payload is exact, distinct and bounded", () => {
@@ -38,4 +38,23 @@ test("supplier responses follow the UC6 state table", () => {
   assert.deepEqual(allowedActions({ status: "cancelled", supplier_response: "rejected" }), []);
   assert.throws(() => orderActionPayload("reject", " ", id(1), 1));
   assert.deepEqual(orderActionPayload("accept", "", id(1), 1), { idempotency_key: id(1), expected_version: 1, action: "accept" });
+});
+
+test("order tabs follow status plus supplier response", () => {
+  assert.equal(orderTabOf({ status: "ordered", supplier_response: "pending" }), "pending");
+  assert.equal(orderTabOf({ status: "ordered", supplier_response: "accepted" }), "accepted");
+  assert.equal(orderTabOf({ status: "partially_received", supplier_response: "accepted" }), "partial");
+  assert.equal(orderTabOf({ status: "received", supplier_response: "accepted" }), "received");
+  assert.equal(orderTabOf({ status: "cancelled", supplier_response: "rejected" }), "cancelled");
+  assert.equal(orderTabOf({ status: "cancelled", supplier_response: "accepted" }), "cancelled");
+  assert.equal(orderTabOf({ status: "mystery", supplier_response: "pending" }), null);
+  const counts = orderCounts([{ status: "ordered", supplier_response: "accepted" }, { status: "cancelled", supplier_response: "rejected" }, { status: "mystery", supplier_response: "x" }]);
+  assert.deepEqual(counts, { pending: 0, accepted: 1, partial: 0, received: 0, cancelled: 1 });
+  assert.equal(defaultOrderTab(counts), "accepted");
+  assert.equal(defaultOrderTab({ pending: 0, accepted: 0, partial: 0, received: 3, cancelled: 0 }), "pending");
+  assert.equal(orderTab("received"), "received");
+  assert.equal(orderTab("all"), null);
+  const order = { order_no: "MO-2026-0007", supplier: { name: "Steel Co" } };
+  assert.ok(matchOrder(order, " steel ") && matchOrder(order, "0007") && matchOrder(order, ""));
+  assert.ok(!matchOrder(order, "copper"));
 });

@@ -14,9 +14,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function supplierFields(name: string, email: string, phone: string) {
   const trimmed = name.trim(); email = email.trim(); phone = phone.trim();
-  if (!trimmed || [...trimmed].length > 200 || /[\0\r\n]/.test(trimmed)) throw new Error("Supplier name is required, up to 200 characters, without line breaks.");
-  if (email && (new TextEncoder().encode(email).length > 254 || !/^[^\s@<>()",]+@[^\s@<>()",]+\.[^\s@<>()",]+$/.test(email))) throw new Error("Email must be a plain address such as sales@example.com, without a display name.");
-  if (phone && !/^\+?[0-9]{7,15}$/.test(phone)) throw new Error("Phone must be 7–15 digits with an optional leading +. Remove spaces and hyphens.");
+  if (!trimmed || [...trimmed].length > 200 || /[\0\r\n]/.test(trimmed)) throw new Error("กรอกชื่อผู้ขาย ไม่เกิน 200 ตัวอักษร ไม่ขึ้นบรรทัดใหม่");
+  if (email && (new TextEncoder().encode(email).length > 254 || !/^[^\s@<>()",]+@[^\s@<>()",]+\.[^\s@<>()",]+$/.test(email))) throw new Error("อีเมลต้องเป็นที่อยู่อย่างเดียว เช่น sales@example.com");
+  if (phone && !/^\+?[0-9]{7,15}$/.test(phone)) throw new Error("เบอร์โทรเป็นตัวเลข 7–15 หลัก ขึ้นต้นด้วย + ได้ ไม่ต้องเว้นวรรคหรือใส่ขีด");
   return { name: trimmed, email, phone };
 }
 
@@ -32,19 +32,19 @@ export function orderTotal(lines: { quantity: string; unit_cost: string }[]): st
 }
 
 export function orderPayload(input: { key: string; supplierId: string; jobIds: string[]; expectedAt: string; lines: DraftLine[] }) {
-  if (!UUID.test(input.key)) throw new Error("A new order key is required.");
-  if (!UUID.test(input.supplierId)) throw new Error("Choose an active supplier.");
-  if (input.lines.length < 1 || input.lines.length > 100) throw new Error("An order needs 1–100 material lines.");
-  if (new Set(input.lines.map((line) => line.material_id)).size !== input.lines.length) throw new Error("Each material may appear once per order.");
-  if (input.jobIds.length > 100 || new Set(input.jobIds).size !== input.jobIds.length || input.jobIds.some((id) => !UUID.test(id))) throw new Error("Job references must be up to 100 distinct jobs.");
+  if (!UUID.test(input.key)) throw new Error("เปิดฟอร์มสั่งซื้อใหม่อีกครั้ง");
+  if (!UUID.test(input.supplierId)) throw new Error("เลือกผู้ขายที่เปิดใช้งาน");
+  if (input.lines.length < 1 || input.lines.length > 100) throw new Error("ใบสั่งซื้อต้องมีวัตถุดิบ 1–100 รายการ");
+  if (new Set(input.lines.map((line) => line.material_id)).size !== input.lines.length) throw new Error("วัตถุดิบแต่ละชนิดใส่ได้ครั้งเดียวต่อใบสั่งซื้อ");
+  if (input.jobIds.length > 100 || new Set(input.jobIds).size !== input.jobIds.length || input.jobIds.some((id) => !UUID.test(id))) throw new Error("เลือกงานที่เกี่ยวข้องได้ไม่เกิน 100 งาน ไม่ซ้ำกัน");
   const lines = input.lines.map((line) => ({ material_id: line.material_id, quantity: inventoryDecimal(line.quantity, true), unit_cost: inventoryDecimal(line.unit_cost) }));
   return { idempotency_key: input.key, supplier_id: input.supplierId, job_ids: input.jobIds, ...(input.expectedAt ? { expected_at: bangkokInstant(input.expectedAt) } : {}), lines };
 }
 
 export function orderActionPayload(action: OrderAction, rawReason: string, key: string, expectedVersion: number | string) {
   const reason = rawReason.trim();
-  if ((action === "reject" || action === "cancel") && !reason) throw new Error("A reason is required to reject or cancel an order.");
-  if ([...reason].length > 2000 || reason.includes("\0")) throw new Error("Reason must be at most 2,000 characters.");
+  if ((action === "reject" || action === "cancel") && !reason) throw new Error("กรอกเหตุผลเมื่อผู้ขายปฏิเสธหรือยกเลิกใบสั่งซื้อ");
+  if ([...reason].length > 2000 || reason.includes("\0")) throw new Error("เหตุผลไม่เกิน 2,000 ตัวอักษร");
   return { idempotency_key: key, expected_version: expectedVersion, action, ...(reason ? { reason } : {}) };
 }
 
@@ -54,4 +54,33 @@ export function allowedActions(order: Pick<SupplierOrder, "status" | "supplier_r
   if (order.supplier_response === "pending") return ["accept", "reject", "cancel"];
   if (order.supplier_response === "accepted" && order.status === "ordered") return ["cancel"];
   return [];
+}
+
+// Tabs for สั่งซื้อวัตถุดิบ, from status plus supplier response (UC6/UC7 state table).
+export const ORDER_TABS = ["pending", "accepted", "partial", "received", "cancelled"] as const;
+export type OrderTab = (typeof ORDER_TABS)[number];
+type OrderState = Pick<SupplierOrder, "status" | "supplier_response">;
+
+// shortcut: an unknown status/response pair belongs to no tab, revisit if UC6/UC7 add states.
+export function orderTabOf(order: OrderState): OrderTab | null {
+  if (order.status === "cancelled") return "cancelled";
+  if (order.status === "received") return "received";
+  if (order.status === "partially_received") return "partial";
+  if (order.status !== "ordered") return null;
+  return order.supplier_response === "pending" ? "pending" : order.supplier_response === "accepted" ? "accepted" : null;
+}
+export const orderTab = (value: string | null): OrderTab | null => ORDER_TABS.find((tab) => tab === value) ?? null;
+
+export function orderCounts(orders: OrderState[]): Record<OrderTab, number> {
+  const counts = { pending: 0, accepted: 0, partial: 0, received: 0, cancelled: 0 };
+  for (const order of orders) { const tab = orderTabOf(order); if (tab) counts[tab] += 1; }
+  return counts;
+}
+/** First tab that still needs attention; falls back to รอผู้ขายตอบ. */
+export const defaultOrderTab = (counts: Record<OrderTab, number>): OrderTab => (["pending", "accepted", "partial"] as const).find((tab) => counts[tab] > 0) ?? "pending";
+
+/** Case-insensitive match on order number or supplier name. */
+export function matchOrder(order: Pick<SupplierOrder, "order_no" | "supplier">, query: string): boolean {
+  const q = query.trim().toLocaleLowerCase("th");
+  return !q || order.order_no.toLocaleLowerCase("th").includes(q) || order.supplier.name.toLocaleLowerCase("th").includes(q);
 }

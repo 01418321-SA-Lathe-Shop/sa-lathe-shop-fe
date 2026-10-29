@@ -199,6 +199,16 @@ Opening a material (`?material=`) shows the new shared side panel (`Drawer`, nat
 
 Browser walk (Chrome, real local API, writes intercepted): `pim.admin` at 1280 Dark, 390 Light, 360 Dark, 768 Light and 1920 Dark; `anan.staff` at 1280 Dark and 390 Light. No horizontal page scroll and no console errors. The intercepted stock addition, unit creation and material PATCH bodies matched the previous payloads, and toasts cleared after 5 s. Not exercised against the live API: actual saves, conflicts, and the retry path. Known limit: ข้อมูลหลัก is not a separate sidebar item; it is reached through the view tab.
 
+### Staff/Admin สั่งซื้อวัตถุดิบ — 2026-10-30
+
+Step 4 of the approved Staff/Admin redesign (`/admin/orders`, Admin only; no new route). Two underline view tabs, ใบสั่งซื้อ and ผู้ขาย (`?view=suppliers`), use the view-tab style now shared in `staff-layout.module.css` with the checkbox toggle and collapsible note (moved from the stock page, no visual change there). Orders load 100 per call up to 1,000 with the cap notice and are grouped by pill status tabs with counts: รอผู้ขายตอบ (`ordered` + response `pending`, orange, marked as needing action) / ผู้ขายรับแล้ว (`ordered` + `accepted`) / รับบางส่วน (`partially_received`) / รับครบ (`received`) / ยกเลิก (`cancelled`) (`?tab=`). The default tab is the first non-empty of the first three. Search matches order number or supplier name within the loaded orders (`?q=`). The list uses the shared list/detail layout: each card shows the order number, status, supplier, total in baht, line count, expected date (or order date) and the next step.
+
+The detail (`?order=`) shows supplier contacts from the order snapshot, expected time, total without VAT, then one action card: รอผู้ขายตอบ offers ผู้ขายรับแล้ว / ผู้ขายปฏิเสธ / ยกเลิกใบสั่งซื้อ; ผู้ขายรับแล้ว and รับบางส่วน point to รับเข้าวัตถุดิบ (cancel only while nothing is received); a cancelled order shows who ended it and the reason. Each action opens a checklist confirmation (“ยืนยันกับผู้ขายนอกระบบแล้ว”) with a reason field, required for reject and cancel, and sends the unchanged idempotent payload with a RetryPanel after an unclear response. Below: lines (quantity × unit price = line total), related jobs labelled “คำขอ #N · description” with job status (loaded only when the order has jobs), and history with Thai event labels (สั่งซื้อ, ผู้ขายรับใบสั่งซื้อ, ผู้ขายปฏิเสธ, ยกเลิกใบสั่งซื้อ, รับของเข้า, จัดการของเสียหาย, ตั้งเครดิตผู้ขาย, ชำระเงินผู้ขาย).
+
+สั่งซื้อวัตถุดิบ opens the side panel as a numbered form: ① active supplier and optional expected time (Bangkok), ② material lines added with the Thai `MaterialPicker` (the old English `MaterialSearch` is removed) with per-line quantity and unit price, Thai field errors and an exact line total, ③ optional related open jobs as checkboxes. A sticky bar shows the exact estimated total, and a checklist confirmation precedes sending. While a send is unresolved the panel cannot be closed, so a second order key cannot be created by reopening it. The ผู้ขาย view lists suppliers with contacts and a เปิดใช้งาน/ปิดใช้งาน badge; add and edit open in the side panel (edit includes the active toggle; blank contacts are cleared). Procurement validation messages are now Thai.
+
+Browser walk (Chrome, `pim.admin`): the local backend was not running (Docker Desktop stopped), so every API call was answered by a test-only stub with orders in all five states. 360 Light, 390 Dark, 768 Dark, 1280 Dark and Light, 1920 Dark: no horizontal page scroll, no console errors. Intercepted reject action, new order, supplier PUT and supplier POST bodies matched the previous payload shapes. Not yet exercised against the live API: the real list data, saves, conflicts and retry.
+
 ### Staff/Admin navbar alignment — 2026-10-29
 
 Staff/Admin now follow Customer's navbar composition: a 64px desktop bar with muted real-connection/session notice left and one right-aligned action group (icon theme switch and bell). At the existing Staff mobile navigation breakpoint (900px), a 72px bar shows the logo left and theme/bell/menu right. The bell links to the existing role-scoped inbox; it does not reuse Customer notification targets, add API reads or fabricate unread counts. Sign-out remains in the sidebar/footer on desktop and mobile. Removed scattered breadcrumb/API-pill/topbar-sign-out controls; page headings and sidebar retain current location/role information. Existing sidebar/menu behavior and role permissions remain unchanged. Shared Light/Dark variables govern the whole bar.
@@ -789,6 +799,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-30 | Staff/Admin redesign Step 4: สั่งซื้อวัตถุดิบ with ใบสั่งซื้อ/ผู้ขาย view tabs, five status tabs with counts and search, one action card per order state with checklist confirmations, new-order step form in the side panel with `MaterialPicker` and exact live total (English `MaterialSearch` removed), supplier list with side-panel add/edit, Thai validation; view-tab, toggle and note styles shared in the staff layout | 175 native tests (order-tab test new), type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 360/390/768/1280/1920 both themes against a test-only API stub (backend down), writes intercepted |
 | 2026-10-30 | Staff/Admin redesign Step 3: สต๊อกวัตถุดิบ table/cards with real-value filter chips, shared side panel (`Drawer`) with movement history, Admin step-form stock adjustment with exact preview and reserved-quantity block, ข้อมูลหลัก view tab for units and materials; shared Toast timer fix | 174 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 360/390/768/1280/1920 and Staff 390/1280, Light and Dark, writes intercepted |
 | 2026-10-30 | Staff/Admin redesign Step 2: คำขอและใบเสนอราคา with six stage tabs and counts from existing reads, one next-action card per stage, automatic minimum-price check, Deposit/PO evidence review, collapsed refuse and history; stage-domain unit tests; CSS registered in the source appendix | Stage/count/price/evidence domain tests (9 new; 172 native tests), type check, lint, source audit, line limits, production build; Chrome walk as Staff and Admin at 1280px and 390px, both themes, writes intercepted (0), no horizontal overflow after tab fix |
 | 2026-10-29 | Staff/Admin redesign Step 1: shared Thai staff-ui kit (tabs, search, buttons, steps, confirm dialog, retry panel, toast, states), `--success` token, shared material picker; งานผลิต rebuilt as prioritized list + detail with readiness, plan editor moved in from the materials page and request opened-job section, segmented work recording and checklist close; Admin read-only plus labor cost | Production list/format domain tests, 163 native tests, type check, lint, source audit, build; Chrome real local API with every write intercepted (no DB writes) as anan.staff, kittipong.staff and pim.admin at 1280px Dark and 390px Light: correct usage/time/complete payloads and versions, Start disabled on short plan, close gated by checklist, no overflow or console errors |
@@ -3092,6 +3103,45 @@ src/features/workspace/workspace.module.css
   .stock td:last-child::before { display: none; }
   .catalogList li { grid-template-columns: minmax(0, 1fr) auto; }
   .catalogList li > :last-child { grid-column: 1 / -1; justify-self: start; }
+}
+```
+
+### A14. Staff/Admin supplier orders — src/features/procurement/procurement.module.css
+
+```css
+/* สั่งซื้อวัตถุดิบ (UC6) page-specific rules; list/detail pieces come from staff-ui/staff-layout.module.css. */
+
+/* Placed order lines and the total row. */
+.lines { display: grid; margin: 0; padding: 0; list-style: none; font-variant-numeric: tabular-nums; }
+.lines li, .total { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.lines li > span:first-child { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.lines small { color: var(--muted); font-size: 0.875rem; }
+.lines li > :nth-child(2) { flex-shrink: 0; }
+.total { margin: 0; border-bottom: 0; font-size: 1.0625rem; font-variant-numeric: tabular-nums; }
+.total span { color: var(--muted); }
+
+/* New order: numbered steps and editable lines. */
+.step { display: grid; gap: 12px; min-width: 0; margin: 0; padding: 0 0 16px; border: 0; border-bottom: 1px solid var(--line); }
+.step > legend { padding: 0 0 4px; font-size: 1.0625rem; font-weight: 650; }
+.draftLines { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.draftLines li { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+.draftLines li > :first-child, .draftLines li > :last-child { grid-column: 1 / -1; }
+.draftLines li > :first-child { display: flex; align-items: center; justify-content: space-between; gap: 8px; overflow-wrap: anywhere; }
+.draftLines li > :last-child { margin: 0; color: var(--muted); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+.jobs { display: grid; gap: 8px; max-height: 18rem; overflow-y: auto; }
+.jobs label { width: auto; font-weight: 500; overflow-wrap: anywhere; }
+
+/* ผู้ขาย */
+.suppliers { display: grid; margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.suppliers li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.suppliers li:last-child { border-bottom: 0; }
+.suppliers li > span:first-child { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.suppliers small { color: var(--muted); font-size: 0.875rem; }
+
+@media (max-width: 40rem) {
+  .draftLines li { grid-template-columns: minmax(0, 1fr); }
+  .suppliers li { grid-template-columns: minmax(0, 1fr) auto; }
+  .suppliers li > :last-child { grid-column: 1 / -1; justify-self: start; }
 }
 ```
 

@@ -38,6 +38,26 @@ export const MOVEMENT_MODE: StatusMap = {
   job_issue: ["เบิกใช้ในงาน", "waiting"],
 };
 
+// Keyed by the สั่งซื้อวัตถุดิบ tab (status + supplier response), see procurement-domain.
+export const ORDER_STATE: StatusMap = {
+  pending: ["รอผู้ขายตอบ", "action"],
+  accepted: ["ผู้ขายรับแล้ว", "progress"],
+  partial: ["รับบางส่วน", "progress"],
+  received: ["รับครบ", "done"],
+  cancelled: ["ยกเลิก", "problem"],
+};
+
+export const ORDER_EVENT: StatusMap = {
+  place: ["สั่งซื้อ", "waiting"],
+  accept: ["ผู้ขายรับใบสั่งซื้อ", "progress"],
+  reject: ["ผู้ขายปฏิเสธ", "problem"],
+  cancel: ["ยกเลิกใบสั่งซื้อ", "problem"],
+  receive: ["รับของเข้า", "done"],
+  claim: ["จัดการของเสียหาย", "action"],
+  credit_terms: ["ตั้งเครดิตผู้ขาย", "waiting"],
+  settle: ["ชำระเงินผู้ขาย", "done"],
+};
+
 export function statusOf(map: StatusMap, value: string): { label: string; tone: Tone } {
   const known = Object.hasOwn(map, value) ? map[value] : undefined;
   return known ? { label: known[0], tone: known[1] } : { label: "สถานะยังไม่ระบุ", tone: "waiting" };
