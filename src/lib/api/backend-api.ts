@@ -96,7 +96,12 @@ export class BackendApi {
     return parseApiJSON(await response.text()) as T;
   }
   async login(username: string, password: string): Promise<Login> {
-    const session = await this.call<Login>("/auth/login", "POST", { username, password });
+    return this.acceptLogin(await this.call<Login>("/auth/login", "POST", { username, password }));
+  }
+  async loginLocalTest(username: string): Promise<Login> {
+    return this.acceptLogin(await this.call<Login>("/auth/local-test/login", "POST", { username }));
+  }
+  private acceptLogin(session: Login): Login {
     if (session.token_type !== "Bearer" || !session.access_token || !["customer", "worker", "admin"].includes(session.account.role)) throw new Error("Unsupported login response.");
     this.token = session.access_token;
     return session;
