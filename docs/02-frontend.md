@@ -22,6 +22,10 @@ server role without returning to login. Cancel or a failed candidate login keeps
 the current account. Normal logout remains separate; a failed old-session logout
 requires sign-in with the existing unconfirmed-revocation warning.
 
+Staff/Admin redesign (2026-10-29): Steps 0–1 (Thai grouped navigation, bell,
+shared staff UI kit, งานผลิต) are pushed; Step 2 onward is in progress. See
+`025-staff-admin-redesign-handoff.md` for decisions, status and remaining steps.
+
 Use `NEXT_PUBLIC_API_BASE_URL` (public API origin only). Real seeded demo accounts
 require an operator-prepared dedicated database and private passwords; no real
 password belongs in frontend source/config. Account-only seeds contain no
