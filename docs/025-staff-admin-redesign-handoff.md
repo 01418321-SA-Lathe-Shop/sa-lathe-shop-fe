@@ -1,6 +1,6 @@
 # Staff/Admin redesign — plan and handoff
 
-Status date: 2026-10-30 · Branch `develop` · Last code commit `d07991e` (Step 2)
+Status date: 2026-10-30 · Branch `develop` · Last code commit `64548f1` (Step 3)
 
 This document holds the complete owner-approved plan for the Staff/Admin redesign (audit, navigation, flow, design system, page specifications and step plan) and the current implementation status. Part A is status; Part B is the plan as approved.
 
@@ -64,6 +64,16 @@ Implemented differences from the spec, all within the approved intent:
 
 - Staff/Admin use the new `staff-requests.tsx`; Customer keeps `requests.tsx`, which still imports `quotations/quotations.tsx` → `fulfillment/fulfillment.tsx`. Those two files are therefore not deleted (the earlier note to delete them is withdrawn).
 - Verification: 172 tests, type check, lint, source audit, DESIGN sync, build; Chrome walk as `anan.staff` and `pim.admin` at 1280px and 390px, Light and Dark, writes intercepted, งานผลิต re-walked. Not walked: 360, 768, 1920px.
+
+## Step 3 — สต๊อกวัตถุดิบ + ข้อมูลหลัก (done)
+
+| Commit | Purpose |
+| --- | --- |
+| `2067a65` | Shared `Toast` keeps its 5-second timer across page re-renders (affected every redesigned page) |
+| `64548f1` | `src/features/inventory/`: `inventory.tsx` (view tabs, filter chips `?filter=`, table/cards, `?material=` side panel), `inventory-material.tsx` (quantities, movement history, Admin stock step form), `inventory-catalog.tsx` (units, materials, create/edit in the side panel), `inventory.module.css`; `stockCounts`/`filterStock`/`stockAfter`/`isBelow` with tests; shared `Drawer` and `MOVEMENT_MODE`; `MaterialSearch` moved to `material-search.tsx` |
+
+- ข้อมูลหลัก is the `?view=catalog` tab of the page; it is not a sidebar item (B2 shows one; adding it needs a query-string nav link type).
+- Verification: 174 tests and all checks; Chrome walk Admin 360/390/768/1280/1920, Staff 390/1280, Light and Dark, writes intercepted. Not exercised against the live API: saves, conflicts, retry.
 
 ## Working notes
 
@@ -406,7 +416,7 @@ Rules for every step:
 | 0 | Shared foundation: page header, status tabs with counts, status badge and Thai labels, record card, side panel and confirmation dialog, toast, “did it save?” panel, skeleton/empty/error states; number display rules; grouped sidebar with Admin section and the shared “คำขอและใบเสนอราคา” name; bell with unread count and dropdown (การแจ้งเตือน leaves the sidebar) | Done (`6a6eb07`; kit components in `d64f659`) |
 | 1 | งานผลิต as approved; plan editor moves here with names and units; duplicate plans removed from สต๊อกวัตถุดิบ and the request detail | Done (`d64f659`) |
 | 2 | คำขอและใบเสนอราคา as approved: six stage tabs (per-request quotation and Deposit/PO reads, six at a time), one action card, automatic minimum price, customer name To be defined | Done (`1313244`, `d07991e`) |
-| 3 | สต๊อกวัตถุดิบ + ข้อมูลหลัก (see below) | Not started |
+| 3 | สต๊อกวัตถุดิบ + ข้อมูลหลัก (see below) | Done (`2067a65`, `64548f1`) |
 | 4 | สั่งซื้อวัตถุดิบ (Admin) (see below) | Not started |
 | 5 | รับเข้าวัตถุดิบ (see below) | Not started |
 | 6 | ส่งมอบและใบแจ้งหนี้ (Staff) / ส่งมอบและรับชำระ (Admin) (see below) | Not started |

@@ -1,3 +1,11 @@
+## Staff/Admin redesign Step 3 (สต๊อกวัตถุดิบ + ข้อมูลหลัก) — 2026-10-30
+
+- Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 3 complete (`2067a65` shared Toast timer fix, `64548f1` page). Stock table/cards, real-value filter chips, shared side panel with movement history, Admin step-form stock adjustment with exact preview and reserved block, Admin ข้อมูลหลัก view tab (`?view=catalog`).
+- Checks: 174 native tests (2 new), type check, lint, source audit, DESIGN sync, production build.
+- Chrome walk (real local API, writes intercepted): `pim.admin` at 360/390/768/1280/1920 and `anan.staff` at 390/1280, Light and Dark, no overflow or console errors. Intercepted stock/unit/material payloads match the earlier ones.
+- Decisions: ข้อมูลหลัก is reached through the page's view tab, not a separate sidebar item (no new nav link type). `MaterialSearch` moved to `material-search.tsx`; Step 4 replaces it.
+- Not exercised against the live API: saves, conflicts, retry path. Pending owner decision: none.
+
 ## Staff/Admin redesign Step 2 (คำขอและใบเสนอราคา) — 2026-10-30
 
 - Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 2 complete. Six stage tabs with counts from existing reads, one next-action card per stage, automatic minimum price, Deposit/PO review, customer name To be defined.
