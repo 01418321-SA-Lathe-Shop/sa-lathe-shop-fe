@@ -22,7 +22,7 @@ export function LandingMotion() {
       if (!entry.isIntersecting) return;
       entry.target.setAttribute("data-revealed", "");
       reveal.unobserve(entry.target);
-    }), { rootMargin: "100000px 0px -8% 0px", threshold: 0.12 });
+    }), { rootMargin: "100000px 0px -6% 0px", threshold: 0 });
     root.querySelectorAll("[data-reveal]").forEach(element => reveal.observe(element));
 
     const links = new Map([...root.querySelectorAll<HTMLAnchorElement>(".landing-sticky a[href^='#']")].map(a => [a.hash.slice(1), a]));

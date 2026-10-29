@@ -8,7 +8,7 @@ The public landing (`/`) now presents **Bangkok Machine Shop** to customers. It 
 |---|---|---|---|
 | 0 | Hero | | What we are: shop headline, quote CTA, animation |
 | 1 | บริการ | `#services` | What we make |
-| 2 | วัสดุและความเที่ยงตรง | `#materials` | Can you machine my part? |
+| 2 | วัสดุที่เรารับงาน | `#materials` | Can you machine my material? |
 | 3 | ผลงาน | `#work` | Proof |
 | 4 | ทำไมต้องเรา | `#why` | Reasons to choose us |
 | 5 | ขั้นตอน | `#process` | How to order (UC1 → UC9 in customer terms) |
@@ -24,7 +24,7 @@ Testimonials are **not** built, because no real content exists. Add them only wi
 | What | File |
 |---|---|
 | Hero headline, paragraph, stats | `src/features/landing/landing-config.ts` |
-| Shop contact details, map, services, materials, capability, gallery, reasons, steps, Deposit/PO rules, FAQ | `src/features/landing/landing-content.ts` |
+| Shop contact details, map, services, materials, gallery, reasons, steps, Deposit/PO rules, order facts card, FAQ | `src/features/landing/landing-content.ts` |
 | Section markup and FAQ JSON-LD | `src/features/landing/landing-sections.tsx` |
 | Service icons | `src/features/landing/landing-icons.tsx` |
 | Click-to-load map | `src/features/landing/landing-map.tsx` |
@@ -75,9 +75,8 @@ Hero stats are confirmed by the owner: 30 years of experience and 837 jobs deliv
 | Contact | `[เบอร์โทรศัพท์]`, `[LINE ID]`, `[อีเมล]`, `[ที่อยู่ร้าน]`, `[วันทำการ]`, `[เวลาเปิด–ปิด]`, Google Maps embed URL and link | `landing-content.ts` (`shop`) |
 | Services | Confirm all six services (turning, milling, threading, repair/replacement parts, prototypes, small to large batches) | `services` |
 | Materials | Example grades for each of the 5 groups, plus "ยืนยันเกรดที่รับ" | `materials` |
-| Capability | `[±X มม.]` tolerance, `[X มม.]` max diameter, `[X มม.]` max length, `[Ra X]` surface finish | `capability` |
 | Gallery | 5 × `[ชื่อชิ้นงาน n]`, `[วัสดุ · จำนวน]`, plus photos | `gallery` |
-| Why us | `[±X มม.]`, `[X–Y วันทำการ]` | `reasons` |
+| Why us | `[±X มม.]` tolerance, `[X–Y วันทำการ]` lead time | `reasons` |
 | FAQ | Lead time `[X–Y วันทำการ]`; CAD file handling; minimum order; materials confirmation; delivery area and fee | `faqs` |
 
 Once a FAQ answer has no `[` left, it is automatically included in the FAQPage structured data.

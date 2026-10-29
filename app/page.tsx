@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import Dashboard from "../src/features/landing/landing-page";
 
 export const metadata: Metadata = {
-  title: "Bangkok Machine Shop | รับกลึงและผลิตชิ้นส่วนตามแบบ",
-  description: "โรงกลึงรับผลิตชิ้นส่วนตามแบบ งานกลึง งานกัด ทำเกลียว ซ่อมและทำชิ้นส่วนทดแทน ส่งแบบงานขอใบเสนอราคาและติดตามงานได้ออนไลน์ ราคาไม่บวก VAT",
+  title: "Bangkok Machine Shop | รับกลึงและทำชิ้นส่วนตามแบบ",
+  description: "โรงกลึงรับทำชิ้นส่วนตามแบบ ทั้งงานกลึง งานกัด ทำเกลียว และทำชิ้นส่วนทดแทน ส่งแบบมาขอใบเสนอราคาได้ทางออนไลน์ เช็กสถานะงานได้ตลอด ราคาไม่บวก VAT",
   openGraph: {
     title: "Bangkok Machine Shop",
-    description: "รับกลึงและผลิตชิ้นส่วนตามแบบ งานละเอียด ส่งมอบรวดเร็ว ราคาเป็นมิตร",
+    description: "รับกลึงและทำชิ้นส่วนตามแบบ งานเนี้ยบ ส่งไว ราคาคุยกันได้",
     locale: "th_TH",
     type: "website",
   },

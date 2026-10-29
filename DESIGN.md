@@ -471,7 +471,7 @@ At the owner's request the short-lived procedural lathe turning scene (commit `7
 The public page now sells the shop first; the order-tracking system becomes one proof point. Copy and data live in `landing-content.ts` and `landing-config.ts`. Every unconfirmed fact is a visible `[placeholder]`, listed in `docs/landing-shop-sections.md`. The furnace scene is unchanged.
 
 **Hero.**
-- Headline: งานกลึงตามแบบ / แม่นยำ ส่งไว / ราคาเป็นกันเอง. The paragraph names Bangkok Machine Shop.
+- Headline: กลึงงานตามแบบ / เนี้ยบ ตรงสเปก / ส่งไว คุยง่าย. The paragraph names Bangkok Machine Shop. All Thai copy is written in a natural, conversational shop voice, without gendered particles (ครับ/ค่ะ).
 - CTA: ขอใบเสนอราคา → `/register`. The caption links to `#services`.
 - Pills: บริการ · วัสดุ · ขั้นตอน · คำถาม · ติดต่อ. At ≤767px they scroll horizontally instead of wrapping.
 - Stats: 30 ปีประสบการณ์ and 837 งานที่ส่งมอบแล้ว (owner-confirmed figures), replacing the old 9 workflows / 3 roles.
@@ -482,10 +482,10 @@ The public page now sells the shop first; the order-tracking system becomes one 
 | # | Section | Anchor | Layout |
 |---|---|---|---|
 | 1 | บริการ | `#services` | 3/2/1-column icon cards; local SVG icons in the shared 24px, 1.8-stroke style |
-| 2 | วัสดุและความเที่ยงตรง | `#materials` | Materials table beside a sticky capability card |
+| 2 | วัสดุที่เรารับงาน | `#materials` | Heading beside the materials table (the capability card was removed at the owner's request) |
 | 3 | ผลงาน | `#work` | 4-column mosaic with a 2×2 lead tile; neutral brushed placeholders until `gallery[].image` is set (rendered through `next/image`) |
 | 4 | ทำไมต้องเรา | `#why` | Sticky statement beside six numbered proof points |
-| 5 | ขั้นตอน | `#process` | Five numbered steps on a connector line (vertical at ≤1100px), plus the Deposit/PO rules table |
+| 5 | ขั้นตอน | `#process` | Five numbered steps on a connector line (vertical at ≤1100px). Below them, one full-width row (`.landing-terms`, 1.15fr/1fr, equal height): the Deposit/PO rules card beside a "เรื่องที่ควรรู้ก่อนสั่งงาน" facts card (`.landing-facts`, 2×2 accent figures: 14 วัน, ไม่บวก VAT, แบ่งจ่ายได้, แก้ให้ฟรี). The row stacks at ≤1100px, and the facts become one column at ≤767px |
 | 6 | คำถามที่พบบ่อย | `#faq` | Native `<details name>` accordion beside a sticky heading |
 | 7 | ติดต่อ | `#contact` | CTA panel beside a contact card with a click-to-load map facade |
 
@@ -755,6 +755,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-29 | Landing: remove the capability card (materials table now sits beside its heading); pair the Deposit/PO card with a full-width order-facts card; rewrite all public Thai copy in a natural shop voice; reveal tall items as soon as they enter the viewport | Type check, lint, native tests, build; Chrome walks at 1440 and 360px: no overflow, no stuck reveals |
 | 2026-10-29 | Fill landing hero stats with owner-confirmed figures: 30 years of experience, 837 jobs delivered | Type check, landing lint, served-HTML check |
 | 2026-10-29 | Shop-first landing: new hero copy, services, materials/tolerances, gallery, why-us, 5-step process with Deposit/PO rules, FAQ accordion with JSON-LD, contact/map facade; smooth scrolling, scroll reveals, sticky section bar, progress line and hero parallax; placeholders for unconfirmed facts | 145 native tests, type check, lint, source audit, production build; real-GPU Chrome walks at 1440/390/360px in Dark/Light, reduced motion and JavaScript off: no overflow, no stuck reveals, keyboard FAQ, valid JSON-LD |
 | 2026-10-29 | Restore the robot arm → conveyor → furnace → ingot landing animation at the owner's request; keep the visible pause pill and use `PCFShadowMap` | Restored timeline tests pass; type check, lint and production build pass; real-GPU browser walk at 1440/390/360px |
@@ -1692,8 +1693,9 @@ src/features/workspace/workspace.module.css
 :where(.scope) :global(.landing-services) li:hover :global(.landing-service-icon) { background: #ff923f; color: #160e08; }
 :where(.scope) :global(.landing-services) p { margin: .75rem 0 0; color: var(--muted); font-size: .875rem; line-height: 1.7; }
 
-/* 2. Materials: spec table + capability card. */
-:where(.scope) :global(.landing-materials) { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 4rem; align-items: start; }
+/* 2. Materials: heading beside the full-width materials table. */
+:where(.scope) :global(.landing-materials) { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 6%; align-items: start; }
+:where(.scope) :global(.landing-materials) :global(.landing-heading) { margin-bottom: 0; }
 :where(.scope) :global(.landing-table-wrap) { overflow-x: auto; }
 :where(.scope) :global(.landing-table) { width: 100%; border-collapse: collapse; font-size: .875rem; }
 :where(.scope) :global(.landing-table) th, :where(.scope) :global(.landing-table) td { padding: 1rem .75rem; border-bottom: 1px solid var(--soft-line); text-align: left; vertical-align: top; }
@@ -1702,12 +1704,6 @@ src/features/workspace/workspace.module.css
 :where(.scope) :global(.landing-table) td { color: var(--muted); }
 :where(.scope) :global(.landing-table) tbody tr { transition: background .25s; }
 :where(.scope) :global(.landing-table) tbody tr:hover { background: #ff923f0d; }
-:where(.scope) :global(.landing-spec) { position: sticky; top: 6rem; padding: 2rem; border: 1px solid var(--soft-line); border-radius: 1rem; background: var(--card); }
-:where(.scope) :global(.landing-spec) dl { margin: 1.5rem 0 0; }
-:where(.scope) :global(.landing-spec) dl > div { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 1rem 0; border-top: 1px solid var(--soft-line); }
-:where(.scope) :global(.landing-spec) dt { color: var(--muted); font-size: .8125rem; }
-:where(.scope) :global(.landing-spec) dd { margin: 0; font-size: 1.375rem; font-variant-numeric: tabular-nums; }
-:where(.scope) :global(.landing-spec) > p { margin: 1rem 0 0; color: var(--muted); font-size: .75rem; line-height: 1.7; }
 
 /* 3. Gallery: asymmetric mosaic. */
 :where(.scope) :global(.landing-gallery) { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 15rem; gap: 1rem; }
@@ -1740,7 +1736,15 @@ src/features/workspace/workspace.module.css
 :global(.cinematic-page):where(.scope)[data-motion="ready"] :global(.landing-steps):not([data-revealed]) li { opacity: 0; translate: 0 1.25rem; }
 :where(.scope) :global(.landing-step-dot) { position: relative; z-index: 1; display: grid; place-items: center; width: 2.5rem; height: 2.5rem; margin-bottom: 1.5rem; border: 1px solid #ff923f88; border-radius: 50%; background: var(--bg); color: var(--accent-ink); font-size: .875rem; font-variant-numeric: tabular-nums; }
 :where(.scope) :global(.landing-steps) p { margin: .6rem 0 0; color: var(--muted); font-size: .8125rem; line-height: 1.7; }
-:where(.scope) :global(.landing-rules) { max-width: 52rem; margin-top: 4rem; padding: 2rem; border: 1px solid var(--soft-line); border-radius: 1rem; background: var(--card); }
+/* Rules table and order facts share one equal-height row, so the band is always full width. */
+:where(.scope) :global(.landing-terms) { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 1rem; margin-top: 4rem; align-items: stretch; }
+:where(.scope) :global(.landing-rules), :where(.scope) :global(.landing-facts) { padding: 2rem; border: 1px solid var(--soft-line); border-radius: 1rem; background: var(--card); }
+:where(.scope) :global(.landing-facts) { background: radial-gradient(ellipse 80% 70% at 100% 0%, #ff7c221a, transparent 70%), var(--card); }
+:where(.scope) :global(.landing-facts) h3 { margin-bottom: 1rem; }
+:where(.scope) :global(.landing-facts) dl { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 1.5rem; }
+:where(.scope) :global(.landing-facts) dl > div { padding: 1.25rem 0; border-top: 1px solid var(--soft-line); }
+:where(.scope) :global(.landing-facts) dt { color: var(--accent-ink); font-size: 1.375rem; font-weight: 500; letter-spacing: -.01em; }
+:where(.scope) :global(.landing-facts) dd { margin: .5rem 0 0; color: var(--muted); font-size: .8125rem; line-height: 1.7; }
 :where(.scope) :global(.landing-rules) h3 { margin-bottom: 1rem; }
 :where(.scope) :global(.landing-rules) > p { margin: 1.25rem 0 0; color: var(--muted); font-size: .8125rem; line-height: 1.7; }
 
@@ -1791,6 +1795,7 @@ src/features/workspace/workspace.module.css
   :where(.scope) :global(.landing-step-dot) { grid-row: span 2; margin: 0; }
   :where(.scope) :global(.landing-steps) li h3 { padding-top: .55rem; }
   :where(.scope) :global(.landing-reasons) { grid-template-columns: 1fr; }
+  :where(.scope) :global(.landing-terms) { grid-template-columns: 1fr; }
 }
 @media (max-width: 767px) {
   :where(.scope) :global(.cinematic-nav-pills) { overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; margin-inline: -1.25rem; padding-inline: 1.25rem; }
@@ -1802,7 +1807,9 @@ src/features/workspace/workspace.module.css
   :where(.scope) :global(.landing-heading) { margin-bottom: 2.5rem; }
   :where(.scope) :global(.landing-services) { grid-template-columns: 1fr; }
   :where(.scope) :global(.landing-materials), :where(.scope) :global(.landing-why), :where(.scope) :global(.landing-faq), :where(.scope) :global(.landing-contact) { grid-template-columns: 1fr; gap: 2.5rem; }
-  :where(.scope) :global(.landing-spec), :where(.scope) :global(.landing-why-statement), :where(.scope) :global(.landing-faq) :global(.landing-heading) { position: static; }
+  :where(.scope) :global(.landing-terms), :where(.scope) :global(.landing-facts) dl { grid-template-columns: 1fr; }
+  :where(.scope) :global(.landing-rules), :where(.scope) :global(.landing-facts) { padding: 1.5rem; }
+  :where(.scope) :global(.landing-why-statement), :where(.scope) :global(.landing-faq) :global(.landing-heading) { position: static; }
   :where(.scope) :global(.landing-gallery) { grid-template-columns: 1fr; grid-auto-rows: 14rem; }
   :where(.scope) :global(.landing-gallery) li:first-child { grid-column: auto; grid-row: auto; }
   :where(.scope) :global(.landing-cta) { padding: 2.25rem 1.5rem; }
@@ -1829,6 +1836,7 @@ src/features/workspace/workspace.module.css
 :global([data-theme="light"]) :where(.scope) :global(.landing-cta) { background: radial-gradient(ellipse 70% 60% at 15% 115%, #f8ad7155, transparent 70%), linear-gradient(160deg, #ffffff, #f0e8df); }
 :global([data-theme="light"]) :where(.scope) :global(.landing-map-facade) { background: repeating-linear-gradient(45deg, #00000006 0 1px, transparent 1px 14px), var(--surface-2); }
 :global([data-theme="light"]) :where(.scope) :global(.landing-step-dot) { border-color: #943c0d77; }
+:global([data-theme="light"]) :where(.scope) :global(.landing-facts) { background: radial-gradient(ellipse 80% 70% at 100% 0%, #f8ad7133, transparent 70%), var(--card); }
 ```
 
 ### A4. Customer wireframe surface — src/features/customer/customer.module.css
