@@ -1,3 +1,11 @@
+## Staff/Admin redesign Step 4 (สั่งซื้อวัตถุดิบ) — 2026-10-30
+
+- Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 4 complete (`ef034d5` shared view-tab/toggle/note styles, `0981939` page, `e5ac7df` Step 1 usage-form fix). Five status tabs with counts and search, one action card per order state, side-panel new-order step form with `MaterialPicker` and exact live total (`MaterialSearch` removed), ผู้ขาย view with side-panel add/edit, Thai validation.
+- Checks: 175 native tests (1 new), type check, lint, source audit, DESIGN sync, production build.
+- Chrome walk: the local backend was down (Docker Desktop not running), so `pim.admin` was walked against a test-only API stub at 360/390/768/1280/1920, Light and Dark: no overflow or console errors; intercepted reject/new-order/supplier payloads match the earlier shapes.
+- Fix found on the way: the Step 1 usage form nested the material search form, so searching could also submit usage. Fixed in `e5ac7df`; not re-walked in the browser.
+- Not exercised against the live API: real order data, saves, conflicts, retry. Pending owner decision: none.
+
 ## Staff/Admin redesign Step 3 (สต๊อกวัตถุดิบ + ข้อมูลหลัก) — 2026-10-30
 
 - Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 3 complete (`2067a65` shared Toast timer fix, `64548f1` page). Stock table/cards, real-value filter chips, shared side panel with movement history, Admin step-form stock adjustment with exact preview and reserved block, Admin ข้อมูลหลัก view tab (`?view=catalog`).

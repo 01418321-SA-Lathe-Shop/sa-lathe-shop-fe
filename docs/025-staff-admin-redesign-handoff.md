@@ -1,6 +1,6 @@
 # Staff/Admin redesign — plan and handoff
 
-Status date: 2026-10-30 · Branch `develop` · Last code commit `64548f1` (Step 3)
+Status date: 2026-10-30 · Branch `develop` · Last code commit `e5ac7df` (Step 4)
 
 This document holds the complete owner-approved plan for the Staff/Admin redesign (audit, navigation, flow, design system, page specifications and step plan) and the current implementation status. Part A is status; Part B is the plan as approved.
 
@@ -74,6 +74,18 @@ Implemented differences from the spec, all within the approved intent:
 
 - ข้อมูลหลัก is the `?view=catalog` tab of the page; it is not a sidebar item (B2 shows one; adding it needs a query-string nav link type).
 - Verification: 174 tests and all checks; Chrome walk Admin 360/390/768/1280/1920, Staff 390/1280, Light and Dark, writes intercepted. Not exercised against the live API: saves, conflicts, retry.
+
+## Step 4 — สั่งซื้อวัตถุดิบ (done)
+
+| Commit | Purpose |
+| --- | --- |
+| `ef034d5` | View tabs, checkbox toggle and collapsible note styles moved from the stock page into `staff-layout.module.css` (no visual change) |
+| `0981939` | `src/features/procurement/`: `procurement.tsx` (ใบสั่งซื้อ/ผู้ขาย views `?view=suppliers`, tabs `?tab=`, search `?q=`, `?order=` detail), `procurement-order.tsx` (action card, lines, related jobs, history), `procurement-new.tsx` (side-panel step form), `procurement-suppliers.tsx`, `procurement-jobs.tsx` (job labels by request number), `procurement.module.css`; `orderTabOf`/`orderCounts`/`defaultOrderTab`/`matchOrder` with a test; `ORDER_STATE`/`ORDER_EVENT` labels; Thai validation; `material-search.tsx` deleted |
+| `e5ac7df` | Step 1 fix: the งานผลิต usage form contained `MaterialPicker`'s search form, so searching could also submit usage; the usage form is now a div and `SearchForm` stops submit propagation |
+
+- Search covers the loaded orders only (the list endpoint filters by `job_id` alone). An order whose status/response pair is unknown falls in no tab (code comment marks the limit).
+- The new-order side panel cannot be closed while a send is unresolved, so reopening cannot create a second order key.
+- Verification: 175 tests and all checks; Chrome walk Admin 360/390/768/1280/1920, Light and Dark, against a test-only API stub because the local backend was not running. Not exercised against the live API: real data, saves, conflicts, retry.
 
 ## Working notes
 
@@ -417,7 +429,7 @@ Rules for every step:
 | 1 | งานผลิต as approved; plan editor moves here with names and units; duplicate plans removed from สต๊อกวัตถุดิบ and the request detail | Done (`d64f659`) |
 | 2 | คำขอและใบเสนอราคา as approved: six stage tabs (per-request quotation and Deposit/PO reads, six at a time), one action card, automatic minimum price, customer name To be defined | Done (`1313244`, `d07991e`) |
 | 3 | สต๊อกวัตถุดิบ + ข้อมูลหลัก (see below) | Done (`2067a65`, `64548f1`) |
-| 4 | สั่งซื้อวัตถุดิบ (Admin) (see below) | Not started |
+| 4 | สั่งซื้อวัตถุดิบ (Admin) (see below) | Done (`ef034d5`, `0981939`, `e5ac7df`) |
 | 5 | รับเข้าวัตถุดิบ (see below) | Not started |
 | 6 | ส่งมอบและใบแจ้งหนี้ (Staff) / ส่งมอบและรับชำระ (Admin) (see below) | Not started |
 | 7 | จัดการพนักงาน (Admin) (see below) | Not started |
