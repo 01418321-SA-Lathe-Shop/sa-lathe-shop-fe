@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { Account, Attachment, BackendApi, JobRequest } from "../../lib/api/backend-api";
+import type { BackendApi, JobRequest } from "../../lib/api/backend-api";
 import { useRetryableWrite } from "../../hooks/backend-hooks";
-import { inspectPayload, paymentPayload, type FulfillmentJob } from "../delivery/delivery-domain";
-import { customerHref, dateTH, DELIVERY_LABELS, EVIDENCE_LABELS, INVOICE_LABELS, moneyTH } from "./customer-domain";
-import { Badge, Empty, Field, PrivateFile } from "./customer-ui";
-import { CustomerUpload } from "./customer-upload";
+import { inspectPayload, type FulfillmentJob } from "../delivery/delivery-domain";
+import { customerHref, dateTH, DELIVERY_LABELS, moneyTH } from "./customer-domain";
+import { Badge, Empty, Field } from "./customer-ui";
 import { CustomerWriteRetry } from "./customer-write";
 
 export function CustomerInspection({ api, state, request, canInspect, saved, reload }: { api: BackendApi; state: FulfillmentJob; request?: JobRequest; canInspect: boolean; saved: (message: string) => void; reload: () => void }) {
@@ -23,20 +22,4 @@ export function CustomerInspection({ api, state, request, canInspect, saved, rel
     }, ""); }}><h2>{outcome === "accept" ? "ตรวจงานก่อนยืนยัน" : "ส่งคืนเพื่อแก้ไข"}</h2><p>{outcome === "accept" ? "ตรวจจำนวนและงานตามที่ตกลงไว้ การยืนยันรับงานเป็นผลถาวร" : "งานเดิมจะกลับไปแก้ไขฟรี ใบแจ้งหนี้และประวัติชำระเงินยังคงเดิม"}</p><fieldset disabled={write.frozen}>{outcome === "return" && <Field label="เหตุผลที่ต้องแก้ไข *"><textarea name="reason" required maxLength={2000} placeholder="ระบุปัญหาที่พบ เพื่อให้ร้านแก้ไขได้ตรงจุด" /></Field>}<label className="cust-checkbox"><input type="checkbox" required checked={confirmed} onChange={(event) => setConfirmed(event.target.checked)} />{outcome === "accept" ? "ฉันตรวจงานแล้วและยอมรับงานนี้" : "ฉันยืนยันส่งคืนงานเดิมเพื่อแก้ไข"}</label><button type="submit" className={outcome === "accept" ? "cust-primary" : "cust-danger"} disabled={!confirmed || write.frozen}>{outcome === "accept" ? "ยืนยันรับงาน" : "ยืนยันส่งคืนเพื่อแก้ไข"}</button><button type="button" className="cust-link" onClick={() => { setOutcome(outcome === "accept" ? "return" : "accept"); setConfirmed(false); }}>{outcome === "accept" ? "งานมีปัญหา? ส่งคืนเพื่อแก้ไข" : "กลับไปตรวจรับงาน"}</button></fieldset><CustomerWriteRetry write={write} onReload={reload} /></form> : <><h2>{delivery?.status === "delivered" ? "ยืนยันรับงานแล้ว" : delivery?.status === "returned" ? "ส่งคืนเพื่อแก้ไขแล้ว" : "ยังไม่พร้อมตรวจรับ"}</h2><p>ดูสถานะล่าสุดจากรายละเอียดงานผลิต ไม่สามารถเปลี่ยนสถานะเองได้</p><Link className="cust-primary" href={customerHref("jobs", { job: state.job_id })}>ติดตามงานผลิต</Link></>}
       {state.invoice && <div className="cust-section"><h3>การชำระเงินแยกจากการตรวจรับ</h3><p>ยอดคงเหลือ {moneyTH(state.invoice.balance)}</p><Link className="cust-link" href={customerHref("payments", { job: state.job_id })}>ดูใบแจ้งหนี้ →</Link></div>}
     </section></div>;
-}
-
-export function CustomerInvoice({ api, account, state, canPay, saved, reload }: { api: BackendApi; account: Account; state: FulfillmentJob; canPay: boolean; saved: (message: string) => void; reload: () => void }) {
-  const invoice = state.invoice;
-  if (!invoice) return <Empty title="ยังไม่มีใบแจ้งหนี้" action={<Link href={customerHref("jobs", { job: state.job_id })}>กลับรายละเอียดงานผลิต</Link>}>ยอดหลังมัดจำยังไม่ใช่ใบแจ้งหนี้ รอร้านออกเอกสารก่อนส่งหลักฐานชำระเงิน</Empty>;
-  return <div className="cust-payment-layout"><section className="cust-invoice-summary"><Badge value={invoice.status} labels={INVOICE_LABELS} /><h2>ยอดคงเหลือ</h2><strong className="cust-hero-price">{moneyTH(invoice.balance)}</strong><dl className="cust-definition"><div><dt>ยอดใบแจ้งหนี้</dt><dd>{moneyTH(invoice.amount)}</dd></div><div><dt>ชำระอนุมัติแล้ว</dt><dd>{moneyTH(invoice.paid)}</dd></div><div><dt>มัดจำก่อนเปิดงาน</dt><dd>{moneyTH(state.deposit)}<small>หักแล้วก่อนออกใบแจ้งหนี้ ไม่หักซ้ำ</small></dd></div><div><dt>ออกเอกสารเมื่อ</dt><dd>{dateTH(invoice.issued_at)}</dd></div><div><dt>ครบกำหนดชำระ</dt><dd>{dateTH(invoice.due_at)}</dd></div></dl><p className="cust-muted">เงินบาท · ไม่มี VAT</p>
-    <section className="cust-section"><h2>ประวัติการชำระเงิน</h2>{!state.payments?.length && <p className="cust-muted">ยังไม่มีรายการชำระเงิน</p>}{state.payments?.map((payment) => <article className="cust-history-row" key={payment.id}><div className="cust-toolbar"><strong>{moneyTH(payment.amount)}</strong><Badge value={payment.status} labels={EVIDENCE_LABELS} /></div><p>{payment.method === "bank" ? "โอนเงิน" : "เงินสดที่ร้านบันทึก"} · {dateTH(payment.paid_at)}</p>{payment.reason && <p className="cust-alert danger">เหตุผล: {payment.reason}</p>}{payment.evidence_id && payment.submitted_by === account.id && <PrivateFile api={api} path={`/customer-evidence/${payment.evidence_id}/download`} name="เปิดหลักฐานของคุณ" />}</article>)}</section>
-    </section><section className="cust-document"><h2>{invoice.status === "paid" ? "ชำระครบแล้ว" : "ส่งหลักฐานชำระงวดนี้"}</h2>{state.payments?.some((item) => item.status === "pending") && <p className="cust-alert">มีหลักฐานรอตรวจ ยอดยังไม่ลดจนกว่า Admin อนุมัติ ตรวจประวัติก่อนส่งหลักฐานรายการใหม่</p>}{canPay ? <BankPayment api={api} state={state} saved={saved} reload={reload} /> : <p className="cust-muted">{invoice.status === "paid" ? "ไม่มีเงินคงเหลือตามใบแจ้งหนี้นี้" : "ยังไม่พร้อมส่งหลักฐานใหม่ กรุณาอัปเดตสถานะ"}</p>}<Link className="cust-link" href={customerHref("jobs", { job: state.job_id })}>ติดตามงานผลิตและการส่งมอบ →</Link></section></div>;
-}
-function BankPayment({ api, state, saved, reload }: { api: BackendApi; state: FulfillmentJob; saved: (message: string) => void; reload: () => void }) {
-  const [ready, setReady] = useState<Attachment | null>(null);
-  const write = useRetryableWrite(api, () => saved("ส่งหลักฐานการชำระเงินแล้ว รอ Admin ตรวจสอบ ยอดคงเหลือยังไม่ลดจนกว่าจะอนุมัติ"));
-  return <form onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); write.submit(`/fulfillment/jobs/${state.job_id}/payments/bank`, "POST", () => {
-    try { return paymentPayload({ idempotency_key: crypto.randomUUID(), expected_version: state.version }, { amount: String(data.get("amount") ?? ""), paidAt: String(data.get("paid_at") ?? ""), evidenceId: ready?.id, balance: state.invoice!.balance, requireEvidence: true }, Date.now()); }
-    catch { throw new Error("ตรวจจำนวนเงินให้มากกว่าศูนย์ ไม่เกินยอดคงเหลือ วันเวลาโอนต้องไม่ใช่อนาคต และต้องมีไฟล์ที่ตรวจแล้ว"); }
-  }, ""); }}><fieldset disabled={write.frozen}><Field label="จำนวนเงินงวดนี้ (บาท) *" hint={`แบ่งชำระได้ แต่ไม่เกิน ${moneyTH(state.invoice!.balance)}`}><input name="amount" inputMode="decimal" required /></Field><Field label="วันและเวลาที่โอน (เวลาไทย) *"><input name="paid_at" type="datetime-local" required /></Field><CustomerUpload api={api} intentPath={`/fulfillment/jobs/${state.job_id}/evidence/uploads`} completePath={(id) => `/customer-evidence/${id}/complete`} ready={ready} onReady={setReady} disabled={write.frozen} /><p className="cust-muted">อัปโหลดสำเร็จยังไม่ใช่การยืนยันชำระเงิน ต้องกดส่งหลักฐานและรอ Admin อนุมัติ</p><button type="submit" className="cust-primary" disabled={!ready || write.frozen}>ส่งหลักฐานการชำระเงิน</button></fieldset><CustomerWriteRetry write={write} onReload={reload} /></form>;
 }

@@ -260,7 +260,6 @@
 .root :global(.cust-document-row) { display: flex; justify-content: space-between; align-items: center; gap: clamp(1rem, 2vw, 2rem); padding: 28px 0; border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-document-row h2) { margin: 8px 0 12px; overflow-wrap: anywhere; }
 .root :global(.cust-document-action) { flex-shrink: 0; text-align: right; }
-.root :global(.cust-list-price) { display: block; font-size: 1.5rem; }
 .root :global(.cust-price-panel) { background: var(--cust-surface); border: 1px solid var(--cust-line); padding: clamp(1.25rem, 2vw, 2rem); border-radius: 12px; position: sticky; top: 104px; }
 .root :global(.cust-price-panel > p) { margin-top: 16px; }
 .root :global(.cust-price-panel > section) { margin: 24px 0; padding-top: 24px; border-top: 1px solid var(--cust-line); }
@@ -269,7 +268,6 @@
 .root :global(.cust-terms-list li) { margin: 10px 0; }
 .root :global(.cust-decision-bar) { display: grid; gap: 12px; margin-top: 24px; }
 .root :global(.cust-preserve) { white-space: pre-wrap; overflow-wrap: anywhere; }
-.root :global(.cust-payment-layout) { display: grid; grid-template-columns: minmax(320px, 440px) minmax(0, 1.5fr); gap: clamp(1.5rem, 2vw, 2.5rem); align-items: start; }
 .root :global(.cust-checklist) { list-style: none; padding: 0; margin: 20px 0; }
 .root :global(.cust-checklist li) { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-upload) { padding: 24px; border: 1px dashed var(--cust-line); border-radius: 12px; margin: 24px 0; background: var(--cust-surface-2); }
@@ -298,8 +296,6 @@
 .root :global(.cust-inspection-decision p) { margin: 12px 0; }
 .root :global(.cust-inspection-decision .cust-primary), .root :global(.cust-inspection-decision .cust-danger) { display: flex; width: 100%; margin-top: 24px; }
 .root :global(.cust-inspection-decision fieldset > .cust-link) { margin-top: 12px; }
-.root :global(.cust-invoice-summary > .cust-hero-price) { margin: 8px 0 24px; }
-.root :global(.cust-invoice-summary > h2) { margin-top: 16px; }
 .root :global(.cust-account-layout) { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1.8fr); gap: clamp(1.5rem, 3.5vw, 4rem); align-items: start; }
 .root :global(.cust-account-profile) { padding: 24px 0; }
 .root :global(.cust-profile-avatar) { width: 72px; height: 72px; display: grid; place-items: center; font-size: 1.75rem; background: var(--cust-tint); color: var(--cust-accent); border-radius: 50%; margin-bottom: 16px; }
@@ -321,7 +317,6 @@
 .root :global(.cust-detail-grid > *),
 .root :global(.cust-quotation-layout > *),
 .root :global(.cust-wizard-grid > *),
-.root :global(.cust-payment-layout > *),
 .root :global(.cust-job-row > *),
 .root :global(.cust-job-detail > *),
 .root :global(.cust-inspection-layout > *),
@@ -349,7 +344,6 @@
   .root :global(.cust-detail-grid),
   .root :global(.cust-quotation-layout),
   .root :global(.cust-wizard-grid),
-  .root :global(.cust-payment-layout),
   .root :global(.cust-job-detail),
   .root :global(.cust-inspection-layout),
   .root :global(.cust-account-layout),

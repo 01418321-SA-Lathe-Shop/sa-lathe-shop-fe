@@ -294,7 +294,7 @@ follows the shared Light/Dark preference without changing document content.
 - `/customer/jobs` now mounts the existing authenticated Customer shell instead of redirecting to requests; `/customer/payments` now mounts the invoice workspace instead of redirecting to the combined legacy workspace. No URL or route file is removed. `/customer/delivery-payment` is the receipt workspace; `?job=UUID` selects details. `/customer/documents` remains a compatible redirect to Deposit/PO.
 - Job list uses existing Customer `/fulfillment/jobs` data and request labels, never Staff `/production/jobs` or stock. Job detail has a vertical queued/in_progress/completed timeline, separate shipment and invoice rails, approved deposit, linked original request/quotation and rework history. No supplier details, stock quantities, actual costs or made-up percentages are exposed. Requested date remains distinct from a promised date (not supplied). Customer production photos and material-waiting status remain explicitly unsupported, not fabricated.
 - Inspection is a focused delivery summary and decision form with required acknowledgement. Acceptance is final; return requires a reason and reopens the same job, preserving invoice and payments. Payment is not gated on acceptance, and acceptance is not gated on payment. Closed requests display the server's accepted-and-paid result.
-- Invoice list/detail emphasize exact outstanding balance and immutable due date from server credit terms, not the 14-day UC4 deadline. Bank installments require a ready private file, nonfuture Bangkok time and a positive amount within balance. Pending proof does not reduce the balance. Command fields freeze after an uncertain response; explicit retry preserves original UUID/payload/version. Payment proof download is offered only for the current uploader. Customer cannot issue invoices, set credit terms, approve proof or record cash.
+- Invoice list/detail emphasize exact outstanding balance and immutable due date from server credit terms, not the 14-day UC4 deadline. The list (`customer-invoice-list.tsx`, `customer-invoices.module.css`) opens with three loaded-data summary tiles (total outstanding in the accent tint, overdue count turning red when above zero, invoices with pending proof), URL `status` pills with counts in the job-list pill style, and 2/1-column stretched-link cards with a 4px accent left rule (green when paid). Each card shows the invoice number, request reference, large balance, an approved-paid progress bar (pending proof is excluded), due date with a Bangkok calendar-day chip (`อีก N วัน` / `ครบกำหนดวันนี้` / `เกินกำหนด N วัน`, the overview's wording) and a primary hint only when bank payment is allowed. The detail (`customer-invoice.tsx`) has a full-width balance hero (badge, due chip, accent amount turning green when paid, progress bar, due/issued/credit-days facts), the pending-proof alert with the exact pending total, a numbered three-step bank form (amount with a "pay full balance" fill chip and inline over-balance/format guidance, Bangkok transfer time, slip upload) ending in a submit bar that repeats the amount, a sticky "สรุปยอด" ledger (amount − approved = balance, deposit note, no VAT) and a status-dotted payment timeline. At ≤1024px it stacks hero → alert → form → ledger → history. Inline guidance never replaces `paymentPayload`; the payload, retry and upload behavior are unchanged. Bank installments require a ready private file, nonfuture Bangkok time and a positive amount within balance. Pending proof does not reduce the balance. Command fields freeze after an uncertain response; explicit retry preserves original UUID/payload/version. Payment proof download is offered only for the current uploader. Customer cannot issue invoices, set credit terms, approve proof or record cash.
 - Account/company uses the actual membership/owner flags. Owner invitation and join flows are distinct, one-use/24-hour and memory-only; no customer profile/password mutations are invented. Settings uses existing theme and size preferences with immediate preview and an explicit blocked-storage warning. Auth tokens still never touch browser storage.
 - Customer shell is keyed by account ID so a mock-account switch destroys prior customer data/forms, notification dialog and transient file/retry state. Staff/Admin and public/auth surfaces are unchanged. The old shared customer forms are no longer mounted by the new Customer workspace.
 - Read-all notification failures reconcile confirmed successful reads with the local unread collection and count; failed items remain actionable. No unsupported bulk endpoint or optimistic all-read claim is added.
@@ -305,7 +305,7 @@ follows the shared Light/Dark preference without changing document content.
 - Customer layout is fully responsive and full-width across all supported viewports (360px, 390px, 768px, 1024px, 1280px, 1440px, 1920px, 2560px).
 - Replaced rigid 1180px and 1280px containers on .cust-main, .cust-footer, .cust-nav-inner, and .cust-environment with width: 100%; max-width: 100% and fluid padding clamp(1rem, 2.5vw, 2.5rem).
 - Replaced 100vh with 100dvh for all full-height containers (.cust-stage, .cust-main, .cust-mobile-menu, .cust-notification-dialog).
-- Multi-column grids (.cust-overview-grid, .cust-detail-grid, .cust-quotation-layout, .cust-wizard-grid, .cust-payment-layout, .cust-job-detail, .cust-inspection-layout, .cust-account-layout, .cust-settings-layout) now collapse to single columns at tablet breakpoint (≤880px), eliminating column cramping on 768px portrait tablets.
+- Multi-column grids (.cust-overview-grid, .cust-detail-grid, .cust-quotation-layout, .cust-wizard-grid, .cust-job-detail, .cust-inspection-layout, .cust-account-layout, .cust-settings-layout) now collapse to single columns at tablet breakpoint (≤880px), eliminating column cramping on 768px portrait tablets.
 - Grid and flex children enforce min-width: 0 to prevent horizontal content overflow. Media elements (img, ideo, canvas) enforce max-width: 100%; height: auto.
 - Forms and single-column steps retain readable bounds (clamp(540px, 60vw, 760px)) or 2-column layouts with summary panels on wide viewports.
 - Touch targets on interactive elements (sidebar links, footer buttons, tabs, pagination) are maintained at >=44px. Zero horizontal scroll across all screen widths.
@@ -759,6 +759,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-29 | Customer invoices: summary tiles, status pills with counts, cards with paid progress and due-day chips; detail balance hero, numbered bank-payment steps with fill-balance and inline amount guidance, sticky ledger and payment timeline; remove unused `.cust-payment-layout`/`.cust-invoice-summary`/`.cust-list-price` rules | Invoice domain tests (exact cents, Bangkok days, pending excluded), 151 native tests, type check, lint, source audit, build; Chrome real local API (somchai unpaid, nida.company paid) at 1280/390px Dark and 1280px Light: no overflow or console errors, over-balance message, fill chip, submit gated on upload |
 | 2026-10-29 | Match Customer Deposit/PO detail and view tabs to Quotation document layout and price rail | Presentation regressions, responsive/theme browser checks, lint and build; existing evidence logic preserved |
 | 2026-10-29 | Landing: remove the capability card (materials table now sits beside its heading); pair the Deposit/PO card with a full-width order-facts card; rewrite all public Thai copy in a natural shop voice; reveal tall items as soon as they enter the viewport | Type check, lint, native tests, build; Chrome walks at 1440 and 360px: no overflow, no stuck reveals |
 | 2026-10-29 | Fill landing hero stats with owner-confirmed figures: 30 years of experience, 837 jobs delivered | Type check, landing lint, served-HTML check |
@@ -2109,7 +2110,6 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-document-row) { display: flex; justify-content: space-between; align-items: center; gap: clamp(1rem, 2vw, 2rem); padding: 28px 0; border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-document-row h2) { margin: 8px 0 12px; overflow-wrap: anywhere; }
 .root :global(.cust-document-action) { flex-shrink: 0; text-align: right; }
-.root :global(.cust-list-price) { display: block; font-size: 1.5rem; }
 .root :global(.cust-price-panel) { background: var(--cust-surface); border: 1px solid var(--cust-line); padding: clamp(1.25rem, 2vw, 2rem); border-radius: 12px; position: sticky; top: 104px; }
 .root :global(.cust-price-panel > p) { margin-top: 16px; }
 .root :global(.cust-price-panel > section) { margin: 24px 0; padding-top: 24px; border-top: 1px solid var(--cust-line); }
@@ -2118,7 +2118,6 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-terms-list li) { margin: 10px 0; }
 .root :global(.cust-decision-bar) { display: grid; gap: 12px; margin-top: 24px; }
 .root :global(.cust-preserve) { white-space: pre-wrap; overflow-wrap: anywhere; }
-.root :global(.cust-payment-layout) { display: grid; grid-template-columns: minmax(320px, 440px) minmax(0, 1.5fr); gap: clamp(1.5rem, 2vw, 2.5rem); align-items: start; }
 .root :global(.cust-checklist) { list-style: none; padding: 0; margin: 20px 0; }
 .root :global(.cust-checklist li) { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--cust-line); }
 .root :global(.cust-upload) { padding: 24px; border: 1px dashed var(--cust-line); border-radius: 12px; margin: 24px 0; background: var(--cust-surface-2); }
@@ -2147,8 +2146,6 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-inspection-decision p) { margin: 12px 0; }
 .root :global(.cust-inspection-decision .cust-primary), .root :global(.cust-inspection-decision .cust-danger) { display: flex; width: 100%; margin-top: 24px; }
 .root :global(.cust-inspection-decision fieldset > .cust-link) { margin-top: 12px; }
-.root :global(.cust-invoice-summary > .cust-hero-price) { margin: 8px 0 24px; }
-.root :global(.cust-invoice-summary > h2) { margin-top: 16px; }
 .root :global(.cust-account-layout) { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1.8fr); gap: clamp(1.5rem, 3.5vw, 4rem); align-items: start; }
 .root :global(.cust-account-profile) { padding: 24px 0; }
 .root :global(.cust-profile-avatar) { width: 72px; height: 72px; display: grid; place-items: center; font-size: 1.75rem; background: var(--cust-tint); color: var(--cust-accent); border-radius: 50%; margin-bottom: 16px; }
@@ -2170,7 +2167,6 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-detail-grid > *),
 .root :global(.cust-quotation-layout > *),
 .root :global(.cust-wizard-grid > *),
-.root :global(.cust-payment-layout > *),
 .root :global(.cust-job-row > *),
 .root :global(.cust-job-detail > *),
 .root :global(.cust-inspection-layout > *),
@@ -2198,7 +2194,6 @@ src/features/workspace/workspace.module.css
   .root :global(.cust-detail-grid),
   .root :global(.cust-quotation-layout),
   .root :global(.cust-wizard-grid),
-  .root :global(.cust-payment-layout),
   .root :global(.cust-job-detail),
   .root :global(.cust-inspection-layout),
   .root :global(.cust-account-layout),
