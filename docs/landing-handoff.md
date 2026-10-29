@@ -3,6 +3,8 @@
 > **Update 2026-10-29.** The owner briefly replaced this scene with a procedural lathe turning scene, then asked for this furnace scene back. It is restored as described below, with two exceptions:
 > - The invisible full-scene pause target is now a visible top-right pill (หยุดชั่วคราว / เล่นต่อ).
 > - Shadows use `PCFShadowMap`, because three r186 removed the soft variant.
+>
+> The public page copy and sections changed in the following batch; see `docs/landing-shop-sections.md`.
 
 
 ## Scope and chosen defaults

@@ -100,8 +100,8 @@ export function Hero() {
     </div>
     <Nav />
     <div className="cinematic-copy"><h1 id="cinematic-title">{landingConfig.headline.map(line => <span className="cinematic-line" key={line}>{line}</span>)}</h1></div>
-    <div className="cinematic-description"><p>{landingConfig.paragraph}</p><Link href="/register" className="cinematic-primary">เริ่มสั่งผลิต <span aria-hidden="true">↗</span></Link></div>
-    <div className="cinematic-bottom-copy"><p>ดูแลงานผลิต<br />ตั้งแต่รับงาน<br />จนถึงส่งมอบ</p><a href="#workflow" aria-label="ดูขั้นตอนการทำงาน">ดูขั้นตอน <span aria-hidden="true">↓</span></a></div>
+    <div className="cinematic-description"><p>{landingConfig.paragraph}</p><Link href="/register" className="cinematic-primary">ขอใบเสนอราคา <span aria-hidden="true">↗</span></Link></div>
+    <div className="cinematic-bottom-copy"><p>ดูแลงานผลิต<br />ตั้งแต่รับแบบ<br />จนถึงส่งมอบ</p><a href="#services">ดูบริการของเรา <span aria-hidden="true">↓</span></a></div>
     <StatCards />
     {!staticMode && state === "loading" && <p className="cinematic-scene-notice" role="status">กำลังเตรียมภาพสามมิติ…</p>}
     {state === "failed" && <p className="cinematic-scene-notice" role="status">แสดงภาพนิ่งแทน เนื่องจากไม่สามารถเปิดภาพสามมิติได้</p>}

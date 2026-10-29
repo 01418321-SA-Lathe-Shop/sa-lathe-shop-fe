@@ -50,21 +50,7 @@
 :where(.scope) :global(.cinematic-stats) dd { display: flex; align-items: center; justify-content: space-between; margin: 0; font-size: 2rem; line-height: 1; font-weight: 500; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
 :where(.scope) :global(.cinematic-stats) dd span { font-size: .875rem; color: #ffad6a; }
 :where(.scope) :global(.cinematic-scene-notice) { position: absolute; left: 50%; transform: translateX(-50%); bottom: 8%; font-size: .75rem; color: #b8bfbb; }
-:where(.scope) :global(.cinematic-process), :where(.scope) :global(.cinematic-platform) { max-width: 100rem; margin: 0 auto; padding: 8rem 4.5%; scroll-margin-top: 2rem; }
-:where(.scope) :global(.cinematic-process) { display: grid; grid-template-columns: 1fr 1fr; gap: 8%; border-bottom: 1px solid #ffffff15; }
 :global(.cinematic-page):where(.scope) h2 { margin: 0; font-weight: 500; font-size: clamp(2.5rem, 4vw, 4.5rem); line-height: 1.3; letter-spacing: -.015em; }
-:where(.scope) :global(.cinematic-section-heading) > p { margin: 2rem 0 0; color: var(--muted); font-size: .9375rem; line-height: 1.7; max-width: 25rem; }
-:where(.scope) :global(.cinematic-process-list) { list-style: none; padding: 0; margin: 0; }
-:where(.scope) :global(.cinematic-process-list) li { display: grid; grid-template-columns: 2.5rem 1fr; gap: 1rem; padding: 1.75rem 0; border-top: 1px solid #ffffff20; }
-:where(.scope) :global(.cinematic-process-list) li:first-child { padding-top: 0; border-top: 0; }
-:where(.scope) :global(.cinematic-step-number) { padding-top: .25rem; color: #ffad6a; font-size: .75rem; font-variant-numeric: tabular-nums; }
-:where(.scope) :global(.cinematic-process-list) h3 { margin: 0; font-size: 1.25rem; font-weight: 500; letter-spacing: -.02em; }
-:where(.scope) :global(.cinematic-process-list) p { margin: .75rem 0 0; max-width: 27rem; color: var(--muted); font-size: .875rem; line-height: 1.7; }
-:where(.scope) :global(.cinematic-capabilities) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3rem; margin-top: 4rem; }
-:where(.scope) :global(.cinematic-capabilities) article { padding-top: 1.5rem; border-top: 1px solid #ffffff30; scroll-margin-top: 2rem; }
-:where(.scope) :global(.cinematic-capabilities) h3 { margin: 0; font-weight: 500; font-size: 1.25rem; letter-spacing: -.02em; }
-:where(.scope) :global(.cinematic-capabilities) p { margin: 1rem 0 2rem; color: var(--muted); font-size: .875rem; line-height: 1.7; max-width: 28rem; }
-:where(.scope) :global(.cinematic-capabilities) article > span { color: #dba27b; font-size: .6875rem; }
 :where(.scope) :global(.cinematic-footer) { max-width: 100rem; margin: 0 auto; padding: 2rem 4.5%; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 2rem; border-top: 1px solid #ffffff20; }
 :where(.scope) :global(.cinematic-footer) > p { color: var(--muted); font-size: .75rem; }
 :where(.scope) :global(.cinematic-footer) > div { display: flex; gap: 1.5rem; align-items: center; }
@@ -99,9 +85,6 @@
   :where(.scope) :global(.cinematic-stats) dd { font-size: 1.75rem; }
   :where(.scope) :global(.cinematic-stats) dt { font-size: .6875rem; max-width: 12ch; line-height: 1.6; }
   :where(.scope) :global(.cinematic-scene-notice) { bottom: 10rem; width: 90%; text-align: center; }
-  :where(.scope) :global(.cinematic-process), :where(.scope) :global(.cinematic-platform) { padding: 4.5rem 1.25rem; }
-  :where(.scope) :global(.cinematic-process) { grid-template-columns: 1fr; gap: 3rem; }
-  :where(.scope) :global(.cinematic-capabilities) { grid-template-columns: 1fr; gap: 2.5rem; margin-top: 3rem; }
   :where(.scope) :global(.cinematic-footer) { padding: 2rem 1.25rem; gap: 1.5rem; }
   :where(.scope) :global(.cinematic-footer) > p { width: 100%; order: 3; margin: 0; }
 }
@@ -150,12 +133,194 @@
 :global([data-theme="light"]) :where(.scope) :global(.cinematic-bottom-copy)::before { background: linear-gradient(90deg, #f6f3eff5 65%, #f6f3ef00); }
 :global([data-theme="light"]) :where(.scope) :global(.cinematic-stats) > div { background: #fffffff0; box-shadow: 0 .75rem 2rem #49321b14; }
 :global([data-theme="light"]) :where(.scope) :global(.cinematic-stats) dd span,
-:global([data-theme="light"]) :where(.scope) :global(.cinematic-step-number),
-:global([data-theme="light"]) :where(.scope) :global(.cinematic-capabilities) article > span,
 :global([data-theme="light"]) :where(.scope) :global(.cinematic-bottom-copy) a:hover { color: #943c0d; }
-:global([data-theme="light"]) :where(.scope) :global(.cinematic-process),
-:global([data-theme="light"]) :where(.scope) :global(.cinematic-process-list) li,
-:global([data-theme="light"]) :where(.scope) :global(.cinematic-capabilities) article,
 :global([data-theme="light"]) :where(.scope) :global(.cinematic-footer) { border-color: var(--line); }
 :global([data-theme="light"]) :where(.scope) :global(.cinematic-footer) :global(.settings-trigger) { color: var(--text); border-color: var(--line); }
 :global([data-theme="light"]) :global(.cinematic-page):where(.scope) :is(a, button):focus-visible { outline-color: #943c0d; }
+
+/* Shop sections and scroll motion (2026-10-29). Reveals hide content only after landing-motion.tsx sets data-motion. */
+:global(html):has(.scope) { scroll-behavior: smooth; scroll-padding-top: 5rem; interpolate-size: allow-keywords; }
+:global(.cinematic-page):where(.scope) { --accent-ink: #ffad6a; --soft-line: #ffffff17; --card: linear-gradient(160deg, #ffffff0a, #ffffff02); --ease-out: cubic-bezier(.16, 1, .3, 1); }
+:global([data-theme="light"]) :global(.cinematic-page):where(.scope) { --accent-ink: #943c0d; --soft-line: var(--line); --card: #ffffff; }
+
+/* Page progress and compact sticky bar. */
+:where(.scope) :global(.landing-progress) { position: fixed; z-index: 60; inset: 0 0 auto; height: 2px; background: linear-gradient(90deg, #ff7c22, #ffb16d); transform-origin: 0 50%; transform: scaleX(var(--scroll-progress, 0)); pointer-events: none; }
+:where(.scope) :global(.landing-sticky) { position: fixed; z-index: 50; top: .75rem; left: 50%; width: min(64rem, calc(100% - 2rem)); display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .375rem .375rem .375rem 1rem; border: 1px solid #ffffff1c; border-radius: 999px; background: #0b0d0dd9; backdrop-filter: blur(14px) saturate(140%); box-shadow: 0 1rem 2.5rem #0007; transform: translate(-50%, -150%); opacity: 0; visibility: hidden; transition: transform .55s var(--ease-out), opacity .3s, visibility 0s .55s; }
+:global(.cinematic-page):where(.scope)[data-scrolled="true"] :global(.landing-sticky) { transform: translate(-50%, 0); opacity: 1; visibility: visible; transition: transform .55s var(--ease-out), opacity .3s, visibility 0s; }
+:where(.scope) :global(.landing-sticky) nav { display: flex; gap: .25rem; }
+:where(.scope) :global(.landing-sticky) nav a { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 .85rem; border-radius: 999px; color: var(--muted); font-size: .75rem; transition: color .2s, background .2s; }
+:where(.scope) :global(.landing-sticky) nav a:hover, :where(.scope) :global(.landing-sticky) nav a[aria-current] { color: var(--text); background: #ffffff12; }
+:where(.scope) :global(.landing-sticky-cta) { display: inline-flex; align-items: center; gap: .75rem; min-height: 2.75rem; padding: 0 1.1rem; border-radius: 999px; background: #f3f3ef; color: #121514 !important; font-size: .75rem; font-weight: 600; transition: background .2s, transform .2s; }
+:where(.scope) :global(.landing-sticky-cta):hover { background: #ffd1ad; transform: translateY(-1px); }
+
+/* Hero: one-time entrance, then a gentle exit as the page scrolls. */
+@keyframes rise { from { opacity: 0; translate: 0 .9em; filter: blur(8px); } to { opacity: 1; translate: 0 0; filter: none; } }
+:where(.scope) :global(.cinematic-line) { animation: rise 1s var(--ease-out) both; }
+:where(.scope) :global(.cinematic-line):nth-child(2) { animation-delay: .1s; }
+:where(.scope) :global(.cinematic-line):nth-child(3) { animation-delay: .2s; }
+:where(.scope) :global(.cinematic-description), :where(.scope) :global(.cinematic-bottom-copy), :where(.scope) :global(.cinematic-stats) { animation: rise 1s var(--ease-out) .35s both; }
+:global(.cinematic-page):where(.scope)[data-motion="ready"] :global(.cinematic-copy), :global(.cinematic-page):where(.scope)[data-motion="ready"] :global(.cinematic-description) { transform: translateY(calc(var(--hero-progress, 0) * -4rem)); opacity: calc(1 - var(--hero-progress, 0) * 1.2); }
+:global(.cinematic-page):where(.scope)[data-motion="ready"] :global(.cinematic-art) { transform: translateY(calc(var(--hero-progress, 0) * 2.5rem)) scale(calc(1 + var(--hero-progress, 0) * .04)); }
+
+/* Scroll reveal: translate/opacity/blur on entry, staggered by --i. Hover uses transform, so it never waits for the stagger. */
+:where(.scope) [data-reveal] { --reveal-delay: calc(var(--i, 0) * 90ms); transition: opacity .8s var(--ease-out) var(--reveal-delay), translate .9s var(--ease-out) var(--reveal-delay), filter .8s var(--ease-out) var(--reveal-delay); }
+:global(.cinematic-page):where(.scope)[data-motion="ready"] [data-reveal]:not([data-revealed]) { opacity: 0; translate: 0 2rem; filter: blur(6px); }
+
+/* Shared section frame. */
+:where(.scope) :global(.landing-section) { max-width: 100rem; margin: 0 auto; padding: 7rem 4.5%; border-top: 1px solid var(--soft-line); }
+:where(.scope) :global(.landing-heading) { max-width: 44rem; margin-bottom: 3.5rem; }
+:where(.scope) :global(.landing-section) h2 { text-wrap: balance; }
+:where(.scope) :global(.landing-eyebrow) { display: inline-flex; align-items: center; gap: .75rem; margin: 0 0 1.25rem; color: var(--accent-ink); font-size: .75rem; letter-spacing: .08em; }
+:where(.scope) :global(.landing-eyebrow)::before { content: ""; width: 1.75rem; height: 1px; background: currentColor; }
+:where(.scope) :global(.landing-lead) { margin: 1.5rem 0 0; color: var(--muted); font-size: .9375rem; line-height: 1.75; max-width: 34rem; text-wrap: pretty; }
+:where(.scope) :global(.landing-section) h3 { margin: 0; font-size: 1.125rem; font-weight: 500; letter-spacing: -.01em; }
+:global(.cinematic-page):where(.scope) :global(.landing-text-link) { display: inline-flex; align-items: center; gap: .6rem; min-height: 2.75rem; color: var(--accent-ink); font-size: .875rem; }
+:where(.scope) :global(.landing-text-link):hover { text-decoration: underline; }
+
+/* 1. Services: icon grid. */
+:where(.scope) :global(.landing-services) { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+:where(.scope) :global(.landing-services) li { position: relative; padding: 2rem 1.75rem; border: 1px solid var(--soft-line); border-radius: .875rem; background: var(--card); overflow: hidden; transition: opacity .8s var(--ease-out) var(--reveal-delay), translate .9s var(--ease-out) var(--reveal-delay), filter .8s var(--ease-out) var(--reveal-delay), transform .35s var(--ease-out), border-color .35s, box-shadow .35s; }
+:where(.scope) :global(.landing-services) li::after { content: ""; position: absolute; inset: auto -30% -60% -30%; height: 70%; background: radial-gradient(closest-side, #ff7c2233, transparent); opacity: 0; transition: opacity .45s; pointer-events: none; }
+:where(.scope) :global(.landing-services) li:hover { transform: translateY(-4px); border-color: #ff923f55; box-shadow: 0 1.25rem 2.5rem #0005; }
+:where(.scope) :global(.landing-services) li:hover::after { opacity: 1; }
+:where(.scope) :global(.landing-service-icon) { display: inline-grid; place-items: center; width: 3rem; height: 3rem; margin-bottom: 1.5rem; border-radius: .75rem; background: #ff923f17; color: var(--accent-ink); transition: background .35s, color .35s; }
+:where(.scope) :global(.landing-services) li:hover :global(.landing-service-icon) { background: #ff923f; color: #160e08; }
+:where(.scope) :global(.landing-services) p { margin: .75rem 0 0; color: var(--muted); font-size: .875rem; line-height: 1.7; }
+
+/* 2. Materials: spec table + capability card. */
+:where(.scope) :global(.landing-materials) { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 4rem; align-items: start; }
+:where(.scope) :global(.landing-table-wrap) { overflow-x: auto; }
+:where(.scope) :global(.landing-table) { width: 100%; border-collapse: collapse; font-size: .875rem; }
+:where(.scope) :global(.landing-table) th, :where(.scope) :global(.landing-table) td { padding: 1rem .75rem; border-bottom: 1px solid var(--soft-line); text-align: left; vertical-align: top; }
+:where(.scope) :global(.landing-table) thead th { color: var(--muted); font-size: .75rem; font-weight: 400; }
+:where(.scope) :global(.landing-table) tbody th { font-weight: 500; }
+:where(.scope) :global(.landing-table) td { color: var(--muted); }
+:where(.scope) :global(.landing-table) tbody tr { transition: background .25s; }
+:where(.scope) :global(.landing-table) tbody tr:hover { background: #ff923f0d; }
+:where(.scope) :global(.landing-spec) { position: sticky; top: 6rem; padding: 2rem; border: 1px solid var(--soft-line); border-radius: 1rem; background: var(--card); }
+:where(.scope) :global(.landing-spec) dl { margin: 1.5rem 0 0; }
+:where(.scope) :global(.landing-spec) dl > div { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 1rem 0; border-top: 1px solid var(--soft-line); }
+:where(.scope) :global(.landing-spec) dt { color: var(--muted); font-size: .8125rem; }
+:where(.scope) :global(.landing-spec) dd { margin: 0; font-size: 1.375rem; font-variant-numeric: tabular-nums; }
+:where(.scope) :global(.landing-spec) > p { margin: 1rem 0 0; color: var(--muted); font-size: .75rem; line-height: 1.7; }
+
+/* 3. Gallery: asymmetric mosaic. */
+:where(.scope) :global(.landing-gallery) { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 15rem; gap: 1rem; }
+:where(.scope) :global(.landing-gallery) li:first-child { grid-column: span 2; grid-row: span 2; }
+:where(.scope) :global(.landing-gallery) figure { height: 100%; margin: 0; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: .75rem; }
+:where(.scope) :global(.landing-gallery-media) { position: relative; overflow: hidden; border-radius: .875rem; border: 1px solid var(--soft-line); }
+:where(.scope) :global(.landing-gallery-media) img, :where(.scope) :global(.landing-gallery-placeholder) { object-fit: cover; transition: transform .9s var(--ease-out); }
+:where(.scope) :global(.landing-gallery) li:hover :global(.landing-gallery-media) img, :where(.scope) :global(.landing-gallery) li:hover :global(.landing-gallery-placeholder) { transform: scale(1.05); }
+:where(.scope) :global(.landing-gallery-placeholder) { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: .75rem; background: repeating-linear-gradient(90deg, #ffffff05 0 2px, transparent 2px 6px), linear-gradient(135deg, #1b1f1f, #2b3131 45%, #131616); }
+:where(.scope) :global(.landing-gallery) figcaption { display: flex; justify-content: space-between; gap: 1rem; font-size: .8125rem; }
+:where(.scope) :global(.landing-gallery) figcaption strong { font-weight: 500; }
+:where(.scope) :global(.landing-gallery) figcaption span { color: var(--muted); }
+
+/* 4. Why us: sticky statement + numbered proof list. */
+:where(.scope) :global(.landing-why) { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 6%; align-items: start; }
+:where(.scope) :global(.landing-why-statement) { position: sticky; top: 7rem; }
+:where(.scope) :global(.landing-why-statement) h2 { margin-bottom: 1.5rem; }
+:where(.scope) :global(.landing-reasons) { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2.75rem 3rem; }
+:where(.scope) :global(.landing-reasons) li { display: grid; grid-template-columns: 2.75rem 1fr; gap: .75rem; padding-top: 1.5rem; border-top: 1px solid var(--soft-line); }
+:where(.scope) :global(.landing-number) { color: var(--accent-ink); font-size: .8125rem; font-variant-numeric: tabular-nums; padding-top: .2rem; }
+:where(.scope) :global(.landing-reasons) p { margin: .6rem 0 0; color: var(--muted); font-size: .875rem; line-height: 1.7; }
+
+/* 5. Process: numbered steps on a line that draws itself, plus the Deposit/PO rules card. */
+:where(.scope) :global(.landing-steps) { position: relative; list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1.5rem; }
+/* The line runs from the first dot's centre to the last dot's centre (5 columns, 1.5rem gaps). */
+:where(.scope) :global(.landing-steps)::before, :where(.scope) :global(.landing-steps)::after { content: ""; position: absolute; top: 1.25rem; left: 1.25rem; right: calc((100% - 6rem) / 5 - 1.25rem); height: 1px; background: var(--soft-line); }
+:where(.scope) :global(.landing-steps)::after { background: linear-gradient(90deg, #ff7c22, #ffb16d); transform-origin: 0 50%; transition: transform 1.6s var(--ease-out) .2s; }
+:global(.cinematic-page):where(.scope)[data-motion="ready"] :global(.landing-steps):not([data-revealed])::after { transform: scaleX(0); }
+:where(.scope) :global(.landing-steps) li { position: relative; z-index: 1; transition: opacity .7s var(--ease-out) calc(var(--i) * 140ms + .2s), translate .8s var(--ease-out) calc(var(--i) * 140ms + .2s); }
+:global(.cinematic-page):where(.scope)[data-motion="ready"] :global(.landing-steps):not([data-revealed]) li { opacity: 0; translate: 0 1.25rem; }
+:where(.scope) :global(.landing-step-dot) { position: relative; z-index: 1; display: grid; place-items: center; width: 2.5rem; height: 2.5rem; margin-bottom: 1.5rem; border: 1px solid #ff923f88; border-radius: 50%; background: var(--bg); color: var(--accent-ink); font-size: .875rem; font-variant-numeric: tabular-nums; }
+:where(.scope) :global(.landing-steps) p { margin: .6rem 0 0; color: var(--muted); font-size: .8125rem; line-height: 1.7; }
+:where(.scope) :global(.landing-rules) { max-width: 52rem; margin-top: 4rem; padding: 2rem; border: 1px solid var(--soft-line); border-radius: 1rem; background: var(--card); }
+:where(.scope) :global(.landing-rules) h3 { margin-bottom: 1rem; }
+:where(.scope) :global(.landing-rules) > p { margin: 1.25rem 0 0; color: var(--muted); font-size: .8125rem; line-height: 1.7; }
+
+/* 7. FAQ: native accordion, height animates where interpolate-size is supported. */
+:where(.scope) :global(.landing-faq) { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 6%; align-items: start; }
+:where(.scope) :global(.landing-faq) :global(.landing-heading) { position: sticky; top: 7rem; }
+:where(.scope) :global(.landing-faq-list) details { border-bottom: 1px solid var(--soft-line); }
+:where(.scope) :global(.landing-faq-list) summary { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; min-height: 2.75rem; padding: 1.35rem 0; cursor: pointer; list-style: none; font-size: 1rem; font-weight: 500; transition: color .2s; }
+:where(.scope) :global(.landing-faq-list) summary::-webkit-details-marker { display: none; }
+:where(.scope) :global(.landing-faq-list) summary:hover { color: var(--accent-ink); }
+:where(.scope) :global(.landing-faq-mark) { position: relative; flex: none; width: 1.75rem; height: 1.75rem; border: 1px solid var(--soft-line); border-radius: 50%; transition: transform .4s var(--ease-out), border-color .3s; }
+:where(.scope) :global(.landing-faq-mark)::before, :where(.scope) :global(.landing-faq-mark)::after { content: ""; position: absolute; inset: 50% auto auto 50%; width: .625rem; height: 1px; background: currentColor; translate: -50% -50%; transition: rotate .4s var(--ease-out); }
+:where(.scope) :global(.landing-faq-mark)::after { rotate: 90deg; }
+:where(.scope) :global(.landing-faq-list) details[open] :global(.landing-faq-mark) { transform: rotate(180deg); border-color: #ff923f88; }
+:where(.scope) :global(.landing-faq-list) details[open] :global(.landing-faq-mark)::after { rotate: 0deg; }
+:where(.scope) :global(.landing-faq-list) details p { margin: 0; padding: 0 3.25rem 1.5rem 0; color: var(--muted); font-size: .875rem; line-height: 1.8; }
+@supports (interpolate-size: allow-keywords) {
+  :where(.scope) :global(.landing-faq-list) details::details-content { block-size: 0; overflow: hidden; transition: block-size .45s var(--ease-out), content-visibility .45s allow-discrete; }
+  :where(.scope) :global(.landing-faq-list) details[open]::details-content { block-size: auto; }
+}
+
+/* 8. Contact: CTA panel + contact card with click-to-load map. */
+:where(.scope) :global(.landing-contact) { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 1.5rem; align-items: stretch; }
+:where(.scope) :global(.landing-cta) { position: relative; overflow: hidden; padding: 3.5rem; border: 1px solid var(--soft-line); border-radius: 1.25rem; background: radial-gradient(ellipse 70% 60% at 15% 115%, #ff7c2240, transparent 70%), linear-gradient(160deg, #151919, #0b0d0d); }
+:where(.scope) :global(.landing-cta) > p:not(:global(.landing-eyebrow)) { max-width: 30rem; margin: 1.5rem 0 0; color: var(--muted); font-size: .9375rem; line-height: 1.75; }
+:where(.scope) :global(.landing-cta-actions) { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.75rem; margin-top: 2rem; }
+:where(.scope) :global(.landing-cta-actions) :global(.cinematic-primary) { margin-top: 0; }
+:where(.scope) :global(.landing-contact-card) { display: flex; flex-direction: column; gap: 1.25rem; padding: 2rem; border: 1px solid var(--soft-line); border-radius: 1.25rem; background: var(--card); }
+:where(.scope) :global(.landing-contact-card) dl { margin: 0; }
+:where(.scope) :global(.landing-contact-card) dl > div { display: grid; grid-template-columns: 6.5rem 1fr; gap: 1rem; padding: .75rem 0; border-top: 1px solid var(--soft-line); font-size: .875rem; }
+:where(.scope) :global(.landing-contact-card) dt { color: var(--muted); }
+:where(.scope) :global(.landing-contact-card) dd { margin: 0; display: grid; gap: .25rem; overflow-wrap: anywhere; }
+:global(.cinematic-page):where(.scope) :global(.landing-contact-card) dd a { color: var(--accent-ink); }
+:where(.scope) :global(.landing-map-facade), :where(.scope) :global(.landing-map-frame) { width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: .75rem; }
+:where(.scope) :global(.landing-map-facade) { display: grid; place-content: center; justify-items: center; gap: .6rem; padding: 1rem; text-align: center; color: var(--muted); background: repeating-linear-gradient(45deg, #ffffff04 0 1px, transparent 1px 14px), #121515; border: 1px dashed var(--soft-line); }
+:where(.scope) :global(.landing-map-facade) p { margin: 0; font-size: .8125rem; }
+:where(.scope) :global(.landing-map-facade) small { font-size: .6875rem; }
+:where(.scope) :global(.landing-map-facade) button { min-height: 2.75rem; padding: 0 1.1rem; border: 1px solid var(--soft-line); border-radius: 999px; background: transparent; color: var(--text); font: inherit; font-size: .8125rem; }
+
+@media (max-width: 1100px) {
+  :where(.scope) :global(.landing-services) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :where(.scope) :global(.landing-gallery) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  :where(.scope) :global(.landing-steps) { grid-template-columns: 1fr; gap: 0; }
+  :where(.scope) :global(.landing-steps)::before, :where(.scope) :global(.landing-steps)::after { top: 1.25rem; bottom: 1.25rem; left: 1.25rem; right: auto; width: 1px; height: auto; }
+  :where(.scope) :global(.landing-steps)::after { transform-origin: 50% 0; }
+  :global(.cinematic-page):where(.scope)[data-motion="ready"] :global(.landing-steps):not([data-revealed])::after { transform: scaleY(0); }
+  :where(.scope) :global(.landing-steps) li { display: grid; grid-template-columns: 2.5rem 1fr; column-gap: 1.25rem; padding-bottom: 2rem; }
+  :where(.scope) :global(.landing-step-dot) { grid-row: span 2; margin: 0; }
+  :where(.scope) :global(.landing-steps) li h3 { padding-top: .55rem; }
+  :where(.scope) :global(.landing-reasons) { grid-template-columns: 1fr; }
+}
+@media (max-width: 767px) {
+  :where(.scope) :global(.cinematic-nav-pills) { overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; margin-inline: -1.25rem; padding-inline: 1.25rem; }
+  :where(.scope) :global(.cinematic-nav-pills) a { flex: none; }
+  :where(.scope) :global(.landing-sticky) { padding-left: .75rem; }
+  :where(.scope) :global(.landing-sticky) nav { display: none; }
+  :where(.scope) :global(.landing-section) { padding: 4.5rem 1.25rem; }
+  :global(.cinematic-page):where(.scope) :global(.landing-section) h2 { font-size: clamp(2rem, 8.5vw, 2.5rem); }
+  :where(.scope) :global(.landing-heading) { margin-bottom: 2.5rem; }
+  :where(.scope) :global(.landing-services) { grid-template-columns: 1fr; }
+  :where(.scope) :global(.landing-materials), :where(.scope) :global(.landing-why), :where(.scope) :global(.landing-faq), :where(.scope) :global(.landing-contact) { grid-template-columns: 1fr; gap: 2.5rem; }
+  :where(.scope) :global(.landing-spec), :where(.scope) :global(.landing-why-statement), :where(.scope) :global(.landing-faq) :global(.landing-heading) { position: static; }
+  :where(.scope) :global(.landing-gallery) { grid-template-columns: 1fr; grid-auto-rows: 14rem; }
+  :where(.scope) :global(.landing-gallery) li:first-child { grid-column: auto; grid-row: auto; }
+  :where(.scope) :global(.landing-cta) { padding: 2.25rem 1.5rem; }
+  :where(.scope) :global(.landing-contact-card) { padding: 1.5rem; }
+  :where(.scope) :global(.landing-contact-card) dl > div { grid-template-columns: 5.5rem 1fr; }
+  :where(.scope) :global(.landing-faq-list) details p { padding-right: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :global(html):has(.scope) { scroll-behavior: auto; }
+  :global(.cinematic-page):where(.scope)[data-motion="ready"] [data-reveal]:not([data-revealed]), :global(.cinematic-page):where(.scope)[data-motion="ready"] :global(.landing-steps):not([data-revealed]) li { opacity: 1; translate: none; filter: none; }
+  :global(.cinematic-page):where(.scope)[data-motion="ready"] :global(.landing-steps):not([data-revealed])::after { transform: none; }
+  :global(.cinematic-page):where(.scope)[data-motion="ready"] :global(.cinematic-copy), :global(.cinematic-page):where(.scope)[data-motion="ready"] :global(.cinematic-description), :global(.cinematic-page):where(.scope)[data-motion="ready"] :global(.cinematic-art) { transform: none; opacity: 1; }
+}
+
+/* Light theme for the shop sections. */
+:global([data-theme="light"]) :where(.scope) :global(.landing-sticky) { background: #fffffff0; border-color: var(--line); box-shadow: 0 1rem 2.5rem #49321b1f; }
+:global([data-theme="light"]) :where(.scope) :global(.landing-sticky) nav a:hover, :global([data-theme="light"]) :where(.scope) :global(.landing-sticky) nav a[aria-current] { background: var(--surface-2); }
+:global([data-theme="light"]) :where(.scope) :global(.landing-sticky-cta) { background: #943c0d; color: #fff !important; }
+:global([data-theme="light"]) :where(.scope) :global(.landing-sticky-cta):hover { background: #742e08; }
+:global([data-theme="light"]) :where(.scope) :global(.landing-services) li:hover { border-color: #943c0d55; box-shadow: 0 1.25rem 2.5rem #49321b1a; }
+:global([data-theme="light"]) :where(.scope) :global(.landing-service-icon) { background: #943c0d12; }
+:global([data-theme="light"]) :where(.scope) :global(.landing-services) li:hover :global(.landing-service-icon) { background: #943c0d; color: #fff; }
+:global([data-theme="light"]) :where(.scope) :global(.landing-gallery-placeholder) { background: repeating-linear-gradient(90deg, #00000006 0 2px, transparent 2px 6px), linear-gradient(135deg, #e9e3dc, #f7f4f0 45%, #ddd5cc); }
+:global([data-theme="light"]) :where(.scope) :global(.landing-cta) { background: radial-gradient(ellipse 70% 60% at 15% 115%, #f8ad7155, transparent 70%), linear-gradient(160deg, #ffffff, #f0e8df); }
+:global([data-theme="light"]) :where(.scope) :global(.landing-map-facade) { background: repeating-linear-gradient(45deg, #00000006 0 1px, transparent 1px 14px), var(--surface-2); }
+:global([data-theme="light"]) :where(.scope) :global(.landing-step-dot) { border-color: #943c0d77; }
