@@ -2,7 +2,7 @@
 import { authStyles as styles } from "../../components/ui/style-scopes";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect,useRef,useState,type FormEvent } from "react";
 import { ThemeToggle } from "../../components/appearance/appearance";
 import { Icon,Logo } from "../../components/appearance/icons";
@@ -30,6 +30,7 @@ export default function BackendWorkspace({ initialRegister = false }: { initialR
   return <LiveLogin key={initialRegister ? "register" : "login"} base={liveBase} notice={notice} initialRegister={initialRegister} onLogin={enter} localTestEnabled={localTestEnabled} onLocalLogin={enterLocalTest} />;
 }
 function LiveLogin({ base, notice, initialRegister, onLogin, localTestEnabled, onLocalLogin }: { base: string; notice: string; initialRegister: boolean; onLogin: (username: string, password: string) => Promise<void>; localTestEnabled: boolean; onLocalLogin: (username: string) => Promise<void> }) {
+  const showTestAccounts = useSearchParams().get("accounts") === "test";
   const router = useRouter();
   const [register, setRegister] = useState(initialRegister);
   const [type, setType] = useState("individual");
@@ -37,6 +38,11 @@ function LiveLogin({ base, notice, initialRegister, onLogin, localTestEnabled, o
   const action = useCommand();
   const registrationApi = useRef<BackendApi | null>(null);
   const loginForm = useRef<HTMLFormElement>(null);
+  useEffect(() => {
+    if (register || !showTestAccounts || !localTestEnabled) return;
+    const picker = document.querySelector<HTMLDetailsElement>(".auth-account-picker");
+    if (picker) { picker.open = true; picker.querySelector("summary")?.focus(); picker.scrollIntoView({ block: "nearest" }); }
+  }, [register, showTestAccounts, localTestEnabled]);
   useEffect(() => () => registrationApi.current?.close(), []);
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); const form = event.currentTarget; const data = new FormData(form);

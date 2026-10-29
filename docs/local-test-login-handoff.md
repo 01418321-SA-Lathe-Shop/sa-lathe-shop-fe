@@ -32,6 +32,18 @@ not existing sessions; those still require revocation or expiry.
 
 ## Flow
 
+### Switch test accounts — 2026-10-29
+
+Sessions created through Local test login have an in-memory UI-only provenance
+marker. Only those sessions, with the existing loopback opt-in enabled, show
+**สลับบัญชีทดสอบ** in the Staff/Admin sidebar or Customer sidebar/mobile menu.
+Normal password sessions never show it, even for the same username. The button
+disables while using existing logout, then opens `/login?accounts=test` with the
+existing picker expanded/focused. This query controls presentation only. Selecting
+the next account remains explicit; there is no automatic login, new endpoint,
+credential persistence, browser mock or changed role permission. Existing logout
+failure notices remain visible if server revocation cannot be confirmed.
+
 1. Open `/login` and expand **บัญชีทดสอบ Local · เข้าสู่ระบบทันที**.
 2. Select one of the six accounts. Clear the normal form's password; disable the
    form and picker through the existing pending-command handling.

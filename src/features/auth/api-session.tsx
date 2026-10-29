@@ -7,7 +7,7 @@ import { isLocalTestLoginEnabled, localTestLoginError } from "./local-test-login
 // One memory-only session for the whole designed shell. Client navigation keeps
 // it; reload or sign-out discards it. Tokens never touch browser storage/URLs.
 // All sessions use the configured real backend; failures never select fixtures.
-export type ApiSession = { api: BackendApi; account: Account; expiresAt: string };
+export type ApiSession = { api: BackendApi; account: Account; expiresAt: string; localTest?: true };
 type SessionContext = {
   session: ApiSession | null;
   notice: string;
@@ -35,13 +35,13 @@ export function ApiSessionProvider({ children }: { children: ReactNode }) {
     return () => window.clearTimeout(timer);
   }, [session]);
 
-  const openSession = useCallback(async (authenticate: (api: BackendApi) => Promise<Login>) => {
+  const openSession = useCallback(async (authenticate: (api: BackendApi) => Promise<Login>, localTest = false) => {
     const api = new BackendApi(LIVE_BASE, () => { if (active.current === api) { active.current = null; setSession(null); setNotice("Session expired or revoked. Please sign in again."); } });
     try {
       const login = await authenticate(api);
       const account = await api.call<Account>("/auth/me");
       active.current?.close(); active.current = api;
-      const next = { api, account, expiresAt: login.expires_at };
+      const next: ApiSession = { api, account, expiresAt: login.expires_at, ...(localTest ? { localTest: true as const } : {}) };
       setNotice(""); setSession(next);
       return next;
     } catch (error) { api.close(); throw error; }
@@ -50,7 +50,7 @@ export function ApiSessionProvider({ children }: { children: ReactNode }) {
   const signIn = useCallback((username: string, password: string) => openSession((api) => api.login(username, password)), [openSession]);
   const signInLocalTest = useCallback(async (username: string) => {
     if (!LOCAL_TEST_ENABLED) throw new Error("Local test login ไม่ได้เปิดใน Frontend นี้ กรุณาใช้ชื่อผู้ใช้และรหัสผ่าน");
-    try { return await openSession((api) => api.loginLocalTest(username)); }
+    try { return await openSession((api) => api.loginLocalTest(username), true); }
     catch (error) { throw new Error(localTestLoginError(error)); }
   }, [openSession]);
 

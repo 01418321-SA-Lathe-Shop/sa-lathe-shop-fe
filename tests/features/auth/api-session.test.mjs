@@ -50,6 +50,7 @@ test("session login uses configured API then /auth/me, without a mode selector",
   const session = await context.signIn("test-customer", "test-only-password");
   assert.deepEqual(calls, [["base", "https://api.test"], ["login", "test-customer", "test-only-password"], ["read", "/auth/me"]]);
   assert.equal(session.account, account);
+  assert.equal(session.localTest, undefined);
   assert.equal("mode" in session, false);
   assert.equal("mock" in context, false);
   assert.equal("resetMock" in context, false);
@@ -82,6 +83,7 @@ test("local test session confirms /auth/me and retains backend logout", async ()
   const { context, calls, account } = sessionHarness(false, true, "http://localhost:8080");
   const session = await context.signInLocalTest("pim.admin");
   assert.equal(context.localTestEnabled, true);
+  assert.equal(session.localTest, true);
   assert.equal(session.account, account);
   assert.deepEqual(calls, [["base", "http://localhost:8080"], ["local-login", "pim.admin"], ["read", "/auth/me"]]);
   await context.signOut(); assert.deepEqual(calls.at(-1), ["logout"]);

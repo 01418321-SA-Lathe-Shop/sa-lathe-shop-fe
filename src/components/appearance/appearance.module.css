@@ -1,4 +1,8 @@
 /* Locally owned styles; legacy descendant class contracts are intentionally preserved. */
+:where(.scope) :global(.demo-account-switch) { display: inline-flex; align-items: center; justify-content: flex-start; gap: .5rem; width: 100%; min-height: 44px; margin-bottom: .5rem; padding: .75rem; border: 1px solid var(--cust-line, var(--line)); border-radius: 10px; background: var(--cust-surface, var(--surface)); color: var(--cust-ink, var(--text)); font: inherit; cursor: pointer; }
+:where(.scope) :global(.demo-account-switch):focus-visible { outline: 2px solid var(--cust-accent, var(--lime)); outline-offset: 3px; }
+:where(.scope) :global(.demo-account-switch):hover:not(:disabled) { background: var(--cust-surface-2, var(--surface-2)); }
+:where(.scope) :global(.demo-account-switch):disabled { opacity: .6; cursor: wait; }
 :where(.scope) :global(.theme-quick-toggle) { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 2.75rem; height: 2.75rem; min-width: 44px; min-height: 44px; padding: 0; border: 1px solid var(--cust-line, var(--line)); border-radius: .6875rem; background: var(--cust-surface, var(--surface)); color: var(--cust-ink, var(--text)); cursor: pointer; }
 :where(.scope) :global(.theme-quick-toggle):hover { background: var(--cust-surface-2, var(--surface-2)); }
 :where(.scope) :global(.theme-quick-toggle):focus-visible { outline: 2px solid var(--cust-accent, var(--lime)); outline-offset: 3px; }

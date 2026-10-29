@@ -12,6 +12,7 @@ import { API_ROLES, canAccessWorkspace, getWorkspaces, type Role, type Workspace
 import { PAGE_LABELS, ROLE_LABELS, ROLE_ROOTS, workspacePath } from "./workspace-routes";
 import ConnectedWorkspace from "./connected-workspace";
 import CustomerShell from "../customer/customer-shell";
+import { DemoAccountSwitch } from "../auth/demo-account-switch";
 
 import { workspaceIcons as icons } from "./workspace-icons";
 const descriptions: Record<Role, string> = {
@@ -54,7 +55,7 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
           {[{ id: "overview" as const }, ...items].map(item => <Link key={item.id} href={workspacePath(role, item.id)} className={workspaceId === item.id ? "active" : ""} aria-current={workspaceId === item.id ? "page" : undefined} onClick={() => setMenuOpen(false)}><span className="nav-icon"><Icon name={icons[item.id]}/></span><span>{PAGE_LABELS[item.id]}</span></Link>)}
         </nav>
       </div>
-      <div className="sidebar-theme"><SettingsToggle/></div>
+      <div className="sidebar-theme"><DemoAccountSwitch/><SettingsToggle/></div>
       <div className="sidebar-footer"><div className="avatar">{initials}</div><div><strong>{account.name}</strong><span>{role === "Admin" ? "ผู้ดูแลระบบ" : role === "Worker" ? "พนักงาน" : "ลูกค้า"} · {account.username}</span></div><button aria-label="ออกจากระบบ" onClick={leave}><Icon name="logout"/></button></div>
     </aside>
     <div className="app-stage">

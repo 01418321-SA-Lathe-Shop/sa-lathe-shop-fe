@@ -161,6 +161,10 @@ by App Router do not uncheck the currently visible theme or size controls.
 
 ## Typography
 
+### Local-test account switching — 2026-10-29
+
+“สลับบัญชีทดสอบ” appears in Staff/Admin sidebar settings and Customer desktop sidebar/mobile menu only when the active session was created via guarded Local test login and the existing loopback opt-in is enabled. Ordinary password sessions, even with a demo username, do not show it. The UI-only provenance marker stays in session memory and is never an authorization claim. Clicking disables the action, uses existing sign-out/revocation and redirects to `/login?accounts=test`, where the existing picker expands and receives focus. The query selects presentation only, never an account or permission. Existing logout-failure notice is preserved; no automatic login/retry, credentials, browser mock or new endpoint is added.
+
 ### Staff/Admin navbar alignment — 2026-10-29
 
 Staff/Admin now follow Customer's navbar composition: a 64px desktop bar with muted real-connection/session notice left and one right-aligned action group (icon theme switch and bell). At the existing Staff mobile navigation breakpoint (900px), a 72px bar shows the logo left and theme/bell/menu right. The bell links to the existing role-scoped inbox; it does not reuse Customer notification targets, add API reads or fabricate unread counts. Sign-out remains in the sidebar/footer on desktop and mobile. Removed scattered breadcrumb/API-pill/topbar-sign-out controls; page headings and sidebar retain current location/role information. Existing sidebar/menu behavior and role permissions remain unchanged. Shared Light/Dark variables govern the whole bar.
@@ -684,6 +688,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-29 | Add test-session-only account switch in sidebar/mobile menu and focus the login picker after sign-out | Provenance/visibility/logout regressions, scoped browser checks, lint and production build |
 | 2026-10-29 | Align Staff/Admin navbar with Customer's grouped desktop/mobile layout; retain role inbox and sidebar sign-out | Scoped responsive/theme/keyboard browser checks with test-only network responses, native tests, lint and build |
 | 2026-10-29 | Connect six demo buttons to real password-free local-test API behind explicit loopback UI opt-in; preserve normal login and memory-only sessions | Real browser login/me/role navigation/logout/revocation passed for all six accounts at desktop/mobile; company membership boundary reads passed; simulated error checks are recorded separately |
 | 2026-10-28 | Separate icon-only navbar theme action from Settings; retain text-size controls only inside Settings | Component regressions for destination labels, immediate action and size-only settings; desktop/mobile browser checks use controlled test responses, not real account verification |
@@ -856,6 +861,10 @@ src/components/appearance/appearance.module.css
 
 ```css
 /* Locally owned styles; legacy descendant class contracts are intentionally preserved. */
+:where(.scope) :global(.demo-account-switch) { display: inline-flex; align-items: center; justify-content: flex-start; gap: .5rem; width: 100%; min-height: 44px; margin-bottom: .5rem; padding: .75rem; border: 1px solid var(--cust-line, var(--line)); border-radius: 10px; background: var(--cust-surface, var(--surface)); color: var(--cust-ink, var(--text)); font: inherit; cursor: pointer; }
+:where(.scope) :global(.demo-account-switch):focus-visible { outline: 2px solid var(--cust-accent, var(--lime)); outline-offset: 3px; }
+:where(.scope) :global(.demo-account-switch):hover:not(:disabled) { background: var(--cust-surface-2, var(--surface-2)); }
+:where(.scope) :global(.demo-account-switch):disabled { opacity: .6; cursor: wait; }
 :where(.scope) :global(.theme-quick-toggle) { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; width: 2.75rem; height: 2.75rem; min-width: 44px; min-height: 44px; padding: 0; border: 1px solid var(--cust-line, var(--line)); border-radius: .6875rem; background: var(--cust-surface, var(--surface)); color: var(--cust-ink, var(--text)); cursor: pointer; }
 :where(.scope) :global(.theme-quick-toggle):hover { background: var(--cust-surface-2, var(--surface-2)); }
 :where(.scope) :global(.theme-quick-toggle):focus-visible { outline: 2px solid var(--cust-accent, var(--lime)); outline-offset: 3px; }
