@@ -86,7 +86,10 @@ export function ErrorText({ error }: { error?: string }) {
 
 /** Success message that hides itself after five seconds. */
 export function Toast({ message, onDone }: { message: string; onDone: () => void }) {
-  useEffect(() => { if (!message) return; const timer = window.setTimeout(onDone, 5000); return () => clearTimeout(timer); }, [message, onDone]);
+  // Latest onDone in a ref so parent re-renders (new callback each time) do not restart the timer.
+  const done = useRef(onDone);
+  useEffect(() => { done.current = onDone; });
+  useEffect(() => { if (!message) return; const timer = window.setTimeout(() => done.current(), 5000); return () => clearTimeout(timer); }, [message]);
   return <div className={styles.toast} role="status" aria-live="polite">{message && <><span aria-hidden="true">✓</span>{message}</>}</div>;
 }
 
