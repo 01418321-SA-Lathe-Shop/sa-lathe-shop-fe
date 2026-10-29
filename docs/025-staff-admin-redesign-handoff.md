@@ -1,6 +1,6 @@
 # Staff/Admin redesign — plan and handoff
 
-Status date: 2026-10-29 · Branch `develop` · Last pushed code commit `d64f659`
+Status date: 2026-10-30 · Branch `develop` · Last code commit `d07991e` (Step 2)
 
 This document holds the complete owner-approved plan for the Staff/Admin redesign (audit, navigation, flow, design system, page specifications and step plan) and the current implementation status. Part A is status; Part B is the plan as approved.
 
@@ -55,37 +55,15 @@ Implemented differences from the spec, all within the approved intent:
 - The งานผลิต toolbar is two rows (tabs, then search and อัปเดตข้อมูล) so it fits at every width.
 - Drawers (side panels) are not used yet; create/edit drawers arrive with Steps 3, 4 and 7.
 
-## In progress (uncommitted): Step 2 — คำขอและใบเสนอราคา
+## Step 2 — คำขอและใบเสนอราคา (done)
 
-Files in `src/features/requests/`:
-
-| File | Content |
+| Commit | Purpose |
 | --- | --- |
-| `request-stage-domain.ts` | Pure logic: stage per request, counts, sorting, Deposit/PO checklist, minimum-price check, rejection count |
-| `request-index.ts` | Loads all requests, then quotations and Deposit/PO for open requests only, six at a time |
-| `requests.tsx` (rewritten) | Six stage tabs; URL `?stage=&q=&request=` (the bell's `?request=` links open the right request) |
-| `request-detail.tsx` | Summary, customer files, next-action card per stage, collapsed history |
-| `request-quote.tsx` | Quote form with automatic server minimum estimate, send-saves-first behind a confirm dialog, Thai 409 conflict message, refuse request |
-| `request-evidence.tsx` | Deposit/PO terms and checklist, approve/reject review with exact retry, opened job linking to production |
-| `requests.module.css` | Page-specific styles |
+| `1313244` | Shared list/detail layout `staff-layout.module.css` (production imports it; sticky submit bar on phones); status-tab fix for a 421px phone overflow; request/quotation/evidence label maps; `dueDayCountdown` |
+| `d07991e` | `src/features/requests/`: `request-stage-domain.ts` (stage, counts, sorting, checklist, minimum-price check) with 9 tests, `request-index.ts` (open requests read six at a time), `staff-requests.tsx` (six tabs, `?stage=&q=&request=`), `request-detail.tsx`, `request-quote.tsx`, `request-evidence.tsx`, `requests.module.css`; DESIGN.md and sync registration |
 
-Other changes in the working tree:
-
-- List/detail layout extracted to `src/components/staff-ui/staff-layout.module.css`; production imports it. Adds a sticky submit bar on phones.
-- `staff-labels.ts`: request, quotation and evidence status maps. `staff-format.ts`: `dueDayCountdown`.
-- To delete (staged deletions were unstaged; re-run `git rm`): `src/features/quotations/quotations.tsx`, `src/features/fulfillment/fulfillment.tsx`. Customer uses its own components; `fulfillment-domain.ts` stays.
-- `connected-workspace.tsx` no longer passes the `focus` prop.
-
-Status: type check, lint and source audit pass; the existing 163 tests pass. Not yet checked in a browser.
-
-Remaining for Step 2:
-
-1. Add `tests/features/requests/request-stage-domain.test.mjs`.
-2. Re-walk งานผลิต, because its CSS moved to the shared layout file.
-3. Walk the requests page as Staff and Admin at 1280px and 390px, both themes, with writes intercepted.
-4. Register `staff-layout.module.css` and `requests.module.css` in `scripts/sync-design.mjs`.
-5. Add a DESIGN.md section and change-log row; run `node scripts/sync-design.mjs`, `--check`, `git diff --check` and `npm run build`.
-6. Commit and push.
+- Staff/Admin use the new `staff-requests.tsx`; Customer keeps `requests.tsx`, which still imports `quotations/quotations.tsx` → `fulfillment/fulfillment.tsx`. Those two files are therefore not deleted (the earlier note to delete them is withdrawn).
+- Verification: 172 tests, type check, lint, source audit, DESIGN sync, build; Chrome walk as `anan.staff` and `pim.admin` at 1280px and 390px, Light and Dark, writes intercepted, งานผลิต re-walked. Not walked: 360, 768, 1920px.
 
 ## Working notes
 
@@ -317,7 +295,7 @@ Components, fields and actions:
 | Unsure whether saved | “Did it save?” panel |
 | No permission | Existing guard; Admin never sees production buttons |
 
-## B6. Page spec — คำขอและใบเสนอราคา (`/staff/quotations`, `/admin/requests`) — Step 2, in progress
+## B6. Page spec — คำขอและใบเสนอราคา (`/staff/quotations`, `/admin/requests`) — implemented in Step 2
 
 Both URLs get the same name and screen; `/staff/requests` keeps redirecting.
 
@@ -427,7 +405,7 @@ Rules for every step:
 | --- | --- | --- |
 | 0 | Shared foundation: page header, status tabs with counts, status badge and Thai labels, record card, side panel and confirmation dialog, toast, “did it save?” panel, skeleton/empty/error states; number display rules; grouped sidebar with Admin section and the shared “คำขอและใบเสนอราคา” name; bell with unread count and dropdown (การแจ้งเตือน leaves the sidebar) | Done (`6a6eb07`; kit components in `d64f659`) |
 | 1 | งานผลิต as approved; plan editor moves here with names and units; duplicate plans removed from สต๊อกวัตถุดิบ and the request detail | Done (`d64f659`) |
-| 2 | คำขอและใบเสนอราคา as approved: six stage tabs (per-request quotation and Deposit/PO reads, six at a time), one action card, automatic minimum price, customer name To be defined | In progress (uncommitted) |
+| 2 | คำขอและใบเสนอราคา as approved: six stage tabs (per-request quotation and Deposit/PO reads, six at a time), one action card, automatic minimum price, customer name To be defined | Done (`1313244`, `d07991e`) |
 | 3 | สต๊อกวัตถุดิบ + ข้อมูลหลัก (see below) | Not started |
 | 4 | สั่งซื้อวัตถุดิบ (Admin) (see below) | Not started |
 | 5 | รับเข้าวัตถุดิบ (see below) | Not started |
