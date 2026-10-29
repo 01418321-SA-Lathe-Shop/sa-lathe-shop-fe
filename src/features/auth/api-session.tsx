@@ -36,15 +36,35 @@ export function ApiSessionProvider({ children }: { children: ReactNode }) {
   }, [session]);
 
   const openSession = useCallback(async (authenticate: (api: BackendApi) => Promise<Login>, localTest = false) => {
+    const previous = active.current;
+    let authenticated = false;
     const api = new BackendApi(LIVE_BASE, () => { if (active.current === api) { active.current = null; setSession(null); setNotice("Session expired or revoked. Please sign in again."); } });
     try {
       const login = await authenticate(api);
+      authenticated = true;
       const account = await api.call<Account>("/auth/me");
-      active.current?.close(); active.current = api;
+      if (active.current !== previous) throw new Error("The active account changed. Please try again.");
+      if (previous && localTest) {
+        try { await previous.logout(); }
+        catch {
+          if (active.current === previous) {
+            active.current = null; setSession(null);
+            setNotice("Signed out locally. Previous account logout could not be confirmed; its server session may remain valid until expiry.");
+          }
+          throw new Error("Previous account logout could not be confirmed. Please sign in again.");
+        }
+        if (active.current !== previous) throw new Error("The active account changed. Please sign in again.");
+      } else previous?.close();
+      active.current = api;
       const next: ApiSession = { api, account, expiresAt: login.expires_at, ...(localTest ? { localTest: true as const } : {}) };
       setNotice(""); setSession(next);
       return next;
-    } catch (error) { api.close(); throw error; }
+    } catch (error) {
+      // A rejected replacement must not leave its newly issued session behind.
+      // Cleanup is best-effort if the API itself is unavailable.
+      if (authenticated) await api.logout().catch(() => {});
+      api.close(); throw error;
+    }
   }, []);
 
   const signIn = useCallback((username: string, password: string) => openSession((api) => api.login(username, password)), [openSession]);

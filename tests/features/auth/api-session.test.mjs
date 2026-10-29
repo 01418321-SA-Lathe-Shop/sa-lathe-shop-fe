@@ -12,6 +12,7 @@ const { outputText } = ts.transpileModule(source, { compilerOptions: { module: t
 
 function sessionHarness(failLogin = false, localEnabled = false, base = "https://api.test") {
   const calls = [], instances = [];
+  let stateIndex = 0, savedSession = null, savedNotice = "";
   const account = { id: "test-account", role: "customer", username: "test-customer" };
   class TestApi {
     constructor(base) { calls.push(["base", base]); instances.push(this); }
@@ -33,16 +34,20 @@ function sessionHarness(failLogin = false, localEnabled = false, base = "https:/
   const hooks = {
     createContext: () => ({ Provider: "session-provider" }),
     useCallback: (callback) => callback, useMemo: (factory) => factory(),
-    useRef: () => ({ current: null }), useState: (initial) => [initial, () => {}],
+    useRef: () => ({ current: null }), useState: (initial) => {
+      const index = stateIndex++;
+      return [initial, (value) => { if (index === 0) savedSession = value; else savedNotice = value; }];
+    },
     useEffect() {},
   };
   runInNewContext(outputText, {
+    Error,
     module: componentModule, exports: componentModule.exports,
     process: { env: { NEXT_PUBLIC_API_BASE_URL: base, NEXT_PUBLIC_LOCAL_TEST_LOGIN_ENABLED: localEnabled ? "true" : undefined } },
     require: (name) => name === "react/jsx-runtime" ? require(name) : name === "react" ? hooks : name === "../../lib/api/backend-api" ? { BackendApi: TestApi } : name === "./local-test-login" ? { isLocalTestLoginEnabled, localTestLoginError } : assert.fail(`Unexpected import: ${name}`),
   });
   const context = componentModule.exports.ApiSessionProvider({ children: null }).props.value;
-  return { context, calls, instances, account };
+  return { context, calls, instances, account, state: () => ({ session: savedSession, notice: savedNotice }) };
 }
 
 test("session login uses configured API then /auth/me, without a mode selector", async () => {
@@ -93,4 +98,50 @@ test("failed local test login closes its client without password or fixture fall
   const { context, calls } = sessionHarness(true, true, "http://localhost:8080");
   await assert.rejects(context.signInLocalTest("pim.admin"), /connection unavailable/);
   assert.deepEqual(calls.map(([action]) => action), ["base", "local-login", "close"]);
+});
+
+test("switch confirms the replacement before revoking the previous session without a signed-out gap", async () => {
+  const h = sessionHarness(false, true, "http://localhost:8080");
+  const previous = await h.context.signInLocalTest("pim.admin");
+  let release;
+  h.instances[0].logout = () => { h.calls.push(["previous-logout"]); return new Promise((resolve) => { release = resolve; }); };
+  const pending = h.context.signInLocalTest("somchai");
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(h.state().session, previous);
+  assert.deepEqual(h.calls.slice(-2), [["read", "/auth/me"], ["previous-logout"]]);
+  release(); const next = await pending;
+  assert.notEqual(next.api, previous.api); assert.equal(h.state().session, next);
+  assert.equal(next.localTest, true);
+});
+
+test("failed replacement identity read preserves the current session and revokes the candidate", async () => {
+  const h = sessionHarness(false, true, "http://localhost:8080");
+  const previous = await h.context.signInLocalTest("pim.admin");
+  const pending = h.context.signInLocalTest("somchai");
+  h.instances[1].call = async () => { throw new Error("identity unavailable"); };
+  await assert.rejects(pending, /identity unavailable/);
+  assert.equal(h.state().session, previous);
+  assert.deepEqual(h.calls.slice(-2), [["logout"], ["close"]]);
+});
+
+test("uncertain old-session logout clears local state instead of silently adopting the new account", async () => {
+  const h = sessionHarness(false, true, "http://localhost:8080");
+  await h.context.signInLocalTest("pim.admin");
+  h.instances[0].logout = async () => { throw new Error("lost logout response"); };
+  await assert.rejects(h.context.signInLocalTest("somchai"), /logout could not be confirmed/);
+  assert.equal(h.state().session, null);
+  assert.match(h.state().notice, /may remain valid until expiry/);
+  assert.deepEqual(h.calls.slice(-2), [["logout"], ["close"]]);
+});
+
+test("sign-out during a pending replacement prevents the candidate from restoring a session", async () => {
+  const h = sessionHarness(false, true, "http://localhost:8080");
+  await h.context.signInLocalTest("pim.admin");
+  const pending = h.context.signInLocalTest("somchai");
+  let release;
+  h.instances[1].call = () => new Promise((resolve) => { release = resolve; });
+  await new Promise((resolve) => setImmediate(resolve));
+  await h.context.signOut(); release(h.account);
+  await assert.rejects(pending, /active account changed/);
+  assert.equal(h.state().session, null);
 });
