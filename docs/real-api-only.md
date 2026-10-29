@@ -28,16 +28,22 @@ Date: 2026-10-28. Owner approved deleting the frontend browser mock.
 
 ## Real seeded accounts are a separate setup
 
-Backend `develop` at `16cdd66` documents operator setup in `docs/015-demo-seed.md`
-and `docs/016-frontend-demo-handoff.md`. It seeds six fictional identities into a
-dedicated real PostgreSQL database, not frontend fixtures. Passwords are privately
-provided. Only the six public demo usernames are listed by owner approval;
-account UUIDs and passwords are not frontend constants.
+Backend `develop` documents the guarded account setup in `docs/015-demo-seed.md`
+and the frontend contract in `docs/016-frontend-demo-handoff.md`. Six fictional
+identities belong only in a dedicated local/test PostgreSQL database. With the
+explicit local-test flags and loopback API, the frontend can use the password-free
+test-login route; otherwise use ordinary authentication. Passwords, hashes,
+tokens, and account UUIDs are never frontend constants.
 
-The account-only seed contains no requests, quotations, jobs, stock, invoices or
-attachments. Empty lists are expected. Operator setup must make `/health/ready`
-return 200 and allow the exact frontend origin through CORS. Storage/file flows
-need separately configured private S3-compatible storage and bucket CORS.
+The account-only seed itself contains no requests, quotations, jobs, stock,
+invoices, or attachments. A separate explicitly guarded workflow fixture is
+documented in backend `docs/017-demo-workflows.md`; it is not applied to every
+database automatically. Empty lists are expected when that fixture has not been
+applied. The operator's dedicated local demo database was populated and checked
+on 2026-10-29, but this is not a production deployment or a guarantee about other
+environments. Operator setup must make `/health/ready` return 200 and allow the
+exact frontend origin through CORS. Storage/file flows need separately configured
+private S3-compatible storage and bucket CORS.
 
 No migration, seed, backend configuration, deployment or data deletion was run
 by this frontend work. Initial removal checks found readiness 503. On 2026-10-29,
