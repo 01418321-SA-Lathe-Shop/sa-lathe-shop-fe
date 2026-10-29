@@ -169,6 +169,12 @@ Customer Deposit/PO reuses Quotation's document layout: the main column contains
 
 “สลับบัญชีทดสอบ” appears in Staff/Admin sidebar settings and Customer desktop sidebar/mobile menu only when the active session was created via guarded Local test login and the existing loopback opt-in is enabled. Ordinary password sessions, even with a demo username, do not show it. The UI-only provenance marker stays in session memory and is never an authorization claim. Clicking expands an inline six-account list without signing out or visiting login. Selecting an account authenticates it through the existing local-test endpoint, confirms `/auth/me`, revokes the previous session and replaces the workspace by server role. The current account is labelled/disabled; all choices disable while pending. Cancel/Escape closes the list and restores focus without changing accounts. Failed replacement login keeps the current account and shows an inline error. If old-session logout cannot be confirmed, clear local state, clean up the candidate best-effort and show the existing expiry/revocation warning at login rather than silently switching. Staff mobile navigation closes after success; Customer shell remounts by account ID. Normal logout remains separate. No password, persisted token, automatic retry, browser mock or new endpoint is added.
 
+### Staff/Admin grouped Thai navigation and bell — 2026-10-29
+
+Step 0 of the approved Staff/Admin redesign (Overview content unchanged). The sidebar groups pages by workflow stage with Thai 0.75rem/650 muted group labels (no tracking): Staff — ภาพรวม, งานขาย (คำขอและใบเสนอราคา), การผลิต (งานผลิต, สต๊อกวัตถุดิบ, รับเข้าวัตถุดิบ), ส่งมอบและการเงิน (ส่งมอบและใบแจ้งหนี้); Admin — ภาพรวม, งานขาย, การผลิต (งานผลิต, สต๊อกวัตถุดิบ), จัดซื้อ (สั่งซื้อวัตถุดิบ, รับเข้าวัตถุดิบ), ส่งมอบและการเงิน (ส่งมอบและรับชำระ), then a top-ruled ผู้ดูแลระบบ section (จัดการพนักงาน). Staff `/staff/quotations` and Admin `/admin/requests` share the label คำขอและใบเสนอราคา; Staff's delivery page is labelled ส่งมอบและใบแจ้งหนี้ because Staff do not receive payments. URLs, routes and permissions are unchanged; การแจ้งเตือน stays routable but leaves the sidebar. Page eyebrows show the Thai stage (0.8125rem, no tracking); workspace descriptions and the sidebar role card are Thai.
+
+The navbar bell now matches Customer: a 44px button with an orange count badge (all loaded notifications, `•`/`99+` when the read is incomplete), opening a native dialog — a 25rem dropdown under the navbar on desktop and a full-screen sheet at ≤700px. It lists the eight newest notifications with Thai wording for the backend's five fixed titles (display only), request number and relative Bangkok time, unread tint and dot, "อ่านทั้งหมด" (only after a complete read), close, and "ดูการแจ้งเตือนทั้งหมด" to the role inbox. Opening an item marks it read then opens the role's request page with `?request=`. Focus returns to the bell on close. This supersedes the bell-as-link sentence below. Known behavior: after client navigation Next.js keeps the previous route mounted but hidden (Cache Components), so a hidden second shell can exist in the DOM.
+
 ### Staff/Admin navbar alignment — 2026-10-29
 
 Staff/Admin now follow Customer's navbar composition: a 64px desktop bar with muted real-connection/session notice left and one right-aligned action group (icon theme switch and bell). At the existing Staff mobile navigation breakpoint (900px), a 72px bar shows the logo left and theme/bell/menu right. The bell links to the existing role-scoped inbox; it does not reuse Customer notification targets, add API reads or fabricate unread counts. Sign-out remains in the sidebar/footer on desktop and mobile. Removed scattered breadcrumb/API-pill/topbar-sign-out controls; page headings and sidebar retain current location/role information. Existing sidebar/menu behavior and role permissions remain unchanged. Shared Light/Dark variables govern the whole bar.
@@ -759,6 +765,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-29 | Staff/Admin redesign Step 0: workflow-grouped Thai sidebar with separated Admin section, shared คำขอและใบเสนอราคา label, Thai eyebrows/descriptions, Customer-style notification bell with unread count and dropdown; remove unused inbox-link CSS | Navigation/notification tests (every permitted page grouped once, Thai titles), 154 native tests, type check, lint, source audit, build; Chrome real local API read-only as anan.staff and pim.admin at 1280px Dark/Light and 390px: no overflow or console errors, focus returns to bell |
 | 2026-10-29 | Customer invoices: summary tiles, status pills with counts, cards with paid progress and due-day chips; detail balance hero, numbered bank-payment steps with fill-balance and inline amount guidance, sticky ledger and payment timeline; remove unused `.cust-payment-layout`/`.cust-invoice-summary`/`.cust-list-price` rules | Invoice domain tests (exact cents, Bangkok days, pending excluded), 151 native tests, type check, lint, source audit, build; Chrome real local API (somchai unpaid, nida.company paid) at 1280/390px Dark and 1280px Light: no overflow or console errors, over-balance message, fill chip, submit gated on upload |
 | 2026-10-29 | Match Customer Deposit/PO detail and view tabs to Quotation document layout and price rail | Presentation regressions, responsive/theme browser checks, lint and build; existing evidence logic preserved |
 | 2026-10-29 | Landing: remove the capability card (materials table now sits beside its heading); pair the Deposit/PO card with a full-width order-facts card; rewrite all public Thai copy in a natural shop voice; reveal tall items as soon as they enter the viewport | Type check, lint, native tests, build; Chrome walks at 1440 and 360px: no overflow, no stuck reveals |
@@ -1130,9 +1137,6 @@ src/features/workspace/workspace.module.css
 :where(.scope) :global(.workspace-navbar-environment) { min-width: 0; color: var(--muted); font-size: .8125rem; }
 :where(.scope) :global(.workspace-navbar-brand) { display: none; }
 :where(.scope) :global(.workspace-navbar-actions) { display: flex; align-items: center; flex-shrink: 0; gap: 16px; margin-left: auto; }
-:where(.scope) :global(.workspace-navbar-inbox) { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 10px; color: var(--text); }
-:where(.scope) :global(.workspace-navbar-inbox):hover { background: var(--surface-2); }
-:where(.scope) :global(.workspace-navbar-inbox):focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
 @media (max-width: 56.25rem) {
   :where(.scope) :global(.topbar.workspace-navbar) { height: 72px; }
   :where(.scope) :global(.workspace-navbar-environment) { display: none; }
@@ -1265,6 +1269,46 @@ src/features/workspace/workspace.module.css
 :global([data-theme="light"]) :where(.scope) :global(.data-row):not(:global(.data-head)):hover { background: #f3f5f0; }
 :global([data-theme="light"]) :where(.scope) :global(.status-pill) { background: #ffeadb; color: #a64c0d !important; }
 :global([data-theme="light"]) :where(.scope) :global(.upload) { border-color: var(--line); background: #f7f8f4; color: #263027; }
+
+/* Grouped Thai sidebar (workflow stages; Admin-only section separated). */
+:where(.scope) :global(.nav-group) { display: flex; flex-direction: column; gap: inherit; margin-top: 0.75rem; }
+:where(.scope) :global(.nav-group-label) { padding: 0 0.75rem 0.25rem; color: var(--muted); font-size: 0.75rem; font-weight: 650; letter-spacing: 0; }
+:where(.scope) :global(.nav-group-admin) { margin-top: 1rem; padding-top: 0.875rem; border-top: 0.0625rem solid var(--line); }
+:where(.scope) :global(.staff-space) span { font-size: 0.75rem; letter-spacing: 0; }
+@media (max-width: 56.25rem) {
+  :where(.scope) :global(.integrated-sidebar) :global(.nav-list) { display: flex; flex-direction: column; overflow-x: visible; }
+}
+
+/* Navbar bell with unread count and dropdown (same pattern as the Customer navbar). */
+:where(.scope) :global(.workspace-bell) { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 10px; background: transparent; color: var(--text); cursor: pointer; }
+:where(.scope) :global(.workspace-bell):hover { background: var(--surface-2); }
+:where(.scope) :global(.workspace-bell):focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+:where(.scope) :global(.workspace-bell) > span { position: absolute; top: 4px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; display: grid; place-items: center; border-radius: 999px; background: var(--lime); color: #160e08; font-size: 0.6875rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+:where(.scope) :global(.workspace-bell-dialog) { position: fixed; inset: 72px clamp(1rem, 2.5vw, 2.5rem) auto auto; margin: 0; width: min(25rem, calc(100vw - 2rem)); max-height: min(36rem, calc(100dvh - 6rem)); padding: 0; overflow: auto; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--text); box-shadow: 0 24px 64px rgba(0, 0, 0, .35); }
+:where(.scope) :global(.workspace-bell-dialog)::backdrop { background: rgba(0, 0, 0, .25); }
+:where(.scope) :global(.workspace-bell-dialog) > section { display: grid; }
+:where(.scope) :global(.workspace-bell-dialog) header { position: sticky; top: 0; display: flex; align-items: center; gap: 8px; padding: 12px 12px 12px 20px; border-bottom: 1px solid var(--line); background: var(--surface); }
+:where(.scope) :global(.workspace-bell-dialog) h2 { margin: 0 auto 0 0; font-size: 1.0625rem; }
+:where(.scope) :global(.workspace-bell-text) { min-height: 44px; padding: 0 8px; border: 0; background: transparent; color: var(--lime); font: inherit; font-size: 0.875rem; cursor: pointer; }
+:where(.scope) :global(.workspace-bell-text):disabled { color: var(--muted); cursor: default; }
+:where(.scope) :global(.workspace-bell-close) { width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 10px; background: transparent; color: var(--text); cursor: pointer; }
+:where(.scope) :global(.workspace-bell-note) { margin: 0; padding: 16px 20px; color: var(--muted); font-size: 0.875rem; }
+:where(.scope) :global(.workspace-bell-dialog) ol { margin: 0; padding: 0; list-style: none; }
+:where(.scope) :global(.workspace-bell-dialog) li { position: relative; border-bottom: 1px solid var(--line); }
+:where(.scope) :global(.workspace-bell-dialog) li[data-unread] { background: color-mix(in srgb, var(--lime) 7%, var(--surface)); }
+:where(.scope) :global(.workspace-bell-dialog) li > a { display: grid; gap: 4px; min-height: 56px; padding: 12px 40px 12px 20px; color: var(--text); text-decoration: none; }
+:where(.scope) :global(.workspace-bell-dialog) li > a:hover { background: var(--surface-2); }
+:where(.scope) :global(.workspace-bell-dialog) li > a:focus-visible { outline: 2px solid var(--lime); outline-offset: -2px; }
+:where(.scope) :global(.workspace-bell-dialog) li strong { font-size: 0.9375rem; font-weight: 600; }
+:where(.scope) :global(.workspace-bell-dialog) li span:not(.workspace-bell-dot) { color: var(--muted); font-size: 0.8125rem; }
+:where(.scope) :global(.workspace-bell-dot) { position: absolute; top: 50%; right: 18px; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; background: var(--lime); }
+:where(.scope) :global(.workspace-bell-all) { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; color: var(--lime); text-decoration: none; font-weight: 600; font-size: 0.9375rem; }
+:global([data-theme="light"]) :where(.scope) :is(:global(.workspace-bell-text), :global(.workspace-bell-all)) { color: var(--lime-soft); }
+@media (max-width: 43.75rem) {
+  :where(.scope) :global(.workspace-bell-dialog) { inset: 0; width: 100%; max-width: 100%; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
+}
+/* Thai stage eyebrow above the page title: no tracking, readable size. */
+:where(.scope) :global(.page-heading) :global(.eyebrow) { color: var(--muted); font-size: 0.8125rem; font-weight: 650; letter-spacing: 0; }
 ```
 
 ### A2. Shared workflow styles — src/components/ui/workflows.module.css

@@ -8,8 +8,9 @@ import { SettingsToggle, ThemeToggle } from "../../components/appearance/appeara
 import { Icon, Logo } from "../../components/appearance/icons";
 
 import { useApiSession } from "../auth/api-session";
-import { API_ROLES, canAccessWorkspace, getWorkspaces, type Role, type WorkspaceId } from "./workspace-access";
-import { PAGE_LABELS, ROLE_LABELS, ROLE_ROOTS, workspacePath } from "./workspace-routes";
+import { API_ROLES, canAccessWorkspace, getWorkspaces, NAV_GROUPS, type Role, type WorkspaceId } from "./workspace-access";
+import { pageLabel, ROLE_ROOTS, workspacePath } from "./workspace-routes";
+import { WorkspaceBell } from "./workspace-bell";
 import ConnectedWorkspace from "./connected-workspace";
 import CustomerShell from "../customer/customer-shell";
 import { DemoAccountSwitch } from "../auth/demo-account-switch";
@@ -40,19 +41,23 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
   if (!canAccessWorkspace(role, workspaceId)) return <main className={`page-content ${styles.scope}`}><h1>ไม่มีสิทธิ์เข้าถึงหน้านี้</h1><Link href={ROLE_ROOTS[role]}>กลับภาพรวม</Link></main>;
   const { account } = session;
   const items = getWorkspaces(role);
+  const groups = role === "Customer" ? [] : NAV_GROUPS[role];
+  const group = groups.find((entry) => entry.items.some((id) => id === workspaceId));
   const overview = workspaceId === "overview";
+  const navLink = (id: WorkspaceId) => <Link key={id} href={workspacePath(role, id)} className={workspaceId === id ? "active" : ""} aria-current={workspaceId === id ? "page" : undefined} onClick={() => setMenuOpen(false)}><span className="nav-icon"><Icon name={icons[id]}/></span><span>{pageLabel(role, id)}</span></Link>;
   const leave = () => void signOut().then(() => router.push("/login"));
   const initials = account.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "??";
   if (role === "Customer") return <CustomerShell key={account.id} session={session} leave={leave} />;
   return <div className={`app-shell integrated-shell ${styles.scope}`}>
     <a className="workflow-skip" href="#main-content">ข้ามไปเนื้อหา</a>
     {menuOpen && <button className="navigation-scrim" aria-label="ปิดเมนู" onClick={() => setMenuOpen(false)}/>}
-    <aside className={`sidebar integrated-sidebar ${menuOpen ? "navigation-open" : ""}`} aria-label={`เมนู ${ROLE_LABELS[role]}`}>
+    <aside className={`sidebar integrated-sidebar ${menuOpen ? "navigation-open" : ""}`} aria-label={role === "Admin" ? "เมนูผู้ดูแลระบบ" : "เมนูพนักงาน"}>
       <div className="sidebar-scroll">
         <Logo onClick={() => router.push("/")}/>
-        <div className="staff-space"><span>{ROLE_LABELS[role].toUpperCase()} WORKSPACE</span><strong>{role === "Admin" ? "จัดการระบบ" : role === "Worker" ? "จัดการงานโรงกลึง" : "พื้นที่ลูกค้า"}</strong></div>
-        <nav className="nav-list"><span className="nav-label">WORKSPACE</span>
-          {[{ id: "overview" as const }, ...items].map(item => <Link key={item.id} href={workspacePath(role, item.id)} className={workspaceId === item.id ? "active" : ""} aria-current={workspaceId === item.id ? "page" : undefined} onClick={() => setMenuOpen(false)}><span className="nav-icon"><Icon name={icons[item.id]}/></span><span>{PAGE_LABELS[item.id]}</span></Link>)}
+        <div className="staff-space"><span>{role === "Admin" ? "ผู้ดูแลระบบ" : "พนักงาน"}</span><strong>{role === "Admin" ? "จัดการระบบ" : role === "Worker" ? "จัดการงานโรงกลึง" : "พื้นที่ลูกค้า"}</strong></div>
+        <nav className="nav-list" aria-label="เมนูหลัก">
+          {navLink("overview")}
+          {groups.map((entry) => <div key={entry.label} className={`nav-group${entry.admin ? " nav-group-admin" : ""}`} role="group" aria-label={entry.label}><span className="nav-group-label" aria-hidden="true">{entry.label}</span>{entry.items.map(navLink)}</div>)}
         </nav>
       </div>
       <div className="sidebar-theme"><DemoAccountSwitch onSwitched={() => setMenuOpen(false)}/><SettingsToggle/></div>
@@ -64,13 +69,13 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
         <div className="workspace-navbar-brand"><Logo onClick={() => router.push(ROLE_ROOTS[role])}/></div>
         <div className="workspace-navbar-actions">
           <ThemeToggle/>
-          <Link className="workspace-navbar-inbox" href={workspacePath(role, "inbox")} aria-label="การแจ้งเตือน" title="การแจ้งเตือน"><Icon name="bell"/></Link>
+          <WorkspaceBell api={session.api} role={role}/>
           <button id="navigation-toggle" className="mobile-navigation icon-button" aria-label="เปิดเมนู" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><Icon name="grid"/></button>
         </div>
       </header>
       <main id="main-content" className={`page-content ${styles.scope}`}>
-        <section className="page-heading"><div>{!overview && <span className="eyebrow">{ROLE_LABELS[role].toUpperCase()} / {workspaceId.toUpperCase()}</span>}<h1 id="workspace-title" tabIndex={-1}>{overview ? "ภาพรวมการผลิต" : PAGE_LABELS[workspaceId]}</h1><p>{overview ? descriptions[role] : items.find((item) => item.id === workspaceId)?.description}</p></div></section>
-        <p className="demo-context">ข้อมูลจริงจาก backend · เวลา Asia/Bangkok · เงินบาท ไม่รวม VAT · รีโหลดหน้าต้องเข้าสู่ระบบใหม่</p>
+        <section className="page-heading"><div>{!overview && <span className="eyebrow">{group?.label ?? pageLabel(role, workspaceId)}</span>}<h1 id="workspace-title" tabIndex={-1}>{overview ? "ภาพรวมการผลิต" : pageLabel(role, workspaceId)}</h1><p>{overview ? descriptions[role] : items.find((item) => item.id === workspaceId)?.description}</p></div></section>
+        <p className="demo-context">ข้อมูลจริง · เวลาไทย · เงินบาท ไม่รวม VAT · รีโหลดหน้าต้องเข้าสู่ระบบใหม่</p>
         <div className="workflow-content live-workspace"><ConnectedWorkspace key={`${account.id}:${workspaceId}`} role={role} workspaceId={workspaceId} session={session} /></div>
       </main>
     </div>

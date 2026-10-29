@@ -18,22 +18,22 @@ const DESCRIPTIONS: Record<Role, Partial<Record<Exclude<WorkspaceId, "overview">
     memberships: ["Account", "Company memberships and private invitations."],
   },
   Worker: {
-    quotations: ["UC1 / UC2 / UC4", "Request queue, quotations and Deposit/PO review."],
-    materials: ["UC5", "Search stock and plan/reserve materials for queued jobs."],
-    receiving: ["UC7", "Receive accepted supplier orders and record damaged goods."],
-    production: ["UC8", "Start jobs, record actual material use, time and photos."],
-    "delivery-payment": ["UC9", "Issue invoices and record shipments."],
-    inbox: ["Inbox", "Notifications for the shop team."],
+    quotations: ["UC1–UC4", "ประเมินราคา ส่งใบเสนอราคา และตรวจหลักฐานมัดจำ/PO"],
+    materials: ["UC5", "ดูยอดวัตถุดิบ และวางแผน/จองวัตถุดิบให้งานที่รอเริ่ม"],
+    receiving: ["UC7", "รับของตามใบสั่งซื้อที่ผู้ขายรับแล้ว และบันทึกของเสียหาย"],
+    production: ["UC8", "เริ่มงาน บันทึกวัตถุดิบที่ใช้ เวลาทำงาน และรูปงาน"],
+    "delivery-payment": ["UC9", "ออกใบแจ้งหนี้และบันทึกการส่งมอบ"],
+    inbox: ["แจ้งเตือน", "การแจ้งเตือนของทีมร้าน"],
   },
   Admin: {
-    requests: ["UC1–UC4", "Read requests and quotations; review Deposit/PO evidence."],
-    workers: ["Admin", "Create and manage Staff accounts and contacts."],
-    materials: ["UC5", "Units, materials, audited stock adjustments and job plans (read-only)."],
-    orders: ["UC6", "Suppliers and supplier material orders."],
-    receiving: ["UC7", "Receiving progress, supplier credit terms and settlement."],
-    production: ["UC8", "Monitor production and enter actual labor cost."],
-    "delivery-payment": ["UC9", "Invoice terms, deliveries, payment review and cash receipts."],
-    inbox: ["Inbox", "Notifications for administrators."],
+    requests: ["UC1–UC4", "ดูคำขอและใบเสนอราคา และตรวจหลักฐานมัดจำ/PO"],
+    workers: ["ผู้ดูแลระบบ", "สร้างและจัดการบัญชีพนักงานและช่องทางติดต่อ"],
+    materials: ["UC5", "หน่วย วัตถุดิบ การปรับสต๊อก และแผนวัตถุดิบของงาน (ดูอย่างเดียว)"],
+    orders: ["UC6", "ผู้ขายและใบสั่งซื้อวัตถุดิบ"],
+    receiving: ["UC7", "ติดตามการรับของ เครดิตผู้ขาย และการจ่ายเงินผู้ขาย"],
+    production: ["UC8", "ติดตามงานผลิตและบันทึกต้นทุนค่าแรงจริง"],
+    "delivery-payment": ["UC9", "ตั้งเครดิต ออกใบแจ้งหนี้ ส่งมอบ ตรวจการชำระ และรับเงินสด"],
+    inbox: ["แจ้งเตือน", "การแจ้งเตือนของผู้ดูแลระบบ"],
   },
 };
 
@@ -41,6 +41,24 @@ export const ROLE_WORKSPACES: Record<Role, Exclude<WorkspaceId, "overview">[]> =
   Customer: ["requests", "quotations", "deposit-po", "delivery-payment", "inbox", "memberships"],
   Worker: ["quotations", "materials", "receiving", "production", "delivery-payment", "inbox"],
   Admin: ["requests", "workers", "materials", "orders", "receiving", "production", "delivery-payment", "inbox"],
+};
+
+// Sidebar groups by workflow stage. Inbox stays routable but lives behind the
+// navbar bell; Admin-only items sit in their own separated section.
+export type NavGroup = { label: string; items: Exclude<WorkspaceId, "overview">[]; admin?: boolean };
+export const NAV_GROUPS: Record<"Worker" | "Admin", NavGroup[]> = {
+  Worker: [
+    { label: "งานขาย", items: ["quotations"] },
+    { label: "การผลิต", items: ["production", "materials", "receiving"] },
+    { label: "ส่งมอบและการเงิน", items: ["delivery-payment"] },
+  ],
+  Admin: [
+    { label: "งานขาย", items: ["requests"] },
+    { label: "การผลิต", items: ["production", "materials"] },
+    { label: "จัดซื้อ", items: ["orders", "receiving"] },
+    { label: "ส่งมอบและการเงิน", items: ["delivery-payment"] },
+    { label: "ผู้ดูแลระบบ", items: ["workers"], admin: true },
+  ],
 };
 
 export function getWorkspaces(role: Role): Workspace[] {
