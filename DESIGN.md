@@ -191,6 +191,14 @@ The list and detail use the shared list/detail layout (`staff-layout.module.css`
 
 Browser walk (Chrome, real local API, Staff `anan.staff` and Admin `pim.admin`): 1280px and 390px, Light and Dark, no horizontal page scroll, no console errors, and no API writes attempted (non-GET requests aborted and counted, zero). At 390px the status tabs scroll inside their own row; the hidden tab labels previously widened the page to 421px, fixed by making the tab links a positioning context. The งานผลิต page was re-walked the same way after its layout moved. Limits: the customer name is “To be defined” (Staff receive only `customer_id`); saves, send, approve and reject were not exercised against the live API (writes intercepted only); widths 360, 768 and 1920px were not walked.
 
+### Staff/Admin สต๊อกวัตถุดิบ and ข้อมูลหลัก — 2026-10-30
+
+Step 3 of the approved Staff/Admin redesign (`/staff/materials`, `/admin/materials`; no new route). Admin gets two underline view tabs, สต๊อก and ข้อมูลหลัก (หน่วย/วัตถุดิบ) (`?view=catalog`); Staff see only สต๊อก and `?view=catalog` falls back to it. The stock view has pill filter chips with counts from real values only: ทั้งหมด / มีของพร้อมใช้ (พร้อมใช้ > 0) / หมด (พร้อมใช้ = 0) / มีการจอง / ปิดใช้งาน (`?filter=`; no “ใกล้หมด”, there is no reorder level), one search box (the server's literal name search, `?q=`), and อัปเดตข้อมูล. Materials load 100 per call up to 1,000 with the cap notice. Stock is a table at desktop widths (name with unit, คงเหลือ, จองแล้ว, พร้อมใช้ in bold, Admin-only ต้นทุนเฉลี่ย/หน่วย, status badge มีของพร้อมใช้ green / หมด red / ปิดใช้งาน grey); at ≤48rem each row becomes a card with labelled values in three columns. Quantities drop trailing zeros; stored values stay exact.
+
+Opening a material (`?material=`) shows the new shared side panel (`Drawer`, native modal `<dialog>`: right edge, 36rem wide on desktop, full screen on phones, close button and Escape). It shows quantities, a note that reservations do not consume stock, and the movement history with Thai mode labels (เพิ่มสต๊อก, แก้ยอดตามที่นับ, รับจากผู้ขาย, เบิกใช้ในงาน), before → after balance and time. Reasons and costs appear only when the API returns them (Admin). Admin also gets ปรับสต๊อก as a numbered step form: ① choose เพิ่มสต๊อก or แก้ยอดตามที่นับ, ② quantity, ③ unit cost (addition only), then reason. A sticky summary bar previews “คงเหลือ 105 → 110” exactly, and a count below the reserved quantity is blocked with a field error. A checklist confirmation follows, and the unchanged idempotent payload is sent with a RetryPanel after an unclear response. ข้อมูลหลัก lists units as chips with an inline add-unit form, and materials with status and แก้ไข. The add-material and edit (rename, active toggle) forms open in the side panel; the panel says that a unit cannot be changed and that nothing is deleted. The shared `Toast` timer no longer restarts when its page re-renders, so success messages now disappear after 5 seconds on every redesigned page.
+
+Browser walk (Chrome, real local API, writes intercepted): `pim.admin` at 1280 Dark, 390 Light, 360 Dark, 768 Light and 1920 Dark; `anan.staff` at 1280 Dark and 390 Light. No horizontal page scroll and no console errors. The intercepted stock addition, unit creation and material PATCH bodies matched the previous payloads, and toasts cleared after 5 s. Not exercised against the live API: actual saves, conflicts, and the retry path. Known limit: ข้อมูลหลัก is not a separate sidebar item; it is reached through the view tab.
+
 ### Staff/Admin navbar alignment — 2026-10-29
 
 Staff/Admin now follow Customer's navbar composition: a 64px desktop bar with muted real-connection/session notice left and one right-aligned action group (icon theme switch and bell). At the existing Staff mobile navigation breakpoint (900px), a 72px bar shows the logo left and theme/bell/menu right. The bell links to the existing role-scoped inbox; it does not reuse Customer notification targets, add API reads or fabricate unread counts. Sign-out remains in the sidebar/footer on desktop and mobile. Removed scattered breadcrumb/API-pill/topbar-sign-out controls; page headings and sidebar retain current location/role information. Existing sidebar/menu behavior and role permissions remain unchanged. Shared Light/Dark variables govern the whole bar.
@@ -781,6 +789,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-30 | Staff/Admin redesign Step 3: สต๊อกวัตถุดิบ table/cards with real-value filter chips, shared side panel (`Drawer`) with movement history, Admin step-form stock adjustment with exact preview and reserved-quantity block, ข้อมูลหลัก view tab for units and materials; shared Toast timer fix | 174 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 360/390/768/1280/1920 and Staff 390/1280, Light and Dark, writes intercepted |
 | 2026-10-30 | Staff/Admin redesign Step 2: คำขอและใบเสนอราคา with six stage tabs and counts from existing reads, one next-action card per stage, automatic minimum-price check, Deposit/PO evidence review, collapsed refuse and history; stage-domain unit tests; CSS registered in the source appendix | Stage/count/price/evidence domain tests (9 new; 172 native tests), type check, lint, source audit, line limits, production build; Chrome walk as Staff and Admin at 1280px and 390px, both themes, writes intercepted (0), no horizontal overflow after tab fix |
 | 2026-10-29 | Staff/Admin redesign Step 1: shared Thai staff-ui kit (tabs, search, buttons, steps, confirm dialog, retry panel, toast, states), `--success` token, shared material picker; งานผลิต rebuilt as prioritized list + detail with readiness, plan editor moved in from the materials page and request opened-job section, segmented work recording and checklist close; Admin read-only plus labor cost | Production list/format domain tests, 163 native tests, type check, lint, source audit, build; Chrome real local API with every write intercepted (no DB writes) as anan.staff, kittipong.staff and pim.admin at 1280px Dark and 390px Light: correct usage/time/complete payloads and versions, Start disabled on short plan, close gated by checklist, no overflow or console errors |
 | 2026-10-29 | Staff/Admin redesign Step 0: workflow-grouped Thai sidebar with separated Admin section, shared คำขอและใบเสนอราคา label, Thai eyebrows/descriptions, Customer-style notification bell with unread count and dropdown; remove unused inbox-link CSS | Navigation/notification tests (every permitted page grouped once, Thai titles), 154 native tests, type check, lint, source audit, build; Chrome real local API read-only as anan.staff and pim.admin at 1280px Dark/Light and 390px: no overflow or console errors, focus returns to bell |
@@ -2808,6 +2817,16 @@ src/features/workspace/workspace.module.css
 .dialogActions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; }
 :global(.live-workspace) .dialogActions > button { min-width: 8rem; }
 
+/* Side panel (drawer): right edge on desktop, full screen on phones */
+.drawer { width: min(36rem, 100vw); max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0 0 0 auto; padding: 0; border: 0; border-left: 1px solid var(--line); background: var(--surface); color: var(--text); box-shadow: -24px 0 64px rgba(0, 0, 0, .35); }
+.drawer[open] { display: grid; grid-template-rows: auto minmax(0, 1fr); animation: drawerIn .2s ease-out; }
+.drawer::backdrop { background: rgba(0, 0, 0, .5); }
+@keyframes drawerIn { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+.drawerHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
+.drawerHeader h2 { margin: 0; font-size: 1.25rem; line-height: 1.35; overflow-wrap: anywhere; }
+:global(.live-workspace) .drawerHeader > button { min-width: 48px; padding: 10px; }
+.drawerBody { display: grid; align-content: start; gap: 20px; padding: 20px; overflow-y: auto; }
+
 /* Feedback */
 .retry { display: grid; gap: 8px; padding: 16px; border: 1px solid color-mix(in srgb, var(--warning) 50%, var(--line)); border-radius: 12px; background: color-mix(in srgb, var(--warning) 8%, var(--surface)); }
 .retry p { margin: 0; color: var(--text); font-size: 0.9375rem; }
@@ -2831,7 +2850,7 @@ src/features/workspace/workspace.module.css
   .dialogActions { flex-direction: column-reverse; }
   :global(.live-workspace) .dialogActions > button { width: 100%; }
 }
-@media (prefers-reduced-motion: reduce) { .skeleton > span { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .skeleton > span, .drawer[open] { animation: none; } }
 ```
 
 ### A10. Staff/Admin production — src/features/production/production.module.css
@@ -3005,6 +3024,71 @@ src/features/workspace/workspace.module.css
 @media (max-width: 40rem) {
   .moneyGrid { grid-template-columns: minmax(0, 1fr); }
   .choices label { flex: 1; justify-content: center; }
+}
+```
+
+### A13. Staff/Admin materials and master data — src/features/inventory/inventory.module.css
+
+```css
+/* สต๊อกวัตถุดิบ (UC5) page-specific rules; list/detail pieces come from staff-ui/staff-layout.module.css. */
+.views { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+:global(.live-workspace) .views a { flex-shrink: 0; display: inline-flex; align-items: center; min-height: 48px; padding: 8px 16px; border-bottom: 3px solid transparent; color: var(--muted); font-weight: 650; text-decoration: none; white-space: nowrap; }
+:global(.live-workspace) .views a:hover { color: var(--text); }
+:global(.live-workspace) .views a[aria-current="page"] { color: var(--text); border-bottom-color: var(--lime); }
+:global(.live-workspace) .views a:focus-visible { outline: 2px solid var(--lime); outline-offset: -2px; }
+
+/* Stock table: a real table on desktop, one card per material on phones. */
+.stock { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); font-variant-numeric: tabular-nums; }
+.stock th, .stock td { padding: 12px 16px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: middle; }
+.stock thead th { color: var(--muted); font-size: 0.8125rem; font-weight: 600; }
+.stock :is(thead th, tbody th):first-child { text-align: left; }
+.stock tbody tr:last-child > * { border-bottom: 0; }
+.stock td:last-child, .stock thead th:last-child { text-align: left; }
+.stock tbody th { display: grid; gap: 2px; font-weight: 400; }
+:global(.live-workspace) .stock tbody th a { color: var(--text); font-size: 1rem; font-weight: 650; text-decoration: none; overflow-wrap: anywhere; }
+:global(.live-workspace) .stock tbody th a:hover { color: var(--lime); text-decoration: underline; }
+:global(.live-workspace) .stock tbody th a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.stock tbody th small { color: var(--muted); font-size: 0.8125rem; }
+.stock tbody tr[aria-current="true"] > * { background: color-mix(in srgb, var(--lime) 7%, var(--surface)); }
+
+.movementTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+.modeGroup { display: grid; gap: 6px; }
+.modeGroup > span { font-size: 0.9375rem; font-weight: 600; }
+.modes { display: flex; flex-wrap: wrap; gap: 8px; }
+.modes label, .toggle { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-weight: 600; cursor: pointer; }
+.modes label:has(input:checked) { border-color: var(--lime); background: color-mix(in srgb, var(--lime) 10%, var(--surface)); }
+.modes label:has(input:disabled) { opacity: .5; cursor: not-allowed; }
+.modes input, .toggle input { width: 20px; height: 20px; margin: 0; accent-color: var(--lime); }
+.toggle { width: fit-content; }
+.note { color: var(--muted); font-size: 0.875rem; }
+.note summary { min-height: 44px; display: flex; align-items: center; font-weight: 600; cursor: pointer; }
+.note p { margin: 0; line-height: 1.6; }
+
+/* ข้อมูลหลัก */
+.catalog { display: grid; gap: 16px; }
+.unitList { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.unitList li { padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-2); font-size: 0.875rem; }
+.inlineForm { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.inlineForm > label { flex: 1 1 14rem; max-width: 24rem; }
+.inlineForm > :is(p, [role="alert"]) { flex-basis: 100%; }
+.catalogList { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.catalogList li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.catalogList li:last-child { border-bottom: 0; }
+.catalogList li > span:first-child { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.catalogList small { color: var(--muted); font-size: 0.8125rem; }
+
+@media (max-width: 48rem) {
+  .stock, .stock tbody, .stock tr, .stock th, .stock td { display: block; }
+  .stock { border: 0; background: transparent; }
+  .stock thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .stock tbody { display: grid; gap: 12px; }
+  .stock tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+  .stock tbody tr > * { padding: 0; border: 0; text-align: left; }
+  .stock tbody th, .stock td:last-child { grid-column: 1 / -1; }
+  .stock td[data-label]::before { content: attr(data-label); display: block; color: var(--muted); font-size: 0.75rem; }
+  .stock td:last-child::before { display: none; }
+  .catalogList li { grid-template-columns: minmax(0, 1fr) auto; }
+  .catalogList li > :last-child { grid-column: 1 / -1; justify-self: start; }
 }
 ```
 

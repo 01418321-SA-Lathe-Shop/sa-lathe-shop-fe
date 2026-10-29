@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { inventoryDecimal, inventoryDisplay, planLines, stockFields, catalogName } from "../../../src/features/inventory/inventory-domain.ts";
+import { inventoryDecimal, inventoryDisplay, planLines, stockFields, catalogName, stockFilter, stockCounts, filterStock, stockAfter, isBelow } from "../../../src/features/inventory/inventory-domain.ts";
 const material = { is_active: true, qty_reserved: "2.000001" };
 const id = "10000000-0000-4000-8000-000000000001";
 test("six-place quantities/unit costs retain full PostgreSQL precision without rounding", () => {
@@ -31,6 +31,28 @@ test("absolute correction cannot undercut reservation; omits cost and permits un
   assert.deepEqual(stockFields({...material,qty_reserved:"0.000000"},"correction","0","","zero"),{mode:"correction",quantity:"0.000000",reason:"zero"});
   assert.throws(() => stockFields({...material,is_active:false},"addition","1","1","reason"));
   assert.deepEqual(stockFields({...material,is_active:false},"correction","3","","count"),{mode:"correction",quantity:"3.000000",reason:"count"});
+});
+test("stock filter chips count real values; unknown filter falls back to all", () => {
+  const items = [
+    { id: "a", is_active: true, qty_available: "3.000000", qty_reserved: "1.000000" },
+    { id: "b", is_active: true, qty_available: "0.000000", qty_reserved: "2.000000" },
+    { id: "c", is_active: false, qty_available: "0.000001", qty_reserved: "0.000000" },
+  ];
+  assert.deepEqual(stockCounts(items), { all: 3, available: 2, empty: 1, reserved: 2, inactive: 1 });
+  assert.deepEqual(filterStock(items, "empty").map((item) => item.id), ["b"]);
+  assert.equal(stockFilter("reserved"), "reserved");
+  assert.equal(stockFilter("low"), "all");
+  assert.equal(stockFilter(null), "all");
+});
+test("adjustment preview is exact: addition sums, correction is the counted total", () => {
+  assert.equal(stockAfter({ qty_on_hand: "10.000000" }, "addition", "5"), "15.000000");
+  assert.equal(stockAfter({ qty_on_hand: "999999999999.999999" }, "addition", "0.000001"), "1000000000000.000000");
+  assert.equal(stockAfter({ qty_on_hand: "0.000000" }, "addition", "0.5"), "0.500000");
+  assert.equal(stockAfter({ qty_on_hand: "10.000000" }, "correction", "0"), "0.000000");
+  assert.equal(stockAfter({ qty_on_hand: "10.000000" }, "addition", "0"), null);
+  assert.equal(stockAfter({ qty_on_hand: "10.000000" }, "correction", "1e2"), null);
+  assert.equal(isBelow("1.999999", "2.000000"), true);
+  assert.equal(isBelow("2.000000", "2.000000"), false);
 });
 test("catalog labels trim Unicode and reject invalid lengths and control lines", () => {
   assert.equal(catalogName(" เหล็ก S45C ",200),"เหล็ก S45C");

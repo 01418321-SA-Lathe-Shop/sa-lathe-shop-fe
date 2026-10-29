@@ -36,6 +36,43 @@ export function planLines(lines: PlanDraftLine[]): PlanDraftLine[] {
   });
 }
 
+// Stock filter chips use real material values only (there is no reorder level).
+export const STOCK_FILTERS = ["all", "available", "empty", "reserved", "inactive"] as const;
+export type StockFilter = (typeof STOCK_FILTERS)[number];
+const positive = (value: string) => /^\d{1,12}\.\d{6}$/.test(value) && decimalUnits(value) > BigInt(0);
+const MATCHES: Record<StockFilter, (material: InventoryMaterial) => boolean> = {
+  all: () => true,
+  available: (material) => positive(material.qty_available),
+  empty: (material) => !positive(material.qty_available),
+  reserved: (material) => positive(material.qty_reserved),
+  inactive: (material) => !material.is_active,
+};
+
+export function stockFilter(value: string | null): StockFilter {
+  return STOCK_FILTERS.find((filter) => filter === value) ?? "all";
+}
+
+export function stockCounts(items: InventoryMaterial[]): Record<StockFilter, number> {
+  return Object.fromEntries(STOCK_FILTERS.map((filter) => [filter, items.filter(MATCHES[filter]).length])) as Record<StockFilter, number>;
+}
+
+export function filterStock(items: InventoryMaterial[], filter: StockFilter): InventoryMaterial[] {
+  return items.filter(MATCHES[filter]);
+}
+
+/** Exact on-hand balance after an adjustment, or null while the entry is not a valid quantity. */
+export function stockAfter(material: Pick<InventoryMaterial, "qty_on_hand">, mode: "addition" | "correction", quantity: string): string | null {
+  let amount: string;
+  try { amount = inventoryDecimal(quantity, mode === "addition"); } catch { return null; }
+  if (mode === "correction") return amount;
+  const total = (decimalUnits(inventoryDecimal(material.qty_on_hand)) + decimalUnits(amount)).toString().padStart(7, "0");
+  return `${total.slice(0, -6)}.${total.slice(-6)}`;
+}
+
+export function isBelow(value: string, floor: string): boolean {
+  return decimalUnits(inventoryDecimal(value)) < decimalUnits(inventoryDecimal(floor));
+}
+
 export function stockFields(material: InventoryMaterial, mode: "addition" | "correction", quantity: string, unitCost: string, rawReason: string) {
   const amount = inventoryDecimal(quantity, mode === "addition");
   const reason = catalogName(rawReason, 2000);

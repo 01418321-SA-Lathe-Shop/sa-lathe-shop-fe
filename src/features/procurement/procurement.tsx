@@ -4,7 +4,7 @@ import { useState } from "react";
 import { BackendApi, displayMoney } from "../../lib/api/backend-api";
 import { useCommand, useResource } from "../../hooks/backend-hooks";
 import { inventoryDisplay } from "../inventory/inventory-domain";
-import { MaterialSearch } from "../inventory/inventory";
+import { MaterialSearch } from "../inventory/material-search";
 import { allowedActions, lineTotal, orderActionPayload, orderPayload, orderTotal, supplierFields, type DraftLine, type OrderAction, type Supplier, type SupplierOrder } from "./procurement-domain";
 import { Feedback, Field, Paging, RetryNote, Status, text } from "../../components/ui/backend-ui";
 import { formatBangkok } from "../../lib/formatting/display";

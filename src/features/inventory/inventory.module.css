@@ -1,0 +1,60 @@
+/* สต๊อกวัตถุดิบ (UC5) page-specific rules; list/detail pieces come from staff-ui/staff-layout.module.css. */
+.views { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+:global(.live-workspace) .views a { flex-shrink: 0; display: inline-flex; align-items: center; min-height: 48px; padding: 8px 16px; border-bottom: 3px solid transparent; color: var(--muted); font-weight: 650; text-decoration: none; white-space: nowrap; }
+:global(.live-workspace) .views a:hover { color: var(--text); }
+:global(.live-workspace) .views a[aria-current="page"] { color: var(--text); border-bottom-color: var(--lime); }
+:global(.live-workspace) .views a:focus-visible { outline: 2px solid var(--lime); outline-offset: -2px; }
+
+/* Stock table: a real table on desktop, one card per material on phones. */
+.stock { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); font-variant-numeric: tabular-nums; }
+.stock th, .stock td { padding: 12px 16px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: middle; }
+.stock thead th { color: var(--muted); font-size: 0.8125rem; font-weight: 600; }
+.stock :is(thead th, tbody th):first-child { text-align: left; }
+.stock tbody tr:last-child > * { border-bottom: 0; }
+.stock td:last-child, .stock thead th:last-child { text-align: left; }
+.stock tbody th { display: grid; gap: 2px; font-weight: 400; }
+:global(.live-workspace) .stock tbody th a { color: var(--text); font-size: 1rem; font-weight: 650; text-decoration: none; overflow-wrap: anywhere; }
+:global(.live-workspace) .stock tbody th a:hover { color: var(--lime); text-decoration: underline; }
+:global(.live-workspace) .stock tbody th a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.stock tbody th small { color: var(--muted); font-size: 0.8125rem; }
+.stock tbody tr[aria-current="true"] > * { background: color-mix(in srgb, var(--lime) 7%, var(--surface)); }
+
+.movementTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+.modeGroup { display: grid; gap: 6px; }
+.modeGroup > span { font-size: 0.9375rem; font-weight: 600; }
+.modes { display: flex; flex-wrap: wrap; gap: 8px; }
+.modes label, .toggle { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; font-weight: 600; cursor: pointer; }
+.modes label:has(input:checked) { border-color: var(--lime); background: color-mix(in srgb, var(--lime) 10%, var(--surface)); }
+.modes label:has(input:disabled) { opacity: .5; cursor: not-allowed; }
+.modes input, .toggle input { width: 20px; height: 20px; margin: 0; accent-color: var(--lime); }
+.toggle { width: fit-content; }
+.note { color: var(--muted); font-size: 0.875rem; }
+.note summary { min-height: 44px; display: flex; align-items: center; font-weight: 600; cursor: pointer; }
+.note p { margin: 0; line-height: 1.6; }
+
+/* ข้อมูลหลัก */
+.catalog { display: grid; gap: 16px; }
+.unitList { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.unitList li { padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-2); font-size: 0.875rem; }
+.inlineForm { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+.inlineForm > label { flex: 1 1 14rem; max-width: 24rem; }
+.inlineForm > :is(p, [role="alert"]) { flex-basis: 100%; }
+.catalogList { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.catalogList li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.catalogList li:last-child { border-bottom: 0; }
+.catalogList li > span:first-child { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.catalogList small { color: var(--muted); font-size: 0.8125rem; }
+
+@media (max-width: 48rem) {
+  .stock, .stock tbody, .stock tr, .stock th, .stock td { display: block; }
+  .stock { border: 0; background: transparent; }
+  .stock thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .stock tbody { display: grid; gap: 12px; }
+  .stock tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+  .stock tbody tr > * { padding: 0; border: 0; text-align: left; }
+  .stock tbody th, .stock td:last-child { grid-column: 1 / -1; }
+  .stock td[data-label]::before { content: attr(data-label); display: block; color: var(--muted); font-size: 0.75rem; }
+  .stock td:last-child::before { display: none; }
+  .catalogList li { grid-template-columns: minmax(0, 1fr) auto; }
+  .catalogList li > :last-child { grid-column: 1 / -1; justify-self: start; }
+}

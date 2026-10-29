@@ -31,6 +31,13 @@ export const EVIDENCE_STATUS: StatusMap = {
   rejected: ["ไม่อนุมัติ", "problem"],
 };
 
+export const MOVEMENT_MODE: StatusMap = {
+  addition: ["เพิ่มสต๊อก", "done"],
+  correction: ["แก้ยอดตามที่นับ", "progress"],
+  purchase_receive: ["รับจากผู้ขาย", "done"],
+  job_issue: ["เบิกใช้ในงาน", "waiting"],
+};
+
 export function statusOf(map: StatusMap, value: string): { label: string; tone: Tone } {
   const known = Object.hasOwn(map, value) ? map[value] : undefined;
   return known ? { label: known[0], tone: known[1] } : { label: "สถานะยังไม่ระบุ", tone: "waiting" };
