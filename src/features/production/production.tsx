@@ -13,6 +13,7 @@ import { useCollection, useNow } from "../customer/customer-hooks";
 import type { InventoryPlan } from "../inventory/inventory-domain";
 import { ProductionDetail } from "./production-detail";
 import { defaultProductionTab, planReadiness, productionCounts, productionRows, productionTab, type ProductionSummary, type ProductionTab, type Readiness } from "./production-list-domain";
+import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./production.module.css";
 
 // UC8: any active Staff plans, starts, records and completes any job; Admin
@@ -78,27 +79,27 @@ function ProductionWorkspace({ api, account }: { api: BackendApi; account: Accou
     { key: "completed", label: "ผลิตเสร็จ", count: counts.completed },
     { key: "all", label: "ทั้งหมด", count: counts.all },
   ];
-  return <section className={styles.page}>
-    <div className={styles.toolbar}>
+  return <section className={layout.page}>
+    <div className={layout.toolbar}>
       <StatusTabs label="สถานะงานผลิต" tabs={tabs} current={tab} href={(key) => href({ tab: key, job: undefined })} loading={listLoading} unavailable={Boolean(jobs.error && !jobs.data)} />
-      <div className={styles.toolbarEnd}>
+      <div className={layout.toolbarEnd}>
         <SearchForm label="ค้นหางานผลิต" placeholder="เลขคำขอหรือชื่องาน" value={q} onSearch={(value) => router.replace(href({ q: value || undefined, job: undefined }), { scroll: false })} />
         <Button onClick={() => { jobs.reload(); requests.reload(); }} disabled={jobs.loading}>อัปเดตข้อมูล</Button>
       </div>
     </div>
     {jobs.error && !jobs.data && <LoadError title="โหลดงานผลิตไม่สำเร็จ" onRetry={jobs.reload} />}
-    {requests.error && <p className={styles.warning}>โหลดรายละเอียดคำขอได้ไม่ครบ ชื่องานและการค้นหาบางรายการอาจยังไม่แสดง <Button variant="text" onClick={requests.reload}>ลองอีกครั้ง</Button></p>}
+    {requests.error && <p className={layout.warning}>โหลดรายละเอียดคำขอได้ไม่ครบ ชื่องานและการค้นหาบางรายการอาจยังไม่แสดง <Button variant="text" onClick={requests.reload}>ลองอีกครั้ง</Button></p>}
     <TruncatedNotice show={jobs.data?.complete === false || requests.data?.complete === false} />
-    {q && <p className={styles.filterNote}>ผลการค้นหา “{q}” <Link href={href({ q: undefined, job: undefined })} scroll={false}>ล้างการค้นหา</Link></p>}
-    <div className={styles.layout} data-detail={selected ? "open" : undefined}>
-      <div className={styles.list} role="region" aria-label="รายการงานผลิต">
+    {q && <p className={layout.filterNote}>ผลการค้นหา “{q}” <Link href={href({ q: undefined, job: undefined })} scroll={false}>ล้างการค้นหา</Link></p>}
+    <div className={layout.layout} data-detail={selected ? "open" : undefined}>
+      <div className={layout.list} role="region" aria-label="รายการงานผลิต">
         {listLoading && <Skeleton label="กำลังโหลดงานผลิต…" />}
         {rows.map(({ job, request }) => <JobCard key={job.job_id} job={job} request={request} requestLoading={requests.loading} readiness={readiness ? readiness.get(job.job_id) ?? null : undefined} now={now} worker={worker} selected={selected === job.job_id} href={href({ job: job.job_id, tab })} />)}
         {jobs.data && !rows.length && <EmptyState title={q ? "ไม่พบงานที่ค้นหา" : EMPTY[tab][0]}>{q ? "ลองค้นด้วยเลขคำขอหรือคำอื่น" : EMPTY[tab][1]}</EmptyState>}
       </div>
-      <div className={styles.detail}>
+      <div className={layout.detail}>
         {selected ? <ProductionDetail key={selected} api={api} account={account} id={selected} request={selectedJob ? lookup.get(selectedJob.request_id) : undefined} requestLoading={requests.loading} now={now} backHref={href({ job: undefined })} onChanged={(message) => { setToast(message); jobs.reload(); }} />
-          : <div className={styles.placeholder}><EmptyState title="เลือกงานจากรายการ">เปิดงานเพื่อเตรียมวัตถุดิบ เริ่มผลิต หรือบันทึกงาน</EmptyState></div>}
+          : <div className={layout.placeholder}><EmptyState title="เลือกงานจากรายการ">เปิดงานเพื่อเตรียมวัตถุดิบ เริ่มผลิต หรือบันทึกงาน</EmptyState></div>}
       </div>
     </div>
     <Toast message={toast} onDone={clearToast} />
@@ -119,15 +120,15 @@ function JobCard({ job, request, requestLoading, readiness, now, worker, selecte
   const countdown = open ? requestedDayCountdown(request?.deadline, now) : null;
   const next = !worker ? (job.status === "completed" ? "ดูสรุปและต้นทุน" : "ดูงาน")
     : job.status === "queued" ? (readiness?.state === "ready" ? "เริ่มผลิต" : "เตรียมวัตถุดิบ") : job.status === "in_progress" ? "บันทึกงาน" : "ดูสรุปงาน";
-  return <Link href={href} scroll={false} className={styles.card} aria-current={selected ? "true" : undefined}>
-    <span className={styles.cardTop}><strong>{request ? `คำขอ #${request.no_request}` : requestLoading ? "กำลังโหลดคำขอ…" : "คำขอผลิต"}</strong><StatusBadge map={JOB_STATUS} value={job.status} /></span>
-    <span className={styles.cardTitle}>{request?.description ?? "รายละเอียดงานยังไม่พร้อม"}</span>
-    <span className={styles.cardMeta}>{request ? `${request.qty} ชิ้น` : ""}{Number(job.cycle) > 1 ? `${request ? " · " : ""}รอบแก้ไขที่ ${Number(job.cycle) - 1} (แก้ไขฟรี)` : ""}</span>
-    {open && <span className={styles.cardMeta}>{request?.deadline ? <>ลูกค้าต้องการ {dateTH(request.deadline)}{countdown && <ToneBadge tone={countdown.tone}>{countdown.text}</ToneBadge>}</> : request ? "ลูกค้าไม่ได้ระบุวันที่ต้องการ" : ""}</span>}
+  return <Link href={href} scroll={false} className={layout.card} aria-current={selected ? "true" : undefined}>
+    <span className={layout.cardTop}><strong>{request ? `คำขอ #${request.no_request}` : requestLoading ? "กำลังโหลดคำขอ…" : "คำขอผลิต"}</strong><StatusBadge map={JOB_STATUS} value={job.status} /></span>
+    <span className={layout.cardTitle}>{request?.description ?? "รายละเอียดงานยังไม่พร้อม"}</span>
+    <span className={layout.cardMeta}>{request ? `${request.qty} ชิ้น` : ""}{Number(job.cycle) > 1 ? `${request ? " · " : ""}รอบแก้ไขที่ ${Number(job.cycle) - 1} (แก้ไขฟรี)` : ""}</span>
+    {open && <span className={layout.cardMeta}>{request?.deadline ? <>ลูกค้าต้องการ {dateTH(request.deadline)}{countdown && <ToneBadge tone={countdown.tone}>{countdown.text}</ToneBadge>}</> : request ? "ลูกค้าไม่ได้ระบุวันที่ต้องการ" : ""}</span>}
     {job.status === "queued" && <span className={styles.readiness} data-state={readiness === null ? "error" : readiness?.state}>{readinessText(readiness)}</span>}
-    {job.status === "in_progress" && <span className={styles.cardMeta}>เริ่มผลิต {dateTimeTH(job.started_at)}</span>}
-    {job.status === "completed" && <span className={styles.cardMeta}>ผลิตเสร็จ {dateTimeTH(job.completed_at)}</span>}
-    <span className={styles.cardNext}>{next} <Icon name="arrow" size={14} /></span>
+    {job.status === "in_progress" && <span className={layout.cardMeta}>เริ่มผลิต {dateTimeTH(job.started_at)}</span>}
+    {job.status === "completed" && <span className={layout.cardMeta}>ผลิตเสร็จ {dateTimeTH(job.completed_at)}</span>}
+    <span className={layout.cardNext}>{next} <Icon name="arrow" size={14} /></span>
   </Link>;
 }
 

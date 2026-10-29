@@ -11,6 +11,26 @@ export const JOB_STATUS: StatusMap = {
   cancelled: ["ยกเลิก", "problem"],
 };
 
+export const REQUEST_STATUS: StatusMap = {
+  pending: ["รอประเมิน", "waiting"],
+  ongoing: ["กำลังดำเนินการ", "progress"],
+  completed: ["เสร็จสิ้น", "done"],
+  canceled: ["ยกเลิก", "problem"],
+};
+
+export const QUOTE_STATUS: StatusMap = {
+  draft: ["ร่าง", "waiting"],
+  sent: ["ส่งแล้ว รอลูกค้าตอบ", "progress"],
+  approved: ["ลูกค้าตอบรับ", "done"],
+  rejected: ["ลูกค้าปฏิเสธ", "problem"],
+};
+
+export const EVIDENCE_STATUS: StatusMap = {
+  pending: ["รอตรวจ", "action"],
+  approved: ["อนุมัติแล้ว", "done"],
+  rejected: ["ไม่อนุมัติ", "problem"],
+};
+
 export function statusOf(map: StatusMap, value: string): { label: string; tone: Tone } {
   const known = Object.hasOwn(map, value) ? map[value] : undefined;
   return known ? { label: known[0], tone: known[1] } : { label: "สถานะยังไม่ระบุ", tone: "waiting" };

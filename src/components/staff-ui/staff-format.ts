@@ -35,11 +35,28 @@ export function dateTH(value: string | null | undefined): string {
 
 const bangkokDay = (instant: number) => Math.floor((instant + 7 * 3600000) / 86400000);
 
-/** Bangkok calendar-day distance to a date, worded for a customer-requested date. */
-export function requestedDayCountdown(value: string | null | undefined, now: number | null): { text: string; tone: "danger" | "today" | "quiet" } | null {
+/** Bangkok calendar days from now until a date (negative when past), or null when unknown. */
+function bangkokDaysUntil(value: string | null | undefined, now: number | null): number | null {
   if (!value || now === null || !Number.isFinite(Date.parse(value))) return null;
-  const days = bangkokDay(Date.parse(value)) - bangkokDay(now);
+  return bangkokDay(Date.parse(value)) - bangkokDay(now);
+}
+
+type Countdown = { text: string; tone: "danger" | "today" | "quiet" };
+
+/** Day distance worded for a customer-requested date (not a promise by the shop). */
+export function requestedDayCountdown(value: string | null | undefined, now: number | null): Countdown | null {
+  const days = bangkokDaysUntil(value, now);
+  if (days === null) return null;
   if (days < 0) return { text: `เลยวันที่ลูกค้าต้องการ ${-days} วัน`, tone: "danger" };
   if (days === 0) return { text: "ลูกค้าต้องการวันนี้", tone: "today" };
   return { text: `อีก ${days} วัน`, tone: "quiet" };
+}
+
+/** Day distance worded for a server-set due date such as the Deposit/PO deadline. */
+export function dueDayCountdown(value: string | null | undefined, now: number | null): Countdown | null {
+  const days = bangkokDaysUntil(value, now);
+  if (days === null) return null;
+  if (days < 0) return { text: `เลยกำหนด ${-days} วัน`, tone: "danger" };
+  if (days === 0) return { text: "ครบกำหนดวันนี้", tone: "today" };
+  return { text: `อีก ${days} วัน`, tone: days <= 3 ? "today" : "quiet" };
 }
