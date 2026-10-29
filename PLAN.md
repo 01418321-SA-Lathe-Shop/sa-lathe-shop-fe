@@ -218,3 +218,13 @@ Owner authorized merging the saved orange design with the functional develop wor
 - `/login` and `/register` keep the designed auth presentation while using the connected backend authentication and registration flow. Three clearly labeled local demo bypass buttons sit below the real form without granting live access.
 - Business validation is preserved, including demo-only assumptions. Both demo and backend quotation flows now use the confirmed rule: five rejections allow revision and the sixth cancels.
 - UI details and route inventory: DESIGN.md. Verification evidence: docs/08-design-workflow-integration.md.
+
+## Systems Analysis report documentation — done (2026-10-29)
+
+- [x] Read the supplied `SA Project (1).md` and compare it with current frontend/backend requirements and implementation contracts.
+- [x] Add a numbered system-analysis overview and index, one numbered frontend guide for each implemented UC1–UC9, and a reconciliation note for source-only UC10–UC12.
+- [x] Update frontend documentation links to the guarded real-backend demo workflow fixture; distinguish account-only seed data from optional workflow data.
+- [x] Add the new-doc numbering rule without renaming historical files or changing application behavior.
+- [x] Check doc references, filename convention, whitespace, and changed-file scope. No application code or dependencies changed.
+
+Decision: current backend UC/API contracts and owner-confirmed rules take precedence over historical report details. Existing filenames remain stable; all new documentation uses a zero-padded three-digit prefix plus a descriptive title.
