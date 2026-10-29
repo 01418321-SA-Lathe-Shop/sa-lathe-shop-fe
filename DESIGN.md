@@ -474,7 +474,7 @@ The public page now sells the shop first; the order-tracking system becomes one 
 - Headline: งานกลึงตามแบบ / แม่นยำ ส่งไว / ราคาเป็นกันเอง. The paragraph names Bangkok Machine Shop.
 - CTA: ขอใบเสนอราคา → `/register`. The caption links to `#services`.
 - Pills: บริการ · วัสดุ · ขั้นตอน · คำถาม · ติดต่อ. At ≤767px they scroll horizontally instead of wrapping.
-- Stats: `[X]` ปีประสบการณ์ and `[X]` งานที่ส่งมอบแล้ว, placeholders that replace the old 9 workflows / 3 roles.
+- Stats: 30 ปีประสบการณ์ and 837 งานที่ส่งมอบแล้ว (owner-confirmed figures), replacing the old 9 workflows / 3 roles.
 - The LATHE / SHOP CONTROL brand mark is shared with the workspaces and is unchanged.
 
 **Sections.** Each one uses a different layout.
@@ -755,6 +755,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-29 | Fill landing hero stats with owner-confirmed figures: 30 years of experience, 837 jobs delivered | Type check, landing lint, served-HTML check |
 | 2026-10-29 | Shop-first landing: new hero copy, services, materials/tolerances, gallery, why-us, 5-step process with Deposit/PO rules, FAQ accordion with JSON-LD, contact/map facade; smooth scrolling, scroll reveals, sticky section bar, progress line and hero parallax; placeholders for unconfirmed facts | 145 native tests, type check, lint, source audit, production build; real-GPU Chrome walks at 1440/390/360px in Dark/Light, reduced motion and JavaScript off: no overflow, no stuck reveals, keyboard FAQ, valid JSON-LD |
 | 2026-10-29 | Restore the robot arm → conveyor → furnace → ingot landing animation at the owner's request; keep the visible pause pill and use `PCFShadowMap` | Restored timeline tests pass; type check, lint and production build pass; real-GPU browser walk at 1440/390/360px |
 | 2026-10-29 | Replace landing robot/furnace loop with a 16 s procedural lathe turning scene (bar feed, jaw clamp, spindle inertia, shader-driven cut, chips, coolant, mist, eject); procedural dark-bay reflections; visible pause pill; regenerate transparent posters | 149 native tests (9 new timeline tests), lint, source audit, production build; real-GPU Chrome captures at 1440/390/360px, paused-frame identity, reduced-motion still, no horizontal overflow |

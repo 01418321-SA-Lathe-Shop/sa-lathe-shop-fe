@@ -68,9 +68,10 @@ These come from `docs/02-frontend.md` and the frontend upload validation. Not st
 
 Every `[…]` on the page:
 
+Hero stats are confirmed by the owner: 30 years of experience and 837 jobs delivered (`landing-config.ts`).
+
 | Area | Placeholder | File |
 |---|---|---|
-| Hero stats | `[X]` ปีประสบการณ์, `[X]` งานที่ส่งมอบแล้ว | `landing-config.ts` |
 | Contact | `[เบอร์โทรศัพท์]`, `[LINE ID]`, `[อีเมล]`, `[ที่อยู่ร้าน]`, `[วันทำการ]`, `[เวลาเปิด–ปิด]`, Google Maps embed URL and link | `landing-content.ts` (`shop`) |
 | Services | Confirm all six services (turning, milling, threading, repair/replacement parts, prototypes, small to large batches) | `services` |
 | Materials | Example grades for each of the 5 groups, plus "ยืนยันเกรดที่รับ" | `materials` |
