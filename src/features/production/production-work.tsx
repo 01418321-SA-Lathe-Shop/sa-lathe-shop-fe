@@ -42,10 +42,12 @@ function UsageForm({ api, job, onSaved }: { api: BackendApi; job: ProductionStat
   const reserved = new Map(materials.map((material) => [material.material_id, material.reserved]));
   const filled = rows.filter((row) => row.quantity.trim()).length;
   const set = (index: number, quantity: string) => setRows((current) => current.map((value, position) => position === index ? { ...value, quantity } : value));
-  return <form className={layout.form} onSubmit={(event) => { event.preventDefault(); write.submit(`/production/jobs/${job.job_id}/usage`, "POST", () => {
+  // A div, not a form: the extra-material MaterialPicker carries its own search form.
+  const save = () => write.submit(`/production/jobs/${job.job_id}/usage`, "POST", () => {
     try { return usagePayload({ idempotency_key: crypto.randomUUID(), expected_version: job.version }, note, rows); }
     catch { throw new Error("กรอกจำนวนที่ใช้อย่างน้อย 1 รายการ เป็นตัวเลขมากกว่า 0 ทศนิยมไม่เกิน 6 ตำแหน่ง และหมายเหตุไม่เกิน 2,000 ตัวอักษร"); }
-  }, ""); }}>
+  }, "");
+  return <div className={layout.form}>
     <p className={layout.muted}>กรอกเฉพาะที่ใช้ตั้งแต่บันทึกครั้งล่าสุด ระบบใช้ของที่จองไว้ให้งานนี้ก่อน แล้วจึงใช้สต๊อกว่าง</p>
     <fieldset disabled={write.frozen}>
       <legend className={layout.visuallyHidden}>จำนวนที่ใช้ครั้งนี้</legend>
@@ -61,9 +63,9 @@ function UsageForm({ api, job, onSaved }: { api: BackendApi; job: ProductionStat
     </fieldset>
     {adding ? <MaterialPicker api={api} label="เพิ่มวัตถุดิบนอกแผน" disabled={write.frozen} isAdded={(materialId) => rows.some((row) => row.material_id === materialId)} onAdd={(material) => { setExtra((current) => ({ ...current, [material.id]: `นอกแผน · พร้อมใช้ ${quantityTH(material.qty_available)}` })); setRows((current) => [...current, { material_id: material.id, label: `${material.name} (${material.unit_name})`, quantity: "" }]); }} />
       : <Button variant="text" disabled={write.frozen} onClick={() => setAdding(true)}>+ เพิ่มวัตถุดิบนอกแผน</Button>}
-    <div className={layout.submitBar}><span>{filled ? `จะบันทึก ${filled} รายการ` : "ยังไม่ได้กรอกจำนวน"}</span><button type="submit" className={layout.submit} disabled={write.frozen || !filled}>บันทึกการใช้วัตถุดิบ</button></div>
+    <div className={layout.submitBar}><span>{filled ? `จะบันทึก ${filled} รายการ` : "ยังไม่ได้กรอกจำนวน"}</span><button type="button" className={layout.submit} disabled={write.frozen || !filled} onClick={save}>บันทึกการใช้วัตถุดิบ</button></div>
     {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />}
-  </form>;
+  </div>;
 }
 
 function TimeForm({ api, job, onSaved }: { api: BackendApi; job: ProductionState; onSaved: (message: string) => void }) {

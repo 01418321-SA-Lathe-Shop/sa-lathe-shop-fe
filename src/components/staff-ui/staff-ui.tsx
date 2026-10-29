@@ -30,7 +30,7 @@ export function StatusTabs({ label, tabs, current, href, loading = false, unavai
 }
 
 export function SearchForm({ label, placeholder, value, onSearch }: { label: string; placeholder: string; value: string; onSearch: (value: string) => void }) {
-  return <form key={value} role="search" className={styles.search} onSubmit={(event) => { event.preventDefault(); onSearch(String(new FormData(event.currentTarget).get("q") ?? "").trim()); }}>
+  return <form key={value} role="search" className={styles.search} onSubmit={(event) => { event.preventDefault(); event.stopPropagation(); onSearch(String(new FormData(event.currentTarget).get("q") ?? "").trim()); }}>
     <label><span className={styles.visuallyHidden}>{label}</span><Icon name="search" size={18} /><input name="q" type="search" defaultValue={value} placeholder={placeholder} maxLength={200} /></label>
     <button type="submit" className={styles.secondary}>ค้นหา</button>
   </form>;
