@@ -7,6 +7,7 @@ import type { ApiSession } from "../auth/api-session";
 import type { BackendApi, JobRequest, Notification, Page } from "../../lib/api/backend-api";
 import { useResource } from "../../hooks/backend-hooks";
 import { LiveRequests } from "../requests/requests";
+import { StaffRequests } from "../requests/staff-requests";
 import { LiveWorkers } from "../workers/workers";
 import { LiveInventory } from "../inventory/inventory";
 import { Inbox } from "../inbox/inbox";
@@ -26,9 +27,9 @@ export default function ConnectedWorkspace({ role, workspaceId, session }: { rol
   const { api, account } = session;
   switch (workspaceId) {
     case "overview": return role === "Customer" ? <Overview role={role} api={api} /> : <StaffOverview api={api} admin={role === "Admin"} />;
-    case "requests": return <LiveRequests api={api} account={account} focus={role === "Customer" ? "request" : "all"} />;
-    case "quotations": return <LiveRequests api={api} account={account} focus={role === "Customer" ? "quotations" : "all"} />;
-    case "deposit-po": return <LiveRequests api={api} account={account} focus="fulfillment" />;
+    case "requests": return role === "Customer" ? <LiveRequests api={api} account={account} focus="request" /> : <StaffRequests api={api} account={account} />;
+    case "quotations": return role === "Customer" ? <LiveRequests api={api} account={account} focus="quotations" /> : <StaffRequests api={api} account={account} />;
+    case "deposit-po": return role === "Customer" ? <LiveRequests api={api} account={account} focus="fulfillment" /> : <StaffRequests api={api} account={account} />;
     case "materials": return <LiveInventory api={api} account={account} />;
     case "orders": return <LiveProcurement api={api} />;
     case "receiving": return <LiveReceiving api={api} account={account} />;

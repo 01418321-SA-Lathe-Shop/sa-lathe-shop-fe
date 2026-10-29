@@ -1,0 +1,33 @@
+/* คำขอและใบเสนอราคา (UC1–UC4) page-specific rules; the list/detail layout is staff-ui/staff-layout.module.css. */
+.files { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.files li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
+.files li > span { display: grid; gap: 2px; min-width: 0; }
+.files strong { overflow-wrap: anywhere; }
+.files small { color: var(--muted); font-size: 0.8125rem; }
+
+.moneyGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.minimum { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); color: var(--muted); font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+.minimum strong { color: var(--text); }
+
+.checklist { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.checklist li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; }
+.checklist li > span { width: 1.25rem; color: var(--muted); font-weight: 700; text-align: center; }
+.checklist li[data-state="approved"] > span { color: var(--success); }
+.checklist li[data-state="pending"] > span { color: var(--lime); }
+.checklist small { color: var(--muted); font-size: 0.875rem; }
+.checklist li[data-state="rejected"] small { color: var(--danger); }
+
+.evidence { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); min-width: 0; }
+.evidence > header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.evidenceList { display: grid; gap: 10px; }
+.legend { margin-bottom: 4px; padding: 0; font-weight: 650; }
+.choices { display: flex; flex-wrap: wrap; gap: 10px; }
+.choices label, .check { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 16px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.choices label:has(input:checked) { border-color: var(--lime); background: color-mix(in srgb, var(--lime) 10%, var(--surface)); }
+.choices input, .check input { width: 20px; height: 20px; margin: 0; accent-color: var(--lime); }
+.check { align-items: flex-start; line-height: 1.5; }
+
+@media (max-width: 40rem) {
+  .moneyGrid { grid-template-columns: minmax(0, 1fr); }
+  .choices label { flex: 1; justify-content: center; }
+}

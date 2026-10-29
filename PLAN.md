@@ -1,3 +1,11 @@
+## Staff/Admin redesign Step 2 (คำขอและใบเสนอราคา) — 2026-10-30
+
+- Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 2 complete. Six stage tabs with counts from existing reads, one next-action card per stage, automatic minimum price, Deposit/PO review, customer name To be defined.
+- Checks: 172 native tests (9 new stage-domain tests), type check, lint, source audit, DESIGN sync, production build.
+- Chrome walk (real local API, writes intercepted, 0 attempted) as `anan.staff` and `pim.admin` at 1280px and 390px, Light and Dark: no console errors. Found and fixed a 421px phone overflow from hidden tab labels; งานผลิต re-walked clean.
+- Not walked: widths 360, 768 and 1920px; save, send, approve and reject against the live API.
+- Pending owner decision: none for this step. Not changed: AGENTS.md (uncommitted owner edit), `.gitignore` (`graphify-out`).
+
 # Frontend Implementation Plan
 
 ## Direct local-test account switching — 2026-10-29

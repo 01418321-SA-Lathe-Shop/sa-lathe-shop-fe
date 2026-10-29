@@ -79,7 +79,7 @@ components:
 
 # Lathe Shop Control — Design specification
 
-อัปเดตล่าสุด: 2026-10-29 · สถานะ: login และ workspace ใช้ real API เท่านั้น; ปุ่ม Local test เชื่อม password-free endpoint เมื่อเปิด config เฉพาะ local; browser login จริงผ่านครบ 6 บัญชี ไม่ใช่การรับรอง workflow ทั้งหมด
+อัปเดตล่าสุด: 2026-10-30 · สถานะ: login และ workspace ใช้ real API เท่านั้น; ปุ่ม Local test เชื่อม password-free endpoint เมื่อเปิด config เฉพาะ local; browser login จริงผ่านครบ 6 บัญชี ไม่ใช่การรับรอง workflow ทั้งหมด
 
 เอกสารนี้ใช้ส่งต่องานให้ designer และ developer เพื่อสร้าง UI ให้ตรงกับระบบปัจจุบัน อ่านคู่กับ `docs/02-frontend.md` ซึ่งเป็นแหล่งอ้างอิง Business Flow และ permission การตรวจ frontend ด้วย unit tests ไม่ใช่หลักฐานว่า real Backend หรือ UC1–UC9 ทำงานครบ
 
@@ -182,6 +182,14 @@ Step 1 of the approved Staff/Admin redesign. New pages share `src/components/sta
 งานผลิต (`/staff/production`, `/admin/production`) is a prioritized list beside a detail panel (24rem list column, 24px gap; one column at ≤64rem where the list and detail swap and a กลับรายการ link appears). The toolbar has two rows: tabs รอเริ่มงาน / กำลังผลิต / ผลิตเสร็จ / ทั้งหมด (counts from the full job list read 100 per call; Staff see an attention badge on รอเริ่มงาน), then search (literal request number or description) and อัปเดตข้อมูล. Open work is sorted by the customer-requested date, labelled "ลูกค้าต้องการ … (ไม่ใช่กำหนดส่งที่ร้านยืนยัน)", with a day-countdown chip; undated jobs come last; finished jobs sort newest first. Each card is one link showing request number, status, description, quantity, rework cycle, material readiness for queued jobs (read per job, six at a time: พร้อม ✓ / ยังไม่ครบ N รายการ / ยังไม่มีแผน / แผนเปลี่ยน) and the next action. The selected job, tab and search live in the URL (`?tab=&q=&job=`).
 
 The detail shows facts, the four steps, then one task panel by status. Queued: material plan lines with names, units and shortages, the material-plan editor (moved here from the materials page and the request opened-job section) with the shared material picker, จองเพิ่มตามแผนเดิม, and เริ่มผลิต (enabled only when the saved plan is ready at the job's plan version, confirmed in a dialog). In progress (Staff): segments ใช้วัตถุดิบ (prefill "ใช้ตามที่จองไว้", extra materials via picker), เวลาทำงาน (+15/+30/+60 chips with a running "จะเพิ่ม…" summary), รูปงาน (image upload with อัปโหลดอีกครั้ง after failure), and ปิดงาน behind a two-item checklist dialog. Completed: a NextAction to ส่งมอบ. Admin sees the same list and detail read-only, plus the actual-cost section and labor-cost form; no Staff write buttons are rendered. History and system events are collapsed. Endpoints, payloads, idempotency, version checks, statuses and permissions are unchanged; the separate “Job material plans” list on สต๊อกวัตถุดิบ and the plan panel inside the request opened-job section are removed because the plan now lives in production.
+
+### Staff/Admin คำขอและใบเสนอราคา — 2026-10-30
+
+Step 2 of the approved Staff/Admin redesign (`/staff/quotations`, `/admin/requests`; redirects unchanged; Overview untouched). One page named คำขอและใบเสนอราคา uses the shared kit: the header with one อัปเดตข้อมูล button, six status tabs with counts (ต้องทำใบเสนอราคา, รอลูกค้าตอบ, รอมัดจำ/PO, รอตรวจหลักฐาน, เปิดงานแล้ว, ปิดแล้ว) in the URL as `?stage=`, and one search box for request number or description. The 🟠 attention dot appears on ต้องทำใบเสนอราคา for Staff and on รอตรวจหลักฐาน for both roles. Stages are views worked out from existing quotation and Deposit/PO data, not new statuses; the server still decides every transition. Counts read every request 100 per call, up to 1,000, with a warning beyond that; a request whose quotation or Deposit/PO cannot be read is counted separately as “ยังโหลดขั้นตอนล่าสุดไม่ได้” with its own retry, not hidden.
+
+The list and detail use the shared list/detail layout (`staff-layout.module.css`). The detail shows the summary, one next-action card for the current stage, and collapsed secondary sections (ประวัติ, ประวัติระบบ). Staff quote form: material and labour totals, offered price, and a minimum price requested from the existing estimate endpoint (the browser does not calculate it). Inline checks flag an offer below the server minimum and invalid amounts; “ไม่มี VAT” is shown. บันทึกร่าง saves a draft; ส่งใบเสนอราคา saves first if needed, then confirms in a dialog and keeps the existing send API. Refuse-request sits in a collapsed section and requires a customer-visible reason. Deposit/PO review lists one row per evidence item with the file, declared amount and time, approve/reject choice (reason when rejecting), and a file-checked checkbox before confirming. Opened jobs link to `…/production?job=…`. Admin sees costs and reviews evidence but gets no quote or refuse controls.
+
+Browser walk (Chrome, real local API, Staff `anan.staff` and Admin `pim.admin`): 1280px and 390px, Light and Dark, no horizontal page scroll, no console errors, and no API writes attempted (non-GET requests aborted and counted, zero). At 390px the status tabs scroll inside their own row; the hidden tab labels previously widened the page to 421px, fixed by making the tab links a positioning context. The งานผลิต page was re-walked the same way after its layout moved. Limits: the customer name is “To be defined” (Staff receive only `customer_id`); saves, send, approve and reject were not exercised against the live API (writes intercepted only); widths 360, 768 and 1920px were not walked.
 
 ### Staff/Admin navbar alignment — 2026-10-29
 
@@ -773,6 +781,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-30 | Staff/Admin redesign Step 2: คำขอและใบเสนอราคา with six stage tabs and counts from existing reads, one next-action card per stage, automatic minimum-price check, Deposit/PO evidence review, collapsed refuse and history; stage-domain unit tests; CSS registered in the source appendix | Stage/count/price/evidence domain tests (9 new; 172 native tests), type check, lint, source audit, line limits, production build; Chrome walk as Staff and Admin at 1280px and 390px, both themes, writes intercepted (0), no horizontal overflow after tab fix |
 | 2026-10-29 | Staff/Admin redesign Step 1: shared Thai staff-ui kit (tabs, search, buttons, steps, confirm dialog, retry panel, toast, states), `--success` token, shared material picker; งานผลิต rebuilt as prioritized list + detail with readiness, plan editor moved in from the materials page and request opened-job section, segmented work recording and checklist close; Admin read-only plus labor cost | Production list/format domain tests, 163 native tests, type check, lint, source audit, build; Chrome real local API with every write intercepted (no DB writes) as anan.staff, kittipong.staff and pim.admin at 1280px Dark and 390px Light: correct usage/time/complete payloads and versions, Start disabled on short plan, close gated by checklist, no overflow or console errors |
 | 2026-10-29 | Staff/Admin redesign Step 0: workflow-grouped Thai sidebar with separated Admin section, shared คำขอและใบเสนอราคา label, Thai eyebrows/descriptions, Customer-style notification bell with unread count and dropdown; remove unused inbox-link CSS | Navigation/notification tests (every permitted page grouped once, Thai titles), 154 native tests, type check, lint, source audit, build; Chrome real local API read-only as anan.staff and pim.admin at 1280px Dark/Light and 390px: no overflow or console errors, focus returns to bell |
 | 2026-10-29 | Customer invoices: summary tiles, status pills with counts, cards with paid progress and due-day chips; detail balance hero, numbered bank-payment steps with fill-balance and inline amount guidance, sticky ledger and payment timeline; remove unused `.cust-payment-layout`/`.cust-invoice-summary`/`.cust-list-price` rules | Invoice domain tests (exact cents, Bangkok days, pending excluded), 151 native tests, type check, lint, source audit, build; Chrome real local API (somchai unpaid, nida.company paid) at 1280/390px Dark and 1280px Light: no overflow or console errors, over-balance message, fill chip, submit gated on upload |
@@ -2744,7 +2753,7 @@ src/features/workspace/workspace.module.css
 
 /* Status tabs with counts (same pattern as Customer lists). */
 .tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
-:global(.live-workspace) .tabs a { flex-shrink: 0; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: 0.875rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
+:global(.live-workspace) .tabs a { position: relative; flex-shrink: 0; display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--muted); font-size: 0.875rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
 :global(.live-workspace) .tabs a:hover { color: var(--text); border-color: var(--lime); }
 :global(.live-workspace) .tabs a[aria-current="page"] { color: var(--text); border-color: var(--lime); background: color-mix(in srgb, var(--lime) 12%, var(--surface)); }
 :global(.live-workspace) .tabs a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
@@ -2828,13 +2837,65 @@ src/features/workspace/workspace.module.css
 ### A10. Staff/Admin production — src/features/production/production.module.css
 
 ```css
-/* งานผลิต (UC8): prioritized queue + detail. Uses the shared theme tokens. */
+/* งานผลิต (UC8) page-specific rules; the list/detail layout is staff-ui/staff-layout.module.css. */
+.readiness { display: inline-flex; align-items: center; gap: 8px; width: fit-content; font-size: 0.875rem; font-weight: 650; color: var(--muted); }
+.readiness::before { content: "•"; font-weight: 700; }
+.readiness[data-state="ready"] { color: var(--success); }
+.readiness[data-state="ready"]::before { content: "✓"; }
+.readiness:is([data-state="short"], [data-state="empty"], [data-state="changed"]) { color: var(--lime); }
+.readiness:is([data-state="short"], [data-state="empty"], [data-state="changed"])::before { content: "!"; }
+.readiness[data-state="error"] { color: var(--danger); }
+:global([data-theme="light"]) .readiness:is([data-state="short"], [data-state="empty"], [data-state="changed"]) { color: var(--lime-soft); }
+
+.planLines { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.planLines li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.planLines li[data-short] { border-color: color-mix(in srgb, var(--danger) 45%, var(--line)); }
+.planLines strong { flex: 1 1 12rem; overflow-wrap: anywhere; }
+.planLines span { color: var(--muted); font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+.planLines .short { color: var(--danger); font-weight: 650; }
+.editor { display: grid; gap: 14px; min-width: 0; }
+.editor fieldset { display: grid; gap: 14px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.editorLine { display: flex; align-items: flex-end; gap: 8px; }
+.editorLine > label { flex: 1; }
+
+/* Work panel (in progress) */
+.segments { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+:global(.live-workspace) .segments button { flex: 1; min-width: 0; min-height: 44px; padding: 8px 6px; white-space: nowrap; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font: inherit; font-weight: 650; cursor: pointer; }
+:global(.live-workspace) .segments button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0, 0, 0, .2); }
+:global(.live-workspace) .segments button:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.usageRow { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+:global(.live-workspace) .fill { justify-self: start; min-height: 44px; font-size: 0.875rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.closeJob { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px 16px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; }
+.closeJob h3 { margin: 0 0 4px; font-size: 1rem; }
+.closeJob > :is([role="alert"]) { grid-column: 1 / -1; }
+
+/* Materials and photo history */
+.materials { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.materials li { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
+.materials small { color: var(--muted); font-weight: 400; }
+.materials dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.materials dt { color: var(--muted); font-size: 0.8125rem; }
+.materials dd { margin: 2px 0 0; font-weight: 650; font-variant-numeric: tabular-nums; }
+.materials dd small { display: block; font-size: 0.75rem; }
+:global(.live-workspace) .photoRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+@media (max-width: 40rem) {
+  .materials dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .closeJob { grid-template-columns: minmax(0, 1fr); }
+}
+```
+
+### A11. Staff/Admin shared list and detail layout — src/components/staff-ui/staff-layout.module.css
+
+```css
+/* Staff/Admin list + detail page layout shared by the redesigned pages. Uses the shared theme tokens. */
 .page { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; min-width: 0; }
 .visuallyHidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .toolbar { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .toolbarEnd { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .toolbarEnd > form { flex: 1 1 20rem; max-width: 36rem; min-width: 0; }
-.warning { margin: 0; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--warning) 45%, var(--line)); border-radius: 10px; background: color-mix(in srgb, var(--warning) 8%, var(--surface)); color: var(--text); font-size: 0.9375rem; }
+.warning { margin: 0; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--warning) 45%, var(--line)); border-radius: 10px; background: color-mix(in srgb, var(--warning) 8%, var(--surface)); color: var(--text); font-size: 0.9375rem; line-height: 1.6; }
 .filterNote { margin: 0; color: var(--muted); font-size: 0.875rem; }
 :global(.live-workspace) .filterNote a { margin-left: 8px; color: var(--lime); }
 .muted { margin: 0; color: var(--muted); font-size: 0.9375rem; line-height: 1.6; }
@@ -2844,7 +2905,7 @@ src/features/workspace/workspace.module.css
 .detail { min-width: 0; }
 .placeholder { position: sticky; top: 96px; }
 
-/* Job cards: the whole card is one link (one tap target). */
+/* Record cards: the whole card is one link (one tap target). */
 :global(.live-workspace) .card { display: grid; gap: 6px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--text); text-decoration: none; transition: border-color .15s, background-color .15s; }
 :global(.live-workspace) .card:hover { border-color: color-mix(in srgb, var(--lime) 60%, var(--line)); text-decoration: none; }
 :global(.live-workspace) .card[aria-current="true"] { border-color: var(--lime); background: color-mix(in srgb, var(--lime) 7%, var(--surface)); box-shadow: inset 4px 0 0 var(--lime); }
@@ -2853,15 +2914,9 @@ src/features/workspace/workspace.module.css
 .cardTop strong { font-size: 0.9375rem; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .cardTitle { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 1.0625rem; font-weight: 650; line-height: 1.45; overflow-wrap: anywhere; }
 .cardMeta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; color: var(--muted); font-size: 0.875rem; }
-.readiness { display: inline-flex; align-items: center; gap: 8px; width: fit-content; font-size: 0.875rem; font-weight: 650; color: var(--muted); }
-.readiness::before { content: "•"; font-weight: 700; }
-.readiness[data-state="ready"] { color: var(--success); }
-.readiness[data-state="ready"]::before { content: "✓"; }
-.readiness:is([data-state="short"], [data-state="empty"], [data-state="changed"]) { color: var(--lime); }
-.readiness:is([data-state="short"], [data-state="empty"], [data-state="changed"])::before { content: "!"; }
-.readiness[data-state="error"] { color: var(--danger); }
 .cardNext { display: inline-flex; align-items: center; gap: 6px; margin-top: 4px; color: var(--lime); font-size: 0.9375rem; font-weight: 650; }
-:global([data-theme="light"]) :is(.cardNext, .readiness:is([data-state="short"], [data-state="empty"], [data-state="changed"])) { color: var(--lime-soft); }
+.cardNext[data-quiet] { color: var(--muted); }
+:global([data-theme="light"]) .cardNext:not([data-quiet]) { color: var(--lime-soft); }
 
 /* Detail */
 .detailCard { display: grid; gap: 20px; padding: clamp(1rem, 2.2vw, 1.75rem); border: 1px solid var(--line); border-radius: 16px; background: var(--surface); min-width: 0; }
@@ -2872,59 +2927,32 @@ src/features/workspace/workspace.module.css
 .meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 8px 0 0; color: var(--muted); font-size: 0.9375rem; }
 .meta small { font-size: 0.8125rem; }
 .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 12px; margin: 0; }
-.facts > div { padding: 12px 14px; border-radius: 12px; background: var(--surface-2); }
+.facts > div { padding: 12px 14px; border-radius: 12px; background: var(--surface-2); min-width: 0; }
 .facts dt { color: var(--muted); font-size: 0.8125rem; }
 .facts dd { margin: 4px 0 0; font-weight: 650; overflow-wrap: anywhere; }
 :global(.live-workspace) .linkButton { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: fit-content; min-height: 48px; padding: 10px 20px; border-radius: 10px; background: var(--lime); color: #160e08; font-weight: 650; text-decoration: none; }
 :global(.live-workspace) .linkButton:hover { text-decoration: none; background: color-mix(in srgb, var(--lime) 85%, #fff); }
-
 .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-.planLines { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.planLines li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
-.planLines li[data-short] { border-color: color-mix(in srgb, var(--danger) 45%, var(--line)); }
-.planLines strong { flex: 1 1 12rem; overflow-wrap: anywhere; }
-.planLines span { color: var(--muted); font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
-.planLines .short { color: var(--danger); font-weight: 650; }
-.editor, .form { display: grid; gap: 14px; min-width: 0; }
-.editor fieldset, .form fieldset { display: grid; gap: 14px; min-width: 0; margin: 0; padding: 0; border: 0; }
-.editorLine { display: flex; align-items: flex-end; gap: 8px; }
-.editorLine > label { flex: 1; }
 .problem { margin: 0; color: var(--danger); font-weight: 600; }
 
-/* Work panel (in progress) */
-.segments { display: flex; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
-:global(.live-workspace) .segments button { flex: 1; min-width: 0; min-height: 44px; padding: 8px 6px; white-space: nowrap; border: 0; border-radius: 9px; background: transparent; color: var(--muted); font: inherit; font-weight: 650; cursor: pointer; }
-:global(.live-workspace) .segments button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0, 0, 0, .2); }
-:global(.live-workspace) .segments button:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
-.usageRow { display: grid; gap: 8px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
-:global(.live-workspace) .fill { justify-self: start; min-height: 44px; font-size: 0.875rem; }
-.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Forms with a summary + main button bar */
+.form { display: grid; gap: 14px; min-width: 0; }
+.form fieldset { display: grid; gap: 14px; min-width: 0; margin: 0; padding: 0; border: 0; }
 .submitBar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: 12px; background: var(--surface-2); }
 .submitBar > span { color: var(--muted); font-size: 0.9375rem; overflow-wrap: anywhere; }
 :global(.live-workspace) .submit { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 10px 22px; border: 0; border-radius: 10px; background: var(--lime); color: #160e08; font: inherit; font-weight: 650; cursor: pointer; }
 :global(.live-workspace) .submit:hover:not(:disabled) { background: color-mix(in srgb, var(--lime) 85%, #fff); }
 :global(.live-workspace) .submit:disabled { opacity: .5; cursor: not-allowed; }
 :global(.live-workspace) .submit:focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
-.closeJob { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px 16px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; }
-.closeJob h3 { margin: 0 0 4px; font-size: 1rem; }
-.closeJob > :is([role="alert"]) { grid-column: 1 / -1; }
 
-/* Materials and history */
+/* Sections and history */
 .section { display: grid; gap: 12px; }
 .section h3 { margin: 0; font-size: 1.0625rem; }
-.materials { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
-.materials li { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; }
-.materials small { color: var(--muted); font-weight: 400; }
-.materials dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; }
-.materials dt { color: var(--muted); font-size: 0.8125rem; }
-.materials dd { margin: 2px 0 0; font-weight: 650; font-variant-numeric: tabular-nums; }
-.materials dd small { display: block; font-size: 0.75rem; }
 .historyBlock { display: grid; gap: 8px; }
 .historyBlock h4 { margin: 0; font-size: 0.9375rem; }
 .timeline { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
 .timeline li { display: grid; gap: 2px; padding: 10px 0 10px 16px; border-left: 2px solid var(--line); }
 .timeline li span { color: var(--muted); font-size: 0.875rem; overflow-wrap: anywhere; }
-.timeline li.photoRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .code { margin: 0; color: var(--muted); font-size: 0.8125rem; overflow-wrap: anywhere; }
 
 @media (max-width: 64rem) {
@@ -2935,12 +2963,49 @@ src/features/workspace/workspace.module.css
 @media (max-width: 40rem) {
   .toolbarEnd > form { flex-basis: 100%; max-width: none; }
   .detailHeader { flex-direction: column; }
-  .materials dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .closeJob { grid-template-columns: minmax(0, 1fr); }
   .submitBar { flex-direction: column; align-items: stretch; }
   :global(.live-workspace) .submit { width: 100%; }
+  .submitBar[data-sticky] { position: sticky; bottom: 0; z-index: 2; box-shadow: 0 -8px 24px rgba(0, 0, 0, .18); }
 }
 @media (prefers-reduced-motion: reduce) { :global(.live-workspace) .card { transition: none; } }
+```
+
+### A12. Staff/Admin requests and quotations — src/features/requests/requests.module.css
+
+```css
+/* คำขอและใบเสนอราคา (UC1–UC4) page-specific rules; the list/detail layout is staff-ui/staff-layout.module.css. */
+.files { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.files li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
+.files li > span { display: grid; gap: 2px; min-width: 0; }
+.files strong { overflow-wrap: anywhere; }
+.files small { color: var(--muted); font-size: 0.8125rem; }
+
+.moneyGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.minimum { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); color: var(--muted); font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+.minimum strong { color: var(--text); }
+
+.checklist { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.checklist li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; }
+.checklist li > span { width: 1.25rem; color: var(--muted); font-weight: 700; text-align: center; }
+.checklist li[data-state="approved"] > span { color: var(--success); }
+.checklist li[data-state="pending"] > span { color: var(--lime); }
+.checklist small { color: var(--muted); font-size: 0.875rem; }
+.checklist li[data-state="rejected"] small { color: var(--danger); }
+
+.evidence { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); min-width: 0; }
+.evidence > header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.evidenceList { display: grid; gap: 10px; }
+.legend { margin-bottom: 4px; padding: 0; font-weight: 650; }
+.choices { display: flex; flex-wrap: wrap; gap: 10px; }
+.choices label, .check { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 16px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.choices label:has(input:checked) { border-color: var(--lime); background: color-mix(in srgb, var(--lime) 10%, var(--surface)); }
+.choices input, .check input { width: 20px; height: 20px; margin: 0; accent-color: var(--lime); }
+.check { align-items: flex-start; line-height: 1.5; }
+
+@media (max-width: 40rem) {
+  .moneyGrid { grid-template-columns: minmax(0, 1fr); }
+  .choices label { flex: 1; justify-content: center; }
+}
 ```
 
 ### B. Font loading and root layout — app/layout.tsx
