@@ -199,6 +199,40 @@ Opening a material (`?material=`) shows the new shared side panel (`Drawer`, nat
 
 Browser walk (Chrome, real local API, writes intercepted): `pim.admin` at 1280 Dark, 390 Light, 360 Dark, 768 Light and 1920 Dark; `anan.staff` at 1280 Dark and 390 Light. No horizontal page scroll and no console errors. The intercepted stock addition, unit creation and material PATCH bodies matched the previous payloads, and toasts cleared after 5 s. Not exercised against the live API: actual saves, conflicts, and the retry path. Known limit: ข้อมูลหลัก is not a separate sidebar item; it is reached through the view tab.
 
+### Staff/Admin รับเข้าวัตถุดิบ — 2026-10-30
+
+Step 5 of the approved Staff/Admin redesign (`/staff/receiving` and `/admin/receiving`; no new route). Accepted, non-cancelled supplier orders load 100 per call, up to 1,000, with the cap notice. They are grouped by pill tabs with counts (`?tab=`):
+- รอรับของ (`ordered`, marked as needing action)
+- รับบางส่วน (`partially_received`)
+- รับครบ (`received`)
+- มีของเสียหาย (a claim still `pending_claim` or `claimed`, marked as needing action)
+- Admin only: ค้างจ่ายผู้ขาย (fully received and `payment_status` not `paid`, including orders whose credit days are not yet set)
+
+The list API has no claim or payment data, so the last two tabs read each listed order's detail once per list load, in parallel, for the first 100 orders. A notice appears when some details fail to load or the list is longer than 100. The default tab is the first non-empty of รอรับของ / รับบางส่วน / มีของเสียหาย. Search matches order number or supplier name (`?q=`). Each card shows the order number, a status badge, the supplier, line count, how many lines are still owed, the full-receipt date, ToneBadges for damaged goods and amounts owed to the supplier, and the next step.
+
+The detail (`?order=`) contains, in order:
+- Facts: supplier, full-receipt time, open damaged claims.
+- A warning when damaged goods have not yet been reported to the supplier.
+- A บันทึกของที่มาถึง action card with the receipt form, until the order is fully received.
+  - Original rows list what the order still expects: outstanding minus what open claims still owe, because original good plus damaged units may not exceed the ordered quantity.
+  - Replacement rows are listed for claims already reported to the supplier.
+  - Each row has ของดี and เสียหาย inputs and a “รับครบตามที่เหลือ” button that types the remaining quantity. “รับครบทุกรายการตามที่เหลือ” appears when there is more than one row. Staff still press บันทึกรับของ.
+  - An inline error blocks a row whose good plus damaged exceeds its remaining quantity.
+  - A checklist confirmation lists the rows being saved.
+- Lines: ordered, good received and remaining, plus damaged history.
+- ของเสียหาย claim cards: Thai claim status, replaced and still-owed quantities, and a required supplier-contact note with บันทึกว่าแจ้งผู้ขายแล้ว.
+- ประวัติการรับของ timeline.
+- Admin-only จ่ายผู้ขาย section:
+  - Total without VAT, credit days, due time and payment status.
+  - Credit days are set once, through a confirmation.
+  - Settlement records an outside payment, once: bank transfer needs an uploaded private proof; cash proof is optional. The proof upload is a new upload on every attempt, shows “อัปโหลดอีกครั้ง” after a failure, and blocks files over 100 MB.
+  - Once paid, the section shows the payment and a proof download.
+- Staff see a note that prices, credit days and payment are handled by Admin.
+
+Every write keeps its frozen idempotent payload and offers a RetryPanel after an unclear response. Receiving validation messages are now Thai.
+
+Browser walk (Chrome): the local backend was not running, so a test-only stub answered every API call, with orders in every state. Runs: `pim.admin` at 1280 Dark and 390 Light; `anan.staff` at 768 Dark. No horizontal page scroll and no console errors. Staff did not get the ค้างจ่ายผู้ขาย tab or the จ่ายผู้ขาย section. The intercepted bodies for receipt, claim submit, credit days and cash settlement matched the previous payload shapes; settlement time was converted from Bangkok. Not yet exercised against the live API: real data, saves, conflicts, retry and the proof upload.
+
 ### Staff/Admin สั่งซื้อวัตถุดิบ — 2026-10-30
 
 Step 4 of the approved Staff/Admin redesign (`/admin/orders`, Admin only; no new route). Two underline view tabs, ใบสั่งซื้อ and ผู้ขาย (`?view=suppliers`), use the view-tab style now shared in `staff-layout.module.css` with the checkbox toggle and collapsible note (moved from the stock page, no visual change there). Orders load 100 per call up to 1,000 with the cap notice and are grouped by pill status tabs with counts: รอผู้ขายตอบ (`ordered` + response `pending`, orange, marked as needing action) / ผู้ขายรับแล้ว (`ordered` + `accepted`) / รับบางส่วน (`partially_received`) / รับครบ (`received`) / ยกเลิก (`cancelled`) (`?tab=`). The default tab is the first non-empty of the first three. Search matches order number or supplier name within the loaded orders (`?q=`). The list uses the shared list/detail layout: each card shows the order number, status, supplier, total in baht, line count, expected date (or order date) and the next step.
@@ -800,6 +834,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 | Date | Change | Verification |
 | --- | --- | --- |
 | 2026-10-30 | Fix: งานผลิต usage form no longer contains the extra-material search form; pressing ค้นหา in เพิ่มวัตถุดิบนอกแผน could also trigger บันทึกการใช้วัตถุดิบ. The usage form saves only from its button, and the shared `SearchForm` stops its submit event from reaching an outer form | 175 native tests, type check, lint, source audit, build; not re-walked in the browser (backend down) |
+| 2026-10-30 | Staff/Admin redesign Step 5: รับเข้าวัตถุดิบ with status tabs plus มีของเสียหาย and Admin-only ค้างจ่ายผู้ขาย (counted from per-order details, first 100), search, cards, receipt form with remaining quantities and “รับครบตามที่เหลือ” per line and for all lines, claim cards, receipt timeline, Admin จ่ายผู้ขาย section with Thai proof upload; Thai receiving validation | 178 native tests (tab, remaining and row-check tests new), type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / 390 Light and Staff 768 Dark against a test-only API stub (backend down), writes intercepted |
 | 2026-10-30 | Staff/Admin redesign Step 4: สั่งซื้อวัตถุดิบ with ใบสั่งซื้อ/ผู้ขาย view tabs, five status tabs with counts and search, one action card per order state with checklist confirmations, new-order step form in the side panel with `MaterialPicker` and exact live total (English `MaterialSearch` removed), supplier list with side-panel add/edit, Thai validation; view-tab, toggle and note styles shared in the staff layout | 175 native tests (order-tab test new), type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 360/390/768/1280/1920 both themes against a test-only API stub (backend down), writes intercepted |
 | 2026-10-30 | Staff/Admin redesign Step 3: สต๊อกวัตถุดิบ table/cards with real-value filter chips, shared side panel (`Drawer`) with movement history, Admin step-form stock adjustment with exact preview and reserved-quantity block, ข้อมูลหลัก view tab for units and materials; shared Toast timer fix | 174 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 360/390/768/1280/1920 and Staff 390/1280, Light and Dark, writes intercepted |
 | 2026-10-30 | Staff/Admin redesign Step 2: คำขอและใบเสนอราคา with six stage tabs and counts from existing reads, one next-action card per stage, automatic minimum-price check, Deposit/PO evidence review, collapsed refuse and history; stage-domain unit tests; CSS registered in the source appendix | Stage/count/price/evidence domain tests (9 new; 172 native tests), type check, lint, source audit, line limits, production build; Chrome walk as Staff and Admin at 1280px and 390px, both themes, writes intercepted (0), no horizontal overflow after tab fix |
@@ -3143,6 +3178,33 @@ src/features/workspace/workspace.module.css
   .draftLines li { grid-template-columns: minmax(0, 1fr); }
   .suppliers li { grid-template-columns: minmax(0, 1fr) auto; }
   .suppliers li > :last-child { grid-column: 1 / -1; justify-self: start; }
+}
+```
+
+### A15. Staff/Admin receiving — src/features/receiving/receiving.module.css
+
+```css
+/* รับเข้าวัตถุดิบ (UC7) page-specific rules; list/detail pieces come from staff-ui/staff-layout.module.css. */
+
+/* Order lines: name, then ordered / good received / remaining. */
+.lines, .claims, .receipt { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.lines li, .claims li { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; overflow-wrap: anywhere; }
+.lines small, .claims small { color: var(--muted); font-size: 0.875rem; }
+.qty { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; font-variant-numeric: tabular-nums; }
+.qty dt { color: var(--muted); font-size: 0.8125rem; }
+.qty dd { margin: 2px 0 0; font-weight: 650; }
+.qty dd[data-zero] { color: var(--muted); }
+.claimTop { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+
+/* Receipt rows: good / damaged side by side, fill button under them. */
+.receipt li { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+.receipt li > :first-child { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; overflow-wrap: anywhere; }
+.receipt li > :first-child small { color: var(--muted); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+.receipt li > :last-child { grid-column: 1 / -1; justify-self: start; }
+.confirmList { display: grid; gap: 4px; margin: 0; padding-left: 1.25rem; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 40rem) {
+  .receipt li { grid-template-columns: minmax(0, 1fr); }
 }
 ```
 

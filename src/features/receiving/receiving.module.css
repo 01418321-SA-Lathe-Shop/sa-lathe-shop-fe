@@ -1,0 +1,22 @@
+/* รับเข้าวัตถุดิบ (UC7) page-specific rules; list/detail pieces come from staff-ui/staff-layout.module.css. */
+
+/* Order lines: name, then ordered / good received / remaining. */
+.lines, .claims, .receipt { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.lines li, .claims li { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; overflow-wrap: anywhere; }
+.lines small, .claims small { color: var(--muted); font-size: 0.875rem; }
+.qty { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; font-variant-numeric: tabular-nums; }
+.qty dt { color: var(--muted); font-size: 0.8125rem; }
+.qty dd { margin: 2px 0 0; font-weight: 650; }
+.qty dd[data-zero] { color: var(--muted); }
+.claimTop { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+
+/* Receipt rows: good / damaged side by side, fill button under them. */
+.receipt li { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+.receipt li > :first-child { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; overflow-wrap: anywhere; }
+.receipt li > :first-child small { color: var(--muted); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+.receipt li > :last-child { grid-column: 1 / -1; justify-self: start; }
+.confirmList { display: grid; gap: 4px; margin: 0; padding-left: 1.25rem; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 40rem) {
+  .receipt li { grid-template-columns: minmax(0, 1fr); }
+}

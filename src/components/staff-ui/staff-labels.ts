@@ -58,6 +58,21 @@ export const ORDER_EVENT: StatusMap = {
   settle: ["ชำระเงินผู้ขาย", "done"],
 };
 
+// Keyed by the รับเข้าวัตถุดิบ tab, see receiving-domain.
+export const RECEIVING_STATE: StatusMap = {
+  waiting: ["รอรับของ", "action"],
+  partial: ["รับบางส่วน", "progress"],
+  received: ["รับครบ", "done"],
+  damaged: ["มีของเสียหาย", "problem"],
+  unpaid: ["ค้างจ่ายผู้ขาย", "action"],
+};
+
+export const CLAIM_STATE: StatusMap = {
+  pending_claim: ["รอแจ้งผู้ขาย", "action"],
+  claimed: ["แจ้งผู้ขายแล้ว รอของแทน", "progress"],
+  resolved: ["ได้ของแทนครบ", "done"],
+};
+
 export function statusOf(map: StatusMap, value: string): { label: string; tone: Tone } {
   const known = Object.hasOwn(map, value) ? map[value] : undefined;
   return known ? { label: known[0], tone: known[1] } : { label: "สถานะยังไม่ระบุ", tone: "waiting" };
