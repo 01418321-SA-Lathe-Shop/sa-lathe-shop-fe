@@ -21,8 +21,8 @@ export function RequestCard({ record, layout = "cards" }: { record: SalesRecord;
   const quote = latestQuote(record.quotations); const job = record.fulfillment?.job;
   const next = job ? customerHref("jobs", { job: job.id }) : customerHref(quote?.status === "approved" ? "deposit-po" : "quotations", { request: request.id, quotation: quote?.id });
   return <article className={`${styles.card} ${layout === "list" ? styles.rowCard : ""}`} aria-label={`คำขอ #${request.no_request}`}>
-    <div className={styles.cardHeader}><div><span className={styles.metaLabel}>คำขอ</span><strong>#{request.no_request}</strong></div><Icon name="machine" size={40} /></div>
-    <h2 className={styles.cardTitle}><Link className={styles.openCard} href={customerHref("requests", { request: request.id })} aria-label={`ดูคำขอ #${request.no_request} · ${request.description}`} title={request.description}>{request.description}</Link></h2>
+    {layout === "cards" && <div className={styles.cardHeader}><div><span className={styles.metaLabel}>คำขอ</span><strong>#{request.no_request}</strong></div></div>}
+    <h2 className={styles.cardTitle}><Link className={styles.openCard} href={customerHref("requests", { request: request.id })} aria-label={`ดูคำขอ #${request.no_request} · ${request.description}`} title={request.description}>{layout === "list" && <span className={styles.rowNumber}>คำขอ #{request.no_request} · </span>}{request.description}</Link></h2>
     <Badge value={request.status} labels={REQUEST_LABELS} />
     <dl className={styles.essentials}><div><dt>จำนวน</dt><dd>{request.qty} ชิ้น</dd></div><div><dt><Icon name="clock" size={15} /> วันที่ต้องการ</dt><dd>{request.deadline ? <time dateTime={request.deadline}>{dateTH(request.deadline)}</time> : "ไม่ได้ระบุ"}</dd></div></dl>
     <div className={styles.nextStep}><p>{salesStep(record)}</p>

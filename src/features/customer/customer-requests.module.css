@@ -26,6 +26,7 @@
 .list .cardHeader > svg { flex-shrink: 0; color: var(--cust-muted); }
 .list .metaLabel { display: block; color: var(--cust-muted); font-size: .875rem; }
 .list .cardTitle { margin: 16px 0 12px; font-size: 1.125rem; line-height: 1.5; font-weight: 650; }
+.rowNumber { color: var(--cust-accent); font-variant-numeric: tabular-nums; }
 .list .openCard { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--cust-ink); overflow-wrap: anywhere; text-decoration: none; }
 .list .openCard:hover { color: var(--cust-ink); text-decoration: none; }
 .list .openCard:focus-visible { outline: none; }
@@ -45,9 +46,8 @@
 .list .skeleton > span:nth-child(2) { width: 90%; height: 44px; }
 .list .skeleton > span:nth-child(3) { width: 35%; height: 28px; border-radius: 999px; }
 .list .skeleton > span:last-child { margin-top: auto; }
-.list .rowCard { display: grid; grid-template-columns: minmax(7rem, .7fr) minmax(14rem, 2fr) auto minmax(15rem, 1.3fr); grid-template-areas: "number title status facts" "number step step footer"; align-items: center; gap: 8px 20px; min-height: 0; padding: 16px 18px; box-shadow: none; border: 1px solid var(--cust-line); }
-.list .rowCard .cardHeader { grid-area: number; }
-.list .rowCard .cardHeader > svg { display: none; }
+.list .rowCard { display: grid; grid-template-columns: minmax(16rem, 2fr) auto minmax(15rem, 1.3fr); grid-template-areas: "title status facts" "step step footer"; align-items: center; gap: 8px 20px; min-height: 0; padding: 16px 18px; box-shadow: none; border: 1px solid var(--cust-line); }
+.list .rowCard .cardHeader { display: none; }
 .list .rowCard .cardTitle { grid-area: title; margin: 0; }
 .list .rowCard > :global(.cust-badge) { grid-area: status; justify-self: start; }
 .list .rowCard .essentials { grid-area: facts; margin: 0; }
@@ -65,5 +65,14 @@
   .list .card { padding: 20px; }
   .list .rowCard { display: flex; padding: 16px; }
 }
-@media (min-width: 641px) and (max-width: 1100px) { .list .rowCard { grid-template-columns: minmax(7rem, .6fr) minmax(12rem, 1.5fr) auto; grid-template-areas: "number title status" "facts facts facts" "step step footer"; } }
+@media (min-width: 641px) and (max-width: 1100px) { .list .rowCard { grid-template-columns: minmax(12rem, 1.5fr) auto; grid-template-areas: "title status" "facts facts" "step footer"; } }
 @media (prefers-reduced-motion: reduce) { .list .card { transition: none; } }
+
+.detailPage :global(.cust-detail-grid) { margin-top: clamp(1.5rem, 3vw, 2.5rem); }
+.detailPage :global(.cust-document) > :global(.cust-badge) { margin-bottom: 18px; }
+.detailPage :global(.cust-side-summary) { display: grid; align-content: start; gap: 18px; }
+.detailPage :global(.cust-side-summary) > * { margin: 0; }
+.detailActions { display: grid; gap: 12px; }
+.evidenceLink { display: inline-flex; align-items: center; gap: 7px; width: fit-content; color: var(--cust-accent); font-weight: 600; text-decoration: none; }
+.evidenceLink:hover { color: var(--cust-accent-hover); }
+.detailActions :global(.cust-primary) { width: 100%; text-align: center; }

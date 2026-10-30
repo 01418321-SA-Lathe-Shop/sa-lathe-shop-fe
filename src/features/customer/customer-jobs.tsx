@@ -9,7 +9,7 @@ import type { FulfillmentJob } from "../delivery/delivery-domain";
 import { availableActions } from "../delivery/delivery-domain";
 import { useResource } from "../../hooks/backend-hooks";
 import { useCollection } from "./customer-hooks";
-import { customerHref, dateTH, DELIVERY_LABELS, INVOICE_LABELS, JOB_LABELS, moneyTH, REQUEST_LABELS } from "./customer-domain";
+import { compareRequestNumbers, customerHref, dateTH, DELIVERY_LABELS, INVOICE_LABELS, JOB_LABELS, moneyTH, REQUEST_LABELS } from "./customer-domain";
 import { Badge, Empty, Field, Limited, LocalPages, PageTitle, ResourceFeedback } from "./customer-ui";
 import { OrderTabs } from "./customer-requests";
 import { CustomerInspection } from "./customer-job-actions";
@@ -22,7 +22,7 @@ export function CustomerJobs({ api, mode = "jobs" }: { api: BackendApi; mode?: "
   const [filter, setFilter] = useState(""); const [page, setPage] = useState(0);
   const lookup = new Map(requests.data?.items.map((request) => [request.id, request]));
   const rows = (jobs.data?.items ?? []).filter((job) => mode === "inspection" ? Boolean(job.deliveries?.length) && (!filter || job.deliveries?.at(-1)?.status === filter) : !filter || job.job_status === filter);
-  const archived = requests.data?.items.filter((request) => ["completed", "canceled"].includes(request.status)) ?? [];
+  const archived = requests.data?.items.filter((request) => ["completed", "canceled"].includes(request.status)).sort(compareRequestNumbers) ?? [];
   const labels = mode === "inspection" ? DELIVERY_LABELS : JOB_LABELS;
   const section = mode === "inspection" ? "delivery-payment" : "jobs";
   if (mode === "jobs" && !history) return <CustomerJobList jobs={jobs} requests={requests} />;

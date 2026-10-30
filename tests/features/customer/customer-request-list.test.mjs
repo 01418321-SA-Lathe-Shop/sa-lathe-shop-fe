@@ -42,6 +42,8 @@ test("request cards preserve exact IDs, essential facts and detail links", () =>
   assert.match(text(tree), /ไม่ได้ระบุ/);
   assert.doesNotMatch(text(tree), /ผู้สั่ง|ข้อกำหนดวัตถุดิบ/);
   assert.doesNotMatch(text(tree), /undefined|NaN|%/);
+  assert.equal(nodes(tree).some((node) => node.type === "icon" && node.props.name === "machine"), false);
+  assert.match(text(RequestCard({ record: base, layout: "list" })), /คำขอ\s*#\s*9007199254740993\s*·\s*ชิ้นงานตามแบบ/);
 });
 test("request cards reuse the existing badge mapping and never guess customer type", () => {
   for (const status of Object.keys(domain.REQUEST_LABELS)) {

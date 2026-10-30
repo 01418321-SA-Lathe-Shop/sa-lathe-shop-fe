@@ -16,13 +16,17 @@ test("request search is literal and combines with actual request status", () => 
   assert.equal(matchingRequests(data, "9007199254740993", "").length, 1);
   assert.equal(matchingRequests(data, "[test]", "canceled").length, 0);
 });
-test("request list puts pending estimates first and parses its layout strictly", () => {
+test("request list sorts by exact request number descending and parses its layout strictly", () => {
   const items = [
     { id: "new-complete", no_request: "3", description: "C", status: "completed", created_at: "2026-10-29T00:00:00Z" },
     { id: "old-pending", no_request: "1", description: "A", status: "pending", created_at: "2026-10-27T00:00:00Z" },
     { id: "new-pending", no_request: "2", description: "B", status: "pending", created_at: "2026-10-28T00:00:00Z" },
   ];
-  assert.deepEqual(matchingRequests(items, "", "").map((item) => item.id), ["new-pending", "old-pending", "new-complete"]);
+  assert.deepEqual(matchingRequests(items, "", "").map((item) => item.id), ["new-complete", "new-pending", "old-pending"]);
+  assert.deepEqual(matchingRequests([
+    { ...items[0], id: "unsafe-low", no_request: "9007199254740993" },
+    { ...items[0], id: "unsafe-high", no_request: "9007199254740994" },
+  ], "", "").map((item) => item.id), ["unsafe-high", "unsafe-low"]);
   assert.equal(customerRequestLayout("list"), "list");
   assert.equal(customerRequestLayout("cards"), "cards");
   assert.equal(customerRequestLayout("unexpected"), "cards");

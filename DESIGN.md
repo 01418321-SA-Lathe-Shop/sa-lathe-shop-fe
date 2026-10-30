@@ -753,7 +753,7 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 Owner-approved reference adaptation changes composition, not the Customer palette.
 The request list has a wrapping status-pill navigation with count badges,
 plus its existing applied search form. A compact การ์ด/รายการ control uses `layout=list` (missing/unknown means cards) without colliding with the existing `view=new` request wizard. Filters retain `q/status/layout` URLs, literal
-matching, pending-first then newest-first sorting, 20-record pagination and all four request states
+matching, exact request-number descending sorting, 20-record pagination and all four request states
 (pending/ongoing/completed/canceled). Counts describe loaded records matching the
 applied query before the selected status; loading shows an ellipsis, and incomplete
 collections retain their existing warning. No new count/profile endpoint or
@@ -777,6 +777,7 @@ detail from the card surface; secondary quotation/evidence/job links remain
 independently focusable above it. Card keyboard focus is visible. No request
 detail drawer or sticky selected-card state is added: the current query selector
 replaces the list, just as before. The navigation drawer remains unchanged.
+The request detail gets an explicit top gap before its document/summary grid and a consistently spaced current-step stack. For an approved quotation, ติดตามหลักฐานมัดจำ / PO is the secondary text link; once the fulfillment read returns a job, the full-width primary action is ติดตามงานผลิต. The former combined ดูหลักฐานและงานผลิต button and duplicated “เปิดงานผลิตแล้ว · ติดตามงาน” link are removed.
 
 Initial loading uses four static decorative skeletons and one status announcement.
 Read failure retains retry/error feedback and never becomes an empty-list success;
@@ -896,7 +897,8 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
-| 2026-10-30 | Customer คำขอผลิต adds URL-backed การ์ด/รายการ layouts, compact essential-only summaries, removes the redundant customer-profile read, and prioritizes รอประเมิน before newest-first remaining requests | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Customer desktop/narrow with real local API, both layouts, no horizontal overflow or console errors |
+| 2026-10-30 | Customer request refinement: sort คำขอผลิต, งานผลิต and ประวัติ by exact request number descending; center the shared empty-state icon/content; move the request number immediately before the description in List; remove the request-card machine icon; improve detail spacing; and separate the Deposit/PO evidence link from the primary ติดตามงานผลิต button | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk against the real local API confirms request order #11→#2, production order #11→#6, centered filtered-empty state and separated detail actions |
+| 2026-10-30 | Customer คำขอผลิต adds URL-backed การ์ด/รายการ layouts, compact essential-only summaries, and removes the redundant customer-profile read | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Customer desktop/narrow with real local API, both layouts, no horizontal overflow or console errors |
 | 2026-10-30 | Admin คำขอและใบเสนอราคา adds URL-backed รายการ/การ์ด views; list keeps the side detail while responsive cards open request detail in an accessible native modal. Staff stays on list/detail regardless of the query | 184 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Admin desktop/narrow with real local API, Escape/URL close checked, no horizontal overflow or console errors |
 | 2026-10-30 | Staff/Admin redesign Step 8: การแจ้งเตือน page in the Thai list style with ทั้งหมด / ยังไม่อ่าน tabs, Bangkok-day groups, read badges, ทำเป็นอ่านแล้ว, read-all and โหลดเพิ่ม; bell and page share one request-link helper | 183 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / Staff 390 Light against the real local API, writes intercepted |
 | 2026-10-30 | Fix: งานผลิต usage form no longer contains the extra-material search form; pressing ค้นหา in เพิ่มวัตถุดิบนอกแผน could also trigger บันทึกการใช้วัตถุดิบ. The usage form saves only from its button, and the shared `SearchForm` stops its submit event from reaching an outer form | 175 native tests, type check, lint, source audit, build; not re-walked in the browser (backend down) |
@@ -2207,7 +2209,9 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-alert.danger) { color: var(--cust-red); }
 .root :global(.cust-alert.success) { color: var(--cust-green); }
 .root :global(.cust-alert button) { margin-top: 8px; }
-.root :global(.cust-empty) { padding: 40px 24px; text-align: center; color: var(--cust-muted); }
+.root :global(.cust-empty) { display: grid; justify-items: center; align-content: center; width: 100%; box-sizing: border-box; padding: 40px 24px; text-align: center; color: var(--cust-muted); }
+.root :global(.cust-empty > svg) { display: block; justify-self: center; }
+.root :global(.cust-empty > p) { max-width: 42rem; margin: 0; }
 .root :global(.cust-empty h2) { color: var(--cust-ink); margin: 16px 0 8px; }
 .root :global(.cust-empty > a) { margin-top: 20px; }
 .root :global(.cust-loading) { padding: 16px 0; color: var(--cust-muted); display: flex; align-items: center; gap: 12px; }
@@ -2473,6 +2477,7 @@ src/features/workspace/workspace.module.css
 .list .cardHeader > svg { flex-shrink: 0; color: var(--cust-muted); }
 .list .metaLabel { display: block; color: var(--cust-muted); font-size: .875rem; }
 .list .cardTitle { margin: 16px 0 12px; font-size: 1.125rem; line-height: 1.5; font-weight: 650; }
+.rowNumber { color: var(--cust-accent); font-variant-numeric: tabular-nums; }
 .list .openCard { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--cust-ink); overflow-wrap: anywhere; text-decoration: none; }
 .list .openCard:hover { color: var(--cust-ink); text-decoration: none; }
 .list .openCard:focus-visible { outline: none; }
@@ -2492,9 +2497,8 @@ src/features/workspace/workspace.module.css
 .list .skeleton > span:nth-child(2) { width: 90%; height: 44px; }
 .list .skeleton > span:nth-child(3) { width: 35%; height: 28px; border-radius: 999px; }
 .list .skeleton > span:last-child { margin-top: auto; }
-.list .rowCard { display: grid; grid-template-columns: minmax(7rem, .7fr) minmax(14rem, 2fr) auto minmax(15rem, 1.3fr); grid-template-areas: "number title status facts" "number step step footer"; align-items: center; gap: 8px 20px; min-height: 0; padding: 16px 18px; box-shadow: none; border: 1px solid var(--cust-line); }
-.list .rowCard .cardHeader { grid-area: number; }
-.list .rowCard .cardHeader > svg { display: none; }
+.list .rowCard { display: grid; grid-template-columns: minmax(16rem, 2fr) auto minmax(15rem, 1.3fr); grid-template-areas: "title status facts" "step step footer"; align-items: center; gap: 8px 20px; min-height: 0; padding: 16px 18px; box-shadow: none; border: 1px solid var(--cust-line); }
+.list .rowCard .cardHeader { display: none; }
 .list .rowCard .cardTitle { grid-area: title; margin: 0; }
 .list .rowCard > :global(.cust-badge) { grid-area: status; justify-self: start; }
 .list .rowCard .essentials { grid-area: facts; margin: 0; }
@@ -2512,8 +2516,17 @@ src/features/workspace/workspace.module.css
   .list .card { padding: 20px; }
   .list .rowCard { display: flex; padding: 16px; }
 }
-@media (min-width: 641px) and (max-width: 1100px) { .list .rowCard { grid-template-columns: minmax(7rem, .6fr) minmax(12rem, 1.5fr) auto; grid-template-areas: "number title status" "facts facts facts" "step step footer"; } }
+@media (min-width: 641px) and (max-width: 1100px) { .list .rowCard { grid-template-columns: minmax(12rem, 1.5fr) auto; grid-template-areas: "title status" "facts facts" "step footer"; } }
 @media (prefers-reduced-motion: reduce) { .list .card { transition: none; } }
+
+.detailPage :global(.cust-detail-grid) { margin-top: clamp(1.5rem, 3vw, 2.5rem); }
+.detailPage :global(.cust-document) > :global(.cust-badge) { margin-bottom: 18px; }
+.detailPage :global(.cust-side-summary) { display: grid; align-content: start; gap: 18px; }
+.detailPage :global(.cust-side-summary) > * { margin: 0; }
+.detailActions { display: grid; gap: 12px; }
+.evidenceLink { display: inline-flex; align-items: center; gap: 7px; width: fit-content; color: var(--cust-accent); font-weight: 600; text-decoration: none; }
+.evidenceLink:hover { color: var(--cust-accent-hover); }
+.detailActions :global(.cust-primary) { width: 100%; text-align: center; }
 ```
 
 ### A6. Customer document workspaces — src/features/customer/customer-documents.module.css
