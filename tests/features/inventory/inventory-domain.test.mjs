@@ -58,3 +58,14 @@ test("catalog labels trim Unicode and reject invalid lengths and control lines",
   assert.equal(catalogName(" เหล็ก S45C ",200),"เหล็ก S45C");
   for(const value of [" ","a\nb","a\0b","x".repeat(51)]) assert.throws(() => catalogName(value,50));
 });
+test("summary helpers: fully reserved, units in use, reserved share", async () => {
+  const { fullyReserved, unitsInUse, reservedPercent } = await import("../../../src/features/inventory/inventory-domain.ts");
+  const row = (unit_name, qty_on_hand, qty_reserved, qty_available) => ({ unit_name, qty_on_hand, qty_reserved, qty_available });
+  assert.equal(fullyReserved(row("กก.", "5.000000", "5.000000", "0.000000")), true);
+  assert.equal(fullyReserved(row("กก.", "0.000000", "0.000000", "0.000000")), false);
+  assert.equal(fullyReserved(row("กก.", "5.000000", "1.000000", "4.000000")), false);
+  assert.deepEqual(unitsInUse([row("ม.", "1.000000"), row("กก.", "1.000000"), row("ม.", "2.000000")]), ["กก.", "ม."]);
+  assert.equal(reservedPercent(row("ม.", "3.000000", "1.000000")), 33);
+  assert.equal(reservedPercent(row("ม.", "0.000000", "0.000000")), 0);
+  assert.equal(reservedPercent(row("ม.", "999999999999.999999", "999999999999.999999")), 100);
+});

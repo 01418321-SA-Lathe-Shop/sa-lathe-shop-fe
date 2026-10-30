@@ -1,8 +1,10 @@
-import type { Customer, Evidence, Quotation } from "../../lib/api/backend-api.ts";
+import type { Customer, Decision, Evidence, Quotation } from "../../lib/api/backend-api.ts";
+import { availableEvidenceKinds } from "../fulfillment/fulfillment-domain.ts";
+import { latestQuote } from "./customer-domain.ts";
 import type { SalesRecord } from "./customer-sales-data.ts";
 
 export type DocumentView = "quotes" | "tasks" | "po";
-export type DocumentRow = SalesRecord & { id: string; quote: Quotation; evidence?: Evidence; customer?: Customer; customerType?: string; date?: string; amount?: string; status: string };
+export type DocumentRow = SalesRecord & { id: string; quote: Quotation; evidence?: Evidence; fileName?: string; customer?: Customer; customerType?: string; date?: string; amount?: string; status: string };
 export const DOCUMENT_FILTER_KEYS = ["q", "status", "from", "to", "type", "min", "max", "sort", "page", "view"] as const;
 export const SORT_LABELS: Record<string, string> = { newest: "ใหม่สุดก่อน", oldest: "เก่าสุดก่อน", number: "เลขใบเสนอราคา", price_asc: "ราคาน้อยไปมาก", price_desc: "ราคามากไปน้อย" };
 export type DocumentFilters = { q: string; status: string; from: string; to: string; type: string; min: string; max: string; sort: string; page: number; history: boolean };
@@ -61,7 +63,7 @@ export function filterDocuments(rows: DocumentRow[], filters: DocumentFilters, v
   if (documentFilterError(filters, view)) return [];
   const query = filters.q.trim().toLocaleLowerCase("th-TH");
   const filtered = rows.filter((row) => {
-    const haystack = `${row.quote.quotation_no} ${row.request.no_request} ${row.request.description} ${row.customer?.name ?? ""}`.toLocaleLowerCase("th-TH");
+    const haystack = `${row.quote.quotation_no} ${row.request.no_request} ${row.request.description} ${row.customer?.name ?? ""} ${row.fileName ?? ""}`.toLocaleLowerCase("th-TH");
     const timestamp = row.date ? Date.parse(row.date) : NaN;
     if (query && !haystack.includes(query)) return false;
     if (!ignoreStatus && filters.status && row.status !== filters.status) return false;
@@ -81,3 +83,38 @@ export function filterDocuments(rows: DocumentRow[], filters: DocumentFilters, v
     return result || a.id.localeCompare(b.id);
   });
 }
+
+/** Next step shown beside a quotation; derived only from the request, revision and evidence DTOs. */
+export function documentNote(row: Pick<DocumentRow, "request" | "quotations" | "quote" | "fulfillment">): { text: string; warn: boolean } {
+  if (row.request.status === "canceled") return { text: "คำขอถูกยกเลิก", warn: false };
+  if (row.quote.status === "sent") return { text: "รอคุณตอบ", warn: true };
+  if (row.quote.status === "rejected") return { text: latestQuote(row.quotations)?.id === row.quote.id ? "รอใบเสนอราคาฉบับใหม่" : "มีฉบับใหม่แล้ว", warn: false };
+  const state = row.fulfillment;
+  if (!state) return { text: "", warn: false };
+  if (state.job) return { text: "เปิดงานผลิตแล้ว", warn: false };
+  const required = (["deposit", "po"] as const).filter((kind) => kind === "deposit" ? state.terms.deposit_required : state.terms.po_required);
+  const active = required.map((kind) => state.evidence?.find((item) => item.kind === kind && item.status !== "rejected"));
+  if (active.some((item) => !item)) return state.evidence?.some((item) => item.status === "rejected") ? { text: "หลักฐานต้องแก้ไข ส่งใหม่", warn: true } : { text: "ยังไม่ส่งหลักฐานมัดจำ/PO", warn: true };
+  return { text: active.some((item) => item?.status === "pending") ? "รอตรวจหลักฐาน" : "หลักฐานผ่านแล้ว รอเปิดงาน", warn: false };
+}
+
+/** Accepted quotations that can take a PO right now, most urgent first; the gate is the one the upload form enforces. */
+export function poAwaiting(rows: DocumentRow[], now: number) {
+  return rows.filter((row) => row.fulfillment && availableEvidenceKinds(row.fulfillment, now).includes("po"))
+    .sort((a, b) => Date.parse(a.fulfillment!.terms.documents_due_at) - Date.parse(b.fulfillment!.terms.documents_due_at) || a.id.localeCompare(b.id));
+}
+
+export type RevisionEvent = { id: string; at?: string; quote: Quotation; decision?: Decision };
+/** Revision timeline, newest first: each sent revision plus the Customer's decision on it. */
+export function revisionEvents(quotes: Quotation[], decisions: Decision[]): RevisionEvent[] {
+  const byId = new Map(quotes.map((quote) => [quote.id, quote]));
+  const time = (value?: string) => value ? Date.parse(value) : 0;
+  const events: RevisionEvent[] = [
+    ...quotes.map((quote) => ({ id: `sent:${quote.id}`, at: quote.sent_at, quote })),
+    ...decisions.flatMap((decision) => { const quote = byId.get(decision.quotation_id); return quote ? [{ id: `decision:${quote.id}`, at: decision.decided_at, quote, decision }] : []; }),
+  ];
+  return events.sort((a, b) => time(b.at) - time(a.at) || Number(Boolean(b.decision)) - Number(Boolean(a.decision)) || a.id.localeCompare(b.id));
+}
+
+export function fileExtension(name: string) { return /\.([a-z0-9]{1,5})$/i.exec(name)?.[1].toUpperCase() ?? "ไฟล์"; }
+export function fileSize(bytes: number) { return bytes < 1048576 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1048576).toFixed(1)} MB`; }

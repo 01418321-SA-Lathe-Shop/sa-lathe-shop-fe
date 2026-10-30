@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { BackendApi, Fulfillment, JobRequest, Quotation } from "../../lib/api/backend-api";
+import type { Attachment, BackendApi, Fulfillment, JobRequest, Quotation } from "../../lib/api/backend-api";
 import { latestQuote, readCollection, type Collection } from "./customer-domain";
 import { useCollection } from "./customer-hooks";
 
@@ -53,4 +53,28 @@ export function salesStep(record: SalesRecord) {
   if (quote?.status === "sent") return "มีใบเสนอราคาให้คุณพิจารณา";
   if (quote?.status === "rejected") return "รอใบเสนอราคาฉบับใหม่";
   return record.request.status === "pending" ? "รอร้านประเมินรายละเอียดคำขอ" : "อยู่ระหว่างดำเนินการกับร้าน";
+}
+
+// File names for submitted POs: the evidence DTO only carries attachment_id.
+export function useRequestFiles(api: BackendApi, requestIds: string[]) {
+  const key = requestIds.join(",");
+  const [state, setState] = useState<{ key: string; files: Map<string, Attachment>; failed: boolean }>({ key: "", files: new Map(), failed: false });
+  useEffect(() => {
+    if (!key) return;
+    const ids = key.split(","); const controller = new AbortController();
+    async function load() {
+      const files = new Map<string, Attachment>(); let failed = false;
+      for (let start = 0; start < ids.length; start += 6) {
+        await Promise.all(ids.slice(start, start + 6).map(async (id) => {
+          try { for (const file of (await readCollection<Attachment>(api, `/requests/${id}/attachments`, controller.signal)).items) files.set(file.id, file); }
+          catch { failed = true; }
+        }));
+        if (controller.signal.aborted) return;
+      }
+      setState({ key, files, failed });
+    }
+    void load();
+    return () => controller.abort();
+  }, [api, key]);
+  return state.key === key ? { files: state.files, failed: state.failed, loading: false } : { files: new Map<string, Attachment>(), failed: false, loading: Boolean(key) };
 }

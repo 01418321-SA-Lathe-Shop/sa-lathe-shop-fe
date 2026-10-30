@@ -15,5 +15,5 @@ test("Deposit/PO shares the quotation grid, document column and price rail", () 
 test("Deposit/PO retains evidence gates, original files and retryable submission", () => {
   const source = read("customer-deposits.tsx");
   for (const value of ['availableEvidenceKinds(state, now)', 'availableEvidenceKinds(state, Date.now())', 'evidencePayload(state.terms', 'disabled={!ready || write.frozen}', '<CustomerWriteRetry', '<CustomerUpload', '/fulfillment', '/evidence', '/download', 'state.canceled_at', 'state.terms.documents_due_at']) assert(source.includes(value), value);
-  assert.match(read("customer-documents.tsx"), /className=\{styles\.tabs\} aria-label="มุมมองมัดจำและ PO"/);
+  assert.match(read("customer-documents.tsx"), /className=\{styles\.views\} aria-label="มุมมองมัดจำและ PO"/);
 });

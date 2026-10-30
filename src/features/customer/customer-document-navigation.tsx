@@ -33,7 +33,7 @@ export function DocumentDetailNavigation({ blocked = false }: { blocked?: boolea
   const list = documentListHref(section, params); const hrefs = snapshots[list]?.hrefs ?? [];
   const index = hrefs.findIndex((href) => { const query = new URL(href, "http://local").searchParams; return query.get("quotation") === params.get("quotation") && query.get("evidence") === params.get("evidence"); });
   return <nav className="cust-document-navigation" aria-label="การนำทางเอกสาร">
-    {blocked ? <span>บันทึกหรือตรวจสอบคำสั่งเดิมก่อนเปลี่ยนเอกสาร</span> : <Link href={list}>← กลับรายการเดิม</Link>}
+    {blocked ? <span>บันทึกหรือตรวจสอบคำสั่งเดิมก่อนเปลี่ยนเอกสาร</span> : <Link href={list}>← {section === "deposit-po" ? "มัดจำและ PO" : "ใบเสนอราคา"}</Link>}
     <div>{index > 0 && !blocked && <Link href={hrefs[index - 1]}>← เอกสารก่อนหน้า</Link>}{index >= 0 && index + 1 < hrefs.length && !blocked && <Link href={hrefs[index + 1]}>เอกสารถัดไป →</Link>}</div>
   </nav>;
 }

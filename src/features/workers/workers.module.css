@@ -1,16 +1,60 @@
 /* จัดการพนักงาน (Admin) page-specific rules; list/form pieces come from staff-ui/staff-layout.module.css. */
 
-.workers { display: grid; margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
-.workers li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
-.workers li:last-child { border-bottom: 0; }
-.workers li > span:first-child { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
-.workers small { color: var(--muted); font-size: 0.875rem; }
+.head { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.head svg { margin-right: 6px; }
+
+/* Summary cells: total / active / inactive from the loaded list. */
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 16px; margin: 0; }
+.summary > div { display: grid; gap: 6px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.summary dt { color: var(--muted); font-size: 0.875rem; }
+.summary dd { margin: 0; font-size: 1.75rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.summary dd[data-tone="done"] { color: var(--success); }
+.summary dd[data-tone="quiet"] { color: var(--muted); }
+
+/* One panel: filter bar, table, footer count. */
+.panel { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.panelBar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.panelBar > nav { min-width: 0; max-width: 100%; padding-bottom: 0; }
+.panelBar > form { flex: 0 1 24rem; }
+.note { margin: 0; padding: 12px 16px; color: var(--muted); font-size: 0.875rem; }
+/* No overflow wrapper: it would clip the row menu. Narrow screens stack rows instead of scrolling. */
+.table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+.table th { padding: 12px 16px; color: var(--muted); font-size: 0.8125rem; font-weight: 650; text-align: left; }
+.table td { padding: 10px 16px; border-top: 1px solid var(--line); vertical-align: middle; }
+.table th:last-child, .table td:last-child { width: 1%; text-align: right; }
+.person { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.person > span:last-child, .stack { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.avatar { flex: none; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); color: var(--text); font-size: 0.8125rem; font-weight: 650; }
+.table small { color: var(--muted); font-size: 0.8125rem; }
+.code { font-variant-numeric: tabular-nums; }
+.footer { margin: 0; padding: 12px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.875rem; }
+
+/* Row actions menu (native disclosure). */
+.menu { position: relative; display: inline-block; }
+.menu summary { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); cursor: pointer; list-style: none; }
+.menu summary::-webkit-details-marker { display: none; }
+.menu[open] summary { background: var(--surface-2); }
+.menu summary:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.menu > div { position: absolute; right: 0; top: calc(100% + 4px); z-index: 5; display: grid; min-width: 12rem; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
+:global(.live-workspace) .menu button { display: flex; align-items: center; justify-content: flex-start; min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 0.9375rem; text-align: left; white-space: nowrap; cursor: pointer; }
+:global(.live-workspace) .menu button:hover, :global(.live-workspace) .menu button:focus-visible { background: var(--surface-2); outline: none; }
 
 /* Side-panel form sections: ข้อมูล / ติดต่อ / รหัสผ่านเริ่มต้น / สถานะบัญชี */
 .section { display: grid; gap: 12px; min-width: 0; margin: 0; padding: 0 0 16px; border: 0; border-bottom: 1px solid var(--line); }
 .section > legend, .section > h3 { padding: 0 0 4px; margin: 0; font-size: 1.0625rem; font-weight: 650; }
 
+@media (max-width: 48rem) {
+  .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .table tbody { display: block; }
+  .table tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; padding: 14px 16px; border-top: 1px solid var(--line); }
+  .table td { display: block; padding: 0; border: 0; }
+  .table td:nth-child(2), .table td:nth-child(3) { grid-column: 1; }
+  .table td:last-child { grid-column: 2; grid-row: 1 / span 3; width: auto; }
+}
 @media (max-width: 40rem) {
-  .workers li { grid-template-columns: minmax(0, 1fr) auto; }
-  .workers li > :last-child { grid-column: 1 / -1; }
+  .panelBar > form { flex-basis: 100%; }
+  .summary { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .summary > div { padding: 12px; }
+  .summary dt { font-size: 0.8125rem; }
+  .summary dd { font-size: 1.375rem; }
 }

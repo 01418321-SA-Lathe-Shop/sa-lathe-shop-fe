@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
+import { Icon } from "../../components/appearance/icons";
 import { documentFilters, documentListHref, documentParams, SORT_LABELS, type DocumentView } from "./customer-documents-domain";
 import { Field } from "./customer-ui";
 import styles from "./customer-documents.module.css";
@@ -15,17 +16,23 @@ export function DocumentFilters({ section, params, view, labels, counts, loading
   }
   const clear = new URLSearchParams(); if (view === "po") clear.set("view", "po");
   const chipLabels: Record<string, string> = { q: "ค้นหา", status: "สถานะ", from: "ตั้งแต่", to: "ถึง", type: "ประเภท", min: "ราคาตั้งแต่", max: "ราคาไม่เกิน", view: "มุมมอง" };
+  const advanced = ["from", "to", "type", "min", "max", "sort"].some((key) => params.get(key));
+  const chips = Object.entries(chipLabels).filter(([key]) => params.get(key) && !(key === "view" && params.get(key) === "po"));
   return <>
-    {view !== "tasks" && <nav className={styles.tabs} aria-label="กรองสถานะเอกสาร">{[["", "ทั้งหมด"], ...Object.entries(labels)].map(([value, label]) => <Link key={value} href={href("status", value)} aria-current={filters.status === value ? "page" : undefined}><span>{label}</span><span className={styles.count}>{loading ? "…" : unavailable ? "—" : counts[value] ?? 0}</span></Link>)}</nav>}
-    <form key={params.toString()} className={styles.filters} onSubmit={submit}>
-      <Field label="ค้นหาเอกสาร"><input type="search" name="q" defaultValue={filters.q} placeholder="เลขใบเสนอราคา / คำขอ / ชื่องาน / ลูกค้า" /></Field>
-      <Field label={view === "po" ? "วันที่ส่ง PO ตั้งแต่" : view === "tasks" ? "วันที่ตอบรับตั้งแต่" : "วันที่ส่งใบเสนอราคาตั้งแต่"}><input type="date" name="from" defaultValue={filters.from} /></Field>
-      <Field label="ถึงวันที่"><input type="date" name="to" defaultValue={filters.to} /></Field>
-      <Field label="ประเภทลูกค้า"><select name="type" defaultValue={filters.type}><option value="">ทั้งหมด</option><option value="individual">บุคคลทั่วไป</option><option value="company">บริษัท</option></select></Field>
-      {view === "quotes" && <><Field label="ราคาต่ำสุด (บาท)"><input name="min" inputMode="decimal" defaultValue={filters.min} placeholder="ไม่จำกัด" /></Field><Field label="ราคาสูงสุด (บาท)"><input name="max" inputMode="decimal" defaultValue={filters.max} placeholder="ไม่จำกัด" /></Field></>}
-      <Field label="เรียงรายการ"><select name="sort" defaultValue={filters.sort}>{Object.entries(SORT_LABELS).filter(([key]) => view === "quotes" || !key.startsWith("price_")).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></Field>
-      <div className={styles.filterActions}><button type="submit">ใช้ตัวกรอง</button><Link href={documentListHref(section, clear)}>ล้างตัวกรอง</Link></div>
-    </form>
-    <div className={styles.chips} aria-label="ตัวกรองที่ใช้อยู่">{Object.entries(chipLabels).filter(([key]) => params.get(key) && !(key === "view" && params.get(key) === "po")).map(([key, label]) => { const raw = params.get(key)!; const value = key === "status" ? labels[raw] ?? raw : key === "type" ? raw === "company" ? "บริษัท" : "บุคคลทั่วไป" : key === "view" ? "ประวัติ" : raw; return <Link key={key} href={href(key)} aria-label={`ลบตัวกรอง ${label}: ${value}`}>{label}: {value} <span aria-hidden="true">×</span></Link>; })}</div>
+    <div className={styles.panelBar}>
+      {view !== "tasks" && <nav className={styles.tabs} aria-label="กรองสถานะเอกสาร">{[["", "ทั้งหมด"], ...Object.entries(labels)].map(([value, label]) => <Link key={value} href={href("status", value)} aria-current={filters.status === value ? "page" : undefined}><span>{label}</span><span className={styles.count}>{loading ? "…" : unavailable ? "—" : counts[value] ?? 0}</span></Link>)}</nav>}
+      <form key={params.toString()} className={styles.filters} onSubmit={submit}>
+        <label className={styles.search}><Icon name="search" size={16} /><input type="search" name="q" aria-label="ค้นหาเอกสาร" defaultValue={filters.q} placeholder={view === "po" ? "เลขใบเสนอราคา / คำขอ / ชื่อไฟล์" : "เลขใบเสนอราคา / คำขอ / ชื่องาน"} /></label>
+        <details className={styles.more} open={advanced}><summary>ตัวกรองเพิ่มเติม</summary><div className={styles.moreGrid}>
+          <Field label={view === "po" ? "วันที่ส่ง PO ตั้งแต่" : view === "tasks" ? "วันที่ตอบรับตั้งแต่" : "วันที่ส่งใบเสนอราคาตั้งแต่"}><input type="date" name="from" defaultValue={filters.from} /></Field>
+          <Field label="ถึงวันที่"><input type="date" name="to" defaultValue={filters.to} /></Field>
+          <Field label="ประเภทลูกค้า"><select name="type" defaultValue={filters.type}><option value="">ทั้งหมด</option><option value="individual">บุคคลทั่วไป</option><option value="company">บริษัท</option></select></Field>
+          {view === "quotes" && <><Field label="ราคาต่ำสุด (บาท)"><input name="min" inputMode="decimal" defaultValue={filters.min} placeholder="ไม่จำกัด" /></Field><Field label="ราคาสูงสุด (บาท)"><input name="max" inputMode="decimal" defaultValue={filters.max} placeholder="ไม่จำกัด" /></Field></>}
+          <Field label="เรียงรายการ"><select name="sort" defaultValue={filters.sort}>{Object.entries(SORT_LABELS).filter(([key]) => view === "quotes" || !key.startsWith("price_")).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></Field>
+          <div className={styles.filterActions}><button type="submit">ใช้ตัวกรอง</button><Link href={documentListHref(section, clear)}>ล้างตัวกรอง</Link></div>
+        </div></details>
+      </form>
+    </div>
+    {chips.length > 0 && <div className={styles.chips} aria-label="ตัวกรองที่ใช้อยู่">{chips.map(([key, label]) => { const raw = params.get(key)!; const value = key === "status" ? labels[raw] ?? raw : key === "type" ? raw === "company" ? "บริษัท" : "บุคคลทั่วไป" : key === "view" ? "ประวัติ" : raw; return <Link key={key} href={href(key)} aria-label={`ลบตัวกรอง ${label}: ${value}`}>{label}: {value} <span aria-hidden="true">×</span></Link>; })}</div>}
   </>;
 }

@@ -163,7 +163,7 @@ by App Router do not uncheck the currently visible theme or size controls.
 
 ### Deposit/PO quotation-style alignment — 2026-10-29
 
-Customer Deposit/PO reuses Quotation's document layout: the main column contains the existing original PO preview, upload form and evidence history, with a right-hand `cust-price-panel` showing the accepted full-job price, quantity/no-VAT label, saved customer type, evidence deadline and required-evidence checklist. It uses the same `quotationLayout` grid, 32px gap, 260–320px rail and <=1200px summary-first stack as Quotation. Nested PO preview information stacks under the original document to avoid squeezing it beside a second rail. Deposit/PO list view choices now use the same document pill tabs as quotation status tabs; existing list/filter/pagination components remain shared. Original PO content, statuses, API calls, upload and uncertain-write handling, deadline and approval gates are unchanged; no fabricated deposit document, PDF or internal costs are introduced.
+Customer Deposit/PO reuses Quotation's document layout: the main column contains the existing original PO preview, upload form and evidence history, with a right-hand `cust-price-panel` showing the accepted full-job price, quantity/no-VAT label, saved customer type, evidence deadline and required-evidence checklist. It uses the same `quotationLayout` grid, 32px gap, 260–320px rail and <=1200px summary-first stack as Quotation. Nested PO preview information stacks under the original document to avoid squeezing it beside a second rail. Deposit/PO list view choices now use the same document pill tabs as quotation status tabs; existing list/filter/pagination components remain shared. In the สิ่งที่ต้องส่ง rows, the evidence checklist is a compact inline line (label plus status badge, muted 0.875rem, no bordered rows) under the work details, so each row keeps the same four-column rhythm as the quotation list. Original PO content, statuses, API calls, upload and uncertain-write handling, deadline and approval gates are unchanged; no fabricated deposit document, PDF or internal costs are introduced.
 
 ### Local-test account switching — 2026-10-29
 
@@ -199,11 +199,15 @@ Opening a material (`?material=`) shows the new shared side panel (`Drawer`, nat
 
 Browser walk (Chrome, real local API, writes intercepted): `pim.admin` at 1280 Dark, 390 Light, 360 Dark, 768 Light and 1920 Dark; `anan.staff` at 1280 Dark and 390 Light. No horizontal page scroll and no console errors. The intercepted stock addition, unit creation and material PATCH bodies matched the previous payloads, and toasts cleared after 5 s. Not exercised against the live API: actual saves, conflicts, and the retry path. Known limit: ข้อมูลหลัก is not a separate sidebar item; it is reached through the view tab.
 
+**Layout (2026-10-30, from the Claude Design material-management board).** The stock view now follows the board: a right-aligned อัปเดตข้อมูล; four summary cells (same style as จัดการพนักงาน: 12px radius, 1.75rem/650 tabular numbers, auto-fit 12rem columns, two columns at ≤40rem) — วัตถุดิบทั้งหมด, หมด (พร้อมใช้ 0) in `--danger`, มีของแต่ถูกจองหมด in `--warning` (on hand > 0 and available = 0: stock exists but every unit is reserved for jobs; replaces the board's “Reserved for jobs” total), and หน่วยวัดที่ใช้ (count of distinct base units with their names). Cells count materials only; quantities are never totalled because each material has its own unit. When active materials are out of stock, a danger-tinted banner names up to five and links to the หมด tab (แสดงเฉพาะรายการนี้). Below that, one 14px-radius panel holds the filter tabs and search in its top bar, the table and a footer “แสดง X จาก Y รายการ”; loading, load error and empty states sit inside the panel. Each row shows the name with a unit pill (หน่วย …), and every quantity (คงเหลือ, จองแล้ว, พร้อมใช้, Admin ต้นทุนเฉลี่ย as “บาท/หน่วย”) carries its own unit in muted text. Under คงเหลือ a 6px bar shows the reserved share of on-hand (exact integer percent, `--warning` fill); there is no minimum/maximum level, so it never implies a reorder point. Summary counts follow the current server search. Not taken from the board: Create PO / Reorder (no purchase-order creation from this page), Issue to job / Stock count / Receive stock header buttons (stock is adjusted per material in the side panel; receiving has its own page), Below minimum, material codes, sizes, racks and family chips (no such fields), the Recent movements tab and Movements today (movements are only available per material), and the board's sidebar, fonts and colors. Units: the backend gives each material one immutable base unit and does not support unit conversion (UC10 / `UNIT_CONVERSION` is not in the contract), so the page shows each value in that material's unit and offers no conversion.
+
 ### Admin จัดการพนักงาน — 2026-10-30
 
 Step 7 of the approved Staff/Admin redesign (`/admin/workers`, Admin only; no new route).
 
-**List.** Staff accounts load 100 per call, up to 1,000, with the cap notice. Search matches name, username, employee number or position within the loaded list, because the API has no search parameter. Each row shows the name, the username · employee number · position, the contacts (or “ยังไม่มีข้อมูลติดต่อ (บัญชีเก่า)” for old accounts), a ใช้งานอยู่/ปิดใช้งาน badge, and แก้ไข / เปลี่ยนรหัสผ่าน. On phones the buttons move under the text.
+**List.** Staff accounts load 100 per call, up to 1,000, with the cap notice. Search matches name, username, employee number or position within the loaded list, because the API has no search parameter. Each row shows the name, the username · employee number · position, the contacts (or “ยังไม่มีข้อมูลติดต่อ (บัญชีเก่า)” for old accounts), a ใช้งานอยู่/ปิดใช้งาน badge, and แก้ไข / เปลี่ยนรหัสผ่าน. On phones the buttons move under the text. The redo adds the shared status tabs (ทั้งหมด / ใช้งานอยู่ / ปิดใช้งาน, with counts from the loaded list) in the URL as `?status=`, so the list matches the materials, delivery and inbox pages; the status filter combines with search, and the empty state names the filter.
+
+**Layout (2026-10-30, from the Claude Design worker-management board).** Right-aligned อัปเดตข้อมูล and เพิ่มพนักงาน (with plus icon); three summary cells (พนักงานทั้งหมด, ใช้งานอยู่ in `--success`, ปิดใช้งาน muted; 1.75rem/650 tabular numbers, 12px radius, auto-fit 12rem columns); then one 14px-radius panel holding the status tabs and search in a top bar, a table (ชื่อ with a 36px initials avatar plus employee number · username, ตำแหน่งและติดต่อ, สถานะ badge, and a 44px ⋯ row menu offering แก้ไขข้อมูลและสถานะ / เปลี่ยนรหัสผ่าน), and a footer “แสดง X จาก Y คน”. The table has no overflow wrapper (an `overflow-x` wrapper clipped the ⋯ menu); at ≤48rem each row stacks into a two-column grid (details left, ⋯ right) instead of scrolling sideways, the panel's single column is `minmax(0, 1fr)` so the tab strip scrolls inside it, and at ≤40rem the three summary cells sit in one compact row. The row menu is a native disclosure that closes after a choice; its items are left-aligned. Add, edit and password open in a centred modal (`Drawer centered`: 40rem wide, 16px radius, at most viewport height minus 2rem with the body scrolling inside) that also closes on Escape, the ✕ button or a click on the dimmed area outside the box; the click must both start and end outside, so dragging a text selection out of the box does not close it. Other pages keep the right-edge side panel. Not taken from the board: Export and Delete (no endpoint; accounts are deactivated, never deleted), the inline status switch (status still changes through แก้ไข with its confirmation), a role dropdown (position stays free text), the board's own sidebar, fonts and colors (the app's theme tokens are used), and the board modal's three fields (the modal keeps the full sectioned form).
 
 **เพิ่มพนักงาน and แก้ไข** open the side panel as one sectioned form:
 - ข้อมูล: name, username, employee number, optional position.
@@ -322,6 +326,8 @@ Theme is an icon-only 44px-minimum sun/moon quick action, not a Settings dialog 
 Noto Sans Thai is self-hosted through Next/font for Customer only, with a sans-serif fallback. The frontmatter hierarchy records heading, section title, body and metadata roles. Rem text responds to the existing UI-size preference; most Customer spacing and target dimensions are currently fixed pixels, not a fully rem-scaled spacing system. The shared brand retains its existing identity styling.
 
 ## Layout
+
+Customer ใบเสนอราคา and มัดจำและ PO share one pattern. Lists: page head, optional banner, then one panel (status tabs, search, collapsible filters, table; one card per row at ≤48rem); quotations awaiting an answer lead as cards above the panel. Details: back link, title with status badge, then section cards at 12px radius. Quotation detail keeps its decision in a sticky bottom bar with a modal confirm; ขอใบเสนอราคาใหม่ records the backend's `reject` decision with a reason. The backend exposes no customer-visible cost breakdown, validity date, lead time, PO number or under-review status, so these pages show none of them. The printable paper renders only in the print portal.
 
 On desktop (>1024px), Customer navigation docks on the left as a 17rem persistent sidebar drawer (`width: 17rem; height: 100dvh; background: #060707`), sharing the obsidian background with the workspace stage offset (`margin-left: 17rem; width: calc(100% - 17rem); max-width: calc(100% - 17rem)`). Content spans the full available width with fluid side padding (`clamp(1.25rem, 2.5vw, 2.5rem)`), eliminating artificial max-width constraints on wide viewports (1280px, 1440px, 1920px, and 2560px ultrawide). Dashboards, request lists, quotations, invoices, and job tracking expand to fill the full stage. Forms and single-column steps maintain an ergonomic readable maximum width (`clamp(540px, 60vw, 760px)`) or use a balanced 2-column layout with a sticky summary panel. The desktop stage features a sticky 64px topbar with fluid padding, mode indicators, mock controls, and notification access.
 
@@ -907,7 +913,13 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 | 2026-10-30 | Customer request refinement: sort คำขอผลิต, งานผลิต and ประวัติ by exact request number descending; center the shared empty-state icon/content; move the request number immediately before the description in List; remove the request-card machine icon; improve detail spacing; and separate the Deposit/PO evidence link from the primary ติดตามงานผลิต button | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk against the real local API confirms request order #11→#2, production order #11→#6, centered filtered-empty state and separated detail actions |
 | 2026-10-30 | Customer คำขอผลิต adds URL-backed การ์ด/รายการ layouts, compact essential-only summaries, and removes the redundant customer-profile read | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Customer desktop/narrow with real local API, both layouts, no horizontal overflow or console errors |
 | 2026-10-30 | Admin คำขอและใบเสนอราคา adds URL-backed รายการ/การ์ด views; list keeps the side detail while responsive cards open request detail in an accessible native modal. Staff stays on list/detail regardless of the query | 184 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Admin desktop/narrow with real local API, Escape/URL close checked, no horizontal overflow or console errors |
+| 2026-10-30 | Customer ใบเสนอราคา and มัดจำและ PO list/detail pages from the Claude Design boards: รอคุณตอบ cards plus one panel with status tabs, search, collapsible filters and table with a next-step column; PO banner and อัปโหลด PO entry; quotation detail with status banner, summary cells, whole-job price, request, terms and attachment cards, revision timeline, sticky decision bar and modal confirm; PO detail with review steps, shop feedback, preview, details and history. On-screen paper removed (print only). `sent` badge is now the info tone. No VAT, no itemised costs, no invented PO number or under-review status | Type check, lint, native tests, source audit, DESIGN sync; headless Chromium against the real local API with new test records: re-quote, revised quote, accept, PO upload, Admin rejection reason, corrected re-upload; 1280 Dark/Light and 390 Light/Dark, blocked-API error, delayed loading, empty state, no horizontal overflow |
+| 2026-10-30 | สต๊อกวัตถุดิบ layout from the Claude Design board: summary cells (ทั้งหมด / หมด / มีของแต่ถูกจองหมด / หน่วยวัดที่ใช้), out-of-stock banner linking to หมด, one panel with tabs + search, unit pill and per-quantity units, reserved-share bar, footer count; no Create PO, Reserved-for-jobs total or unit conversion | Type check, lint, 185 native tests (summary helpers new), DESIGN sync; headless Chromium against the real local API: Staff 1280 Dark / 390 Light, Admin 1280 Light with side panel, blocked-API error state |
 | 2026-10-30 | Staff/Admin redesign Step 8: การแจ้งเตือน page in the Thai list style with ทั้งหมด / ยังไม่อ่าน tabs, Bangkok-day groups, read badges, ทำเป็นอ่านแล้ว, read-all and โหลดเพิ่ม; bell and page share one request-link helper | 183 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / Staff 390 Light against the real local API, writes intercepted |
+| 2026-10-30 | Admin จัดการพนักงาน fixes: ⋯ row menu no longer clipped (overflow wrapper removed, rows stack at ≤48rem); add/edit/password open in a centred modal that closes on an outside click (`Drawer centered`, workers only); panel no longer overflows on phones; compact summary row at ≤40rem | Type check, lint, native tests, DESIGN sync; built-in browser on the local dev server as the local-test Admin at 800px and 375px: last-row menu fully visible, modal centred with its bottom reachable, inside click keeps it open, outside click closes it, no horizontal page overflow; no writes made |
+| 2026-10-30 | Admin จัดการพนักงาน layout from the Claude Design board: summary cells, one panel with tabs + search bar, table with initials avatars and ⋯ row menu, footer count; Export/Delete/inline switch/role list not adopted | Type check, lint, native tests (initials test new), DESIGN sync; browser check pending real API data |
+| 2026-10-30 | Admin จัดการพนักงาน redo: shared status tabs with counts (`?status=`) above search, so the list follows the other staff list pages; combined filter and empty state | Type check, lint, native tests, DESIGN sync; browser check pending real API data |
+| 2026-10-30 | Customer Deposit/PO list: evidence checklist in สิ่งที่ต้องส่ง rows changed from bordered full-width rows to a compact inline line so the rows match the quotation list layout; detail price-panel checklist unchanged | Type check, lint, native tests, DESIGN sync check, Chrome check on /customer/deposit-po pending real API data |
 | 2026-10-30 | Fix: งานผลิต usage form no longer contains the extra-material search form; pressing ค้นหา in เพิ่มวัตถุดิบนอกแผน could also trigger บันทึกการใช้วัตถุดิบ. The usage form saves only from its button, and the shared `SearchForm` stops its submit event from reaching an outer form | 175 native tests, type check, lint, source audit, build; not re-walked in the browser (backend down) |
 | 2026-10-30 | Staff/Admin redesign Step 7: จัดการพนักงาน with searchable list, side-panel create/edit in sections ข้อมูล / ติดต่อ / รหัสผ่านเริ่มต้น, username-change and account-status confirmations, separate password side panel; Thai field rules | 183 native tests (3 new), type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / 390 Light against the real local API, writes intercepted |
 | 2026-10-30 | Staff/Admin redesign Step 6: ส่งมอบและใบแจ้งหนี้ / ส่งมอบและรับชำระ with seven role-filtered tabs from the action rules, search and cards with request labels, large balance panel, per-role action cards (credit days, invoice, shipment), Admin payment cards with proof download, review and a cash form, delivery/rework/event timelines; proof upload shared in `staff-ui`; Thai delivery validation; English `RequestLabel` removed | 180 native tests (tab and amount tests new), type check, lint, source audit, DESIGN sync, build; Chrome walk against the real local API (writes intercepted) Admin 1280 Dark, Staff 390/360 Light, plus a stubbed Staff 768 walk for invoice and shipment |
@@ -2542,39 +2554,12 @@ src/features/workspace/workspace.module.css
 ```css
 .scope { min-width: 0; }
 .scope a:global(.cust-primary):hover { color: #121514; }
-.scope .total { color: var(--cust-muted); margin: -12px 0 24px; }
-.scope .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-.scope .tabs a { gap: 10px; padding: 8px 14px; min-height: 44px; background: var(--cust-surface); color: var(--cust-muted); border-radius: 999px; text-decoration: none; }
-.scope .tabs a:hover { color: var(--cust-ink); background: var(--cust-surface-2); }
-.scope .tabs a[aria-current="page"] { color: var(--cust-accent); background: var(--cust-tint); }
-.scope .count { min-width: 24px; padding: 0 6px; background: var(--cust-surface-2); color: var(--cust-ink); border-radius: 999px; text-align: center; font-variant-numeric: tabular-nums; }
-.scope .filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; align-items: end; padding: 24px; background: var(--cust-surface); border-radius: 12px; margin-bottom: 16px; }
-.scope .filters > label { min-width: 0; margin: 0; }
-.scope .filters > label:first-child { grid-column: span 2; }
-.scope .filterActions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
-.scope .filterActions button { min-height: 48px; }
-.scope .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
-.scope .chips a { max-width: 100%; padding: 6px 12px; gap: 12px; background: var(--cust-tint); color: var(--cust-ink); border-radius: 999px; overflow-wrap: anywhere; }
-.scope .rows { display: grid; margin-top: 24px; }
-.scope .row { display: grid; grid-template-columns: minmax(140px, 1fr) minmax(0, 1.7fr) minmax(130px, .9fr) minmax(150px, 1fr); gap: 24px; padding: 28px 0; border-bottom: 1px solid var(--cust-line); align-items: start; }
-.scope .row > div { min-width: 0; overflow-wrap: anywhere; }
-.scope .rowTitle { display: block; color: var(--cust-ink); font-weight: 650; margin-bottom: 12px; }
-.scope .rowTitle:hover { color: var(--cust-accent); }
-.scope .row p { margin-top: 8px; color: var(--cust-muted); font-size: .875rem; }
-.scope .workName { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-.scope .label { display: block; color: var(--cust-muted); font-size: .875rem; margin-bottom: 8px; }
-.scope .row time { font-size: .875rem; }
-.scope .rowActions { text-align: right; }
-.scope .rowActions > strong, .scope .rowActions > small { display: block; }
-.scope .rowActions a { justify-content: flex-end; }
-.scope .mobileMore { display: none; }
-.scope .skeletons { display: grid; gap: 16px; margin: 24px 0; }
-.scope .skeleton { height: 140px; background: var(--cust-surface); border-radius: 12px; }
+.scope .evidenceLine { display: flex; flex-wrap: wrap; gap: 8px 16px; list-style: none; margin: 12px 0 0; padding: 0; }
+.scope .evidenceLine li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0; border: 0; color: var(--cust-muted); font-size: .875rem; }
 .scope :global(.cust-document-navigation) { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
 .scope :global(.cust-document-navigation) > div { display: flex; flex-wrap: wrap; gap: 16px; }
 .scope .quotationLayout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); gap: 32px; align-items: start; }
 .scope .quotationLayout > * { min-width: 0; }
-.scope .depositLayout .previewLayout { grid-template-columns: minmax(0, 1fr); gap: 24px; }
 .scope .depositLayout :global(.cust-document) > h2 { margin-bottom: 24px; }
 .scope .depositLayout :global(.cust-price-panel) :global(.cust-definition) > div { grid-template-columns: minmax(0, 1fr); gap: 4px; }
 .scope .depositLayout :global(.cust-price-panel) :global(.cust-checklist li) { flex-wrap: wrap; gap: 8px; }
@@ -2593,13 +2578,6 @@ src/features/workspace/workspace.module.css
 .paperTotal strong { font-size: 1.5rem; }
 .paperTotal small { grid-column: 1 / -1; color: #57615b; }
 .paperFooter { margin-top: 32px; color: #57615b; font-size: .8125rem; }
-.scope .poSection { margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--cust-line); }
-.scope .documentToolbar { display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
-.scope .documentToolbar h2 { margin-bottom: 12px; }
-.scope .previewLayout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); gap: 32px; align-items: start; }
-.scope .previewLayout > * { min-width: 0; }
-.scope .previewInfo { padding: 24px; border-radius: 12px; background: var(--cust-surface); overflow-wrap: anywhere; }
-.scope .previewInfo :global(.cust-definition > div) { grid-template-columns: minmax(0, 1fr); gap: 4px; }
 .scope .filePreview object { display: block; width: 100%; height: 680px; background: #fff; border: 0; border-radius: 12px; }
 .scope .filePreview > p { margin-top: 16px; }
 .scope .previewFallback { min-height: 280px; padding: 32px; display: flex; flex-direction: column; align-items: start; justify-content: center; gap: 16px; background: var(--cust-surface); border-radius: 12px; overflow-wrap: anywhere; }
@@ -2610,22 +2588,199 @@ src/features/workspace/workspace.module.css
   .printRoot .paper { box-shadow: none; border-radius: 0; margin: 0; padding: 0; font-size: 11pt; }
   .printRoot .paperHeader, .printRoot .paperTotal, .printRoot .documentFacts > div { break-inside: avoid; }
 }
-@media (max-width: 1200px) { .scope .quotationLayout, .scope .previewLayout { grid-template-columns: minmax(0, 1fr); } .scope .quotationLayout > aside { order: -1; position: static; } }
-@media (max-width: 1100px) { .scope .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } .scope .row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); } .scope .rowActions { text-align: left; } .scope .rowActions a { justify-content: flex-start; } }
-@media (max-width: 640px) {
-  .scope .filters { grid-template-columns: minmax(0, 1fr); padding: 16px; }
-  .scope .filters > label:first-child { grid-column: auto; }
-  .scope .row { grid-template-columns: minmax(0, 1fr); gap: 20px; padding: 20px; border: 0; border-radius: 12px; background: var(--cust-surface); }
-  .scope .rows { gap: 16px; }
-  .scope .desktopDownload { display: none; }
-  .scope .mobileMore { display: block; }
-  .scope .mobileMore summary { display: flex; align-items: center; min-height: 44px; color: var(--cust-accent); }
+
+/* Quotation / PO list and detail pages (Claude Design boards), one pattern for all four. */
+.scope { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.scope > * { margin-top: 0; margin-bottom: 0; }
+.scope :global(.cust-heading) { margin-bottom: 0; }
+.scope small { color: var(--cust-muted); font-size: .8125rem; }
+.scope .uploadIdle { display: grid; justify-items: end; gap: 4px; }
+.scope .uploadIdle button:disabled { opacity: .55; cursor: not-allowed; }
+.scope .outline, .scope .fileAction button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 14px; border: 1px solid var(--cust-line); border-radius: 10px; background: var(--cust-surface); color: var(--cust-ink); font-size: .875rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.scope .outline:hover, .scope .fileAction button:hover { background: var(--cust-surface-2); color: var(--cust-ink); }
+.scope .fileAction { display: inline-grid; gap: 4px; justify-items: start; }
+.scope .fileAction :global(.cust-alert), .scope .fileAction :global(.cust-muted) { margin: 0; font-size: .8125rem; }
+.scope .banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 12px 12px 12px 20px; border: 1px solid color-mix(in srgb, var(--cust-accent) 35%, var(--cust-line)); border-radius: 12px; background: var(--cust-tint); }
+.scope .banner p { flex: 1 1 20rem; margin: 0; font-size: .9375rem; overflow-wrap: anywhere; }
+.scope .banner strong { color: var(--cust-accent); }
+
+/* List: awaiting-answer cards, then one panel with tabs, search and table. */
+.scope .openSection { display: grid; gap: 14px; }
+.scope .openSection h2 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.125rem; }
+.scope .openCount { min-width: 24px; padding: 1px 8px; border-radius: 999px; background: var(--cust-action); color: #121514; font-size: .8125rem; text-align: center; font-variant-numeric: tabular-nums; }
+.scope .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 16px; }
+.scope .card, .scope .card2 { min-width: 0; padding: 20px; border: 1px solid var(--cust-line); border-radius: 12px; background: var(--cust-surface); overflow-wrap: anywhere; }
+.scope .card { display: flex; flex-direction: column; gap: 14px; }
+.scope .card h3 { margin: 0 0 4px; font-size: 1.0625rem; font-weight: 650; }
+.scope .card :global(.cust-primary) { margin-top: auto; }
+.scope .cardTop { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; color: var(--cust-muted); font-size: .875rem; }
+.scope .cardPrice { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; padding: 12px 0; border-block: 1px solid var(--cust-line); }
+.scope .cardPrice strong { font-size: 1.375rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.scope .cardPrice span { color: var(--cust-muted); font-size: .8125rem; }
+.scope .skeletonCard { height: 240px; border: 1px solid var(--cust-line); border-radius: 12px; background: var(--cust-surface); }
+.scope .caughtUp { display: flex; align-items: center; gap: 12px; margin: 0; padding: 16px 20px; border: 1px solid var(--cust-line); border-radius: 12px; background: var(--cust-surface); color: var(--cust-muted); font-size: .9375rem; }
+.scope .caughtUp > span { color: var(--cust-green); font-weight: 700; }
+.scope .panel { min-width: 0; border: 1px solid var(--cust-line); border-radius: 12px; background: var(--cust-surface); }
+.scope .views { display: flex; flex-wrap: wrap; gap: 4px; padding: 8px 12px 0; border-bottom: 1px solid var(--cust-line); }
+.scope .views a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; margin-bottom: -1px; border-bottom: 2px solid transparent; color: var(--cust-muted); font-size: .9375rem; text-decoration: none; }
+.scope .views a[aria-current="page"] { border-bottom-color: var(--cust-accent); color: var(--cust-ink); font-weight: 650; }
+.scope .panelBar { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--cust-line); }
+.scope .tabs { display: flex; flex-wrap: wrap; gap: 4px; min-width: 0; }
+.scope .tabs a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 12px; border-radius: 10px; color: var(--cust-muted); font-size: .9375rem; text-decoration: none; }
+.scope .tabs a:hover { background: var(--cust-surface-2); color: var(--cust-ink); }
+.scope .tabs a[aria-current="page"] { background: var(--cust-tint); color: var(--cust-accent); font-weight: 650; }
+.scope .count { min-width: 22px; padding: 0 6px; border-radius: 999px; background: var(--cust-surface-2); color: var(--cust-ink); font-size: .8125rem; text-align: center; font-variant-numeric: tabular-nums; }
+.scope .filters { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: flex-end; gap: 8px 12px; flex: 1 1 18rem; min-width: 0; }
+.scope .search { display: flex; align-items: center; gap: 8px; flex: 1 1 14rem; max-width: 24rem; min-height: 44px; margin: 0; padding: 0 12px; border: 1px solid var(--cust-line); border-radius: 10px; background: var(--cust-bg); color: var(--cust-muted); }
+.scope .search input { flex: 1; min-width: 0; min-height: 40px; padding: 0; border: 0; outline: 0; background: transparent; color: var(--cust-ink); }
+.scope .search:focus-within { outline: 2px solid var(--cust-focus); outline-offset: 1px; }
+.scope .more summary { display: flex; align-items: center; min-height: 44px; padding: 0 4px; color: var(--cust-accent); font-size: .875rem; cursor: pointer; }
+.scope .more[open] { flex: 1 0 100%; }
+.scope .moreGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: 12px 16px; align-items: end; padding: 8px 0 4px; }
+.scope .moreGrid > label { min-width: 0; margin: 0; }
+.scope .filterActions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+.scope .chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--cust-line); }
+.scope .chips a { max-width: 100%; padding: 4px 10px; border-radius: 999px; background: var(--cust-tint); color: var(--cust-ink); font-size: .8125rem; overflow-wrap: anywhere; }
+.scope .panelNote { margin: 0; padding: 12px 16px; color: var(--cust-muted); font-size: .875rem; }
+.scope .footer { margin: 0; padding: 12px 16px; border-top: 1px solid var(--cust-line); color: var(--cust-muted); font-size: .875rem; }
+.scope .panel :global(.cust-empty) { border: 0; background: transparent; }
+.scope .panel :global(.cust-pagination) { padding: 8px 16px; }
+.scope .skeletons { display: grid; gap: 8px; padding: 16px; }
+.scope .skeleton { height: 56px; border-radius: 8px; background: var(--cust-surface-2); }
+
+/* Table on desktop, one card per row on phones. */
+.scope .table { width: 100%; border-collapse: collapse; font-size: .9375rem; }
+.scope .table th, .scope .table td { padding: 12px 16px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+.scope .table thead th { color: var(--cust-muted); font-size: .8125rem; font-weight: 650; white-space: nowrap; }
+.scope .table tbody td { border-top: 1px solid var(--cust-line); }
+.scope .table [data-numeric] { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.scope .table td > small { display: block; margin-top: 2px; }
+.scope .rowTitle { color: var(--cust-ink); font-weight: 650; }
+.scope .rowTitle:hover { color: var(--cust-accent); }
+.scope .plainLink { color: var(--cust-ink); }
+.scope .workName { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-weight: 500; }
+.scope .quiet { color: var(--cust-muted); font-size: .875rem; }
+.scope .warn { color: var(--cust-accent); font-size: .875rem; font-weight: 600; }
+.scope .openCell { width: 44px; padding-left: 0 !important; }
+.scope .openCell a { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; color: var(--cust-muted); }
+.scope .openCell a:hover { background: var(--cust-surface-2); color: var(--cust-ink); }
+.scope .fileCell { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.scope .fileTag { flex: none; display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 4px; border: 1px solid var(--cust-line); border-radius: 6px; color: var(--cust-accent); font-size: .6875rem; font-weight: 700; }
+.scope .evidenceLine { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.scope .evidenceLine li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0; border: 0; color: var(--cust-muted); font-size: .875rem; }
+
+/* Detail: breadcrumb, title row, status banner, summary cells, then section cards. */
+.scope .detailHead { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.scope .detailHead > div:first-child { flex: 1 1 20rem; min-width: 0; }
+.scope .detailHead p { margin: 6px 0 0; color: var(--cust-muted); overflow-wrap: anywhere; }
+.scope .detailTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.scope .detailTitle h1 { margin: 0; overflow-wrap: anywhere; }
+.scope .revision { padding: 3px 8px; border: 1px solid var(--cust-line); border-radius: 6px; color: var(--cust-muted); font-size: .8125rem; font-weight: 600; white-space: nowrap; }
+.scope .statusBanner { margin: 0; padding: 14px 20px; border: 1px solid var(--cust-line); border-radius: 12px; background: var(--cust-surface); font-size: .9375rem; overflow-wrap: anywhere; }
+.scope .statusBanner[data-tone="info"], .scope .feedback[data-tone="info"] { border-color: color-mix(in srgb, var(--cust-blue) 35%, var(--cust-line)); background: color-mix(in srgb, var(--cust-blue) 8%, var(--cust-surface)); }
+.scope .statusBanner[data-tone="success"], .scope .feedback[data-tone="success"] { border-color: color-mix(in srgb, var(--cust-green) 35%, var(--cust-line)); background: color-mix(in srgb, var(--cust-green) 8%, var(--cust-surface)); }
+.scope .feedback[data-tone="danger"] { border-color: color-mix(in srgb, var(--cust-red) 35%, var(--cust-line)); background: color-mix(in srgb, var(--cust-red) 8%, var(--cust-surface)); }
+.scope .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr)); margin: 0; border: 1px solid var(--cust-line); border-radius: 12px; background: var(--cust-line); gap: 1px; overflow: hidden; }
+.scope .summary > div { display: grid; align-content: start; gap: 4px; padding: 16px 20px; background: var(--cust-surface); min-width: 0; overflow-wrap: anywhere; }
+.scope .summary dt { color: var(--cust-muted); font-size: .8125rem; }
+.scope .summary dd { margin: 0; font-size: .9375rem; }
+.scope .summary .summaryTotal { background: var(--cust-tint); }
+.scope .summary .summaryTotal dd { font-size: 1.25rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.scope .card2 > h2, .scope .feedback h2 { margin: 0 0 14px; font-size: 1rem; font-weight: 650; }
+.scope .card2 > .table { margin: 0 -20px; width: calc(100% + 40px); }
+.scope .totalBar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 48px; margin: 0 -20px -20px; padding: 20px; border-top: 1px solid var(--cust-line); border-radius: 0 0 12px 12px; background: var(--cust-surface-2); }
+.scope .totalBar p { flex: 1 1 18rem; margin: 0; color: var(--cust-muted); font-size: .875rem; }
+.scope .totalBar div { display: flex; align-items: baseline; gap: 24px; }
+.scope .totalBar strong { font-size: 1.25rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.scope .detailGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: 20px; align-items: stretch; }
+.scope .facts { display: grid; gap: 10px; margin: 0 0 14px; font-size: .9375rem; }
+.scope .facts > div { display: grid; grid-template-columns: minmax(6.5rem, 9rem) minmax(0, 1fr); gap: 4px 16px; }
+.scope .facts dt { color: var(--cust-muted); }
+.scope .facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.scope .facts small { display: block; margin-top: 2px; }
+.scope .factsHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; margin-bottom: 10px; }
+.scope .factsHead h3 { margin: 0; color: var(--cust-muted); font-size: .8125rem; font-weight: 650; }
+.scope .fileList { display: grid; list-style: none; margin: 0; padding: 0; }
+.scope .fileList li { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 8px 0; border-top: 1px solid var(--cust-line); }
+.scope .fileMeta :global(.cust-link) { min-height: 32px; padding: 2px 0; font-size: .8125rem; }
+.scope .fileMeta { display: grid; flex: 1 1 9rem; min-width: 0; font-size: .875rem; overflow-wrap: anywhere; }
+.scope .timeline { display: grid; list-style: none; margin: 0; padding: 0; }
+.scope .timeline li { position: relative; padding: 0 0 16px 24px; }
+.scope .timeline li::before { content: ""; position: absolute; left: 0; top: 7px; width: 10px; height: 10px; border: 2px solid var(--cust-muted); border-radius: 50%; }
+.scope .timeline li:first-child::before { border-color: var(--cust-accent); background: var(--cust-accent); }
+.scope .timeline li:not(:last-child)::after { content: ""; position: absolute; left: 6px; top: 24px; bottom: 0; width: 2px; background: var(--cust-line); }
+.scope .timeline p { margin: 3px 0 0; color: var(--cust-muted); font-size: .875rem; overflow-wrap: anywhere; }
+.scope .timelineHead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.scope .timelineHead time { color: var(--cust-muted); font-size: .8125rem; }
+.scope .decisionBar { position: sticky; bottom: 0; z-index: 10; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 14px 20px; border: 1px solid var(--cust-line); border-radius: 12px; background: var(--cust-surface); box-shadow: 0 -6px 18px rgb(0 0 0 / .12); }
+.scope .decisionBar > div:first-child { display: grid; gap: 2px; }
+.scope .decisionBar > div:first-child span { color: var(--cust-muted); font-size: .8125rem; }
+.scope .decisionBar > div:first-child strong { font-size: 1.25rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.scope .decisionBar > p { flex: 1 1 18rem; margin: 0; font-size: .9375rem; }
+.scope .decisionActions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.scope .overlay { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgb(0 0 0 / .55); }
+.scope .modal { width: min(100%, 32rem); max-height: calc(100dvh - 32px); overflow-y: auto; border-radius: 12px; background: var(--cust-surface); }
+.scope .modal :global(.cust-confirm) { margin: 0; background: var(--cust-surface); }
+.scope .modal :global(.cust-confirm:focus) { outline: 0; }
+
+/* PO detail. */
+.scope .poSection { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.scope .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); list-style: none; margin: 0; padding: 0; }
+.scope .steps li { position: relative; display: grid; align-content: start; gap: 2px; padding-right: 12px; font-size: .875rem; }
+.scope .steps li > span { display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; margin-bottom: 8px; border: 2px solid var(--cust-line); border-radius: 50%; background: var(--cust-surface); font-weight: 700; }
+.scope .steps li:not(:last-child)::after { content: ""; position: absolute; left: 36px; right: 8px; top: 13px; height: 2px; background: var(--cust-line); }
+.scope .steps li[data-state="done"] > span { border-color: var(--cust-ink); background: var(--cust-ink); color: var(--cust-surface); }
+.scope .steps li[data-state="done"]:not(:last-child)::after { background: var(--cust-ink); }
+.scope .steps li[data-state="current"] > span { border-color: var(--cust-blue); color: var(--cust-blue); }
+.scope .steps li[data-state="approved"] > span { border-color: var(--cust-green); background: var(--cust-green); color: var(--cust-on-danger); }
+.scope .steps li[data-state="approved"] strong { color: var(--cust-green); }
+.scope .steps li[data-state="rejected"] > span { border-color: var(--cust-red); background: var(--cust-red); color: var(--cust-on-danger); }
+.scope .steps li[data-state="rejected"] strong { color: var(--cust-red); }
+.scope .steps li[data-state="todo"] strong { color: var(--cust-muted); font-weight: 500; }
+.scope .feedback { padding: 20px; border: 1px solid var(--cust-line); border-radius: 12px; background: var(--cust-surface); overflow-wrap: anywhere; }
+.scope .feedback > div { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+.scope .feedback p { margin: 0; font-size: .9375rem; }
+.scope .feedback h2 { margin-bottom: 8px; }
+.scope .nextStep { margin-top: 12px !important; padding-top: 12px; border-top: 1px solid var(--cust-line); }
+.scope .activity { display: grid; list-style: none; margin: 0; padding: 0; }
+.scope .activity li { display: grid; grid-template-columns: minmax(7rem, 11rem) minmax(0, 1fr); gap: 4px 16px; padding: 10px 0; border-top: 1px solid var(--cust-line); font-size: .9375rem; overflow-wrap: anywhere; }
+.scope .activity time { color: var(--cust-muted); font-size: .8125rem; }
+.scope .activity span { display: grid; }
+.scope :global(#upload) { scroll-margin-top: 104px; }
+
+@media (max-width: 1200px) { .scope .quotationLayout { grid-template-columns: minmax(0, 1fr); } .scope .quotationLayout > aside { order: -1; position: static; } }
+@media (max-width: 48rem) {
+  .scope .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .scope .table, .scope .table tbody, .scope .table tr, .scope .table td { display: block; width: auto; }
+  .scope .card2 > .table { margin: 0 -20px; width: auto; }
+  .scope .table tbody tr { position: relative; padding: 12px 16px; border-top: 1px solid var(--cust-line); }
+  .scope .table tbody td { display: grid; grid-template-columns: minmax(6rem, 7.5rem) minmax(0, 1fr); gap: 4px 12px; padding: 6px 0; border: 0; text-align: left; white-space: normal; }
+  .scope .table tbody td > * { grid-column: 2; }
+  .scope .table tbody td::before { content: attr(data-label); grid-column: 1; grid-row: 1 / span 3; color: var(--cust-muted); font-size: .8125rem; }
+  .scope .table tbody td:first-child { padding-right: 44px; }
+  .scope .table tbody td.openCell { position: absolute; top: 6px; right: 8px; display: block; width: auto; padding: 0; }
+  .scope .table tbody td.openCell::before { content: none; }
+  .scope .uploadIdle { justify-items: start; }
+  .scope .uploadIdle, .scope .uploadIdle button { width: 100%; }
+  .scope .decisionBar { margin: 0 -4px; }
+  .scope .decisionActions { width: 100%; }
+  .scope .decisionActions > * { flex: 1 1 10rem; }
+  .scope .steps li { padding-right: 8px; }
+  .scope .activity li { grid-template-columns: minmax(0, 1fr); }
   .paper { padding: 20px; }
   .documentFacts { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .paperTotal { grid-template-columns: minmax(0, 1fr); }
   .scope .filePreview object { height: 480px; }
   .scope .previewFallback { padding: 20px; }
 }
+
+.scope :global(.cust-badge) { white-space: nowrap; }
+.scope .rowTitle, .scope .plainLink { display: block; min-height: 0; }
+.scope .detailGrid > :nth-child(3):last-child { grid-column: 1 / -1; }
+.scope .table time { white-space: nowrap; }
+@media (max-width: 48rem) { .scope .table tbody td[data-numeric] { text-align: left; } .scope .table time { white-space: normal; } }
+@media (max-width: 1200px) { .scope .depositLayout > aside { order: 0; } }
+@media (min-width: 48.01rem) { .scope .table .fileCell { min-width: 13rem; } .scope .table td > small { white-space: nowrap; } }
 ```
 
 ### A7. Customer overview dashboard — src/features/customer/customer-overview.module.css
@@ -2977,6 +3132,12 @@ src/features/workspace/workspace.module.css
 .drawer[open] { display: grid; grid-template-rows: auto minmax(0, 1fr); animation: drawerIn .2s ease-out; }
 .drawer::backdrop { background: rgba(0, 0, 0, .5); }
 @keyframes drawerIn { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+/* Centred variant (Drawer centered): same header/body, flex column so the body scrolls inside the height cap. */
+.modal { width: min(40rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); margin: auto; padding: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--text); box-shadow: 0 24px 64px rgba(0, 0, 0, .4); }
+.modal[open] { display: flex; flex-direction: column; animation: modalIn .18s ease-out; }
+.modal::backdrop { background: rgba(0, 0, 0, .5); }
+.modal > .drawerBody { flex: 1 1 auto; min-height: 0; }
+@keyframes modalIn { from { transform: translateY(8px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
 .drawerHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
 .drawerHeader h2 { margin: 0; font-size: 1.25rem; line-height: 1.35; overflow-wrap: anywhere; }
 :global(.live-workspace) .drawerHeader > button { min-width: 48px; padding: 10px; }
@@ -3005,7 +3166,7 @@ src/features/workspace/workspace.module.css
   .dialogActions { flex-direction: column-reverse; }
   :global(.live-workspace) .dialogActions > button { width: 100%; }
 }
-@media (prefers-reduced-motion: reduce) { .skeleton > span, .drawer[open] { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .skeleton > span, .drawer[open], .modal[open] { animation: none; } }
 ```
 
 ### A10. Staff/Admin production — src/features/production/production.module.css
@@ -3226,18 +3387,51 @@ src/features/workspace/workspace.module.css
 ```css
 /* สต๊อกวัตถุดิบ (UC5) page-specific rules; list/detail pieces come from staff-ui/staff-layout.module.css. */
 
-/* Stock table: a real table on desktop, one card per material on phones. */
-.stock { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); font-variant-numeric: tabular-nums; }
-.stock th, .stock td { padding: 12px 16px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: middle; }
-.stock thead th { color: var(--muted); font-size: 0.8125rem; font-weight: 600; }
+.head { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+
+/* Summary cells (counts only, never quantities summed across different units). */
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 16px; margin: 0; }
+.summary > div { display: grid; align-content: start; gap: 6px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.summary dt { color: var(--muted); font-size: 0.875rem; }
+.summary dd { margin: 0; font-size: 1.75rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.summary dd[data-tone="danger"] { color: var(--danger); }
+.summary dd[data-tone="warning"] { color: var(--warning); }
+.summary small { color: var(--muted); font-size: 0.8125rem; overflow-wrap: anywhere; }
+
+/* Out-of-stock banner: links to the หมด tab only (no purchase order from here). */
+.alert { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 12px 12px 12px 20px; border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--line)); border-radius: 12px; background: color-mix(in srgb, var(--danger) 8%, var(--surface)); }
+.alert p { flex: 1 1 20rem; margin: 0; font-size: 0.9375rem; overflow-wrap: anywhere; }
+.alert strong { color: var(--danger); }
+:global(.live-workspace) .alert a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); font-size: 0.875rem; font-weight: 600; text-decoration: none; }
+:global(.live-workspace) .alert a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+
+/* One panel: tabs + search bar, stock table, footer count. */
+.panel { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.panelBar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.panelBar > nav { min-width: 0; max-width: 100%; padding-bottom: 0; }
+.panelBar > form { flex: 0 1 24rem; }
+.note { margin: 0; padding: 12px 16px; color: var(--muted); font-size: 0.875rem; }
+.footer { margin: 0; padding: 12px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.875rem; }
+
+/* Stock table: a real table on desktop, one card per material on phones. Every quantity carries its own unit. */
+.stock { width: 100%; border-collapse: collapse; font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+.stock th, .stock td { padding: 12px 16px; text-align: right; vertical-align: middle; }
+.stock tbody > tr > * { border-top: 1px solid var(--line); }
+.stock thead th { color: var(--muted); font-size: 0.8125rem; font-weight: 650; }
 .stock :is(thead th, tbody th):first-child { text-align: left; }
-.stock tbody tr:last-child > * { border-bottom: 0; }
 .stock td:last-child, .stock thead th:last-child { text-align: left; }
-.stock tbody th { display: grid; gap: 2px; font-weight: 400; }
+.stock tbody th { font-weight: 400; }
+.stock tbody th > * { display: block; width: fit-content; }
+.stock tbody th > * + * { margin-top: 4px; }
 :global(.live-workspace) .stock tbody th a { color: var(--text); font-size: 1rem; font-weight: 650; text-decoration: none; overflow-wrap: anywhere; }
 :global(.live-workspace) .stock tbody th a:hover { color: var(--lime); text-decoration: underline; }
 :global(.live-workspace) .stock tbody th a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
-.stock tbody th small { color: var(--muted); font-size: 0.8125rem; }
+.unit { padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-2); color: var(--muted); font-size: 0.75rem; }
+.qty { white-space: nowrap; }
+.qty small { color: var(--muted); font-size: 0.8125rem; font-weight: 400; }
+/* Reserved share of on-hand; no min/max level exists, so the bar never implies a reorder point. */
+.bar { display: block; height: 6px; margin-top: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--warning); }
 .stock tbody tr[aria-current="true"] > * { background: color-mix(in srgb, var(--lime) 7%, var(--surface)); }
 
 .movementTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
@@ -3264,16 +3458,23 @@ src/features/workspace/workspace.module.css
 
 @media (max-width: 48rem) {
   .stock, .stock tbody, .stock tr, .stock th, .stock td { display: block; }
-  .stock { border: 0; background: transparent; }
   .stock thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .stock tbody { display: grid; gap: 12px; }
-  .stock tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+  .stock tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; padding: 14px 16px; border-top: 1px solid var(--line); }
+  .stock tbody tr:first-child { border-top: 0; }
   .stock tbody tr > * { padding: 0; border: 0; text-align: left; }
   .stock tbody th, .stock td:last-child { grid-column: 1 / -1; }
   .stock td[data-label]::before { content: attr(data-label); display: block; color: var(--muted); font-size: 0.75rem; }
   .stock td:last-child::before { display: none; }
+  .qty { white-space: normal; }
   .catalogList li { grid-template-columns: minmax(0, 1fr) auto; }
   .catalogList li > :last-child { grid-column: 1 / -1; justify-self: start; }
+}
+@media (max-width: 40rem) {
+  .panelBar > form { flex-basis: 100%; }
+  .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .summary > div { padding: 12px; }
+  .summary dt { font-size: 0.8125rem; }
+  .summary dd { font-size: 1.375rem; }
 }
 ```
 
@@ -3369,19 +3570,63 @@ src/features/workspace/workspace.module.css
 ```css
 /* จัดการพนักงาน (Admin) page-specific rules; list/form pieces come from staff-ui/staff-layout.module.css. */
 
-.workers { display: grid; margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
-.workers li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
-.workers li:last-child { border-bottom: 0; }
-.workers li > span:first-child { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
-.workers small { color: var(--muted); font-size: 0.875rem; }
+.head { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.head svg { margin-right: 6px; }
+
+/* Summary cells: total / active / inactive from the loaded list. */
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 16px; margin: 0; }
+.summary > div { display: grid; gap: 6px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.summary dt { color: var(--muted); font-size: 0.875rem; }
+.summary dd { margin: 0; font-size: 1.75rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.summary dd[data-tone="done"] { color: var(--success); }
+.summary dd[data-tone="quiet"] { color: var(--muted); }
+
+/* One panel: filter bar, table, footer count. */
+.panel { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.panelBar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.panelBar > nav { min-width: 0; max-width: 100%; padding-bottom: 0; }
+.panelBar > form { flex: 0 1 24rem; }
+.note { margin: 0; padding: 12px 16px; color: var(--muted); font-size: 0.875rem; }
+/* No overflow wrapper: it would clip the row menu. Narrow screens stack rows instead of scrolling. */
+.table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+.table th { padding: 12px 16px; color: var(--muted); font-size: 0.8125rem; font-weight: 650; text-align: left; }
+.table td { padding: 10px 16px; border-top: 1px solid var(--line); vertical-align: middle; }
+.table th:last-child, .table td:last-child { width: 1%; text-align: right; }
+.person { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.person > span:last-child, .stack { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.avatar { flex: none; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); color: var(--text); font-size: 0.8125rem; font-weight: 650; }
+.table small { color: var(--muted); font-size: 0.8125rem; }
+.code { font-variant-numeric: tabular-nums; }
+.footer { margin: 0; padding: 12px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.875rem; }
+
+/* Row actions menu (native disclosure). */
+.menu { position: relative; display: inline-block; }
+.menu summary { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); cursor: pointer; list-style: none; }
+.menu summary::-webkit-details-marker { display: none; }
+.menu[open] summary { background: var(--surface-2); }
+.menu summary:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.menu > div { position: absolute; right: 0; top: calc(100% + 4px); z-index: 5; display: grid; min-width: 12rem; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
+:global(.live-workspace) .menu button { display: flex; align-items: center; justify-content: flex-start; min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 0.9375rem; text-align: left; white-space: nowrap; cursor: pointer; }
+:global(.live-workspace) .menu button:hover, :global(.live-workspace) .menu button:focus-visible { background: var(--surface-2); outline: none; }
 
 /* Side-panel form sections: ข้อมูล / ติดต่อ / รหัสผ่านเริ่มต้น / สถานะบัญชี */
 .section { display: grid; gap: 12px; min-width: 0; margin: 0; padding: 0 0 16px; border: 0; border-bottom: 1px solid var(--line); }
 .section > legend, .section > h3 { padding: 0 0 4px; margin: 0; font-size: 1.0625rem; font-weight: 650; }
 
+@media (max-width: 48rem) {
+  .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .table tbody { display: block; }
+  .table tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; padding: 14px 16px; border-top: 1px solid var(--line); }
+  .table td { display: block; padding: 0; border: 0; }
+  .table td:nth-child(2), .table td:nth-child(3) { grid-column: 1; }
+  .table td:last-child { grid-column: 2; grid-row: 1 / span 3; width: auto; }
+}
 @media (max-width: 40rem) {
-  .workers li { grid-template-columns: minmax(0, 1fr) auto; }
-  .workers li > :last-child { grid-column: 1 / -1; }
+  .panelBar > form { flex-basis: 100%; }
+  .summary { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .summary > div { padding: 12px; }
+  .summary dt { font-size: 0.8125rem; }
+  .summary dd { font-size: 1.375rem; }
 }
 ```
 
