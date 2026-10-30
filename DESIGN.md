@@ -199,6 +199,8 @@ Opening a material (`?material=`) shows the new shared side panel (`Drawer`, nat
 
 Browser walk (Chrome, real local API, writes intercepted): `pim.admin` at 1280 Dark, 390 Light, 360 Dark, 768 Light and 1920 Dark; `anan.staff` at 1280 Dark and 390 Light. No horizontal page scroll and no console errors. The intercepted stock addition, unit creation and material PATCH bodies matched the previous payloads, and toasts cleared after 5 s. Not exercised against the live API: actual saves, conflicts, and the retry path. Known limit: ข้อมูลหลัก is not a separate sidebar item; it is reached through the view tab.
 
+**Layout (2026-10-30, from the Claude Design material-management board).** The stock view now follows the board: a right-aligned อัปเดตข้อมูล; four summary cells (same style as จัดการพนักงาน: 12px radius, 1.75rem/650 tabular numbers, auto-fit 12rem columns, two columns at ≤40rem) — วัตถุดิบทั้งหมด, หมด (พร้อมใช้ 0) in `--danger`, มีของแต่ถูกจองหมด in `--warning` (on hand > 0 and available = 0: stock exists but every unit is reserved for jobs; replaces the board's “Reserved for jobs” total), and หน่วยวัดที่ใช้ (count of distinct base units with their names). Cells count materials only; quantities are never totalled because each material has its own unit. When active materials are out of stock, a danger-tinted banner names up to five and links to the หมด tab (แสดงเฉพาะรายการนี้). Below that, one 14px-radius panel holds the filter tabs and search in its top bar, the table and a footer “แสดง X จาก Y รายการ”; loading, load error and empty states sit inside the panel. Each row shows the name with a unit pill (หน่วย …), and every quantity (คงเหลือ, จองแล้ว, พร้อมใช้, Admin ต้นทุนเฉลี่ย as “บาท/หน่วย”) carries its own unit in muted text. Under คงเหลือ a 6px bar shows the reserved share of on-hand (exact integer percent, `--warning` fill); there is no minimum/maximum level, so it never implies a reorder point. Summary counts follow the current server search. Not taken from the board: Create PO / Reorder (no purchase-order creation from this page), Issue to job / Stock count / Receive stock header buttons (stock is adjusted per material in the side panel; receiving has its own page), Below minimum, material codes, sizes, racks and family chips (no such fields), the Recent movements tab and Movements today (movements are only available per material), and the board's sidebar, fonts and colors. Units: the backend gives each material one immutable base unit and does not support unit conversion (UC10 / `UNIT_CONVERSION` is not in the contract), so the page shows each value in that material's unit and offers no conversion.
+
 ### Admin จัดการพนักงาน — 2026-10-30
 
 Step 7 of the approved Staff/Admin redesign (`/admin/workers`, Admin only; no new route).
@@ -903,6 +905,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-30 | สต๊อกวัตถุดิบ layout from the Claude Design board: summary cells (ทั้งหมด / หมด / มีของแต่ถูกจองหมด / หน่วยวัดที่ใช้), out-of-stock banner linking to หมด, one panel with tabs + search, unit pill and per-quantity units, reserved-share bar, footer count; no Create PO, Reserved-for-jobs total or unit conversion | Type check, lint, 185 native tests (summary helpers new), DESIGN sync; headless Chromium against the real local API: Staff 1280 Dark / 390 Light, Admin 1280 Light with side panel, blocked-API error state |
 | 2026-10-30 | Staff/Admin redesign Step 8: การแจ้งเตือน page in the Thai list style with ทั้งหมด / ยังไม่อ่าน tabs, Bangkok-day groups, read badges, ทำเป็นอ่านแล้ว, read-all and โหลดเพิ่ม; bell and page share one request-link helper | 183 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / Staff 390 Light against the real local API, writes intercepted |
 | 2026-10-30 | Admin จัดการพนักงาน fixes: ⋯ row menu no longer clipped (overflow wrapper removed, rows stack at ≤48rem); add/edit/password open in a centred modal that closes on an outside click (`Drawer centered`, workers only); panel no longer overflows on phones; compact summary row at ≤40rem | Type check, lint, native tests, DESIGN sync; built-in browser on the local dev server as the local-test Admin at 800px and 375px: last-row menu fully visible, modal centred with its bottom reachable, inside click keeps it open, outside click closes it, no horizontal page overflow; no writes made |
 | 2026-10-30 | Admin จัดการพนักงาน layout from the Claude Design board: summary cells, one panel with tabs + search bar, table with initials avatars and ⋯ row menu, footer count; Export/Delete/inline switch/role list not adopted | Type check, lint, native tests (initials test new), DESIGN sync; browser check pending real API data |
@@ -3176,18 +3179,51 @@ src/features/workspace/workspace.module.css
 ```css
 /* สต๊อกวัตถุดิบ (UC5) page-specific rules; list/detail pieces come from staff-ui/staff-layout.module.css. */
 
-/* Stock table: a real table on desktop, one card per material on phones. */
-.stock { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); font-variant-numeric: tabular-nums; }
-.stock th, .stock td { padding: 12px 16px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: middle; }
-.stock thead th { color: var(--muted); font-size: 0.8125rem; font-weight: 600; }
+.head { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+
+/* Summary cells (counts only, never quantities summed across different units). */
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 16px; margin: 0; }
+.summary > div { display: grid; align-content: start; gap: 6px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.summary dt { color: var(--muted); font-size: 0.875rem; }
+.summary dd { margin: 0; font-size: 1.75rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.summary dd[data-tone="danger"] { color: var(--danger); }
+.summary dd[data-tone="warning"] { color: var(--warning); }
+.summary small { color: var(--muted); font-size: 0.8125rem; overflow-wrap: anywhere; }
+
+/* Out-of-stock banner: links to the หมด tab only (no purchase order from here). */
+.alert { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 12px 12px 12px 20px; border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--line)); border-radius: 12px; background: color-mix(in srgb, var(--danger) 8%, var(--surface)); }
+.alert p { flex: 1 1 20rem; margin: 0; font-size: 0.9375rem; overflow-wrap: anywhere; }
+.alert strong { color: var(--danger); }
+:global(.live-workspace) .alert a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--text); font-size: 0.875rem; font-weight: 600; text-decoration: none; }
+:global(.live-workspace) .alert a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+
+/* One panel: tabs + search bar, stock table, footer count. */
+.panel { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.panelBar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.panelBar > nav { min-width: 0; max-width: 100%; padding-bottom: 0; }
+.panelBar > form { flex: 0 1 24rem; }
+.note { margin: 0; padding: 12px 16px; color: var(--muted); font-size: 0.875rem; }
+.footer { margin: 0; padding: 12px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.875rem; }
+
+/* Stock table: a real table on desktop, one card per material on phones. Every quantity carries its own unit. */
+.stock { width: 100%; border-collapse: collapse; font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
+.stock th, .stock td { padding: 12px 16px; text-align: right; vertical-align: middle; }
+.stock tbody > tr > * { border-top: 1px solid var(--line); }
+.stock thead th { color: var(--muted); font-size: 0.8125rem; font-weight: 650; }
 .stock :is(thead th, tbody th):first-child { text-align: left; }
-.stock tbody tr:last-child > * { border-bottom: 0; }
 .stock td:last-child, .stock thead th:last-child { text-align: left; }
-.stock tbody th { display: grid; gap: 2px; font-weight: 400; }
+.stock tbody th { font-weight: 400; }
+.stock tbody th > * { display: block; width: fit-content; }
+.stock tbody th > * + * { margin-top: 4px; }
 :global(.live-workspace) .stock tbody th a { color: var(--text); font-size: 1rem; font-weight: 650; text-decoration: none; overflow-wrap: anywhere; }
 :global(.live-workspace) .stock tbody th a:hover { color: var(--lime); text-decoration: underline; }
 :global(.live-workspace) .stock tbody th a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
-.stock tbody th small { color: var(--muted); font-size: 0.8125rem; }
+.unit { padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-2); color: var(--muted); font-size: 0.75rem; }
+.qty { white-space: nowrap; }
+.qty small { color: var(--muted); font-size: 0.8125rem; font-weight: 400; }
+/* Reserved share of on-hand; no min/max level exists, so the bar never implies a reorder point. */
+.bar { display: block; height: 6px; margin-top: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--warning); }
 .stock tbody tr[aria-current="true"] > * { background: color-mix(in srgb, var(--lime) 7%, var(--surface)); }
 
 .movementTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
@@ -3214,16 +3250,23 @@ src/features/workspace/workspace.module.css
 
 @media (max-width: 48rem) {
   .stock, .stock tbody, .stock tr, .stock th, .stock td { display: block; }
-  .stock { border: 0; background: transparent; }
   .stock thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .stock tbody { display: grid; gap: 12px; }
-  .stock tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+  .stock tbody tr { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 12px; padding: 14px 16px; border-top: 1px solid var(--line); }
+  .stock tbody tr:first-child { border-top: 0; }
   .stock tbody tr > * { padding: 0; border: 0; text-align: left; }
   .stock tbody th, .stock td:last-child { grid-column: 1 / -1; }
   .stock td[data-label]::before { content: attr(data-label); display: block; color: var(--muted); font-size: 0.75rem; }
   .stock td:last-child::before { display: none; }
+  .qty { white-space: normal; }
   .catalogList li { grid-template-columns: minmax(0, 1fr) auto; }
   .catalogList li > :last-child { grid-column: 1 / -1; justify-self: start; }
+}
+@media (max-width: 40rem) {
+  .panelBar > form { flex-basis: 100%; }
+  .summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .summary > div { padding: 12px; }
+  .summary dt { font-size: 0.8125rem; }
+  .summary dd { font-size: 1.375rem; }
 }
 ```
 

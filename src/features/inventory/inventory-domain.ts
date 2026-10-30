@@ -60,6 +60,23 @@ export function filterStock(items: InventoryMaterial[], filter: StockFilter): In
   return items.filter(MATCHES[filter]);
 }
 
+/** Has physical stock but none available: every on-hand unit is reserved for jobs. */
+export function fullyReserved(material: InventoryMaterial): boolean {
+  return positive(material.qty_on_hand) && !positive(material.qty_available);
+}
+
+/** Distinct base units in the list; quantities are never summed across materials because units differ. */
+export function unitsInUse(items: InventoryMaterial[]): string[] {
+  return [...new Set(items.map((material) => material.unit_name))].sort((a, b) => a.localeCompare(b, "th"));
+}
+
+/** Whole percent of on-hand reserved (same unit, exact integer math), for the row bar only. */
+export function reservedPercent(material: Pick<InventoryMaterial, "qty_on_hand" | "qty_reserved">): number {
+  if (!positive(material.qty_on_hand) || !positive(material.qty_reserved)) return 0;
+  const percent = decimalUnits(material.qty_reserved) * BigInt(100) / decimalUnits(material.qty_on_hand);
+  return percent > BigInt(100) ? 100 : Number(percent);
+}
+
 /** Exact on-hand balance after an adjustment, or null while the entry is not a valid quantity. */
 export function stockAfter(material: Pick<InventoryMaterial, "qty_on_hand">, mode: "addition" | "correction", quantity: string): string | null {
   let amount: string;

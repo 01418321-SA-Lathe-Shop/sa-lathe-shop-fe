@@ -7,7 +7,7 @@ import type { Account, BackendApi } from "../../lib/api/backend-api";
 import { quantityTH } from "../../components/staff-ui/staff-format";
 import { Button, Drawer, EmptyState, LoadError, SearchForm, Skeleton, StatusTabs, Toast, TruncatedNotice } from "../../components/staff-ui/staff-ui";
 import { useCollection } from "../customer/customer-hooks";
-import { filterStock, stockCounts, stockFilter, type InventoryMaterial, type StockFilter } from "./inventory-domain";
+import { filterStock, fullyReserved, reservedPercent, stockCounts, stockFilter, unitsInUse, type InventoryMaterial, type StockFilter } from "./inventory-domain";
 import { CatalogView } from "./inventory-catalog";
 import { MaterialPanel, MaterialState } from "./inventory-material";
 import layout from "../../components/staff-ui/staff-layout.module.css";
@@ -37,37 +37,59 @@ function InventoryWorkspace({ api, account }: { api: BackendApi; account: Accoun
     const query = next.toString(); return query ? `${pathname}?${query}` : pathname;
   };
   const saved = (message: string) => { setToast(message); materials.reload(); };
-  const listLoading = materials.loading && !materials.data;
+  const listLoading = materials.loading && !materials.data; const loaded = Boolean(materials.data);
+  const count = (n: number) => loaded ? n.toLocaleString("th-TH") : "—";
+  const units = unitsInUse(items ?? []); const empty = filterStock(items ?? [], "empty").filter((item) => item.is_active);
+  const search = <SearchForm label="ค้นหาวัตถุดิบ" placeholder="ชื่อวัตถุดิบ" value={q} onSearch={(value) => router.replace(href({ q: value || undefined, material: undefined }), { scroll: false })} />;
+  const searchNote = q && <p className={view === "stock" ? styles.note : layout.filterNote}>ผลการค้นหา “{q}” <Link href={href({ q: undefined, material: undefined })} scroll={false}>ล้างการค้นหา</Link></p>;
   return <section className={layout.page}>
     {admin && <nav className={layout.views} aria-label="มุมมอง">
       <Link href={href({ view: undefined })} scroll={false} aria-current={view === "stock" ? "page" : undefined}>สต๊อก</Link>
       <Link href={href({ view: "catalog", filter: undefined, material: undefined })} scroll={false} aria-current={view === "catalog" ? "page" : undefined}>ข้อมูลหลัก (หน่วย/วัตถุดิบ)</Link>
     </nav>}
-    <div className={layout.toolbar}>
-      {view === "stock" && <StatusTabs label="กรองสต๊อก" tabs={FILTERS.map(([key, label]) => ({ key, label, count: counts[key] }))} current={filter} href={(key) => href({ filter: key === "all" ? undefined : key, material: undefined })} loading={listLoading} unavailable={Boolean(materials.error && !materials.data)} />}
-      <div className={layout.toolbarEnd}>
-        <SearchForm label="ค้นหาวัตถุดิบ" placeholder="ชื่อวัตถุดิบ" value={q} onSearch={(value) => router.replace(href({ q: value || undefined, material: undefined }), { scroll: false })} />
-        <Button onClick={materials.reload} disabled={materials.loading}>อัปเดตข้อมูล</Button>
-      </div>
-    </div>
-    {materials.error && !materials.data && <LoadError title="โหลดสต๊อกวัตถุดิบไม่สำเร็จ" onRetry={materials.reload} />}
+    <div className={styles.head}><Button onClick={materials.reload} disabled={materials.loading}>อัปเดตข้อมูล</Button></div>
     <TruncatedNotice show={materials.data?.complete === false} />
-    {q && <p className={layout.filterNote}>ผลการค้นหา “{q}” <Link href={href({ q: undefined, material: undefined })} scroll={false}>ล้างการค้นหา</Link></p>}
-    {view === "catalog" ? <CatalogView api={api} materials={items} onSaved={saved} /> : <>
-      {listLoading && <Skeleton label="กำลังโหลดสต๊อกวัตถุดิบ…" />}
-      {materials.data && !rows.length && <EmptyState title={q ? "ไม่พบวัตถุดิบที่ค้นหา" : EMPTY[filter]}>{q ? "ลองค้นด้วยชื่ออื่น" : admin ? "เพิ่มวัตถุดิบได้ที่ข้อมูลหลัก" : "ผู้ดูแลระบบเป็นผู้เพิ่มวัตถุดิบ"}</EmptyState>}
-      {rows.length > 0 && <table className={styles.stock}>
-        <caption className={layout.visuallyHidden}>สต๊อกวัตถุดิบ หน่วยตามหน่วยหลักของแต่ละวัตถุดิบ</caption>
-        <thead><tr><th scope="col">วัตถุดิบ</th><th scope="col">คงเหลือ</th><th scope="col">จองแล้ว</th><th scope="col">พร้อมใช้</th>{admin && <th scope="col">ต้นทุนเฉลี่ย/หน่วย</th>}<th scope="col">สถานะ</th></tr></thead>
-        <tbody>{rows.map((item) => <tr key={item.id} aria-current={item.id === selected ? "true" : undefined}>
-          <th scope="row"><Link href={href({ material: item.id })} scroll={false}>{item.name}</Link><small>หน่วย {item.unit_name}</small></th>
-          <td data-label="คงเหลือ">{quantityTH(item.qty_on_hand)}</td>
-          <td data-label="จองแล้ว">{quantityTH(item.qty_reserved)}</td>
-          <td data-label="พร้อมใช้"><strong>{quantityTH(item.qty_available)}</strong></td>
-          {admin && <td data-label="ต้นทุนเฉลี่ย/หน่วย">{item.avg_cost === undefined ? "—" : `${quantityTH(item.avg_cost)} บาท`}</td>}
-          <td data-label="สถานะ"><MaterialState material={item} /></td>
-        </tr>)}</tbody>
-      </table>}
+    {view === "catalog" ? <>
+      <div className={layout.toolbarEnd}>{search}</div>
+      {materials.error && !materials.data && <LoadError title="โหลดสต๊อกวัตถุดิบไม่สำเร็จ" onRetry={materials.reload} />}
+      {searchNote}
+      <CatalogView api={api} materials={items} onSaved={saved} />
+    </> : <>
+      {/* Counts only: each material has its own base unit, so quantities are never totalled here. */}
+      <dl className={styles.summary}>
+        <div><dt>วัตถุดิบทั้งหมด</dt><dd>{count(items?.length ?? 0)}</dd></div>
+        <div><dt>หมด (พร้อมใช้ 0)</dt><dd data-tone="danger">{count(counts.empty)}</dd></div>
+        <div><dt>มีของแต่ถูกจองหมด</dt><dd data-tone="warning">{count((items ?? []).filter(fullyReserved).length)}</dd><small>คงเหลือทั้งหมดถูกจองให้งานแล้ว</small></div>
+        <div><dt>หน่วยวัดที่ใช้</dt><dd>{count(units.length)}</dd>{units.length > 0 && <small>{units.join(" · ")}</small>}</div>
+      </dl>
+      {empty.length > 0 && filter !== "empty" && <div className={styles.alert} role="status">
+        <p><strong>วัตถุดิบหมด {empty.length.toLocaleString("th-TH")} รายการ</strong> — {empty.slice(0, 5).map((item) => item.name).join(", ")}{empty.length > 5 ? ` และอีก ${(empty.length - 5).toLocaleString("th-TH")} รายการ` : ""}</p>
+        <Link href={href({ filter: "empty", material: undefined })} scroll={false}>แสดงเฉพาะรายการนี้</Link>
+      </div>}
+      <section className={styles.panel} aria-label="สต๊อกวัตถุดิบ">
+        <div className={styles.panelBar}>
+          <StatusTabs label="กรองสต๊อก" tabs={FILTERS.map(([key, label]) => ({ key, label, count: counts[key] }))} current={filter} href={(key) => href({ filter: key === "all" ? undefined : key, material: undefined })} loading={listLoading} unavailable={Boolean(materials.error && !materials.data)} />
+          {search}
+        </div>
+        {searchNote}
+        {listLoading && <div className={styles.note}><Skeleton label="กำลังโหลดสต๊อกวัตถุดิบ…" /></div>}
+        {materials.error && !materials.data && <div className={styles.note}><LoadError title="โหลดสต๊อกวัตถุดิบไม่สำเร็จ" onRetry={materials.reload} /></div>}
+        {materials.data && !rows.length && <EmptyState title={q ? "ไม่พบวัตถุดิบที่ค้นหา" : EMPTY[filter]}>{q ? "ลองค้นด้วยชื่ออื่น" : admin ? "เพิ่มวัตถุดิบได้ที่ข้อมูลหลัก" : "ผู้ดูแลระบบเป็นผู้เพิ่มวัตถุดิบ"}</EmptyState>}
+        {rows.length > 0 && <table className={styles.stock}>
+          <caption className={layout.visuallyHidden}>สต๊อกวัตถุดิบ แต่ละจำนวนแสดงในหน่วยหลักของวัตถุดิบนั้น</caption>
+          <thead><tr><th scope="col">วัตถุดิบ</th><th scope="col">คงเหลือ</th><th scope="col">จองแล้ว</th><th scope="col">พร้อมใช้</th>{admin && <th scope="col">ต้นทุนเฉลี่ย</th>}<th scope="col">สถานะ</th></tr></thead>
+          <tbody>{rows.map((item) => { const unit = item.unit_name; const reserved = reservedPercent(item); return <tr key={item.id} aria-current={item.id === selected ? "true" : undefined}>
+            <th scope="row"><Link href={href({ material: item.id })} scroll={false}>{item.name}</Link><span className={styles.unit}>หน่วย {unit}</span></th>
+            <td data-label="คงเหลือ"><span className={styles.qty}>{quantityTH(item.qty_on_hand)} <small>{unit}</small></span>
+              <span className={styles.bar} role="img" aria-label={`จองแล้ว ${reserved}% ของคงเหลือ`}><span style={{ width: `${reserved}%` }} /></span></td>
+            <td data-label="จองแล้ว"><span className={styles.qty}>{quantityTH(item.qty_reserved)} <small>{unit}</small></span></td>
+            <td data-label="พร้อมใช้"><strong className={styles.qty}>{quantityTH(item.qty_available)} <small>{unit}</small></strong></td>
+            {admin && <td data-label="ต้นทุนเฉลี่ย">{item.avg_cost === undefined ? "—" : <span className={styles.qty}>{quantityTH(item.avg_cost)} <small>บาท/{unit}</small></span>}</td>}
+            <td data-label="สถานะ"><MaterialState material={item} /></td>
+          </tr>; })}</tbody>
+        </table>}
+        {loaded && <p className={styles.footer} aria-live="polite">แสดง {rows.length.toLocaleString("th-TH")} จาก {(items?.length ?? 0).toLocaleString("th-TH")} รายการ</p>}
+      </section>
     </>}
     <Drawer open={Boolean(material)} title={material?.name ?? ""} onClose={() => router.replace(href({ material: undefined }), { scroll: false })}>
       {material && <MaterialPanel key={`${material.id}:${material.version}`} api={api} material={material} admin={admin} onSaved={saved} />}
