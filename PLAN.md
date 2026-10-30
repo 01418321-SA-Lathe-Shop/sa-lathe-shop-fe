@@ -6,6 +6,7 @@
 - Checks: 183 native tests, type check, lint, source audit, DESIGN sync, production build.
 - Chrome walk against the real local API, writes intercepted: Admin 1280 Dark, Staff 390 Light. No overflow or console errors.
 - Not exercised: marks that really reach the backend. Pending owner decision: none.
+
 ## Staff/Admin redesign Step 7 (จัดการพนักงาน) — 2026-10-30
 
 - Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 7 complete (`2eff48d` field rules, `bb5613b` page).
