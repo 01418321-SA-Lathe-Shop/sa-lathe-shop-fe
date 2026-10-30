@@ -9,6 +9,7 @@ import { Button, EmptyState, LoadError, SearchForm, Skeleton, StatusTabs, Toast,
 import { useCollection } from "../customer/customer-hooks";
 import { filterStock, fullyReserved, reservedPercent, stockCounts, stockFilter, unitsInUse, type InventoryMaterial, type StockFilter } from "./inventory-domain";
 import { CatalogView } from "./inventory-catalog";
+import { ConversionsView } from "./inventory-conversions";
 import { MaterialDetail, MaterialState } from "./inventory-material";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./inventory.module.css";
@@ -25,7 +26,7 @@ export function LiveInventory({ api, account }: { api: BackendApi; account: Acco
 function InventoryWorkspace({ api, account }: { api: BackendApi; account: Account }) {
   const params = useSearchParams(); const pathname = usePathname(); const router = useRouter();
   const admin = account.role === "admin";
-  const view = admin && params.get("view") === "catalog" ? "catalog" : "stock";
+  const view = admin && params.get("view") === "catalog" ? "catalog" : admin && params.get("view") === "conversions" ? "conversions" : "stock";
   const q = params.get("q") ?? ""; const filter = stockFilter(params.get("filter")); const selected = params.get("material") ?? "";
   const materials = useCollection<InventoryMaterial>(api, `/materials?search=${encodeURIComponent(q)}`);
   const items = materials.data?.items; const counts = stockCounts(items ?? []); const rows = filterStock(items ?? [], filter);
@@ -46,10 +47,11 @@ function InventoryWorkspace({ api, account }: { api: BackendApi; account: Accoun
     {admin && <nav className={layout.views} aria-label="มุมมอง">
       <Link href={href({ view: undefined })} scroll={false} aria-current={view === "stock" ? "page" : undefined}>สต๊อก</Link>
       <Link href={href({ view: "catalog", filter: undefined, material: undefined })} scroll={false} aria-current={view === "catalog" ? "page" : undefined}>ข้อมูลหลัก (หน่วย/วัตถุดิบ)</Link>
+      <Link href={href({ view: "conversions", q: undefined, filter: undefined, material: undefined })} scroll={false} aria-current={view === "conversions" ? "page" : undefined}>การแปลงหน่วย</Link>
     </nav>}
-    <div className={styles.head}><Button onClick={materials.reload} disabled={materials.loading}>อัปเดตข้อมูล</Button></div>
+    {view !== "conversions" && <div className={styles.head}><Button onClick={materials.reload} disabled={materials.loading}>อัปเดตข้อมูล</Button></div>}
     <TruncatedNotice show={materials.data?.complete === false} />
-    {view === "catalog" ? <>
+    {view === "conversions" ? <ConversionsView /> : view === "catalog" ? <>
       <div className={layout.toolbarEnd}>{search}</div>
       {materials.error && !materials.data && <LoadError title="โหลดสต๊อกวัตถุดิบไม่สำเร็จ" onRetry={materials.reload} />}
       {searchNote}

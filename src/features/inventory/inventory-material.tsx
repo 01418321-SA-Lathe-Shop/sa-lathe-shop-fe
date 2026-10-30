@@ -27,6 +27,9 @@ export function MaterialDetail({ api, material, admin, back, onSaved }: { api: B
       <div><dt>ใช้ในงานแล้ว</dt><dd>{movements ? quantityTH(consumedTotal(movements)) : "—"}</dd><small>{unit} · ตัดเมื่อบันทึกการใช้ในงานผลิต</small></div>
       {admin && <div><dt>ต้นทุนเฉลี่ย (เฉพาะ Admin)</dt><dd>{material.avg_cost === undefined ? "—" : quantityTH(material.avg_cost)}</dd><small>บาท/{unit}</small></div>}
     </dl>
+    <section className={styles.detailCard} aria-labelledby="units-title"><h3 id="units-title">หน่วยที่รองรับ</h3>
+      <p className={styles.unitLine}><span className={styles.unit}>หน่วยหลัก {unit}</span> ทุกจำนวนในหน้านี้ใช้หน่วยหลัก ระบบยังไม่รองรับการแปลงหน่วย</p>
+    </section>
     <section className={styles.detailCard} aria-labelledby="usage-title"><h3 id="usage-title">การใช้ในงาน 6 เดือนล่าสุด ({unit})</h3>
       {movements && <UsageChart movements={movements} unit={unit} />}
       <TruncatedNotice show={history.data?.complete === false} />

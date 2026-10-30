@@ -327,6 +327,8 @@ Noto Sans Thai is self-hosted through Next/font for Customer only, with a sans-s
 
 ## Layout
 
+Known limitation: การแปลงหน่วย shows sample data only until the backend API exists; it is a design preview, not an integration.
+
 List rows that have a detail page open it from anywhere on the row: the title link stretches over the row, and other controls sit above it. Material detail is a full page at `?material=`, not a side panel.
 
 Customer ใบเสนอราคา and มัดจำและ PO share one pattern. Lists: page head, optional banner, then one panel (status tabs, search, collapsible filters, table; one card per row at ≤48rem); quotations awaiting an answer lead as cards above the panel. Details: back link, title with status badge, then section cards at 12px radius. Quotation detail keeps its decision in a sticky bottom bar with a modal confirm; ขอใบเสนอราคาใหม่ records the backend's `reject` decision with a reason. The backend exposes no customer-visible cost breakdown, validity date, lead time, PO number or under-review status, so these pages show none of them. The printable paper renders only in the print portal.
@@ -910,6 +912,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-30 | สต๊อกวัตถุดิบ adds an Admin การแปลงหน่วย view (`?view=conversions`) as a design preview with owner-approved in-page sample data: dashed notice, summary, add form, list and ⋯ deactivate. Nothing is saved and stock is unaffected; the API is planned in backend PLAN.md. Material detail adds หน่วยที่รองรับ, base unit only | Type check, lint, native tests, source audit, DESIGN sync; headless Chromium at 1280 and 390: add, validation, deactivate, menu, no overflow, no API write |
 | 2026-10-30 | Whole-row navigation on สต๊อกวัตถุดิบ, ใบเสนอราคา and เอกสาร PO lists and รอคุณตอบ cards (stretched title link, hover and focus states; menus, downloads and nested links stay separate). Material detail is now a page at `?material=` instead of a side panel: stock cells, ใช้ในงานแล้ว from `job_issue` movements, 6-month usage bars, stock form, history. Admin ⋯ row menu shared with workers. No unit-conversion page: not in the backend contract | Type check, lint, native tests, source audit, DESIGN sync; headless Chromium against the real local API: row, menu, download and keyboard navigation, chart values against the movements API, 1280 and 390 |
 | 2026-10-30 | Customer request-card footer keeps ดูรายละเอียด and its arrow on one line at narrow card widths | Focused CSS/DESIGN sync check |
 | 2026-10-30 | Customer ประวัติการสั่งงาน now uses the compact Jobs list composition with literal request-number/description search, clear-search empty state and local pagination | Focused TypeScript and DESIGN sync check |
@@ -3457,13 +3460,17 @@ src/features/workspace/workspace.module.css
 /* Whole row opens the detail: the name link stretches over the row, so keyboard, middle-click and screen readers keep a real link. */
 .stock tbody tr { position: relative; }
 .stock tbody th a::after { content: ""; position: absolute; inset: 0; }
-.stock tbody tr:hover { background: var(--surface-2); }
+.stock tbody tr:has(th a):hover { background: var(--surface-2); }
 .stock tbody tr:has(th a:focus-visible) { outline: 2px solid var(--lime); outline-offset: -2px; }
 :global(.live-workspace) .stock tbody th a:focus-visible { outline: none; }
 .menuCell { position: relative; z-index: 1; }
 .menuCell:has(details[open]) { z-index: 6; }
 
 /* Material detail page. */
+.sample { margin: 0; padding: 12px 16px; border: 1px dashed var(--warning); border-radius: 12px; font-size: 0.9375rem; }
+.sample strong { color: var(--warning); }
+.formError { margin: 0; color: var(--danger); font-size: 0.875rem; }
+.unitLine { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; color: var(--muted); font-size: 0.9375rem; }
 :global(.live-workspace) .back { width: fit-content; color: var(--muted); font-size: 0.9375rem; text-decoration: none; }
 .detailHead { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .detailHead h2 { margin: 0; overflow-wrap: anywhere; }
