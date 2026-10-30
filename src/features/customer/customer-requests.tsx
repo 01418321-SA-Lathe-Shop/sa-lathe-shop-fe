@@ -14,15 +14,12 @@ import { CustomerUpload } from "./customer-upload";
 import { RequestCard, RequestCardSkeleton, RequestStatusFilters } from "./customer-request-list";
 import styles from "./customer-requests.module.css";
 
-export function OrderTabs({ active }: { active: "requests" | "jobs" | "history" }) {
-  return <nav className="cust-tabs" aria-label="งานของฉัน">{[["requests", "/customer/requests", "คำขอผลิต"], ["jobs", "/customer/jobs", "งานผลิต"], ["history", "/customer/jobs?view=history", "ประวัติ"]].map(([id, href, label]) => <Link key={id} href={href} aria-current={active === id ? "page" : undefined}>{label}</Link>)}</nav>;
-}
 export function CustomerRequests({ api }: { api: BackendApi }) {
   const router = useRouter(); const params = useSearchParams(); const resource = useSalesIndex(api);
   const [page, setPage] = useState(0); const q = params.get("q") ?? ""; const status = params.get("status") ?? ""; const layout = customerRequestLayout(params.get("layout"));
   const filtered = matchingRequests(resource.records.map((item) => item.request), q, status);
   const recordsById = new Map(resource.records.map((record) => [record.request.id, record]));
-  return <section className={styles.list}><OrderTabs active="requests" /><PageTitle title="คำขอผลิต" description="ดูสถานะและขั้นตอนถัดไป ตั้งแต่ส่งคำขอจนเปิดงานผลิต" action={<Link className="cust-primary" href={customerHref("requests", { view: "new" })}>ส่งคำขอผลิตใหม่</Link>} />
+  return <section className={styles.list}><PageTitle title="คำขอผลิต" description="ดูสถานะและขั้นตอนถัดไป ตั้งแต่ส่งคำขอจนเปิดงานผลิต" action={<Link className="cust-primary" href={customerHref("requests", { view: "new" })}>ส่งคำขอผลิตใหม่</Link>} />
     <form className={styles.searchForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); router.replace(customerHref("requests", { q: String(data.get("q") ?? ""), status: String(data.get("status") ?? ""), layout: layout === "list" ? "list" : undefined }), { scroll: false }); }}><Field label="ค้นหาคำขอ"><input name="q" type="search" defaultValue={q} placeholder="เลขคำขอหรือรายละเอียดงาน" /></Field><input type="hidden" name="status" value={status} /><button type="submit">ค้นหา</button></form>
     <div className={styles.listTools}><RequestStatusFilters items={resource.records.map((item) => item.request)} query={q} status={status} layout={layout} loading={resource.loading} countUnavailable={Boolean(resource.error && !resource.data)} /><nav className={styles.viewSwitch} aria-label="รูปแบบการแสดงคำขอ"><Link href={customerHref("requests", { q, status })} aria-current={layout === "cards" ? "page" : undefined}><span aria-hidden="true">▦</span> การ์ด</Link><Link href={customerHref("requests", { q, status, layout: "list" })} aria-current={layout === "list" ? "page" : undefined}><span aria-hidden="true">☷</span> รายการ</Link></nav></div>
     {(q || status) && <p className="cust-filter-result">ผลจากการค้นหาและตัวกรอง <Link href="/customer/requests">ล้างการค้นหาและตัวกรอง</Link></p>}

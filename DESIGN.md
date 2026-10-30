@@ -759,6 +759,8 @@ applied query before the selected status; loading shows an ellipsis, and incompl
 collections retain their existing warning. No new count/profile endpoint or
 authorization change is introduced. The new CSS Module is scoped under its list
 owner; shared badges, navigation, drawer, detail and wizard remain unchanged.
+The redundant local คำขอผลิต / งานผลิต / ประวัติ tab row is omitted from all
+three pages; role navigation remains available through the Customer shell.
 
 The reference's composition is translated to the existing dark/orange system,
 not its white/purple identity. Card view uses an auto-fill full-width grid with a 19rem minimum and becomes
@@ -797,14 +799,14 @@ CSS Module, not a new identity or duplicated card stylesheet. Presentation-only
 literal search and query-scoped counts use the existing authorized jobs/requests collections.
 Production status remains queued/in_progress/completed/cancelled; delivery and
 invoice status are separate. Preserve server job order, exact request references
-and missing-metadata fallbacks. No new API, business transition or date is added.
-The same 2-column grid (1 column at 640px), spacing, corner/shadow, status pills,
-existing machine/date icons and keyboard-focus treatment align both lists. Cards
+and missing-metadata fallbacks. Jobs are sorted by their exact related request
+number descending. No new API, business transition or date is added.
+The same responsive grid/list switch, spacing, corner/shadow, status pills and
+keyboard-focus treatment align both lists. The machine and date icons are omitted. Cards
 open the unchanged job detail with a stretched native Link; no drawer is added.
-They show request reference/name/quantity, actual request creation/requested dates,
-production badge, rework note and separate delivery summary. Missing dates are
-explicit, never job creation dates or shop-confirmed promises; no progress is
-invented. Search/status URLs reset/clamp the existing 20-item local pagination;
+They show only request reference/name/quantity, production badge, rework note and
+delivery summary; creation/requested dates and unavailable shop deadlines are not
+repeated in the list. No progress is invented. Search/status/layout URLs reset/clamp the existing 20-item local pagination;
 clearing filters resets the input. Counts distinguish loading/failed/partial
 reads; four static skeletons share one announcement. Job details, history,
 inspection and payment screens, all commands and the original two list reads
@@ -897,6 +899,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-30 | Customer งานผลิต adds URL-backed การ์ด/รายการ views with compact essential-only summaries and no machine/date icons; the redundant local คำขอผลิต / งานผลิต / ประวัติ tabs are removed from all three pages | Focused Customer job-card tests and TypeScript check |
 | 2026-10-30 | Customer request refinement: sort คำขอผลิต, งานผลิต and ประวัติ by exact request number descending; center the shared empty-state icon/content; move the request number immediately before the description in List; remove the request-card machine icon; improve detail spacing; and separate the Deposit/PO evidence link from the primary ติดตามงานผลิต button | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk against the real local API confirms request order #11→#2, production order #11→#6, centered filtered-empty state and separated detail actions |
 | 2026-10-30 | Customer คำขอผลิต adds URL-backed การ์ด/รายการ layouts, compact essential-only summaries, and removes the redundant customer-profile read | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Customer desktop/narrow with real local API, both layouts, no horizontal overflow or console errors |
 | 2026-10-30 | Admin คำขอและใบเสนอราคา adds URL-backed รายการ/การ์ด views; list keeps the side detail while responsive cards open request detail in an accessible native modal. Staff stays on list/detail regardless of the query | 184 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Admin desktop/narrow with real local API, Escape/URL close checked, no horizontal overflow or console errors |
@@ -2491,6 +2494,7 @@ src/features/workspace/workspace.module.css
 .list .nextStep > p { margin: 0; }
 .list .secondaryLink { position: relative; z-index: 1; margin-top: 4px; font-size: .875rem; }
 .list .cardFooter { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; margin-top: auto; border-top: 1px solid var(--cust-line); color: var(--cust-muted); font-size: .8125rem; pointer-events: none; }
+.list .jobFooter { justify-content: flex-end; }
 .list .openHint { display: inline-flex; align-items: center; gap: 7px; color: var(--cust-accent); font-size: .875rem; font-weight: 600; }
 .list .skeleton { min-height: 320px; gap: 20px; }
 .list .skeleton > span { height: 16px; width: 70%; border-radius: 6px; background: var(--cust-surface-2); }

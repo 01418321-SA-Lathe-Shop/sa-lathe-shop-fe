@@ -11,7 +11,6 @@ import { useResource } from "../../hooks/backend-hooks";
 import { useCollection } from "./customer-hooks";
 import { compareRequestNumbers, customerHref, dateTH, DELIVERY_LABELS, INVOICE_LABELS, JOB_LABELS, moneyTH, REQUEST_LABELS } from "./customer-domain";
 import { Badge, Empty, Field, Limited, LocalPages, PageTitle, ResourceFeedback } from "./customer-ui";
-import { OrderTabs } from "./customer-requests";
 import { CustomerInspection } from "./customer-job-actions";
 import { CustomerInvoice } from "./customer-invoice";
 import { CustomerInvoiceList } from "./customer-invoice-list";
@@ -27,7 +26,7 @@ export function CustomerJobs({ api, mode = "jobs" }: { api: BackendApi; mode?: "
   const section = mode === "inspection" ? "delivery-payment" : "jobs";
   if (mode === "jobs" && !history) return <CustomerJobList jobs={jobs} requests={requests} />;
   if (mode === "payments") return <CustomerInvoiceList jobs={jobs} requests={requests} />;
-  return <>{mode === "jobs" && <OrderTabs active={history ? "history" : "jobs"} />}<PageTitle title={history ? "ประวัติการสั่งงาน" : mode === "inspection" ? "ตรวจรับงาน" : "งานผลิต"} description={history ? "คำขอที่เสร็จสิ้นหรือยกเลิก เชื่อมกลับข้อมูลเดิม" : mode === "inspection" ? "ตรวจงานที่ร้านส่งมอบ ก่อนยืนยันรับหรือส่งคืนเพื่อแก้ไข" : "งานที่ร้านรับเข้าคิวหลังอนุมัติหลักฐานแล้ว"} />
+  return <><PageTitle title={history ? "ประวัติการสั่งงาน" : mode === "inspection" ? "ตรวจรับงาน" : "งานผลิต"} description={history ? "คำขอที่เสร็จสิ้นหรือยกเลิก เชื่อมกลับข้อมูลเดิม" : mode === "inspection" ? "ตรวจงานที่ร้านส่งมอบ ก่อนยืนยันรับหรือส่งคืนเพื่อแก้ไข" : "งานที่ร้านรับเข้าคิวหลังอนุมัติหลักฐานแล้ว"} />
     <ResourceFeedback {...jobs} /><ResourceFeedback {...requests} /><Limited complete={jobs.data?.complete && requests.data?.complete} />
     {history ? <>{archived.map((request) => <article className="cust-document-row" key={request.id}><div><h2>{request.description}</h2><p>คำขอ #{request.no_request}</p><Badge value={request.status} labels={REQUEST_LABELS} /></div><Link href={customerHref("requests", { request: request.id })}>ดูคำขอและเอกสาร →</Link></article>)}{requests.data && !requests.loading && !requests.error && !archived.length && <Empty title="ยังไม่มีประวัติงานที่ปิดแล้ว">คำขอจะเสร็จสิ้นเมื่อรับงานแล้วและชำระครบ</Empty>}</> : <>
       <div className="cust-list-filter"><Field label={mode === "inspection" ? "สถานะการส่งมอบ" : "สถานะการผลิต"}><select value={filter} onChange={(event) => { setFilter(event.target.value); setPage(0); }}><option value="">ทั้งหมด</option>{Object.entries(labels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field></div>

@@ -17,10 +17,14 @@ function text(value) { return Array.isArray(value) ? value.map(text).join(" ") :
 const job = { job_id: "job-id", request_id: "request-id", job_status: "queued", request_status: "ongoing", cycle: 1, deliveries: [] };
 const request = { no_request: "9007199254740993", qty: "9223372036854775807", description: "ชิ้นงานตามแบบ", created_at: "2026-10-28T00:00:00Z" };
 
-test("job cards share request-card styles and preserve original detail destinations and exact references", () => {
+test("job cards keep only essential facts, omit the machine icon and preserve exact destinations", () => {
   const tree = mod.exports.JobCard({ job, request, requestLoading: false }); const link = nodes(tree).find((node) => node.type === "link");
   assert.equal(tree.props.className, "card"); assert.equal(link.props.className, "openCard"); assert.equal(link.props.href, "/customer/jobs?job=job-id");
-  assert.match(link.props["aria-label"], /9007199254740993/); assert.match(text(tree), /9223372036854775807/); assert.match(text(tree), /ส่งคำขอเมื่อ/); assert.match(text(tree), /ไม่ใช่กำหนดส่งที่ร้านยืนยัน/); assert.match(text(tree), /ไม่ได้ระบุวันที่ต้องการ/);
+  assert.match(link.props["aria-label"], /9007199254740993/); assert.match(text(tree), /9223372036854775807/); assert.match(text(tree), /การส่งมอบ/);
+  assert.doesNotMatch(text(tree), /ส่งคำขอเมื่อ|วันที่ลูกค้าต้องการ|กำหนดส่งที่ร้านยืนยัน/);
+  assert.equal(nodes(tree).some((node) => node.type === "icon" && node.props?.name === "machine"), false);
+  const list = mod.exports.JobCard({ job, request, requestLoading: false, layout: "list" });
+  assert.equal(list.props.className, "card rowCard"); assert.match(text(list), /คำขอ #9007199254740993 ·\s+ชิ้นงานตามแบบ/);
 });
 test("production badges retain original status labels, separate delivery and rework, and never render finance/internal fields", () => {
   for (const status of Object.keys(domain.JOB_LABELS)) {
@@ -38,7 +42,9 @@ test("missing request data has honest loading/error wording, without inventing d
 test("status pills distinguish unknown counts from zero and loading; skeleton announces one loading region", () => {
   const props = { counts: { all: 0, byStatus: { queued: 0, in_progress: 0, completed: 0, cancelled: 0 } }, query: "เพลา [แบบ]", status: "queued", loading: false, unavailable: false };
   const current = nodes(mod.exports.JobStatusFilters(props)).find((node) => node.props?.["aria-current"] === "page"); assert.equal(current.props.href, domain.customerHref("jobs", { q: props.query, status: "queued" }));
+  const listCurrent = nodes(mod.exports.JobStatusFilters({ ...props, layout: "list" })).find((node) => node.props?.["aria-current"] === "page"); assert.equal(listCurrent.props.href, domain.customerHref("jobs", { q: props.query, status: "queued", layout: "list" }));
   assert.match(text(mod.exports.JobStatusFilters({ ...props, unavailable: true })), /ยังโหลดจำนวนไม่ได้/); assert.doesNotMatch(text(mod.exports.JobStatusFilters({ ...props, unavailable: true })), /0 รายการ/);
   assert.match(text(mod.exports.JobStatusFilters({ ...props, loading: true })), /กำลังโหลดจำนวน/);
   const skeleton = mod.exports.JobCardSkeleton(); assert.equal(skeleton.props.role, "status"); assert.equal(skeleton.props["aria-label"], "กำลังโหลดงานผลิต"); assert.equal(nodes(skeleton).find((node) => node.props?.["aria-hidden"] === "true").props.children.length, 4);
+  assert.match(nodes(mod.exports.JobCardSkeleton({ layout: "list" })).find((node) => node.props?.["aria-hidden"] === "true").props.className, /listView/);
 });
