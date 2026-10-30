@@ -199,6 +199,38 @@ Opening a material (`?material=`) shows the new shared side panel (`Drawer`, nat
 
 Browser walk (Chrome, real local API, writes intercepted): `pim.admin` at 1280 Dark, 390 Light, 360 Dark, 768 Light and 1920 Dark; `anan.staff` at 1280 Dark and 390 Light. No horizontal page scroll and no console errors. The intercepted stock addition, unit creation and material PATCH bodies matched the previous payloads, and toasts cleared after 5 s. Not exercised against the live API: actual saves, conflicts, and the retry path. Known limit: ข้อมูลหลัก is not a separate sidebar item; it is reached through the view tab.
 
+### Staff/Admin ส่งมอบและใบแจ้งหนี้ / ส่งมอบและรับชำระ — 2026-10-30
+
+Step 6 of the approved Staff/Admin redesign (`/staff/delivery-payment` and `/admin/delivery-payment`; no new route). Jobs load 100 per call, up to 1,000, with the cap notice. The list already carries full fulfillment documents (payments for Admin only), so it needs no extra reads. Request labels “คำขอ #N · description” come from `/requests`.
+
+Pill tabs with counts (`?tab=`) follow the existing action rules:
+- รอตั้งเครดิต (Admin)
+- รอออกใบแจ้งหนี้ (Staff also see jobs still waiting for Admin credit days here, marked รอแอดมินตั้งเครดิต)
+- พร้อมส่ง (invoice issued; nothing shipped, or the last delivery was returned and rework is finished)
+- รอลูกค้าตรวจรับ
+- รอตรวจการชำระ (Admin)
+- ค้างชำระ
+- ปิดแล้ว
+
+A job may appear in several tabs, for example awaiting inspection and still owing. Jobs still in production, including free rework, are in no tab. The default tab is the first non-empty tab where the role has work to do. Search matches the invoice number or request label (`?q=`). Each card shows the invoice number, the tab badge, the request label, balance and due date (or the amount to invoice), badges for rework round, returned delivery and (Admin) a pending proof, and the next step.
+
+The detail (`?job=`), in order:
+- A large balance panel, like the Customer invoice page: remaining balance, invoice status, invoice amount without VAT, paid, due time, credit days and issue time. Before an invoice exists it shows the amount to invoice, the approved deposit and credit days. Facts are two columns at every width.
+- Action cards, only where the role can act: ตั้งเครดิตใบแจ้งหนี้ (Admin), ออกใบแจ้งหนี้, บันทึกส่งมอบ (ส่งงานที่แก้ไขแล้ว after a return). Each has a checklist confirmation and Thai field errors.
+- Informational cards for รอแอดมินตั้งเครดิต (Staff) and รอลูกค้าตรวจรับ.
+- Admin การชำระเงิน section: payment cards (method, amount, time, status, rejection reason, เปิดหลักฐาน), and อนุมัติ / ไม่อนุมัติ on pending proofs. Rejection needs a reason the customer will see. A collapsed บันทึกรับเงินสด form accepts an amount up to the balance, a Bangkok time and an optional receipt, using the shared proof upload (now `staff-ui/staff-upload.tsx`, also used by รับเข้าวัตถุดิบ).
+- Staff see a note that payments are handled by Admin.
+- Delivery timeline, rework history, and event history with Thai labels.
+
+Writes keep their frozen idempotent payload and show the RetryPanel after an unclear response. Delivery validation messages are now Thai. The English `RequestLabel` helper was removed.
+
+Browser walk (Chrome), real local API with writes intercepted (500):
+- `pim.admin` 1280 Dark: tab counts match the demo data. Credit-days errors and the retry/discard path work (the dialog does not reopen). Reject needs a reason; approve and cash confirmations work; malformed and over-balance cash amounts get Thai errors.
+- `anan.staff` 390 Light and 360 Light: five tabs; the credit-pending job shows รอแอดมินตั้งเครดิต; no payment section; no writes.
+- Issue invoice and ship (third-party, after a returned delivery) were walked as `anan.staff` at 768 against a test-only stub, because the demo data has no job in those states.
+
+No horizontal page scroll and no console errors. Intercepted credit-terms PUT, review, cash, invoice and delivery bodies matched the previous payload shapes. Not exercised: saves that really reach the backend, conflicts, and the cash receipt upload.
+
 ### Staff/Admin รับเข้าวัตถุดิบ — 2026-10-30
 
 Step 5 of the approved Staff/Admin redesign (`/staff/receiving` and `/admin/receiving`; no new route). Accepted, non-cancelled supplier orders load 100 per call, up to 1,000, with the cap notice. They are grouped by pill tabs with counts (`?tab=`):
@@ -834,6 +866,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 | Date | Change | Verification |
 | --- | --- | --- |
 | 2026-10-30 | Fix: งานผลิต usage form no longer contains the extra-material search form; pressing ค้นหา in เพิ่มวัตถุดิบนอกแผน could also trigger บันทึกการใช้วัตถุดิบ. The usage form saves only from its button, and the shared `SearchForm` stops its submit event from reaching an outer form | 175 native tests, type check, lint, source audit, build; not re-walked in the browser (backend down) |
+| 2026-10-30 | Staff/Admin redesign Step 6: ส่งมอบและใบแจ้งหนี้ / ส่งมอบและรับชำระ with seven role-filtered tabs from the action rules, search and cards with request labels, large balance panel, per-role action cards (credit days, invoice, shipment), Admin payment cards with proof download, review and a cash form, delivery/rework/event timelines; proof upload shared in `staff-ui`; Thai delivery validation; English `RequestLabel` removed | 180 native tests (tab and amount tests new), type check, lint, source audit, DESIGN sync, build; Chrome walk against the real local API (writes intercepted) Admin 1280 Dark, Staff 390/360 Light, plus a stubbed Staff 768 walk for invoice and shipment |
 | 2026-10-30 | Staff/Admin redesign Step 5: รับเข้าวัตถุดิบ with status tabs plus มีของเสียหาย and Admin-only ค้างจ่ายผู้ขาย (counted from per-order details, first 100), search, cards, receipt form with remaining quantities and “รับครบตามที่เหลือ” per line and for all lines, claim cards, receipt timeline, Admin จ่ายผู้ขาย section with Thai proof upload; Thai receiving validation | 178 native tests (tab, remaining and row-check tests new), type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / 390 Light and Staff 768 Dark against a test-only API stub (backend down), writes intercepted |
 | 2026-10-30 | Staff/Admin redesign Step 4: สั่งซื้อวัตถุดิบ with ใบสั่งซื้อ/ผู้ขาย view tabs, five status tabs with counts and search, one action card per order state with checklist confirmations, new-order step form in the side panel with `MaterialPicker` and exact live total (English `MaterialSearch` removed), supplier list with side-panel add/edit, Thai validation; view-tab, toggle and note styles shared in the staff layout | 175 native tests (order-tab test new), type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 360/390/768/1280/1920 both themes against a test-only API stub (backend down), writes intercepted |
 | 2026-10-30 | Staff/Admin redesign Step 3: สต๊อกวัตถุดิบ table/cards with real-value filter chips, shared side panel (`Drawer`) with movement history, Admin step-form stock adjustment with exact preview and reserved-quantity block, ข้อมูลหลัก view tab for units and materials; shared Toast timer fix | 174 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 360/390/768/1280/1920 and Staff 390/1280, Light and Dark, writes intercepted |
@@ -3206,6 +3239,27 @@ src/features/workspace/workspace.module.css
 @media (max-width: 40rem) {
   .receipt li { grid-template-columns: minmax(0, 1fr); }
 }
+```
+
+### A16. Staff/Admin delivery and invoices — src/features/delivery/delivery.module.css
+
+```css
+/* ส่งมอบ (UC9) page-specific rules; list/detail pieces come from staff-ui/staff-layout.module.css. */
+
+/* Balance first, like the Customer invoice page. */
+.hero { display: grid; gap: 14px; padding: 18px 20px; border: 1px solid color-mix(in srgb, var(--lime) 35%, var(--line)); border-radius: 14px; background: color-mix(in srgb, var(--lime) 6%, var(--surface)); }
+.hero[data-paid] { border-color: color-mix(in srgb, var(--success) 40%, var(--line)); background: color-mix(in srgb, var(--success) 6%, var(--surface)); }
+.hero > div:first-child { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.heroLabel { flex-basis: 100%; color: var(--muted); font-size: 0.9375rem; font-weight: 600; }
+.heroAmount { font-size: clamp(1.75rem, 4vw, 2.25rem); line-height: 1.15; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.hero dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.hero dl > div { background: var(--surface); }
+
+/* Payment proof cards (Admin). */
+.payments { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.payments li { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; overflow-wrap: anywhere; }
+.payments small { color: var(--muted); font-size: 0.875rem; }
+.paymentTop { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }
 ```
 
 ### B. Font loading and root layout — app/layout.tsx

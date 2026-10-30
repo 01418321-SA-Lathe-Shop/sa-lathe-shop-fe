@@ -5,7 +5,6 @@ import { Suspense, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "../../components/appearance/icons";
 import type { Account, BackendApi, JobRequest } from "../../lib/api/backend-api";
-import { useResource } from "../../hooks/backend-hooks";
 import { dateTH, dateTimeTH, requestedDayCountdown } from "../../components/staff-ui/staff-format";
 import { JOB_STATUS } from "../../components/staff-ui/staff-labels";
 import { Button, EmptyState, LoadError, SearchForm, Skeleton, StatusBadge, StatusTabs, Toast, ToneBadge, TruncatedNotice } from "../../components/staff-ui/staff-ui";
@@ -130,10 +129,4 @@ function JobCard({ job, request, requestLoading, readiness, now, worker, selecte
     {job.status === "completed" && <span className={layout.cardMeta}>ผลิตเสร็จ {dateTimeTH(job.completed_at)}</span>}
     <span className={layout.cardNext}>{next} <Icon name="arrow" size={14} /></span>
   </Link>;
-}
-
-// One read for the opened job only; the delivery job list stays a single request.
-export function RequestLabel({ api, id }: { api: BackendApi; id: string }) {
-  const request = useResource<JobRequest>(api, `/requests/${id}`);
-  return <p className="live-description">{request.data ? `Request #${request.data.no_request} · ${request.data.description} · Qty ${request.data.qty}` : request.error ? "Request details unavailable" : "Loading request…"}</p>;
 }

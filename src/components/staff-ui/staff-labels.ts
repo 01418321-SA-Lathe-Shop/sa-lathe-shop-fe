@@ -73,6 +73,41 @@ export const CLAIM_STATE: StatusMap = {
   resolved: ["ได้ของแทนครบ", "done"],
 };
 
+// Keyed by the ส่งมอบ tab, see delivery-domain.
+export const DELIVERY_STATE: StatusMap = {
+  terms: ["รอตั้งเครดิต", "action"],
+  invoice: ["รอออกใบแจ้งหนี้", "action"],
+  ship: ["พร้อมส่ง", "action"],
+  inspect: ["รอลูกค้าตรวจรับ", "progress"],
+  review: ["รอตรวจการชำระ", "action"],
+  unpaid: ["ค้างชำระ", "waiting"],
+  closed: ["ปิดแล้ว", "done"],
+};
+
+// Wording matches the Customer pages (customer-domain INVOICE_LABELS / DELIVERY_LABELS).
+export const INVOICE_STATE: StatusMap = {
+  unpaid: ["ยังไม่ชำระ", "waiting"],
+  partial: ["ชำระบางส่วน", "progress"],
+  paid: ["ชำระครบ", "done"],
+};
+
+export const SHIPMENT_STATE: StatusMap = {
+  shipping: ["จัดส่งแล้ว–รอตรวจรับ", "progress"],
+  delivered: ["ลูกค้ารับงานแล้ว", "done"],
+  returned: ["ส่งคืนเพื่อแก้ไข", "problem"],
+};
+
+export const FULFILLMENT_EVENT: StatusMap = {
+  terms: ["ตั้งเครดิตใบแจ้งหนี้", "waiting"],
+  invoice: ["ออกใบแจ้งหนี้", "progress"],
+  ship: ["บันทึกส่งมอบ", "progress"],
+  accept: ["ลูกค้ารับงาน", "done"],
+  return: ["ลูกค้าส่งคืนเพื่อแก้ไข", "problem"],
+  bank: ["ลูกค้าส่งหลักฐานโอน", "action"],
+  cash: ["รับเงินสด", "done"],
+  review: ["ตรวจการชำระ", "done"],
+};
+
 export function statusOf(map: StatusMap, value: string): { label: string; tone: Tone } {
   const known = Object.hasOwn(map, value) ? map[value] : undefined;
   return known ? { label: known[0], tone: known[1] } : { label: "สถานะยังไม่ระบุ", tone: "waiting" };

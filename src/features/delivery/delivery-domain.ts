@@ -45,7 +45,8 @@ export function inspectPayload(command: Command, outcome: "accept" | "return", r
 
 // Positive amount no larger than the current balance; time not in the future.
 export function paymentPayload(command: Command, input: { amount: string; paidAt: string; evidenceId?: string; balance: string; requireEvidence: boolean }, now: number) {
-  const amount = moneyInput(input.amount.trim());
+  let amount: string;
+  try { amount = moneyInput(input.amount.trim()); } catch { throw new Error("กรอกจำนวนเงินเป็นบาท ทศนิยมไม่เกิน 2 ตำแหน่ง"); }
   if (cents(amount) === BigInt(0)) throw new Error("จำนวนเงินต้องมากกว่า 0");
   if (cents(amount) > cents(input.balance)) throw new Error("จำนวนเงินต้องไม่เกินยอดคงเหลือ ชำระเกินไม่ได้");
   const paid_at = bangkokInstant(input.paidAt);

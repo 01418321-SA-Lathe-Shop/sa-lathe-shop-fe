@@ -59,3 +59,7 @@ test("delivery tabs follow the action rules; Staff see credit-pending jobs under
   assert.equal(defaultDeliveryTab({ terms: 0, invoice: 0, ship: 0, inspect: 0, review: 0, unpaid: 0, closed: 2 }, false), "closed");
   assert.equal(defaultDeliveryTab({ terms: 0, invoice: 0, ship: 0, inspect: 0, review: 0, unpaid: 0, closed: 0 }, false), "invoice");
 });
+
+test("malformed payment amounts get a Thai message", () => {
+  assert.throws(() => paymentPayload(command, { amount: "1,000", paidAt: "2026-10-24T09:00", balance: "6200.00", requireEvidence: false }, Date.parse("2026-10-25T00:00:00Z")), /ทศนิยมไม่เกิน 2/);
+});

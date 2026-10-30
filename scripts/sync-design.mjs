@@ -58,6 +58,8 @@ const snapshot = [
   fence('css', read('src/features/procurement/procurement.module.css')),
   '### A15. Staff/Admin receiving — src/features/receiving/receiving.module.css',
   fence('css', read('src/features/receiving/receiving.module.css')),
+  '### A16. Staff/Admin delivery and invoices — src/features/delivery/delivery.module.css',
+  fence('css', read('src/features/delivery/delivery.module.css')),
   '### B. Font loading and root layout — app/layout.tsx',
   fence('tsx', read('app/layout.tsx')),
   '### B2. Scoped Thai landing font — src/features/landing/landing-page.tsx',
