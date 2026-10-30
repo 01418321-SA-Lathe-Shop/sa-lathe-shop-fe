@@ -49,6 +49,17 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - For documentation-only groups, check accuracy, references, and diffs. For application groups, run the relevant existing checks before committing.
 - At handoff, report phase status, changed files, verification results, commit groups, and push outcome. Unresolved product decisions remain pending rather than being marked confirmed.
 
+## Commit and push rules
+
+These are mandatory for every phase, not optional cleanup at the end:
+
+1. Plan reasonable commit groups and commit completed logical units as work progresses. Each commit has one purpose, normally 3-8 related files. Keep dependencies in buildable order; include the tests needed to explain that change.
+2. Never collect a whole multi-feature phase or several phases into one giant commit and push. Do not split cohesive changes artificially just to increase the commit count. A small documentation-only follow-up may be one focused commit.
+3. Use short Conventional Commit messages describing what changed and why. Avoid vague messages such as update, changes or done. Make each group understandable, independently reviewable and easy to locate with git log or git bisect.
+4. Run go build ./... before every commit and verify that the committed snapshot itself builds, not merely a working tree containing uncommitted dependencies. Run focused tests for each group and the full required checks at phase completion.
+5. At the end of EVERY completed phase, update PLAN.md, review the staged diff, git status and git log --oneline, then push that phase's separate commits to the authorized branch. Do not accumulate completed phases locally. Standing owner instruction for every phase and follow-up: always push to origin/develop first, until the owner explicitly asks to push main. Permission to start/finish a phase is not permission to push main.
+6. Verify the remote branch tip after pushing and report the branch, commit range and test results. If a push is blocked, report the reason and pending commits; never claim the phase was pushed. Never force-push or rewrite published history without explicit authorization.
+
 <!-- BEGIN:nextjs-agent-feedback -->
 
 ## Report Next.js feedback
