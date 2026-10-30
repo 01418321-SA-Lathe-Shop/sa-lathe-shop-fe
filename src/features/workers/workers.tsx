@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import type { BackendApi, Worker } from "../../lib/api/backend-api";
-import { Button, Drawer, EmptyState, LoadError, SearchForm, Skeleton, Toast, ToneBadge, TruncatedNotice } from "../../components/staff-ui/staff-ui";
+import { Button, Drawer, EmptyState, LoadError, SearchForm, Skeleton, StatusTabs, Toast, ToneBadge, TruncatedNotice } from "../../components/staff-ui/staff-ui";
 import { useCollection } from "../customer/customer-hooks";
 import { matchWorker } from "./workers-domain";
 import { EditWorker, PasswordForm, WorkerForm } from "./workers-form";
@@ -17,10 +18,13 @@ export function LiveWorkers({ api }: { api: BackendApi }) {
   const workers = useCollection<Worker>(api, "/admin/workers");
   const [q, setQ] = useState(""); const [panel, setPanel] = useState<Panel>(null);
   const [toast, setToast] = useState(""); const clearToast = () => setToast("");
-  const items = (workers.data?.items ?? []).filter((worker) => matchWorker(worker, q));
+  const pathname = usePathname(); const status = useSearchParams().get("status") ?? "all";
+  const all = workers.data?.items ?? []; const active = all.filter((worker) => worker.is_active).length;
+  const items = all.filter((worker) => (status === "all" || (status === "active") === worker.is_active) && matchWorker(worker, q));
   const saved = (message: string) => { setPanel(null); setToast(message); workers.reload(); };
   const title = panel?.kind === "new" ? "เพิ่มพนักงาน" : panel?.kind === "edit" ? `แก้ไข ${panel.worker.name}` : panel ? `เปลี่ยนรหัสผ่าน ${panel.worker.name}` : "";
   return <section className={layout.page}>
+    <StatusTabs label="สถานะบัญชีพนักงาน" tabs={[{ key: "all", label: "ทั้งหมด", count: all.length }, { key: "active", label: "ใช้งานอยู่", count: active }, { key: "inactive", label: "ปิดใช้งาน", count: all.length - active }]} current={status} href={(key) => key === "all" ? pathname : `${pathname}?status=${key}`} loading={workers.loading && !workers.data} unavailable={Boolean(workers.error && !workers.data)} />
     <div className={layout.toolbarEnd}>
       <SearchForm label="ค้นหาพนักงาน" placeholder="ชื่อ ชื่อผู้ใช้ รหัสพนักงาน หรือตำแหน่ง" value={q} onSearch={setQ} />
       <Button onClick={workers.reload} disabled={workers.loading}>อัปเดตข้อมูล</Button>
@@ -30,7 +34,7 @@ export function LiveWorkers({ api }: { api: BackendApi }) {
     {workers.loading && !workers.data && <Skeleton label="กำลังโหลดพนักงาน…" />}
     {workers.error && !workers.data && <LoadError title="โหลดรายชื่อพนักงานไม่สำเร็จ" onRetry={workers.reload} />}
     <TruncatedNotice show={workers.data?.complete === false} />
-    {workers.data && !items.length && <EmptyState title={q ? "ไม่พบพนักงานที่ค้นหา" : "ยังไม่มีบัญชีพนักงาน"}>{q ? "ลองค้นด้วยชื่อหรือรหัสพนักงานอื่น" : "เพิ่มพนักงานเพื่อสร้างบัญชีเข้าใช้งาน"}</EmptyState>}
+    {workers.data && !items.length && <EmptyState title={q || status !== "all" ? "ไม่พบพนักงานที่ตรงกับตัวกรอง" : "ยังไม่มีบัญชีพนักงาน"}>{q || status !== "all" ? "ลองเปลี่ยนคำค้นหาหรือสถานะบัญชี" : "เพิ่มพนักงานเพื่อสร้างบัญชีเข้าใช้งาน"}</EmptyState>}
     {items.length > 0 && <ul className={styles.workers}>{items.map((worker) => <li key={worker.id}>
       <span><strong>{worker.name}</strong><small>{worker.username} · {worker.employee_no}{worker.position ? ` · ${worker.position}` : ""}</small>
         <small>{worker.email && worker.phone ? `${worker.email} · ${worker.phone}` : "ยังไม่มีข้อมูลติดต่อ (บัญชีเก่า) กรอกได้ที่แก้ไข"}</small></span>
