@@ -36,7 +36,7 @@ export default function ConnectedWorkspace({ role, workspaceId, session }: { rol
     case "production": return <LiveProduction api={api} account={account} />;
     case "delivery-payment": return <LiveDelivery api={api} account={account} />;
     case "workers": return <LiveWorkers api={api} />;
-    case "inbox": return <Inbox api={api} />;
+    case "inbox": return <Inbox api={api} admin={role === "Admin"} />;
     case "memberships": return <Memberships api={api} />;
   }
 }

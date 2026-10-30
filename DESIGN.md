@@ -223,6 +223,18 @@ Step 7 of the approved Staff/Admin redesign (`/admin/workers`, Admin only; no ne
 - No horizontal page scroll and no console errors.
 - Not exercised: saves that really reach the backend, and duplicate-username responses.
 
+### Staff/Admin การแจ้งเตือน — 2026-10-30
+
+Step 8 of the approved Staff/Admin redesign (`/staff/inbox`, `/admin/inbox`; reached from the bell's “ดูการแจ้งเตือนทั้งหมด”, not the sidebar). It replaces the English “Inbox” list.
+
+- Status tabs ทั้งหมด / ยังไม่อ่าน (`?tab=unread`) with counts; อัปเดตข้อมูล and อ่านทั้งหมด (enabled only after a complete read, like the bell).
+- Notifications load 100 per call up to 1,000, with the cap notice, and show 20 at a time with โหลดเพิ่ม (remaining count).
+- Groups วันนี้ / ก่อนหน้านี้ by Bangkok date. Each row uses the bell's Thai wording and link: title, คำขอ #n · relative time (full date on hover), an ยังไม่อ่าน/อ่านแล้ว badge, a lime tint when unread, and ทำเป็นอ่านแล้ว. On phones the button moves under the text.
+- Opening a row marks it read, then opens the role's request page with `?request=` (Admin `/admin/requests`, Staff `/staff/quotations`); the link target is now one shared helper for the bell and this page. A failed mark shows a Thai error and leaves the item unread.
+- APIs and rules are unchanged; there is still no “mark unread”.
+
+**Browser walk** (Chrome, real local API, writes intercepted): `pim.admin` 1280 Dark and `anan.staff` 390 Light. Tabs, counts, grouping, the mark-read failure message, read-all and opening a row all work; no horizontal page scroll and no console errors. Not exercised: marks that really reach the backend.
+
 ### Staff/Admin ส่งมอบและใบแจ้งหนี้ / ส่งมอบและรับชำระ — 2026-10-30
 
 Step 6 of the approved Staff/Admin redesign (`/staff/delivery-payment` and `/admin/delivery-payment`; no new route). Jobs load 100 per call, up to 1,000, with the cap notice. The list already carries full fulfillment documents (payments for Admin only), so it needs no extra reads. Request labels “คำขอ #N · description” come from `/requests`.
@@ -889,6 +901,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-30 | Staff/Admin redesign Step 8: การแจ้งเตือน page in the Thai list style with ทั้งหมด / ยังไม่อ่าน tabs, Bangkok-day groups, read badges, ทำเป็นอ่านแล้ว, read-all and โหลดเพิ่ม; bell and page share one request-link helper | 183 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / Staff 390 Light against the real local API, writes intercepted |
 | 2026-10-30 | Fix: งานผลิต usage form no longer contains the extra-material search form; pressing ค้นหา in เพิ่มวัตถุดิบนอกแผน could also trigger บันทึกการใช้วัตถุดิบ. The usage form saves only from its button, and the shared `SearchForm` stops its submit event from reaching an outer form | 175 native tests, type check, lint, source audit, build; not re-walked in the browser (backend down) |
 | 2026-10-30 | Staff/Admin redesign Step 7: จัดการพนักงาน with searchable list, side-panel create/edit in sections ข้อมูล / ติดต่อ / รหัสผ่านเริ่มต้น, username-change and account-status confirmations, separate password side panel; Thai field rules | 183 native tests (3 new), type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / 390 Light against the real local API, writes intercepted |
 | 2026-10-30 | Staff/Admin redesign Step 6: ส่งมอบและใบแจ้งหนี้ / ส่งมอบและรับชำระ with seven role-filtered tabs from the action rules, search and cards with request labels, large balance panel, per-role action cards (credit days, invoice, shipment), Admin payment cards with proof download, review and a cash form, delivery/rework/event timelines; proof upload shared in `staff-ui`; Thai delivery validation; English `RequestLabel` removed | 180 native tests (tab and amount tests new), type check, lint, source audit, DESIGN sync, build; Chrome walk against the real local API (writes intercepted) Admin 1280 Dark, Staff 390/360 Light, plus a stubbed Staff 768 walk for invoice and shipment |
@@ -3305,6 +3318,31 @@ src/features/workspace/workspace.module.css
 @media (max-width: 40rem) {
   .workers li { grid-template-columns: minmax(0, 1fr) auto; }
   .workers li > :last-child { grid-column: 1 / -1; }
+}
+```
+
+### A18. Staff/Admin notifications — src/features/inbox/inbox.module.css
+
+```css
+/* การแจ้งเตือน (Staff/Admin) page-specific rules; tabs, buttons and badges come from staff-ui. */
+
+.group { display: grid; gap: 8px; }
+.group > h2 { margin: 0; color: var(--muted); font-size: 0.875rem; font-weight: 650; }
+.notices { display: grid; margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.notices li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.notices li:last-child { border-bottom: 0; }
+.notices li[data-unread] { background: color-mix(in srgb, var(--lime) 7%, var(--surface)); }
+.notices li:first-child { border-radius: 14px 14px 0 0; }
+.notices li:last-child { border-radius: 0 0 14px 14px; }
+.notices li:only-child { border-radius: 14px; }
+.notices a { display: grid; gap: 2px; min-width: 0; color: inherit; text-decoration: none; overflow-wrap: anywhere; }
+.notices a:hover strong, .notices a:focus-visible strong { text-decoration: underline; }
+.notices li:not([data-unread]) strong { font-weight: 500; }
+.notices small { color: var(--muted); font-size: 0.875rem; }
+
+@media (max-width: 40rem) {
+  .notices li { grid-template-columns: minmax(0, 1fr) auto; }
+  .notices li > :nth-child(3) { grid-column: 1 / -1; justify-self: start; }
 }
 ```
 
