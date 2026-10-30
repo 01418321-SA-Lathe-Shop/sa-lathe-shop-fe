@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { availableActions, inspectPayload, paymentPayload, reviewPayload, shipPayload } from "../../../src/features/delivery/delivery-domain.ts";
+import { availableActions, defaultDeliveryTab, deliveryCounts, deliveryTab, inDeliveryTab, inspectPayload, paymentPayload, reviewPayload, shipPayload } from "../../../src/features/delivery/delivery-domain.ts";
 
 const command = { idempotency_key: "10000000-0000-4000-8000-000000000009", expected_version: 4 };
 const base = { job_id: "j", request_id: "r", job_status: "completed", request_status: "ongoing", version: 4, cycle: 1, opening_balance: "8200.00", deposit: "0.00", deliveries: [], payments: [], events: [], rework_history: [] };
@@ -34,9 +34,28 @@ test("payments are positive, within balance, not future, with bank proof", () =>
   const now = Date.parse("2026-10-24T12:00:00Z");
   const ok = paymentPayload(command, { amount: "6200", paidAt: "2026-10-24T09:00", evidenceId: "e", balance: "6200.00", requireEvidence: true }, now);
   assert.deepEqual(ok, { ...command, amount: "6200.00", paid_at: "2026-10-24T02:00:00.000Z", evidence_id: "e" });
-  assert.throws(() => paymentPayload(command, { amount: "6200.01", paidAt: "2026-10-24T09:00", evidenceId: "e", balance: "6200.00", requireEvidence: true }, now), /overpayment/);
+  assert.throws(() => paymentPayload(command, { amount: "6200.01", paidAt: "2026-10-24T09:00", evidenceId: "e", balance: "6200.00", requireEvidence: true }, now), /ชำระเกินไม่ได้/);
   assert.throws(() => paymentPayload(command, { amount: "0", paidAt: "2026-10-24T09:00", evidenceId: "e", balance: "6200.00", requireEvidence: true }, now));
-  assert.throws(() => paymentPayload(command, { amount: "10", paidAt: "2026-10-24T09:00", balance: "6200.00", requireEvidence: true }, now), /proof/);
+  assert.throws(() => paymentPayload(command, { amount: "10", paidAt: "2026-10-24T09:00", balance: "6200.00", requireEvidence: true }, now), /หลักฐาน/);
   assert.equal(paymentPayload(command, { amount: "10", paidAt: "2026-10-24T09:00", balance: "6200.00", requireEvidence: false }, now).evidence_id, undefined);
-  assert.throws(() => paymentPayload(command, { amount: "10", paidAt: "2026-10-25T09:00", balance: "6200.00", requireEvidence: false }, now), /future/);
+  assert.throws(() => paymentPayload(command, { amount: "10", paidAt: "2026-10-25T09:00", balance: "6200.00", requireEvidence: false }, now), /อนาคต/);
+});
+
+test("delivery tabs follow the action rules; Staff see credit-pending jobs under invoice", () => {
+  const ship = (status) => ({ id: "d", cycle: 1, method: "self", receiver_name: "N", status, shipped_at: "", reason: "" });
+  const jobs = [
+    base,
+    { ...base, credit_days: 14 },
+    { ...base, credit_days: 14, invoice },
+    { ...base, credit_days: 14, invoice: { ...invoice, balance: "0.00", status: "paid" }, deliveries: [ship("shipping")], payments: [{ id: "p", status: "pending" }] },
+    { ...base, request_status: "completed", credit_days: 14, invoice: { ...invoice, balance: "0.00", status: "paid" }, deliveries: [ship("delivered")] },
+    { ...base, job_status: "in_progress" },
+  ];
+  assert.deepEqual(deliveryCounts(jobs, true), { terms: 1, invoice: 1, ship: 1, inspect: 1, review: 1, unpaid: 1, closed: 1 });
+  assert.deepEqual(deliveryCounts(jobs, false), { terms: 0, invoice: 2, ship: 1, inspect: 1, review: 0, unpaid: 1, closed: 1 });
+  assert.equal(inDeliveryTab("ship", { ...jobs[2], deliveries: [ship("returned")] }, false), true);
+  assert.equal(deliveryTab("review", false), null); assert.equal(deliveryTab("review", true), "review");
+  assert.equal(defaultDeliveryTab(deliveryCounts(jobs, true), true), "review");
+  assert.equal(defaultDeliveryTab({ terms: 0, invoice: 0, ship: 0, inspect: 0, review: 0, unpaid: 0, closed: 2 }, false), "closed");
+  assert.equal(defaultDeliveryTab({ terms: 0, invoice: 0, ship: 0, inspect: 0, review: 0, unpaid: 0, closed: 0 }, false), "invoice");
 });

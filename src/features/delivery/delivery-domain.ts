@@ -31,32 +31,68 @@ export function availableActions(state: FulfillmentJob, role: Role): DeliveryAct
 
 export function shipPayload(command: Command, method: string, receiver: string) {
   const name = receiver.trim();
-  if (method !== "self" && method !== "third_party") throw new Error("Choose self delivery or a third-party carrier.");
-  if (!name || [...name].length > 200 || /[\0\r\n]/.test(name)) throw new Error("Receiver name is required, up to 200 characters.");
+  if (method !== "self" && method !== "third_party") throw new Error("เลือกวิธีส่ง: ร้านส่งเอง/ลูกค้ารับเอง หรือผู้ให้บริการขนส่ง");
+  if (!name || [...name].length > 200 || /[\0\r\n]/.test(name)) throw new Error("กรอกชื่อผู้รับ ไม่เกิน 200 ตัวอักษร");
   return { ...command, method, receiver_name: name };
 }
 
 export function inspectPayload(command: Command, outcome: "accept" | "return", reason: string) {
   const trimmed = reason.trim();
   if (outcome === "accept") return { ...command, outcome };
-  if (!trimmed || [...trimmed].length > 2000 || trimmed.includes("\0")) throw new Error("Describe what needs rework (1–2,000 characters).");
+  if (!trimmed || [...trimmed].length > 2000 || trimmed.includes("\0")) throw new Error("กรอกสิ่งที่ต้องแก้ไข 1–2,000 ตัวอักษร");
   return { ...command, outcome, reason: trimmed };
 }
 
 // Positive amount no larger than the current balance; time not in the future.
 export function paymentPayload(command: Command, input: { amount: string; paidAt: string; evidenceId?: string; balance: string; requireEvidence: boolean }, now: number) {
   const amount = moneyInput(input.amount.trim());
-  if (cents(amount) === BigInt(0)) throw new Error("Amount must be greater than zero.");
-  if (cents(amount) > cents(input.balance)) throw new Error("Amount cannot exceed the remaining invoice balance; overpayment is not supported.");
+  if (cents(amount) === BigInt(0)) throw new Error("จำนวนเงินต้องมากกว่า 0");
+  if (cents(amount) > cents(input.balance)) throw new Error("จำนวนเงินต้องไม่เกินยอดคงเหลือ ชำระเกินไม่ได้");
   const paid_at = bangkokInstant(input.paidAt);
-  if (Date.parse(paid_at) > now) throw new Error("Payment time cannot be in the future.");
-  if (input.requireEvidence && !input.evidenceId) throw new Error("Upload the transfer proof first.");
+  if (Date.parse(paid_at) > now) throw new Error("เวลาที่ชำระต้องไม่เป็นเวลาในอนาคต");
+  if (input.requireEvidence && !input.evidenceId) throw new Error("อัปโหลดหลักฐานการโอนก่อน");
   return { ...command, amount, paid_at, ...(input.evidenceId ? { evidence_id: input.evidenceId } : {}) };
 }
 
 export function reviewPayload(command: Command, paymentId: string, outcome: "approved" | "rejected", reason: string) {
   const trimmed = reason.trim();
   if (outcome === "approved") return { ...command, payment_id: paymentId, outcome };
-  if (!trimmed || [...trimmed].length > 2000 || trimmed.includes("\0")) throw new Error("A rejection reason of 1–2,000 characters is required.");
+  if (!trimmed || [...trimmed].length > 2000 || trimmed.includes("\0")) throw new Error("กรอกเหตุผลที่ไม่ผ่าน 1–2,000 ตัวอักษร");
   return { ...command, payment_id: paymentId, outcome, reason: trimmed };
 }
+
+// Tabs of ส่งมอบและใบแจ้งหนี้ / ส่งมอบและรับชำระ, worked out from the same rules
+// as availableActions. A job may sit in several tabs (e.g. awaiting inspection
+// and still owing). Staff see jobs awaiting Admin credit days under "invoice".
+export const DELIVERY_TABS = ["terms", "invoice", "ship", "inspect", "review", "unpaid", "closed"] as const;
+export type DeliveryTab = typeof DELIVERY_TABS[number];
+const ADMIN_ONLY: readonly DeliveryTab[] = ["terms", "review"];
+
+export const deliveryTabs = (admin: boolean) => DELIVERY_TABS.filter((tab) => admin || !ADMIN_ONLY.includes(tab));
+export function deliveryTab(value: string | null, admin: boolean): DeliveryTab | null {
+  return (deliveryTabs(admin) as readonly string[]).includes(value ?? "") ? value as DeliveryTab : null;
+}
+const awaitingInvoice = (job: FulfillmentJob) => job.request_status === "ongoing" && job.job_status === "completed" && !job.invoice;
+export const hasPendingPayment = (job: FulfillmentJob) => Boolean(job.payments?.some((payment) => payment.status === "pending"));
+
+export function inDeliveryTab(tab: DeliveryTab, job: FulfillmentJob, admin: boolean): boolean {
+  const open = job.request_status === "ongoing"; const last = job.deliveries?.at(-1);
+  switch (tab) {
+    case "terms": return admin && awaitingInvoice(job) && job.credit_days === undefined;
+    case "invoice": return awaitingInvoice(job) && (!admin || job.credit_days !== undefined);
+    case "ship": return open && job.job_status === "completed" && Boolean(job.invoice) && (!last || last.status === "returned");
+    case "inspect": return open && last?.status === "shipping";
+    case "review": return admin && hasPendingPayment(job);
+    case "unpaid": return open && Boolean(job.invoice) && cents(job.invoice!.balance) > BigInt(0);
+    case "closed": return job.request_status === "completed";
+  }
+}
+export function deliveryCounts(jobs: FulfillmentJob[], admin: boolean): Record<DeliveryTab, number> {
+  return Object.fromEntries(DELIVERY_TABS.map((tab) => [tab, jobs.filter((job) => inDeliveryTab(tab, job, admin)).length])) as Record<DeliveryTab, number>;
+}
+// First tab where this role has something to do, else the first non-empty one.
+export function defaultDeliveryTab(counts: Record<DeliveryTab, number>, admin: boolean): DeliveryTab {
+  const tabs = deliveryTabs(admin); const action: DeliveryTab[] = admin ? ["review", "terms", "invoice", "ship"] : ["invoice", "ship"];
+  return action.find((tab) => counts[tab] > 0) ?? tabs.find((tab) => counts[tab] > 0) ?? tabs[0];
+}
+export const matchDelivery = (job: FulfillmentJob, label: string, q: string) => !q.trim() || `${job.invoice?.number ?? ""} ${label}`.toLowerCase().includes(q.trim().toLowerCase());
