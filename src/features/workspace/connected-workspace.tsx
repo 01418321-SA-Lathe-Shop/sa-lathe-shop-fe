@@ -9,6 +9,7 @@ import { useResource } from "../../hooks/backend-hooks";
 import { LiveRequests } from "../requests/requests";
 import { StaffRequests } from "../requests/staff-requests";
 import { LiveWorkers } from "../workers/workers";
+import { SettingsPage } from "../settings/settings-page";
 import { LiveInventory } from "../inventory/inventory";
 import { Inbox } from "../inbox/inbox";
 import { Memberships } from "../memberships/memberships";
@@ -38,6 +39,7 @@ export default function ConnectedWorkspace({ role, workspaceId, session }: { rol
     case "workers": return <LiveWorkers api={api} />;
     case "inbox": return <Inbox api={api} admin={role === "Admin"} />;
     case "memberships": return <Memberships api={api} />;
+    case "settings": return <SettingsPage />;
   }
 }
 

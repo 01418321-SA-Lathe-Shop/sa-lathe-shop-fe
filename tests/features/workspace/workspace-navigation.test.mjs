@@ -31,3 +31,12 @@ test("shell renders Thai group labels and no English workspace eyebrow", () => {
   assert.match(shell, /nav-group-label/);
   assert.doesNotMatch(shell, /WORKSPACE<\/span>|workspaceId\.toUpperCase\(\)/);
 });
+
+test("settings expose the system section to Admin only", async () => {
+  const { settingsTabs, roleAccessRows } = await import("../../../src/features/settings/settings-domain.ts");
+  assert.deepEqual(settingsTabs("customer").map((tab) => tab.id), ["account", "preferences", "security"]);
+  assert.deepEqual(settingsTabs("worker").map((tab) => tab.id), ["account", "preferences", "security"]);
+  assert(settingsTabs("admin").some((tab) => tab.id === "system"));
+  assert.deepEqual(roleAccessRows().find((row) => row.label === "จัดการพนักงาน").roles, [false, false, true]);
+  assert(!canAccessWorkspace("Customer", "workers") && canAccessWorkspace("Worker", "settings") && canAccessWorkspace("Admin", "settings"));
+});

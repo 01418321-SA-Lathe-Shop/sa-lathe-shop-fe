@@ -9,6 +9,16 @@ const cents = (value: string) => /^\d+\.\d{2}$/.test(value) ? BigInt(value.repla
 const money = (value: bigint) => `${value / BigInt(100)}.${String(value % BigInt(100)).padStart(2, "0")}`;
 const bangkokDay = (instant: number) => Math.floor((instant + 7 * 3600000) / 86400000);
 
+function sumCents(values: string[]): string | undefined {
+  let total = BigInt(0);
+  for (const value of values) {
+    const amount = cents(value);
+    if (amount === null) return undefined;
+    total += amount;
+  }
+  return money(total);
+}
+
 /** Whole percent of the invoice amount already approved; pending proof is excluded. */
 export function paidPercent(invoice: Pick<Invoice, "amount" | "paid" | "status">): number | null {
   const amount = cents(invoice.amount); const paid = cents(invoice.paid);
@@ -59,7 +69,19 @@ export function invoiceSummary(jobs: FulfillmentJob[], now: number | null) {
     open: open.length,
     overdue: now === null ? null : open.filter((job) => dueCountdown(job.invoice!, now)?.tone === "danger").length,
     pending: invoicedJobs(jobs).filter((job) => job.payments?.some((payment) => payment.status === "pending")).length,
+    paid: sumCents(invoicedJobs(jobs).map((job) => job.invoice!.paid)),
   };
+}
+
+export type LedgerRow = { key: string; job: FulfillmentJob; kind: "deposit" | "invoice"; reference?: string; amount: string; paidAt?: string; method?: Payment["method"]; status: Payment["status"]; hasEvidence: boolean };
+
+/** One row per approved deposit or invoice payment, newest first. The API gives a job's deposit no date, so those rows sort last. */
+export function paymentLedger(jobs: FulfillmentJob[]): LedgerRow[] {
+  const rows = jobs.flatMap((job): LedgerRow[] => [
+    ...(cents(job.deposit) ? [{ key: `deposit:${job.job_id}`, job, kind: "deposit" as const, amount: job.deposit, status: "approved" as const, hasEvidence: true }] : []),
+    ...(job.payments ?? []).map((payment) => ({ key: payment.id, job, kind: "invoice" as const, reference: payment.id.slice(0, 8).toUpperCase(), amount: payment.amount, paidAt: payment.paid_at, method: payment.method, status: payment.status, hasEvidence: Boolean(payment.evidence_id) })),
+  ]);
+  return rows.sort((a, b) => (Date.parse(b.paidAt ?? "") || 0) - (Date.parse(a.paidAt ?? "") || 0));
 }
 
 /** Inline guidance while typing; the submit path still runs paymentPayload unchanged. */

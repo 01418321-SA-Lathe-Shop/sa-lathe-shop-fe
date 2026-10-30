@@ -327,6 +327,10 @@ Noto Sans Thai is self-hosted through Next/font for Customer only, with a sans-s
 
 ## Layout
 
+การแปลงหน่วย (`?view=conversions`, Admin) is per material: pick a material, add a factor from existing units, or deactivate one after confirming. There is no all-materials list because the API reads one material at a time. Stock adjustment, the job material plan and production usage show a หน่วยที่กรอก select with an exact `= n base unit` preview only when the material has active conversions; otherwise they look unchanged. Stock cost is always labelled per base unit. Material detail lists supported units with available stock in each, marked ประมาณ when rounded down. Known limitation: reopening a saved plan shows base quantities, and saving it again drops the typed unit unless it is chosen again.
+
+List rows that have a detail page open it from anywhere on the row: the title link stretches over the row, and other controls sit above it. Material detail is a full page at `?material=`, not a side panel.
+
 Customer ใบเสนอราคา and มัดจำและ PO share one pattern. Lists: page head, optional banner, then one panel (status tabs, search, collapsible filters, table; one card per row at ≤48rem); quotations awaiting an answer lead as cards above the panel. Details: back link, title with status badge, then section cards at 12px radius. Quotation detail keeps its decision in a sticky bottom bar with a modal confirm; ขอใบเสนอราคาใหม่ records the backend's `reject` decision with a reason. The backend exposes no customer-visible cost breakdown, validity date, lead time, PO number or under-review status, so these pages show none of them. The printable paper renders only in the print portal.
 
 On desktop (>1024px), Customer navigation docks on the left as a 17rem persistent sidebar drawer (`width: 17rem; height: 100dvh; background: #060707`), sharing the obsidian background with the workspace stage offset (`margin-left: 17rem; width: calc(100% - 17rem); max-width: calc(100% - 17rem)`). Content spans the full available width with fluid side padding (`clamp(1.25rem, 2.5vw, 2.5rem)`), eliminating artificial max-width constraints on wide viewports (1280px, 1440px, 1920px, and 2560px ultrawide). Dashboards, request lists, quotations, invoices, and job tracking expand to fill the full stage. Forms and single-column steps maintain an ergonomic readable maximum width (`clamp(540px, 60vw, 760px)`) or use a balanced 2-column layout with a sticky summary panel. The desktop stage features a sticky 64px topbar with fluid padding, mode indicators, mock controls, and notification access.
@@ -464,6 +468,18 @@ follows the shared Light/Dark preference without changing document content.
 - Drawer background (`.cust-sidebar` and `.cust-mobile-menu`) updated to `var(--cust-bg)` (`#060707`), perfectly matching the main workspace background canvas and landing page obsidian color.
 - Topbar (`.cust-topbar`) backdrop tint updated to `rgba(6, 7, 7, 0.85)` and mobile navbar (`.cust-navbar`) background unified with `var(--cust-bg)`.
 - Reaffirmed main color tokens strictly matching the cinematic landing page: `#060707` background and drawer, `#111313` card surfaces, `#191c1c` elevated slabs/hover states, `#343838` milled boundaries, and `#ff923f` burnt-orange action highlights.
+## Customer payments, account and role-aware settings (2026-10-30)
+
+Implemented from the Claude Design boards (Customer payments, Customer account, Settings) using each shell's existing tokens, not the boards' sidebar, fonts or colors.
+
+**ใบแจ้งหนี้และการชำระเงิน (`/customer/payments`).** Four summary cells: ยอดค้างชำระรวม, ชำระอนุมัติแล้ว (invoices only, deposits excluded), เกินกำหนดชำระ, หลักฐานรอตรวจ. Status pills with counts (`?status=`) plus ประวัติการชำระ (`?view=history`). One 14px-radius panel holds a local search box and a table; the whole row opens its detail through a stretched first-cell link. Invoices show number, request, job reference, total, paid with a 6px bar, balance, due date with countdown and status. History shows one row per approved deposit and per invoice payment: reference (first 8 characters of the payment id), job, amount, paid date, method, evidence and status. Invoice payments open the existing invoice detail (`?job=`); deposits open `/customer/deposit-po?request=`, because the job read gives a deposit no date, method or file. At 760px and below each row becomes a labelled two-column card. The detail adds the job reference, the accepted quotation link and each payment's reference. Not taken from the board: Record payment, reminders, export, aging, per-customer view and PromptPay/cheque methods. Partial and final payment types are not shown: the API has no payment type, only invoice status.
+
+**บัญชีและบริษัท (`/customer/memberships`).** Panels for บัญชีผู้ใช้ (name, username, status, created date), ลูกค้าและบริษัท (name, type, your rights, customer ID, private invitation for owners; join by invitation) and ช่องทางติดต่อและที่อยู่. The API stores no customer email, phone or address, so those read ยังไม่มีในระบบ, with no edit controls.
+
+**ตั้งค่า (`/customer?view=settings`, `/staff/settings`, `/admin/settings`).** One `SettingsPage` in `src/features/settings` for all roles, with underline tabs บัญชีของฉัน, การตั้งค่าส่วนตัว, ความปลอดภัย and, for Admin only, ระบบ. Everything is read-only except display size (browser only) and sign-out, which has a confirmation dialog. ระบบ links to จัดการพนักงาน and shows which pages each fixed role can open, from the route guard's map. The Staff/Admin sidebar item replaces the old ตั้งค่า dialog there; the landing page keeps the dialog. Theme stays on the navbar toggle. `--s-*` tokens resolve to the Customer or Staff tokens, so one stylesheet serves both shells.
+
+**Known limitations.** The backend has no command for editing a profile, changing your own password, saved addresses, notification or language preferences, session lists or shop configuration, so those are stated as unavailable, not simulated.
+
 ## Visual direction
 
 Private-file viewing correction (2026-10-27): files without a download filename
@@ -698,10 +714,10 @@ The entire playback action bar is removed at the owner's request. There are no v
 | / | Landing |
 | /login, /register | ฟอร์มดีไซน์หลักที่เชื่อม sign-in / customer registration จริง พร้อมบัญชีทดสอบ mock backend ใต้ฟอร์ม |
 | /staff | Staff overview |
-| /staff/quotations, /staff/materials, /staff/receiving, /staff/production, /staff/delivery-payment, /staff/inbox | UC1/UC2/UC4 review, UC5, UC7–UC9, การแจ้งเตือน |
+| /staff/quotations, /staff/materials, /staff/receiving, /staff/production, /staff/delivery-payment, /staff/inbox, /staff/settings | UC1/UC2/UC4 review, UC5, UC7–UC9, การแจ้งเตือน, ตั้งค่า |
 | /customer | Customer overview |
-| /customer/requests, /customer/quotations, /customer/deposit-po, /customer/delivery-payment, /customer/inbox, /customer/memberships | UC1 / UC3 / UC4 / UC9, การแจ้งเตือน, บริษัทและคำเชิญ |
-| /admin, /admin/requests, /admin/workers, /admin/materials, /admin/orders, /admin/receiving, /admin/production, /admin/delivery-payment, /admin/inbox | Admin overview, UC1–UC4 read/review, จัดการ Staff, UC5 catalog/stock, UC6, UC7 finance, UC8 labor cost, UC9 terms/payments |
+| /customer/requests, /customer/quotations, /customer/deposit-po, /customer/delivery-payment, /customer/payments, /customer/inbox, /customer/memberships | UC1 / UC3 / UC4 / UC9, ใบแจ้งหนี้และการชำระเงิน, การแจ้งเตือน, บัญชีและบริษัท (ตั้งค่าอยู่ที่ /customer?view=settings) |
+| /admin, /admin/requests, /admin/workers, /admin/materials, /admin/orders, /admin/receiving, /admin/production, /admin/delivery-payment, /admin/inbox, /admin/settings | Admin overview, UC1–UC4 read/review, จัดการ Staff, UC5 catalog/stock, UC6, UC7 finance, UC8 labor cost, UC9 terms/payments |
 
 Legacy redirects: /staff/orders → /staff/receiving (UC6 เป็นของ Admin เท่านั้นตาม backend UC6.md); /staff/requests → /staff/quotations; /staff/delivery, /staff/payments, /staff/debtors → /staff/delivery-payment; /customer/documents → /customer/deposit-po. Customer jobs and payments now render their own task workspaces at their existing URLs.
 
@@ -908,6 +924,10 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-30 | สต๊อกวัตถุดิบ table: the last column now aligns right, so rows reach the panel edge | DESIGN sync, native tests; headless Chromium Staff/Admin 1440 and Staff 390 |
+| 2026-10-30 | การแปลงหน่วย now uses the real API and is per material (the sample notice and summary cells are removed); stock, plan and usage forms add หน่วยที่กรอก; material detail lists supported units. |
+| 2026-10-30 | สต๊อกวัตถุดิบ adds an Admin การแปลงหน่วย view (`?view=conversions`) as a design preview with owner-approved in-page sample data: dashed notice, summary, add form, list and ⋯ deactivate. Nothing is saved and stock is unaffected; the API is planned in backend PLAN.md. Material detail adds หน่วยที่รองรับ, base unit only | Type check, lint, native tests, source audit, DESIGN sync; headless Chromium at 1280 and 390: add, validation, deactivate, menu, no overflow, no API write |
+| 2026-10-30 | Whole-row navigation on สต๊อกวัตถุดิบ, ใบเสนอราคา and เอกสาร PO lists and รอคุณตอบ cards (stretched title link, hover and focus states; menus, downloads and nested links stay separate). Material detail is now a page at `?material=` instead of a side panel: stock cells, ใช้ในงานแล้ว from `job_issue` movements, 6-month usage bars, stock form, history. Admin ⋯ row menu shared with workers. No unit-conversion page: not in the backend contract | Type check, lint, native tests, source audit, DESIGN sync; headless Chromium against the real local API: row, menu, download and keyboard navigation, chart values against the movements API, 1280 and 390 |
 | 2026-10-30 | Customer request-card footer keeps ดูรายละเอียด and its arrow on one line at narrow card widths | Focused CSS/DESIGN sync check |
 | 2026-10-30 | Customer ประวัติการสั่งงาน now uses the compact Jobs list composition with literal request-number/description search, clear-search empty state and local pagination | Focused TypeScript and DESIGN sync check |
 | 2026-10-30 | Customer งานผลิต adds URL-backed การ์ด/รายการ views with compact essential-only summaries and no machine/date icons; the redundant local คำขอผลิต / งานผลิต / ประวัติ tabs are removed from all three pages | Focused Customer job-card tests and TypeScript check |
@@ -916,6 +936,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 | 2026-10-30 | Admin คำขอและใบเสนอราคา adds URL-backed รายการ/การ์ด views; list keeps the side detail while responsive cards open request detail in an accessible native modal. Staff stays on list/detail regardless of the query | 184 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Admin desktop/narrow with real local API, Escape/URL close checked, no horizontal overflow or console errors |
 | 2026-10-30 | Customer ใบเสนอราคา and มัดจำและ PO list/detail pages from the Claude Design boards: รอคุณตอบ cards plus one panel with status tabs, search, collapsible filters and table with a next-step column; PO banner and อัปโหลด PO entry; quotation detail with status banner, summary cells, whole-job price, request, terms and attachment cards, revision timeline, sticky decision bar and modal confirm; PO detail with review steps, shop feedback, preview, details and history. On-screen paper removed (print only). `sent` badge is now the info tone. No VAT, no itemised costs, no invented PO number or under-review status | Type check, lint, native tests, source audit, DESIGN sync; headless Chromium against the real local API with new test records: re-quote, revised quote, accept, PO upload, Admin rejection reason, corrected re-upload; 1280 Dark/Light and 390 Light/Dark, blocked-API error, delayed loading, empty state, no horizontal overflow |
 | 2026-10-30 | Staff/Admin งานผลิต, สั่งซื้อวัตถุดิบ (orders), รับเข้าวัตถุดิบ (receiving), and ส่งมอบ (delivery-payment) card & list views: Card view is the default across production, orders, receiving, and delivery-payment with responsive card grid and centered modal dialog popup on selection; list view starts unselected full width and collapses into the same-size 24rem list column beside the detail panel with a back link to deselect; view switcher provides seamless toggle | 192 native tests, type check, lint, source audit, DESIGN sync |
+| 2026-10-30 | Customer payments table with history view, Customer account panels, and one role-aware Settings page (new `/staff/settings`, `/admin/settings`; Admin-only ระบบ section). Unsupported profile, address, password and preference actions are stated as unavailable | Type check, lint, native tests, source audit, DESIGN sync; browser against the real local API as Customer, Staff and Admin: row navigation, sign-out confirm and cancel, Staff redirected from Admin settings, 1440 and 390 widths with no horizontal overflow |
 | 2026-10-30 | สต๊อกวัตถุดิบ layout from the Claude Design board: summary cells (ทั้งหมด / หมด / มีของแต่ถูกจองหมด / หน่วยวัดที่ใช้), out-of-stock banner linking to หมด, one panel with tabs + search, unit pill and per-quantity units, reserved-share bar, footer count; no Create PO, Reserved-for-jobs total or unit conversion | Type check, lint, 185 native tests (summary helpers new), DESIGN sync; headless Chromium against the real local API: Staff 1280 Dark / 390 Light, Admin 1280 Light with side panel, blocked-API error state |
 | 2026-10-30 | Staff/Admin redesign Step 8: การแจ้งเตือน page in the Thai list style with ทั้งหมด / ยังไม่อ่าน tabs, Bangkok-day groups, read badges, ทำเป็นอ่านแล้ว, read-all and โหลดเพิ่ม; bell and page share one request-link helper | 183 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / Staff 390 Light against the real local API, writes intercepted |
 | 2026-10-30 | Admin จัดการพนักงาน fixes: ⋯ row menu no longer clipped (overflow wrapper removed, rows stack at ≤48rem); add/edit/password open in a centred modal that closes on an outside click (`Drawer centered`, workers only); panel no longer overflows on phones; compact summary row at ≤40rem | Type check, lint, native tests, DESIGN sync; built-in browser on the local dev server as the local-test Admin at 800px and 375px: last-row menu fully visible, modal centred with its bottom reachable, inside click keeps it open, outside click closes it, no horizontal page overflow; no writes made |
@@ -2359,22 +2380,10 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-inspection-decision p) { margin: 12px 0; }
 .root :global(.cust-inspection-decision .cust-primary), .root :global(.cust-inspection-decision .cust-danger) { display: flex; width: 100%; margin-top: 24px; }
 .root :global(.cust-inspection-decision fieldset > .cust-link) { margin-top: 12px; }
-.root :global(.cust-account-layout) { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1.8fr); gap: clamp(1.5rem, 3.5vw, 4rem); align-items: start; }
-.root :global(.cust-account-profile) { padding: 24px 0; }
-.root :global(.cust-profile-avatar) { width: 72px; height: 72px; display: grid; place-items: center; font-size: 1.75rem; background: var(--cust-tint); color: var(--cust-accent); border-radius: 50%; margin-bottom: 16px; }
-.root :global(.cust-membership) { padding: 24px 0; border-bottom: 1px solid var(--cust-line); }
-.root :global(.cust-membership p) { color: var(--cust-muted); margin-top: 8px; }
 .root :global(.cust-narrow) { width: 100%; max-width: min(100%, 720px); margin: 0; }
 .root :global(.cust-narrow > p), .root :global(.cust-narrow > button) { margin-top: 20px; }
 .root :global(.cust-secret) { padding: 24px; background: var(--cust-surface-2); border: 1px dashed var(--cust-line); border-radius: 10px; margin: 24px 0; }
 .root :global(.cust-secret output) { display: block; overflow-wrap: anywhere; margin-top: 16px; user-select: all; }
-.root :global(.cust-settings-layout) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.5rem, 3vw, 3rem); align-items: start; }
-.root :global(.cust-preference) { padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--cust-line); }
-.root :global(.cust-preference legend) { font-size: 1.25rem; margin-bottom: 16px; font-weight: 650; }
-.root :global(.cust-preference label) { display: flex; align-items: center; gap: 12px; min-height: 48px; cursor: pointer; }
-.root :global(.cust-settings-preview) { padding: clamp(1.25rem, 2vw, 2rem); background: var(--cust-surface); border: 1px solid var(--cust-line); border-radius: 12px; }
-.root :global(.cust-settings-preview h3) { margin-top: 24px; }
-.root :global(.cust-settings-preview p), .root :global(.cust-settings-preview .cust-badge) { margin-top: 16px; }
 
 .root :global(.cust-overview-grid > *),
 .root :global(.cust-detail-grid > *),
@@ -2383,8 +2392,6 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-job-row > *),
 .root :global(.cust-job-detail > *),
 .root :global(.cust-inspection-layout > *),
-.root :global(.cust-account-layout > *),
-.root :global(.cust-settings-layout > *),
 .root :global(.cust-filters > *),
 .root :global(.cust-request-row > *),
 .root :global(.cust-document-row > *) {
@@ -2408,9 +2415,7 @@ src/features/workspace/workspace.module.css
   .root :global(.cust-quotation-layout),
   .root :global(.cust-wizard-grid),
   .root :global(.cust-job-detail),
-  .root :global(.cust-inspection-layout),
-  .root :global(.cust-account-layout),
-  .root :global(.cust-settings-layout) {
+  .root :global(.cust-inspection-layout) {
     grid-template-columns: minmax(0, 1fr);
     gap: 28px;
   }
@@ -2457,7 +2462,7 @@ src/features/workspace/workspace.module.css
   .root :global(.cust-document-action) { text-align: left; }
   .root :global(.cust-decision-bar) { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 100%; box-sizing: border-box; z-index: 20; background: var(--cust-surface); padding: 12px 16px max(12px, env(safe-area-inset-bottom)); border-top: 1px solid var(--cust-line); gap: 6px; }
   .root :global(.cust-main:has(.cust-decision-bar)) { padding-bottom: 180px; }
-  .root :global(.cust-inspection-decision), .root :global(.cust-account-profile), .root :global(.cust-settings-preview) { padding: 16px 0; }
+  .root :global(.cust-inspection-decision) { padding: 16px 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2664,8 +2669,7 @@ src/features/workspace/workspace.module.css
 .scope .quiet { color: var(--cust-muted); font-size: .875rem; }
 .scope .warn { color: var(--cust-accent); font-size: .875rem; font-weight: 600; }
 .scope .openCell { width: 44px; padding-left: 0 !important; }
-.scope .openCell a { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; color: var(--cust-muted); }
-.scope .openCell a:hover { background: var(--cust-surface-2); color: var(--cust-ink); }
+.scope .openCell { color: var(--cust-muted); vertical-align: middle; }
 .scope .fileCell { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .scope .fileTag { flex: none; display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 4px; border: 1px solid var(--cust-line); border-radius: 6px; color: var(--cust-accent); font-size: .6875rem; font-weight: 700; }
 .scope .evidenceLine { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0; }
@@ -2783,6 +2787,15 @@ src/features/workspace/workspace.module.css
 @media (max-width: 48rem) { .scope .table tbody td[data-numeric] { text-align: left; } .scope .table time { white-space: normal; } }
 @media (max-width: 1200px) { .scope .depositLayout > aside { order: 0; } }
 @media (min-width: 48.01rem) { .scope .table .fileCell { min-width: 13rem; } .scope .table td > small { white-space: nowrap; } }
+
+/* Whole row/card opens the record: the title link stretches over it; other controls sit above. */
+.scope .table tbody tr, .scope .card { position: relative; }
+.scope .rowTitle::after, .scope .card :global(.cust-primary)::after { content: ""; position: absolute; inset: 0; }
+.scope .table tbody tr:has(.rowTitle):hover td { background: var(--cust-surface-2); }
+.scope .card:hover { border-color: var(--cust-accent); }
+.scope .table tbody tr:has(.rowTitle:focus-visible) { outline: 2px solid var(--cust-focus); outline-offset: -2px; }
+.scope .rowTitle:focus-visible { outline: none; }
+.scope .plainLink, .scope .fileMeta :global(.cust-link) { position: relative; z-index: 1; }
 ```
 
 ### A7. Customer overview dashboard — src/features/customer/customer-overview.module.css
@@ -3393,6 +3406,16 @@ src/features/workspace/workspace.module.css
   .submitBar[data-sticky] { position: sticky; bottom: 0; z-index: 2; box-shadow: 0 -8px 24px rgba(0, 0, 0, .18); }
 }
 @media (prefers-reduced-motion: reduce) { :global(.live-workspace) .card { transition: none; } }
+
+/* Row actions menu (native disclosure). */
+.menu { position: relative; display: inline-block; }
+.menu summary { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); cursor: pointer; list-style: none; }
+.menu summary::-webkit-details-marker { display: none; }
+.menu[open] summary { background: var(--surface-2); }
+.menu summary:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.menu > div { position: absolute; right: 0; top: calc(100% + 4px); z-index: 5; display: grid; min-width: 12rem; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
+:global(.live-workspace) .menu :is(button, a) { display: flex; align-items: center; justify-content: flex-start; min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text); text-decoration: none; font: inherit; font-size: 0.9375rem; text-align: left; white-space: nowrap; cursor: pointer; }
+:global(.live-workspace) .menu :is(button, a):hover, :global(.live-workspace) .menu :is(button, a):focus-visible { background: var(--surface-2); outline: none; }
 ```
 
 ### A12. Staff/Admin requests and quotations — src/features/requests/requests.module.css
@@ -3497,7 +3520,6 @@ src/features/workspace/workspace.module.css
 .stock tbody > tr > * { border-top: 1px solid var(--line); }
 .stock thead th { color: var(--muted); font-size: 0.8125rem; font-weight: 650; }
 .stock :is(thead th, tbody th):first-child { text-align: left; }
-.stock td:last-child, .stock thead th:last-child { text-align: left; }
 .stock tbody th { font-weight: 400; }
 .stock tbody th > * { display: block; width: fit-content; }
 .stock tbody th > * + * { margin-top: 4px; }
@@ -3510,7 +3532,27 @@ src/features/workspace/workspace.module.css
 /* Reserved share of on-hand; no min/max level exists, so the bar never implies a reorder point. */
 .bar { display: block; height: 6px; margin-top: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
 .bar > span { display: block; height: 100%; background: var(--warning); }
-.stock tbody tr[aria-current="true"] > * { background: color-mix(in srgb, var(--lime) 7%, var(--surface)); }
+/* Whole row opens the detail: the name link stretches over the row, so keyboard, middle-click and screen readers keep a real link. */
+.stock tbody tr { position: relative; }
+.stock tbody th a::after { content: ""; position: absolute; inset: 0; }
+.stock tbody tr:has(th a):hover { background: var(--surface-2); }
+.stock tbody tr:has(th a:focus-visible) { outline: 2px solid var(--lime); outline-offset: -2px; }
+:global(.live-workspace) .stock tbody th a:focus-visible { outline: none; }
+.menuCell { position: relative; z-index: 1; }
+.menuCell:has(details[open]) { z-index: 6; }
+
+/* Material detail page. */
+.formError { margin: 0; color: var(--danger); font-size: 0.875rem; }
+.unitLine { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; color: var(--muted); font-size: 0.9375rem; }
+:global(.live-workspace) .back { width: fit-content; color: var(--muted); font-size: 0.9375rem; text-decoration: none; }
+.detailHead { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.detailHead h2 { margin: 0; overflow-wrap: anywhere; }
+.detailCard { display: grid; gap: 12px; min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.detailCard h3 { margin: 0; font-size: 1rem; }
+.chart { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; color: var(--muted); font-size: 0.8125rem; text-align: center; font-variant-numeric: tabular-nums; }
+.chartPlot { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 180px; margin-bottom: 6px; border-bottom: 1px solid var(--line); }
+.chartPlot small { color: var(--text); font-size: 0.75rem; }
+.chartPlot i { display: block; flex: 0 1 auto; width: min(100%, 2.5rem); min-height: 3px; border-radius: 4px 4px 0 0; background: var(--lime); }
 
 .movementTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
 .modeGroup { display: grid; gap: 6px; }
@@ -3544,6 +3586,9 @@ src/features/workspace/workspace.module.css
   .stock td[data-label]::before { content: attr(data-label); display: block; color: var(--muted); font-size: 0.75rem; }
   .stock td:last-child::before { display: none; }
   .qty { white-space: normal; }
+  .stock tbody td.menuCell { position: absolute; top: 6px; right: 10px; z-index: 1; }
+  .stock tbody td.menuCell:has(details[open]) { z-index: 6; }
+  .stock tbody th:has(+ td ~ .menuCell) { padding-right: 52px; }
   .catalogList li { grid-template-columns: minmax(0, 1fr) auto; }
   .catalogList li > :last-child { grid-column: 1 / -1; justify-self: start; }
 }
@@ -3899,16 +3944,6 @@ src/features/workspace/workspace.module.css
 .code { font-variant-numeric: tabular-nums; }
 .footer { margin: 0; padding: 12px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.875rem; }
 
-/* Row actions menu (native disclosure). */
-.menu { position: relative; display: inline-block; }
-.menu summary { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); cursor: pointer; list-style: none; }
-.menu summary::-webkit-details-marker { display: none; }
-.menu[open] summary { background: var(--surface-2); }
-.menu summary:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
-.menu > div { position: absolute; right: 0; top: calc(100% + 4px); z-index: 5; display: grid; min-width: 12rem; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
-:global(.live-workspace) .menu button { display: flex; align-items: center; justify-content: flex-start; min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 0.9375rem; text-align: left; white-space: nowrap; cursor: pointer; }
-:global(.live-workspace) .menu button:hover, :global(.live-workspace) .menu button:focus-visible { background: var(--surface-2); outline: none; }
-
 /* Side-panel form sections: ข้อมูล / ติดต่อ / รหัสผ่านเริ่มต้น / สถานะบัญชี */
 .section { display: grid; gap: 12px; min-width: 0; margin: 0; padding: 0 0 16px; border: 0; border-bottom: 1px solid var(--line); }
 .section > legend, .section > h3 { padding: 0 0 4px; margin: 0; font-size: 1.0625rem; font-weight: 650; }
@@ -4067,6 +4102,7 @@ export function Logo({ onClick }: { onClick?: () => void }) {
 - `app/admin/production/page.tsx`
 - `app/admin/receiving/page.tsx`
 - `app/admin/requests/page.tsx`
+- `app/admin/settings/page.tsx`
 - `app/admin/workers/page.tsx`
 - `app/customer/delivery-payment/page.tsx`
 - `app/customer/deposit-po/page.tsx`
@@ -4093,5 +4129,6 @@ export function Logo({ onClick }: { onClick?: () => void }) {
 - `app/staff/quotations/page.tsx`
 - `app/staff/receiving/page.tsx`
 - `app/staff/requests/page.tsx`
+- `app/staff/settings/page.tsx`
 
 <!-- DESIGN-SNAPSHOT:END -->

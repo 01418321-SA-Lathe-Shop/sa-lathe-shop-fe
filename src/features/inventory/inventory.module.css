@@ -32,7 +32,6 @@
 .stock tbody > tr > * { border-top: 1px solid var(--line); }
 .stock thead th { color: var(--muted); font-size: 0.8125rem; font-weight: 650; }
 .stock :is(thead th, tbody th):first-child { text-align: left; }
-.stock td:last-child, .stock thead th:last-child { text-align: left; }
 .stock tbody th { font-weight: 400; }
 .stock tbody th > * { display: block; width: fit-content; }
 .stock tbody th > * + * { margin-top: 4px; }
@@ -45,7 +44,27 @@
 /* Reserved share of on-hand; no min/max level exists, so the bar never implies a reorder point. */
 .bar { display: block; height: 6px; margin-top: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
 .bar > span { display: block; height: 100%; background: var(--warning); }
-.stock tbody tr[aria-current="true"] > * { background: color-mix(in srgb, var(--lime) 7%, var(--surface)); }
+/* Whole row opens the detail: the name link stretches over the row, so keyboard, middle-click and screen readers keep a real link. */
+.stock tbody tr { position: relative; }
+.stock tbody th a::after { content: ""; position: absolute; inset: 0; }
+.stock tbody tr:has(th a):hover { background: var(--surface-2); }
+.stock tbody tr:has(th a:focus-visible) { outline: 2px solid var(--lime); outline-offset: -2px; }
+:global(.live-workspace) .stock tbody th a:focus-visible { outline: none; }
+.menuCell { position: relative; z-index: 1; }
+.menuCell:has(details[open]) { z-index: 6; }
+
+/* Material detail page. */
+.formError { margin: 0; color: var(--danger); font-size: 0.875rem; }
+.unitLine { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0; color: var(--muted); font-size: 0.9375rem; }
+:global(.live-workspace) .back { width: fit-content; color: var(--muted); font-size: 0.9375rem; text-decoration: none; }
+.detailHead { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.detailHead h2 { margin: 0; overflow-wrap: anywhere; }
+.detailCard { display: grid; gap: 12px; min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.detailCard h3 { margin: 0; font-size: 1rem; }
+.chart { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; color: var(--muted); font-size: 0.8125rem; text-align: center; font-variant-numeric: tabular-nums; }
+.chartPlot { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 180px; margin-bottom: 6px; border-bottom: 1px solid var(--line); }
+.chartPlot small { color: var(--text); font-size: 0.75rem; }
+.chartPlot i { display: block; flex: 0 1 auto; width: min(100%, 2.5rem); min-height: 3px; border-radius: 4px 4px 0 0; background: var(--lime); }
 
 .movementTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
 .modeGroup { display: grid; gap: 6px; }
@@ -79,6 +98,9 @@
   .stock td[data-label]::before { content: attr(data-label); display: block; color: var(--muted); font-size: 0.75rem; }
   .stock td:last-child::before { display: none; }
   .qty { white-space: normal; }
+  .stock tbody td.menuCell { position: absolute; top: 6px; right: 10px; z-index: 1; }
+  .stock tbody td.menuCell:has(details[open]) { z-index: 6; }
+  .stock tbody th:has(+ td ~ .menuCell) { padding-right: 52px; }
   .catalogList li { grid-template-columns: minmax(0, 1fr) auto; }
   .catalogList li > :last-child { grid-column: 1 / -1; justify-self: start; }
 }

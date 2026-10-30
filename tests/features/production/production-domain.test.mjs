@@ -20,3 +20,10 @@ test("time is whole minutes 1–1,000,000; labor cost is two-place THB", () => {
   assert.equal(laborPayload(command, "0").amount, "0.00");
   assert.throws(() => laborPayload(command, "12.345"));
 });
+
+test("usage sends a unit only when one is chosen", () => {
+  const unit = "00000000-0000-4000-8000-000000000009";
+  const material = "00000000-0000-4000-8000-000000000001";
+  const payload = usagePayload({ idempotency_key: unit, expected_version: 1 }, "", [{ material_id: material, label: "Steel", quantity: "0.5", unit_id: unit, unit_name: "sheet" }]);
+  assert.deepEqual(payload.lines, [{ material_id: material, quantity: "0.500000", unit_id: unit }]);
+});

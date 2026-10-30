@@ -6,6 +6,8 @@ import { flushSync } from "react-dom";
 import { getServerTheme,getServerUiSize,getTheme,getUiSize,saveTheme,saveUiSize,subscribeAppearance,type Theme,type UiSize } from "./appearance-preferences";
 const ThemeContext = createContext<{ theme: Theme; onTheme: (theme: Theme) => void; uiSize: UiSize; onUiSize: (size: UiSize) => void }>({ theme: "dark", onTheme: () => {}, uiSize: "medium", onUiSize: () => {} });
 
+export const useAppearance = () => useContext(ThemeContext);
+
 export function ThemeToggle() {
   const { onTheme } = useContext(ThemeContext);
   const theme = useSyncExternalStore(subscribeAppearance, getTheme, getServerTheme);

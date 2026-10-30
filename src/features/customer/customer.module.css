@@ -298,22 +298,10 @@
 .root :global(.cust-inspection-decision p) { margin: 12px 0; }
 .root :global(.cust-inspection-decision .cust-primary), .root :global(.cust-inspection-decision .cust-danger) { display: flex; width: 100%; margin-top: 24px; }
 .root :global(.cust-inspection-decision fieldset > .cust-link) { margin-top: 12px; }
-.root :global(.cust-account-layout) { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1.8fr); gap: clamp(1.5rem, 3.5vw, 4rem); align-items: start; }
-.root :global(.cust-account-profile) { padding: 24px 0; }
-.root :global(.cust-profile-avatar) { width: 72px; height: 72px; display: grid; place-items: center; font-size: 1.75rem; background: var(--cust-tint); color: var(--cust-accent); border-radius: 50%; margin-bottom: 16px; }
-.root :global(.cust-membership) { padding: 24px 0; border-bottom: 1px solid var(--cust-line); }
-.root :global(.cust-membership p) { color: var(--cust-muted); margin-top: 8px; }
 .root :global(.cust-narrow) { width: 100%; max-width: min(100%, 720px); margin: 0; }
 .root :global(.cust-narrow > p), .root :global(.cust-narrow > button) { margin-top: 20px; }
 .root :global(.cust-secret) { padding: 24px; background: var(--cust-surface-2); border: 1px dashed var(--cust-line); border-radius: 10px; margin: 24px 0; }
 .root :global(.cust-secret output) { display: block; overflow-wrap: anywhere; margin-top: 16px; user-select: all; }
-.root :global(.cust-settings-layout) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.5rem, 3vw, 3rem); align-items: start; }
-.root :global(.cust-preference) { padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--cust-line); }
-.root :global(.cust-preference legend) { font-size: 1.25rem; margin-bottom: 16px; font-weight: 650; }
-.root :global(.cust-preference label) { display: flex; align-items: center; gap: 12px; min-height: 48px; cursor: pointer; }
-.root :global(.cust-settings-preview) { padding: clamp(1.25rem, 2vw, 2rem); background: var(--cust-surface); border: 1px solid var(--cust-line); border-radius: 12px; }
-.root :global(.cust-settings-preview h3) { margin-top: 24px; }
-.root :global(.cust-settings-preview p), .root :global(.cust-settings-preview .cust-badge) { margin-top: 16px; }
 
 .root :global(.cust-overview-grid > *),
 .root :global(.cust-detail-grid > *),
@@ -322,8 +310,6 @@
 .root :global(.cust-job-row > *),
 .root :global(.cust-job-detail > *),
 .root :global(.cust-inspection-layout > *),
-.root :global(.cust-account-layout > *),
-.root :global(.cust-settings-layout > *),
 .root :global(.cust-filters > *),
 .root :global(.cust-request-row > *),
 .root :global(.cust-document-row > *) {
@@ -347,9 +333,7 @@
   .root :global(.cust-quotation-layout),
   .root :global(.cust-wizard-grid),
   .root :global(.cust-job-detail),
-  .root :global(.cust-inspection-layout),
-  .root :global(.cust-account-layout),
-  .root :global(.cust-settings-layout) {
+  .root :global(.cust-inspection-layout) {
     grid-template-columns: minmax(0, 1fr);
     gap: 28px;
   }
@@ -396,7 +380,7 @@
   .root :global(.cust-document-action) { text-align: left; }
   .root :global(.cust-decision-bar) { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 100%; box-sizing: border-box; z-index: 20; background: var(--cust-surface); padding: 12px 16px max(12px, env(safe-area-inset-bottom)); border-top: 1px solid var(--cust-line); gap: 6px; }
   .root :global(.cust-main:has(.cust-decision-bar)) { padding-bottom: 180px; }
-  .root :global(.cust-inspection-decision), .root :global(.cust-account-profile), .root :global(.cust-settings-preview) { padding: 16px 0; }
+  .root :global(.cust-inspection-decision) { padding: 16px 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

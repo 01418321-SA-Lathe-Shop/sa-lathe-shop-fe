@@ -5,6 +5,7 @@ import type { BackendApi } from "../../lib/api/backend-api";
 import { useCommand, useRetryableWrite } from "../../hooks/backend-hooks";
 import { minutesTH, quantityTH } from "../../components/staff-ui/staff-format";
 import { Button, ConfirmDialog, ErrorText, Field, NextAction, RetryPanel } from "../../components/staff-ui/staff-ui";
+import { EntryUnit } from "../inventory/entry-unit";
 import { MaterialPicker } from "../inventory/material-picker";
 import { timePayload, usagePayload, type ProductionState, type UsageDraft } from "./production-domain";
 import { editableQuantity, isPositiveQuantity } from "./production-list-domain";
@@ -36,12 +37,12 @@ export function WorkPanel({ api, job, onSaved }: { api: BackendApi; job: Product
 
 function UsageForm({ api, job, onSaved }: { api: BackendApi; job: ProductionState; onSaved: (message: string) => void }) {
   const materials = job.materials ?? [];
-  const [rows, setRows] = useState<UsageDraft[]>(() => materials.map((material) => ({ material_id: material.material_id, label: `${material.name} (${material.unit_name})`, quantity: "" })));
+  const [rows, setRows] = useState<UsageDraft[]>(() => materials.map((material) => ({ material_id: material.material_id, label: `${material.name} (${material.unit_name})`, quantity: "", base_unit: material.unit_name })));
   const [extra, setExtra] = useState<Record<string, string>>({}); const [note, setNote] = useState(""); const [adding, setAdding] = useState(false);
   const write = useRetryableWrite(api, () => onSaved("บันทึกการใช้วัตถุดิบแล้ว"));
   const reserved = new Map(materials.map((material) => [material.material_id, material.reserved]));
   const filled = rows.filter((row) => row.quantity.trim()).length;
-  const set = (index: number, quantity: string) => setRows((current) => current.map((value, position) => position === index ? { ...value, quantity } : value));
+  const set = (index: number, changes: Partial<UsageDraft>) => setRows((current) => current.map((value, position) => position === index ? { ...value, ...changes } : value));
   // A div, not a form: the extra-material MaterialPicker carries its own search form.
   const save = () => write.submit(`/production/jobs/${job.job_id}/usage`, "POST", () => {
     try { return usagePayload({ idempotency_key: crypto.randomUUID(), expected_version: job.version }, note, rows); }
@@ -54,14 +55,15 @@ function UsageForm({ api, job, onSaved }: { api: BackendApi; job: ProductionStat
       {rows.map((row, index) => {
         const held = reserved.get(row.material_id); const invalid = Boolean(row.quantity.trim()) && !isPositiveQuantity(row.quantity);
         return <div className={styles.usageRow} key={row.material_id}>
-          <Field label={`ใช้ครั้งนี้ · ${row.label}`} hint={held !== undefined ? `จองไว้เหลือ ${quantityTH(held)}` : extra[row.material_id]} error={invalid ? "ตัวเลขมากกว่า 0 ทศนิยมไม่เกิน 6 ตำแหน่ง" : undefined}><input inputMode="decimal" autoComplete="off" value={row.quantity} aria-invalid={invalid || undefined} onChange={(event) => set(index, event.target.value)} /></Field>
-          {held !== undefined && /[1-9]/.test(held) && <Button className={styles.fill} onClick={() => set(index, editableQuantity(held))}>ใช้ตามที่จองไว้ {quantityTH(held)}</Button>}
+          <Field label={`ใช้ครั้งนี้ · ${row.label}${row.unit_name ? ` · กรอกเป็น ${row.unit_name}` : ""}`} hint={held !== undefined ? `จองไว้เหลือ ${quantityTH(held)}` : extra[row.material_id]} error={invalid ? "ตัวเลขมากกว่า 0 ทศนิยมไม่เกิน 6 ตำแหน่ง" : undefined}><input inputMode="decimal" autoComplete="off" value={row.quantity} aria-invalid={invalid || undefined} onChange={(event) => set(index, { quantity: event.target.value })} /></Field>
+          <EntryUnit api={api} materialId={row.material_id} baseUnit={row.base_unit ?? ""} unitId={row.unit_id} quantity={row.quantity} onChange={(conversion) => set(index, { unit_id: conversion?.unit_id, unit_name: conversion?.unit_name })} />
+          {held !== undefined && /[1-9]/.test(held) && <Button className={styles.fill} onClick={() => set(index, { quantity: editableQuantity(held), unit_id: undefined, unit_name: undefined })}>ใช้ตามที่จองไว้ {quantityTH(held)}</Button>}
         </div>;
       })}
       {!rows.length && <p className={layout.muted}>งานนี้ไม่มีวัตถุดิบในแผน เพิ่มวัตถุดิบนอกแผนได้ด้านล่าง</p>}
       <Field label="หมายเหตุ (ไม่บังคับ)"><textarea maxLength={2000} value={note} onChange={(event) => setNote(event.target.value)} /></Field>
     </fieldset>
-    {adding ? <MaterialPicker api={api} label="เพิ่มวัตถุดิบนอกแผน" disabled={write.frozen} isAdded={(materialId) => rows.some((row) => row.material_id === materialId)} onAdd={(material) => { setExtra((current) => ({ ...current, [material.id]: `นอกแผน · พร้อมใช้ ${quantityTH(material.qty_available)}` })); setRows((current) => [...current, { material_id: material.id, label: `${material.name} (${material.unit_name})`, quantity: "" }]); }} />
+    {adding ? <MaterialPicker api={api} label="เพิ่มวัตถุดิบนอกแผน" disabled={write.frozen} isAdded={(materialId) => rows.some((row) => row.material_id === materialId)} onAdd={(material) => { setExtra((current) => ({ ...current, [material.id]: `นอกแผน · พร้อมใช้ ${quantityTH(material.qty_available)}` })); setRows((current) => [...current, { material_id: material.id, label: `${material.name} (${material.unit_name})`, quantity: "", base_unit: material.unit_name }]); }} />
       : <Button variant="text" disabled={write.frozen} onClick={() => setAdding(true)}>+ เพิ่มวัตถุดิบนอกแผน</Button>}
     <div className={layout.submitBar}><span>{filled ? `จะบันทึก ${filled} รายการ` : "ยังไม่ได้กรอกจำนวน"}</span><button type="button" className={layout.submit} disabled={write.frozen || !filled} onClick={save}>บันทึกการใช้วัตถุดิบ</button></div>
     {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />}

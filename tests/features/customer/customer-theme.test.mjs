@@ -39,12 +39,12 @@ test("navigation, forms and badges use shared theme tokens instead of dark-only 
   for (const color of ["green", "blue", "red"]) assert(css.includes(`background: color-mix(in srgb, var(--cust-${color}) 10%, var(--cust-surface))`));
 });
 
-test("Customer settings isolate native radio groups in retained App Router trees", () => {
-  const source = readFileSync(new URL("../../../src/features/customer/customer-settings.tsx", import.meta.url), "utf8");
+test("Settings isolate native radio groups in retained App Router trees", () => {
+  const source = readFileSync(new URL("../../../src/features/settings/settings-page.tsx", import.meta.url), "utf8");
   assert.match(source, /const preferenceId = useId\(\)/);
-  assert(source.includes('name={`customer-size-${preferenceId}`}'));
+  assert(source.includes('name={`settings-size-${preferenceId}`}'));
   assert.doesNotMatch(source, /customer-theme-|saveTheme|<legend>ธีม/);
-  assert.doesNotMatch(source, /name="customer-(?:size|theme)"/);
+  assert.doesNotMatch(source, /name="settings-(?:size|theme)"/);
 });
 
 test("white quotation paper isolates its secondary ink from the workspace theme", () => {

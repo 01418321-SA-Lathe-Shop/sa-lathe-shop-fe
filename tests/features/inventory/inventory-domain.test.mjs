@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { inventoryDecimal, inventoryDisplay, planLines, stockFields, catalogName, stockFilter, stockCounts, filterStock, stockAfter, isBelow } from "../../../src/features/inventory/inventory-domain.ts";
+import { baseToUnit, convertToBase, inventoryDecimal, inventoryDisplay, planLines, stockFields, catalogName, stockFilter, stockCounts, filterStock, stockAfter, isBelow, consumedTotal, consumptionByMonth } from "../../../src/features/inventory/inventory-domain.ts";
 const material = { is_active: true, qty_reserved: "2.000001" };
 const id = "10000000-0000-4000-8000-000000000001";
 test("six-place quantities/unit costs retain full PostgreSQL precision without rounding", () => {
@@ -68,4 +68,35 @@ test("summary helpers: fully reserved, units in use, reserved share", async () =
   assert.equal(reservedPercent(row("ม.", "3.000000", "1.000000")), 33);
   assert.equal(reservedPercent(row("ม.", "0.000000", "0.000000")), 0);
   assert.equal(reservedPercent(row("ม.", "999999999999.999999", "999999999999.999999")), 100);
+});
+
+test("usage counts job_issue only, exactly, in Bangkok months with empty months kept", () => {
+  const entry = (mode, quantity, created_at) => ({ mode, quantity, created_at });
+  const items = [entry("job_issue", "1.500000", "2026-10-31T17:30:00Z"), entry("job_issue", "0.000001", "2026-10-01T00:00:00Z"), entry("addition", "99.000000", "2026-10-02T00:00:00Z"), entry("correction", "5.000000", "2026-10-02T00:00:00Z"), entry("job_issue", "3.000000", "2026-08-10T00:00:00Z")];
+  assert.equal(consumedTotal(items), "4.500001");
+  const months = consumptionByMonth(items, Date.parse("2026-11-20T00:00:00Z"), 4);
+  assert.deepEqual(months.map((item) => [item.month, item.total]), [["2026-08", "3.000000"], ["2026-09", "0.000000"], ["2026-10", "0.000001"], ["2026-11", "1.500000"]]);
+  assert.deepEqual(months.map((item) => item.percent), [100, 0, 0, 50]);
+  assert.equal(consumptionByMonth([], Date.parse("2026-01-10T00:00:00Z"), 2)[0].month, "2025-12");
+});
+
+test("unit conversion is exact and never rounds", () => {
+  assert.equal(convertToBase("2", "12.500000"), "25.000000");
+  assert.equal(convertToBase("0", "12.5"), "0.000000");
+  assert.equal(convertToBase("0.5", "0.333333"), null);
+  assert.equal(convertToBase("999999999999", "2"), null);
+  assert.equal(convertToBase("abc", "2"), null);
+  assert.deepEqual(baseToUnit("25.000000", "12.500000"), { value: "2.000000", exact: true });
+  assert.deepEqual(baseToUnit("1.000000", "3.000000"), { value: "0.333333", exact: false });
+});
+
+test("entered unit is sent only when chosen", () => {
+  const id = "00000000-0000-4000-8000-000000000001"; const unit = "00000000-0000-4000-8000-000000000002";
+  assert.deepEqual(planLines([{ material_id: id, quantity: "1", unit_id: unit, unit_name: "sheet" }]), [{ material_id: id, quantity: "1.000000", unit_id: unit }]);
+  const material = { id, name: "Steel", unit_id: unit, unit_name: "kg", is_active: true, version: 1, qty_on_hand: "30.000000", qty_reserved: "20.000000", qty_available: "10.000000" };
+  const conversion = { unit_id: unit, factor: "12.500000" };
+  assert.deepEqual(stockFields(material, "correction", "2", "", "Count", conversion), { mode: "correction", quantity: "2.000000", reason: "Count", unit_id: unit });
+  assert.throws(() => stockFields(material, "correction", "1", "", "Count", conversion), /below active reserved/);
+  assert.throws(() => stockFields(material, "addition", "0.0000001", "1", "Add", conversion));
+  assert.equal("unit_id" in stockFields(material, "correction", "25", "", "Count"), false);
 });

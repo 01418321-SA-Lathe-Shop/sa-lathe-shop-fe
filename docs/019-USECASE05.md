@@ -19,7 +19,7 @@ Give shop staff a current view of material availability and let authorized roles
 
 ## Boundaries
 
-Keep quantities/unit cost as exact decimal strings with six-place precision. Do not perform arithmetic with JavaScript floating-point numbers, invent unit conversions, or expose Admin-only average/movement costs to Worker views.
+Keep quantities/unit cost as exact decimal strings with six-place precision. Do not perform arithmetic with JavaScript floating-point numbers, invent conversions other than the per-material factors the backend provides, or expose Admin-only average/movement costs to Worker views.
 
 ## Contract references
 

@@ -1,7 +1,7 @@
 // Browser client for docs/AUTH.md and UC1–UC3.md in SA-Lathe-Shop-BE.
 // An instance belongs to one mounted session. Never persist its token or links.
 export type Integer = number | string;
-export type Account = { id: string; person_id: string; username: string; name: string; role: "customer" | "worker" | "admin"; is_active: boolean };
+export type Account = { id: string; person_id: string; username: string; name: string; role: "customer" | "worker" | "admin"; is_active: boolean; created_at?: string };
 export type Login = { access_token: string; token_type: "Bearer"; expires_at: string; account: Account };
 export type Customer = { id: string; customer_type: "individual" | "company"; name: string; is_owner: boolean };
 export type JobRequest = { id: string; no_request: Integer; customer_id: string; description: string; qty: Integer; material_spec: string; deadline?: string; status: string; created_at: string };
