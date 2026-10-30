@@ -1,0 +1,60 @@
+/* Shared by the Customer and Staff/Admin shells: each --s-* resolves to whichever shell's tokens exist. */
+.page, .panel {
+  --s-surface: var(--cust-surface, var(--surface));
+  --s-line: var(--cust-line, var(--border));
+  --s-ink: var(--cust-ink, var(--text));
+  --s-muted: var(--cust-muted, var(--muted));
+  --s-accent: var(--cust-action, var(--accent));
+  --s-green: var(--cust-green, var(--success));
+  --s-red: var(--cust-red, var(--danger));
+}
+.page { display: grid; gap: 20px; min-width: 0; max-width: 880px; }
+.stack { display: grid; gap: 20px; min-width: 0; }
+.inviteLink { margin: 12px 0 0; }
+.inviteLink a { color: var(--s-accent); }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--s-line); }
+.page .tabs button { min-height: 44px; margin-bottom: -1px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; color: var(--s-muted); font: inherit; font-size: .875rem; cursor: pointer; }
+.page .tabs button:hover { color: var(--s-ink); }
+.page .tabs button[aria-current] { border-bottom-color: var(--s-accent); color: var(--s-ink); font-weight: 650; }
+
+.panel { display: grid; gap: 16px; min-width: 0; padding: 24px; border: 1px solid var(--s-line); border-radius: 14px; background: var(--s-surface); color: var(--s-ink); }
+.panelHead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 12px 16px; }
+.panelHead > div { min-width: 0; flex: 1 1 16rem; }
+.panel .panelHead h2 { margin: 0; font-size: 1.0625rem; font-weight: 650; }
+.panel .panelHead p { margin: 4px 0 0; color: var(--s-muted); font-size: .875rem; }
+
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 16px 32px; margin: 0; }
+.facts > div { min-width: 0; }
+.facts dt { color: var(--s-muted); font-size: .8125rem; }
+.facts dd { margin: 2px 0 0; overflow-wrap: anywhere; }
+.state { color: var(--s-red); font-weight: 600; }
+.state[data-active] { color: var(--s-green); }
+.panel .note { margin: 0; padding-top: 14px; border-top: 1px solid var(--s-line); color: var(--s-muted); font-size: .875rem; }
+.note a { color: var(--s-accent); }
+
+.choice { min-width: 0; margin: 0; padding: 0; border: 0; }
+.choice legend { margin-bottom: 8px; padding: 0; font-size: .875rem; font-weight: 600; }
+.choice > div { display: flex; flex-wrap: wrap; gap: 10px; }
+.panel .choice label { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; margin: 0; padding: 0 16px; border: 1px solid var(--s-line); border-radius: 8px; color: var(--s-ink); font-size: .875rem; cursor: pointer; }
+.choice label:has(input:checked) { border-color: var(--s-accent); }
+.choice input { width: 18px; height: 18px; min-height: 0; margin: 0; accent-color: var(--s-accent); }
+
+.secondary, .danger { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 16px; border-radius: 8px; font: inherit; font-size: .875rem; font-weight: 600; text-decoration: none; cursor: pointer; }
+.page .secondary, .panel .secondary, .dialog .secondary { border: 1px solid var(--s-line); background: none; color: var(--s-ink); }
+.dialog .danger { border: 0; background: var(--s-red); color: var(--cust-on-danger, #fff); }
+
+.dialog { width: min(100% - 32px, 440px); padding: 24px; border: 1px solid var(--s-line); border-radius: 14px; background: var(--s-surface); color: var(--s-ink); }
+.dialog::backdrop { background: rgb(0 0 0 / .55); }
+.dialog h2 { margin: 0; font-size: 1.125rem; }
+.dialog p { margin: 8px 0 20px; color: var(--s-muted); }
+.dialog > div { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 12px; }
+
+.tableWrap { overflow-x: auto; }
+.table { width: 100%; min-width: 30rem; border-collapse: collapse; font-size: .875rem; }
+.table th, .table td { padding: 10px 8px; border-top: 1px solid var(--s-line); background: none; color: var(--s-ink); text-align: center; }
+.table thead th { border-top: 0; color: var(--s-muted); font-size: .75rem; font-weight: 600; }
+.table th:first-child { padding-left: 0; font-weight: 400; text-align: left; }
+.table td { color: var(--s-green); font-weight: 700; }
+.table td span { color: var(--s-muted); font-weight: 400; }
+
+@media (max-width: 640px) { .panel { padding: 16px; } }

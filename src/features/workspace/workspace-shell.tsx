@@ -4,7 +4,7 @@ import { workspaceStyles as styles } from "../../components/ui/style-scopes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { SettingsToggle, ThemeToggle } from "../../components/appearance/appearance";
+import { ThemeToggle } from "../../components/appearance/appearance";
 import { Icon, Logo } from "../../components/appearance/icons";
 
 import { useApiSession } from "../auth/api-session";
@@ -60,7 +60,7 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
           {groups.map((entry) => <div key={entry.label} className={`nav-group${entry.admin ? " nav-group-admin" : ""}`} role="group" aria-label={entry.label}><span className="nav-group-label" aria-hidden="true">{entry.label}</span>{entry.items.map(navLink)}</div>)}
         </nav>
       </div>
-      <div className="sidebar-theme"><DemoAccountSwitch onSwitched={() => setMenuOpen(false)}/><SettingsToggle/></div>
+      <div className="sidebar-theme"><DemoAccountSwitch onSwitched={() => setMenuOpen(false)}/></div>
       <div className="sidebar-footer"><div className="avatar">{initials}</div><div><strong>{account.name}</strong><span>{role === "Admin" ? "ผู้ดูแลระบบ" : role === "Worker" ? "พนักงาน" : "ลูกค้า"} · {account.username}</span></div><button aria-label="ออกจากระบบ" onClick={leave}><Icon name="logout"/></button></div>
     </aside>
     <div className="app-stage">

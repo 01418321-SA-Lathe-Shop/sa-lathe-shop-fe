@@ -8,17 +8,17 @@ import { CustomerNotifications } from "./customer-notifications";
 import { CustomerRequests, CustomerRequestDetail } from "./customer-requests";
 import { CustomerRequestWizard } from "./customer-request-wizard";
 import { CustomerDocumentList, CustomerSalesDetail } from "./customer-sales";
-import { Empty } from "./customer-ui";
+import { Empty, PageTitle } from "./customer-ui";
 import { CustomerJobs, CustomerJobDetail } from "./customer-jobs";
 import { CustomerAccount } from "./customer-account";
-import { CustomerSettings } from "./customer-settings";
+import { SettingsPage } from "../settings/settings-page";
 
 export function CustomerContent({ api, account }: { api: BackendApi; account: Account }) {
   const path = usePathname(); const query = useSearchParams();
   const request = query.get("request") ?? ""; const quotation = query.get("quotation") ?? "";
   const badId = ["request", "quotation", "job", "company", "evidence"].some((key) => query.has(key) && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(query.get(key) ?? ""));
   if (badId) return <Empty title="ลิงก์รายการไม่ถูกต้อง" action={<Link href="/customer">กลับภาพรวม</Link>}>เปิดรายการจากเมนูหรือการแจ้งเตือนอีกครั้ง</Empty>;
-  if (path === "/customer" && query.get("view") === "settings") return <CustomerSettings />;
+  if (path === "/customer" && query.get("view") === "settings") return <><PageTitle title="ตั้งค่า" description="บัญชีของฉัน การแสดงผล และความปลอดภัย" /><SettingsPage /></>;
   if (path === "/customer") return <CustomerOverview api={api} />;
   if (path === "/customer/inbox") return <CustomerNotifications api={api} />;
   if (path === "/customer/requests") return query.get("view") === "new" ? <CustomerRequestWizard api={api} /> : request ? <CustomerRequestDetail api={api} id={request} /> : <CustomerRequests api={api} />;

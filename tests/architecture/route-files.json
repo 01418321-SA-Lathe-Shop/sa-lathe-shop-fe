@@ -7,6 +7,7 @@
   "app/admin/production/page.tsx",
   "app/admin/receiving/page.tsx",
   "app/admin/requests/page.tsx",
+  "app/admin/settings/page.tsx",
   "app/admin/workers/page.tsx",
   "app/customer/delivery-payment/page.tsx",
   "app/customer/deposit-po/page.tsx",
@@ -33,5 +34,6 @@
   "app/staff/production/page.tsx",
   "app/staff/quotations/page.tsx",
   "app/staff/receiving/page.tsx",
-  "app/staff/requests/page.tsx"
+  "app/staff/requests/page.tsx",
+  "app/staff/settings/page.tsx"
 ]

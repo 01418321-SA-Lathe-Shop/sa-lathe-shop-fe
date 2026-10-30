@@ -3,7 +3,7 @@
 export const ROLES = ["Customer", "Worker", "Admin"] as const;
 export type Role = (typeof ROLES)[number];
 export type ApiRole = "customer" | "worker" | "admin";
-export type WorkspaceId = "overview" | "requests" | "quotations" | "deposit-po" | "materials" | "orders" | "receiving" | "production" | "delivery-payment" | "workers" | "inbox" | "memberships";
+export type WorkspaceId = "overview" | "requests" | "quotations" | "deposit-po" | "materials" | "orders" | "receiving" | "production" | "delivery-payment" | "workers" | "inbox" | "memberships" | "settings";
 export type Workspace = { id: Exclude<WorkspaceId, "overview">; useCase: string; description: string };
 
 export const API_ROLES: Record<ApiRole, Role> = { customer: "Customer", worker: "Worker", admin: "Admin" };
@@ -24,6 +24,7 @@ const DESCRIPTIONS: Record<Role, Partial<Record<Exclude<WorkspaceId, "overview">
     production: ["UC8", "เริ่มงาน บันทึกวัตถุดิบที่ใช้ เวลาทำงาน และรูปงาน"],
     "delivery-payment": ["UC9", "ออกใบแจ้งหนี้และบันทึกการส่งมอบ"],
     inbox: ["แจ้งเตือน", "การแจ้งเตือนของทีมร้าน"],
+    settings: ["บัญชี", "บัญชีของฉัน การแสดงผล และความปลอดภัย"],
   },
   Admin: {
     requests: ["UC1–UC4", "ดูคำขอและใบเสนอราคา และตรวจหลักฐานมัดจำ/PO"],
@@ -34,13 +35,14 @@ const DESCRIPTIONS: Record<Role, Partial<Record<Exclude<WorkspaceId, "overview">
     production: ["UC8", "ติดตามงานผลิตและบันทึกต้นทุนค่าแรงจริง"],
     "delivery-payment": ["UC9", "ตั้งเครดิต ออกใบแจ้งหนี้ ส่งมอบ ตรวจการชำระ และรับเงินสด"],
     inbox: ["แจ้งเตือน", "การแจ้งเตือนของผู้ดูแลระบบ"],
+    settings: ["บัญชี", "บัญชีของฉัน การแสดงผล ความปลอดภัย และการเข้าถึงของแต่ละบทบาท"],
   },
 };
 
 export const ROLE_WORKSPACES: Record<Role, Exclude<WorkspaceId, "overview">[]> = {
   Customer: ["requests", "quotations", "deposit-po", "delivery-payment", "inbox", "memberships"],
-  Worker: ["quotations", "materials", "receiving", "production", "delivery-payment", "inbox"],
-  Admin: ["requests", "workers", "materials", "orders", "receiving", "production", "delivery-payment", "inbox"],
+  Worker: ["quotations", "materials", "receiving", "production", "delivery-payment", "inbox", "settings"],
+  Admin: ["requests", "workers", "materials", "orders", "receiving", "production", "delivery-payment", "inbox", "settings"],
 };
 
 // Sidebar groups by workflow stage. Inbox stays routable but lives behind the
@@ -51,6 +53,7 @@ export const NAV_GROUPS: Record<"Worker" | "Admin", NavGroup[]> = {
     { label: "งานขาย", items: ["quotations"] },
     { label: "การผลิต", items: ["production", "materials", "receiving"] },
     { label: "ส่งมอบและการเงิน", items: ["delivery-payment"] },
+    { label: "บัญชี", items: ["settings"] },
   ],
   Admin: [
     { label: "งานขาย", items: ["requests"] },
@@ -58,6 +61,7 @@ export const NAV_GROUPS: Record<"Worker" | "Admin", NavGroup[]> = {
     { label: "จัดซื้อ", items: ["orders", "receiving"] },
     { label: "ส่งมอบและการเงิน", items: ["delivery-payment"] },
     { label: "ผู้ดูแลระบบ", items: ["workers"], admin: true },
+    { label: "บัญชี", items: ["settings"] },
   ],
 };
 

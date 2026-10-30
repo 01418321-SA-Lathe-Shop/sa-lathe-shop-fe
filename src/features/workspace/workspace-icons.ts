@@ -11,4 +11,5 @@ export const workspaceIcons = {
   workers: "grid",
   inbox: "bell",
   memberships: "grid",
+  settings: "sun",
 } as const;
