@@ -1,6 +1,6 @@
 # Staff/Admin redesign — plan and handoff
 
-Status date: 2026-10-30 · Branch `develop` · Last code commit `86c99a8` (Step 6)
+Status date: 2026-10-30 · Branch `develop` · Last code commit `bb5613b` (Step 7)
 
 This document holds the complete owner-approved plan for the Staff/Admin redesign (audit, navigation, flow, design system, page specifications and step plan) and the current implementation status. Part A is status; Part B is the plan as approved.
 
@@ -97,6 +97,18 @@ Implemented differences from the spec, all within the approved intent:
 - The list API has no claim or payment data. The owner chose to read each listed order's detail to count มีของเสียหาย and ค้างจ่ายผู้ขาย. This covers the first 100 orders; a notice appears if details fail or the list is longer, and a `shortcut:` code comment marks the limit.
 - ค้างจ่ายผู้ขาย = fully received and not settled, including orders whose credit days are not yet set. รับครบตามที่เหลือ fills good units only; Staff still confirm and save.
 - Verification: 178 tests and all checks; Chrome walk Admin 1280 Dark / 390 Light, Staff 768 Dark, against a test-only API stub because the local backend was not running. Not exercised against the live API: real data, saves, conflicts, retry, proof upload.
+
+## Step 7 — จัดการพนักงาน (done)
+
+| Commit | Purpose |
+| --- | --- |
+| `2eff48d` | `workers-domain.ts`: Thai field errors per field, password rule (same as the server), payload, case-insensitive username-change check, search; tests |
+| `bb5613b` | `src/features/workers/` redesign. Files:<br>• `workers.tsx`: searchable list, side panel<br>• `workers-form.tsx`: sectioned create/edit form, account-status section, username-change confirmation, password panel<br>• `workers.module.css` |
+
+- Search covers the loaded accounts only, because `/admin/workers` has no search parameter.
+- Deactivate/reactivate moved into the edit panel (สถานะบัญชี) with a confirmation, replacing the old list button and `window.confirm`.
+- Writes stay plain POST/PATCH without retry keys, as before; after an unclear failure the panel asks Admin to refresh and check first.
+- Verification: 183 tests and all checks; real-API walk with writes intercepted, Admin 1280 Dark / 390 Light. Not exercised: real saves, duplicate-username responses.
 
 ## Step 6 — ส่งมอบและใบแจ้งหนี้ / ส่งมอบและรับชำระ (done)
 
@@ -467,7 +479,7 @@ Rules for every step:
 | 4 | สั่งซื้อวัตถุดิบ (Admin) (see below) | Done (`ef034d5`, `0981939`, `e5ac7df`) |
 | 5 | รับเข้าวัตถุดิบ (see below) | Done (`2b99aec`, `32020b7`) |
 | 6 | ส่งมอบและใบแจ้งหนี้ (Staff) / ส่งมอบและรับชำระ (Admin) (see below) | Done (`cd6c27f`, `55b3845`, `86c99a8`) |
-| 7 | จัดการพนักงาน (Admin) (see below) | Not started |
+| 7 | จัดการพนักงาน (Admin) (see below) | Done (`2eff48d`, `bb5613b`) |
 | 8 | การแจ้งเตือน page (see below) | Not started |
 | 9 | Wrap-up: handoff doc update, DESIGN.md consolidation, final full walk of every page for both roles | Not started |
 

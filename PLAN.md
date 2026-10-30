@@ -1,3 +1,15 @@
+## Staff/Admin redesign Step 7 (จัดการพนักงาน) — 2026-10-30
+
+- Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 7 complete (`2eff48d` field rules, `bb5613b` page).
+  - Searchable list.
+  - Side-panel create/edit in sections ข้อมูล / ติดต่อ / รหัสผ่านเริ่มต้น.
+  - Confirmations for a username change and for account status; both warn that the person is logged out everywhere.
+  - Separate password side panel.
+  - Thai field errors.
+- Checks: 183 native tests (3 new), type check, lint, source audit, DESIGN sync, production build.
+- Chrome walk against the real local API, writes intercepted: Admin 1280 Dark / 390 Light. No overflow or console errors; payload shapes unchanged.
+- Not exercised: real saves, duplicate-username responses. Pending owner decision: none.
+
 ## Staff/Admin redesign Step 6 (ส่งมอบและใบแจ้งหนี้ / ส่งมอบและรับชำระ) — 2026-10-30
 
 - Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 6 complete (`cd6c27f` domain tabs and Thai messages, `55b3845` shared proof upload, `86c99a8` page).
