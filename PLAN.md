@@ -1,3 +1,11 @@
+## Staff/Admin redesign Step 8 (การแจ้งเตือน) — 2026-10-30
+
+- Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 8 complete (`9de567b` shared request link, `f128f5a` page).
+  - ทั้งหมด / ยังไม่อ่าน tabs with counts, วันนี้ / ก่อนหน้านี้ groups, read badges, ทำเป็นอ่านแล้ว, อ่านทั้งหมด, โหลดเพิ่ม.
+  - Same Thai wording and request links as the bell; opening a row marks it read.
+- Checks: 183 native tests, type check, lint, source audit, DESIGN sync, production build.
+- Chrome walk against the real local API, writes intercepted: Admin 1280 Dark, Staff 390 Light. No overflow or console errors.
+- Not exercised: marks that really reach the backend. Pending owner decision: none.
 ## Staff/Admin redesign Step 7 (จัดการพนักงาน) — 2026-10-30
 
 - Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 7 complete (`2eff48d` field rules, `bb5613b` page).

@@ -1,6 +1,6 @@
 # Staff/Admin redesign — plan and handoff
 
-Status date: 2026-10-30 · Branch `develop` · Last code commit `bb5613b` (Step 7)
+Status date: 2026-10-30 · Branch `develop` · Last code commit `f128f5a` (Step 8)
 
 This document holds the complete owner-approved plan for the Staff/Admin redesign (audit, navigation, flow, design system, page specifications and step plan) and the current implementation status. Part A is status; Part B is the plan as approved.
 
@@ -97,6 +97,17 @@ Implemented differences from the spec, all within the approved intent:
 - The list API has no claim or payment data. The owner chose to read each listed order's detail to count มีของเสียหาย and ค้างจ่ายผู้ขาย. This covers the first 100 orders; a notice appears if details fail or the list is longer, and a `shortcut:` code comment marks the limit.
 - ค้างจ่ายผู้ขาย = fully received and not settled, including orders whose credit days are not yet set. รับครบตามที่เหลือ fills good units only; Staff still confirm and save.
 - Verification: 178 tests and all checks; Chrome walk Admin 1280 Dark / 390 Light, Staff 768 Dark, against a test-only API stub because the local backend was not running. Not exercised against the live API: real data, saves, conflicts, retry, proof upload.
+
+## Step 8 — การแจ้งเตือน (done)
+
+| Commit | Purpose |
+| --- | --- |
+| `9de567b` | `staffNoticeHref` in `workspace-notifications.ts`: one request-link rule for the bell and the page |
+| `f128f5a` | `src/features/inbox/` redesign: `inbox.tsx` (tabs `?tab=unread`, day groups, read badges, ทำเป็นอ่านแล้ว, อ่านทั้งหมด, โหลดเพิ่ม) and `inbox.module.css`; `connected-workspace.tsx` passes the role |
+
+- Reuses the bell's Thai titles, mark-read helper and `lathe-inbox-read` event, so the bell count follows the page.
+- No “mark unread”: the API has none.
+- Verification: 183 tests and all checks; real-API walk with writes intercepted, Admin 1280 Dark / Staff 390 Light. Not exercised: marks that really reach the backend.
 
 ## Step 7 — จัดการพนักงาน (done)
 
@@ -480,7 +491,7 @@ Rules for every step:
 | 5 | รับเข้าวัตถุดิบ (see below) | Done (`2b99aec`, `32020b7`) |
 | 6 | ส่งมอบและใบแจ้งหนี้ (Staff) / ส่งมอบและรับชำระ (Admin) (see below) | Done (`cd6c27f`, `55b3845`, `86c99a8`) |
 | 7 | จัดการพนักงาน (Admin) (see below) | Done (`2eff48d`, `bb5613b`) |
-| 8 | การแจ้งเตือน page (see below) | Not started |
+| 8 | การแจ้งเตือน page (see below) | Done (`9de567b`, `f128f5a`) |
 | 9 | Wrap-up: handoff doc update, DESIGN.md consolidation, final full walk of every page for both roles | Not started |
 
 Step 3 — สต๊อกวัตถุดิบ + ข้อมูลหลัก:
