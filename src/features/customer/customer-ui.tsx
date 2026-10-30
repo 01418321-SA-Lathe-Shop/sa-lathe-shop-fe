@@ -10,7 +10,7 @@ export function PageTitle({ title, description, action, back }: { title: string;
   return <><header className="cust-heading">{back && <Link className="cust-back" href={back}><Icon name="arrow" size={16} /> กลับ</Link>}<div><div><h1 tabIndex={-1}>{title}</h1>{description && <p>{description}</p>}</div>{action}</div></header></>;
 }
 export function Badge({ value, labels }: { value: string; labels: Record<string, string> }) {
-  const tone = ["approved", "paid", "delivered", "completed"].includes(value) ? "success" : ["rejected", "returned"].includes(value) ? "danger" : ["in_progress", "shipping", "ongoing"].includes(value) ? "info" : "quiet";
+  const tone = ["approved", "paid", "delivered", "completed"].includes(value) ? "success" : ["rejected", "returned"].includes(value) ? "danger" : ["in_progress", "shipping", "ongoing", "sent"].includes(value) ? "info" : "quiet";
   return <span className={`cust-badge ${tone}`}><span aria-hidden="true" className="cust-status-dot" />{labels[value] ?? "สถานะยังไม่ระบุ"}</span>;
 }
 export function Empty({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {

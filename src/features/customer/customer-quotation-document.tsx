@@ -33,7 +33,7 @@ export function QuotationDocument({ request, quote, customer, terms }: { request
 export function QuotationPrint({ ready, children }: { ready: boolean; children: ReactNode }) {
   const params = useSearchParams(); const path = usePathname(); const router = useRouter();
   const [requested, setRequested] = useState(() => params.get("print") === "1"); const [printing, setPrinting] = useState(false);
-  const root = useRef<HTMLDivElement>(null); const [font, setFont] = useState<string>();
+  const root = useRef<HTMLSpanElement>(null); const [font, setFont] = useState<string>();
   useEffect(() => {
     if (!requested || !ready) return;
     const timer = window.setTimeout(() => { setFont(root.current ? getComputedStyle(root.current).fontFamily : undefined); setPrinting(true); setRequested(false); if (params.has("print")) { const next = new URLSearchParams(params); next.delete("print"); router.replace(`${path}?${next}`, { scroll: false }); } }, 0);
@@ -46,9 +46,9 @@ export function QuotationPrint({ ready, children }: { ready: boolean; children: 
     void document.fonts.ready.then(() => { if (!canceled) frame = requestAnimationFrame(() => { if (!canceled) window.print(); }); });
     return () => { canceled = true; cancelAnimationFrame(frame); window.removeEventListener("afterprint", finish); };
   }, [printing]);
-  return <><button type="button" disabled={!ready || printing || requested} onClick={() => { setFont(root.current ? getComputedStyle(root.current).fontFamily : undefined); setPrinting(true); }}>พิมพ์ / บันทึกเป็น PDF</button>
+  return <><span ref={root} className={styles.fileAction}><button type="button" disabled={!ready || printing || requested} onClick={() => { setFont(root.current ? getComputedStyle(root.current).fontFamily : undefined); setPrinting(true); }}>พิมพ์ / บันทึกเป็น PDF</button></span>
     {!ready && <small>โหลดผู้สั่งและเงื่อนไขที่บันทึกให้ครบก่อนพิมพ์</small>}
-    <div ref={root}>{children}</div>
+    
     {printing && createPortal(<div className={styles.printRoot} style={{ fontFamily: font }}>{children}</div>, document.body)}
   </>;
 }

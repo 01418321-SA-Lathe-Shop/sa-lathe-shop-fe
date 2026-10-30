@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import type { Attachment, BackendApi, Fulfillment, JobRequest, Quotation } from "../../lib/api/backend-api";
 import { useResource, useRetryableWrite } from "../../hooks/backend-hooks";
 import { availableEvidenceKinds, evidencePayload } from "../fulfillment/fulfillment-domain";
@@ -25,11 +26,14 @@ export function CustomerDepositDetail({ api, request, quote }: { api: BackendApi
   const resource = useResource<Fulfillment>(api, `/quotations/${quote.id}/fulfillment`); const [kind, setKind] = useState<"deposit" | "po" | null>(null); const [notice, setNotice] = useState(""); const now = useNow();
   const state = resource.data; const available = state && now !== null && !resource.loading ? availableEvidenceKinds(state, now) : [];
   const activeKind = kind && available.includes(kind) ? kind : available[0];
-  return <><PageTitle title="หลักฐานมัดจำและ PO" description={`${request.description} · คำขอ #${request.no_request}`} /><ResourceFeedback {...resource} />
+  const uploadSection = useRef<HTMLElement>(null); const wantsUpload = useSearchParams().get("upload") === "po"; const scrolled = useRef(false);
+  const hasPo = Boolean(state?.evidence?.some((item) => item.kind === "po")); const canUploadPo = available.includes("po");
+  useEffect(() => { if (wantsUpload && !scrolled.current && canUploadPo) { scrolled.current = true; setKind("po"); uploadSection.current?.scrollIntoView({ block: "start" }); } }, [wantsUpload, canUploadPo]);
+  return <>{!hasPo && <PageTitle title="หลักฐานมัดจำและ PO" description={`${request.description} · คำขอ #${request.no_request}`} />}<ResourceFeedback {...resource} />
     {notice && <p role="status" className="cust-alert success">{notice}</p>}
+    {state && <CustomerPoPreview key={`${quote.id}:${state.evidence?.map((item) => item.id).join(":")}`} api={api} request={request} quote={quote} state={state} onUpload={canUploadPo ? () => { setKind("po"); uploadSection.current?.scrollIntoView({ block: "start" }); } : undefined} />}
     {state && <div className={`${styles.quotationLayout} ${styles.depositLayout}`}><section>
-      <CustomerPoPreview key={`${quote.id}:${state.evidence?.map((item) => item.id).join(":")}`} api={api} request={request} state={state} />
-      <section className="cust-document"><h2>{state.job ? "ประวัติหลักฐาน" : "ส่งหลักฐานให้ครบตามเงื่อนไข"}</h2>
+      <section ref={uploadSection} id="upload" className="cust-document"><h2>{state.job ? "ประวัติหลักฐาน" : "ส่งหลักฐานให้ครบตามเงื่อนไข"}</h2>
       {state.canceled_at && <p className="cust-alert danger">คำขอถูกยกเลิกแล้วเมื่อ {dateTH(state.canceled_at)} ไม่สามารถส่งหลักฐานใหม่</p>}
       {!state.job && !state.canceled_at && now !== null && now > Date.parse(state.terms.documents_due_at) && <p className="cust-alert">พ้นกำหนดส่งหลักฐานแล้ว หากส่งครบและทันเวลาก่อนหน้านี้ เจ้าหน้าที่ยังตรวจได้ ระบบเป็นผู้ตัดสินการหมดเวลา หน้านี้ไม่ต่อเวลาให้เอง</p>}
       {available.length > 0 && <><div className="cust-tabs" aria-label="ประเภทหลักฐาน">{available.map((item) => <button key={item} aria-pressed={activeKind === item} onClick={() => setKind(item)}>{item === "deposit" ? "หลักฐานมัดจำ" : "ใบสั่งซื้อ PO"}</button>)}</div>{activeKind && <DepositForm key={`${activeKind}:${resource.data?.evidence?.length}`} api={api} state={state} kind={activeKind} requestId={request.id} quotationId={quote.id} onReload={resource.reload} onSaved={() => { setKind(null); setNotice("ส่งหลักฐานแล้ว รอเจ้าหน้าที่ตรวจสอบ ยังไม่ใช่การอนุมัติหรือการชำระเงินอัตโนมัติ"); resource.reload(); }} />}</>}
