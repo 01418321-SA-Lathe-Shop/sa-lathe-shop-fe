@@ -468,6 +468,18 @@ follows the shared Light/Dark preference without changing document content.
 - Drawer background (`.cust-sidebar` and `.cust-mobile-menu`) updated to `var(--cust-bg)` (`#060707`), perfectly matching the main workspace background canvas and landing page obsidian color.
 - Topbar (`.cust-topbar`) backdrop tint updated to `rgba(6, 7, 7, 0.85)` and mobile navbar (`.cust-navbar`) background unified with `var(--cust-bg)`.
 - Reaffirmed main color tokens strictly matching the cinematic landing page: `#060707` background and drawer, `#111313` card surfaces, `#191c1c` elevated slabs/hover states, `#343838` milled boundaries, and `#ff923f` burnt-orange action highlights.
+## Customer payments, account and role-aware settings (2026-10-30)
+
+Implemented from the Claude Design boards (Customer payments, Customer account, Settings) using each shell's existing tokens, not the boards' sidebar, fonts or colors.
+
+**ใบแจ้งหนี้และการชำระเงิน (`/customer/payments`).** Four summary cells: ยอดค้างชำระรวม, ชำระอนุมัติแล้ว (invoices only, deposits excluded), เกินกำหนดชำระ, หลักฐานรอตรวจ. Status pills with counts (`?status=`) plus ประวัติการชำระ (`?view=history`). One 14px-radius panel holds a local search box and a table; the whole row opens its detail through a stretched first-cell link. Invoices show number, request, job reference, total, paid with a 6px bar, balance, due date with countdown and status. History shows one row per approved deposit and per invoice payment: reference (first 8 characters of the payment id), job, amount, paid date, method, evidence and status. Invoice payments open the existing invoice detail (`?job=`); deposits open `/customer/deposit-po?request=`, because the job read gives a deposit no date, method or file. At 760px and below each row becomes a labelled two-column card. The detail adds the job reference, the accepted quotation link and each payment's reference. Not taken from the board: Record payment, reminders, export, aging, per-customer view and PromptPay/cheque methods. Partial and final payment types are not shown: the API has no payment type, only invoice status.
+
+**บัญชีและบริษัท (`/customer/memberships`).** Panels for บัญชีผู้ใช้ (name, username, status, created date), ลูกค้าและบริษัท (name, type, your rights, customer ID, private invitation for owners; join by invitation) and ช่องทางติดต่อและที่อยู่. The API stores no customer email, phone or address, so those read ยังไม่มีในระบบ, with no edit controls.
+
+**ตั้งค่า (`/customer?view=settings`, `/staff/settings`, `/admin/settings`).** One `SettingsPage` in `src/features/settings` for all roles, with underline tabs บัญชีของฉัน, การตั้งค่าส่วนตัว, ความปลอดภัย and, for Admin only, ระบบ. Everything is read-only except display size (browser only) and sign-out, which has a confirmation dialog. ระบบ links to จัดการพนักงาน and shows which pages each fixed role can open, from the route guard's map. The Staff/Admin sidebar item replaces the old ตั้งค่า dialog there; the landing page keeps the dialog. Theme stays on the navbar toggle. `--s-*` tokens resolve to the Customer or Staff tokens, so one stylesheet serves both shells.
+
+**Known limitations.** The backend has no command for editing a profile, changing your own password, saved addresses, notification or language preferences, session lists or shop configuration, so those are stated as unavailable, not simulated.
+
 ## Visual direction
 
 Private-file viewing correction (2026-10-27): files without a download filename
@@ -702,10 +714,10 @@ The entire playback action bar is removed at the owner's request. There are no v
 | / | Landing |
 | /login, /register | ฟอร์มดีไซน์หลักที่เชื่อม sign-in / customer registration จริง พร้อมบัญชีทดสอบ mock backend ใต้ฟอร์ม |
 | /staff | Staff overview |
-| /staff/quotations, /staff/materials, /staff/receiving, /staff/production, /staff/delivery-payment, /staff/inbox | UC1/UC2/UC4 review, UC5, UC7–UC9, การแจ้งเตือน |
+| /staff/quotations, /staff/materials, /staff/receiving, /staff/production, /staff/delivery-payment, /staff/inbox, /staff/settings | UC1/UC2/UC4 review, UC5, UC7–UC9, การแจ้งเตือน, ตั้งค่า |
 | /customer | Customer overview |
-| /customer/requests, /customer/quotations, /customer/deposit-po, /customer/delivery-payment, /customer/inbox, /customer/memberships | UC1 / UC3 / UC4 / UC9, การแจ้งเตือน, บริษัทและคำเชิญ |
-| /admin, /admin/requests, /admin/workers, /admin/materials, /admin/orders, /admin/receiving, /admin/production, /admin/delivery-payment, /admin/inbox | Admin overview, UC1–UC4 read/review, จัดการ Staff, UC5 catalog/stock, UC6, UC7 finance, UC8 labor cost, UC9 terms/payments |
+| /customer/requests, /customer/quotations, /customer/deposit-po, /customer/delivery-payment, /customer/payments, /customer/inbox, /customer/memberships | UC1 / UC3 / UC4 / UC9, ใบแจ้งหนี้และการชำระเงิน, การแจ้งเตือน, บัญชีและบริษัท (ตั้งค่าอยู่ที่ /customer?view=settings) |
+| /admin, /admin/requests, /admin/workers, /admin/materials, /admin/orders, /admin/receiving, /admin/production, /admin/delivery-payment, /admin/inbox, /admin/settings | Admin overview, UC1–UC4 read/review, จัดการ Staff, UC5 catalog/stock, UC6, UC7 finance, UC8 labor cost, UC9 terms/payments |
 
 Legacy redirects: /staff/orders → /staff/receiving (UC6 เป็นของ Admin เท่านั้นตาม backend UC6.md); /staff/requests → /staff/quotations; /staff/delivery, /staff/payments, /staff/debtors → /staff/delivery-payment; /customer/documents → /customer/deposit-po. Customer jobs and payments now render their own task workspaces at their existing URLs.
 
@@ -922,6 +934,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 | 2026-10-30 | Customer คำขอผลิต adds URL-backed การ์ด/รายการ layouts, compact essential-only summaries, and removes the redundant customer-profile read | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Customer desktop/narrow with real local API, both layouts, no horizontal overflow or console errors |
 | 2026-10-30 | Admin คำขอและใบเสนอราคา adds URL-backed รายการ/การ์ด views; list keeps the side detail while responsive cards open request detail in an accessible native modal. Staff stays on list/detail regardless of the query | 184 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Admin desktop/narrow with real local API, Escape/URL close checked, no horizontal overflow or console errors |
 | 2026-10-30 | Customer ใบเสนอราคา and มัดจำและ PO list/detail pages from the Claude Design boards: รอคุณตอบ cards plus one panel with status tabs, search, collapsible filters and table with a next-step column; PO banner and อัปโหลด PO entry; quotation detail with status banner, summary cells, whole-job price, request, terms and attachment cards, revision timeline, sticky decision bar and modal confirm; PO detail with review steps, shop feedback, preview, details and history. On-screen paper removed (print only). `sent` badge is now the info tone. No VAT, no itemised costs, no invented PO number or under-review status | Type check, lint, native tests, source audit, DESIGN sync; headless Chromium against the real local API with new test records: re-quote, revised quote, accept, PO upload, Admin rejection reason, corrected re-upload; 1280 Dark/Light and 390 Light/Dark, blocked-API error, delayed loading, empty state, no horizontal overflow |
+| 2026-10-30 | Customer payments table with history view, Customer account panels, and one role-aware Settings page (new `/staff/settings`, `/admin/settings`; Admin-only ระบบ section). Unsupported profile, address, password and preference actions are stated as unavailable | Type check, lint, native tests, source audit, DESIGN sync; browser against the real local API as Customer, Staff and Admin: row navigation, sign-out confirm and cancel, Staff redirected from Admin settings, 1440 and 390 widths with no horizontal overflow |
 | 2026-10-30 | สต๊อกวัตถุดิบ layout from the Claude Design board: summary cells (ทั้งหมด / หมด / มีของแต่ถูกจองหมด / หน่วยวัดที่ใช้), out-of-stock banner linking to หมด, one panel with tabs + search, unit pill and per-quantity units, reserved-share bar, footer count; no Create PO, Reserved-for-jobs total or unit conversion | Type check, lint, 185 native tests (summary helpers new), DESIGN sync; headless Chromium against the real local API: Staff 1280 Dark / 390 Light, Admin 1280 Light with side panel, blocked-API error state |
 | 2026-10-30 | Staff/Admin redesign Step 8: การแจ้งเตือน page in the Thai list style with ทั้งหมด / ยังไม่อ่าน tabs, Bangkok-day groups, read badges, ทำเป็นอ่านแล้ว, read-all and โหลดเพิ่ม; bell and page share one request-link helper | 183 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / Staff 390 Light against the real local API, writes intercepted |
 | 2026-10-30 | Admin จัดการพนักงาน fixes: ⋯ row menu no longer clipped (overflow wrapper removed, rows stack at ≤48rem); add/edit/password open in a centred modal that closes on an outside click (`Drawer centered`, workers only); panel no longer overflows on phones; compact summary row at ≤40rem | Type check, lint, native tests, DESIGN sync; built-in browser on the local dev server as the local-test Admin at 800px and 375px: last-row menu fully visible, modal centred with its bottom reachable, inside click keeps it open, outside click closes it, no horizontal page overflow; no writes made |
@@ -2365,22 +2378,10 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-inspection-decision p) { margin: 12px 0; }
 .root :global(.cust-inspection-decision .cust-primary), .root :global(.cust-inspection-decision .cust-danger) { display: flex; width: 100%; margin-top: 24px; }
 .root :global(.cust-inspection-decision fieldset > .cust-link) { margin-top: 12px; }
-.root :global(.cust-account-layout) { display: grid; grid-template-columns: minmax(260px, 340px) minmax(0, 1.8fr); gap: clamp(1.5rem, 3.5vw, 4rem); align-items: start; }
-.root :global(.cust-account-profile) { padding: 24px 0; }
-.root :global(.cust-profile-avatar) { width: 72px; height: 72px; display: grid; place-items: center; font-size: 1.75rem; background: var(--cust-tint); color: var(--cust-accent); border-radius: 50%; margin-bottom: 16px; }
-.root :global(.cust-membership) { padding: 24px 0; border-bottom: 1px solid var(--cust-line); }
-.root :global(.cust-membership p) { color: var(--cust-muted); margin-top: 8px; }
 .root :global(.cust-narrow) { width: 100%; max-width: min(100%, 720px); margin: 0; }
 .root :global(.cust-narrow > p), .root :global(.cust-narrow > button) { margin-top: 20px; }
 .root :global(.cust-secret) { padding: 24px; background: var(--cust-surface-2); border: 1px dashed var(--cust-line); border-radius: 10px; margin: 24px 0; }
 .root :global(.cust-secret output) { display: block; overflow-wrap: anywhere; margin-top: 16px; user-select: all; }
-.root :global(.cust-settings-layout) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.5rem, 3vw, 3rem); align-items: start; }
-.root :global(.cust-preference) { padding-bottom: 24px; margin-bottom: 24px; border-bottom: 1px solid var(--cust-line); }
-.root :global(.cust-preference legend) { font-size: 1.25rem; margin-bottom: 16px; font-weight: 650; }
-.root :global(.cust-preference label) { display: flex; align-items: center; gap: 12px; min-height: 48px; cursor: pointer; }
-.root :global(.cust-settings-preview) { padding: clamp(1.25rem, 2vw, 2rem); background: var(--cust-surface); border: 1px solid var(--cust-line); border-radius: 12px; }
-.root :global(.cust-settings-preview h3) { margin-top: 24px; }
-.root :global(.cust-settings-preview p), .root :global(.cust-settings-preview .cust-badge) { margin-top: 16px; }
 
 .root :global(.cust-overview-grid > *),
 .root :global(.cust-detail-grid > *),
@@ -2389,8 +2390,6 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-job-row > *),
 .root :global(.cust-job-detail > *),
 .root :global(.cust-inspection-layout > *),
-.root :global(.cust-account-layout > *),
-.root :global(.cust-settings-layout > *),
 .root :global(.cust-filters > *),
 .root :global(.cust-request-row > *),
 .root :global(.cust-document-row > *) {
@@ -2414,9 +2413,7 @@ src/features/workspace/workspace.module.css
   .root :global(.cust-quotation-layout),
   .root :global(.cust-wizard-grid),
   .root :global(.cust-job-detail),
-  .root :global(.cust-inspection-layout),
-  .root :global(.cust-account-layout),
-  .root :global(.cust-settings-layout) {
+  .root :global(.cust-inspection-layout) {
     grid-template-columns: minmax(0, 1fr);
     gap: 28px;
   }
@@ -2463,7 +2460,7 @@ src/features/workspace/workspace.module.css
   .root :global(.cust-document-action) { text-align: left; }
   .root :global(.cust-decision-bar) { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; max-width: 100%; box-sizing: border-box; z-index: 20; background: var(--cust-surface); padding: 12px 16px max(12px, env(safe-area-inset-bottom)); border-top: 1px solid var(--cust-line); gap: 6px; }
   .root :global(.cust-main:has(.cust-decision-bar)) { padding-bottom: 180px; }
-  .root :global(.cust-inspection-decision), .root :global(.cust-account-profile), .root :global(.cust-settings-preview) { padding: 16px 0; }
+  .root :global(.cust-inspection-decision) { padding: 16px 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -3807,6 +3804,7 @@ export function Logo({ onClick }: { onClick?: () => void }) {
 - `app/admin/production/page.tsx`
 - `app/admin/receiving/page.tsx`
 - `app/admin/requests/page.tsx`
+- `app/admin/settings/page.tsx`
 - `app/admin/workers/page.tsx`
 - `app/customer/delivery-payment/page.tsx`
 - `app/customer/deposit-po/page.tsx`
@@ -3833,5 +3831,6 @@ export function Logo({ onClick }: { onClick?: () => void }) {
 - `app/staff/quotations/page.tsx`
 - `app/staff/receiving/page.tsx`
 - `app/staff/requests/page.tsx`
+- `app/staff/settings/page.tsx`
 
 <!-- DESIGN-SNAPSHOT:END -->
