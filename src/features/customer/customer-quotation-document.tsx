@@ -48,7 +48,6 @@ export function QuotationPrint({ ready, children }: { ready: boolean; children: 
   }, [printing]);
   return <><span ref={root} className={styles.fileAction}><button type="button" disabled={!ready || printing || requested} onClick={() => { setFont(root.current ? getComputedStyle(root.current).fontFamily : undefined); setPrinting(true); }}>พิมพ์ / บันทึกเป็น PDF</button></span>
     {!ready && <small>โหลดผู้สั่งและเงื่อนไขที่บันทึกให้ครบก่อนพิมพ์</small>}
-    
     {printing && createPortal(<div className={styles.printRoot} style={{ fontFamily: font }}>{children}</div>, document.body)}
   </>;
 }
