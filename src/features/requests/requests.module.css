@@ -1,25 +1,11 @@
 /* คำขอและใบเสนอราคา (UC1–UC4) page-specific rules; the list/detail layout is staff-ui/staff-layout.module.css. */
-.viewSwitch { display: inline-flex; flex: 0 0 auto; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
-:global(.live-workspace) .viewSwitch a { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 7px 13px; border-radius: 8px; color: var(--muted); font-size: 0.875rem; font-weight: 650; text-decoration: none; }
-:global(.live-workspace) .viewSwitch a:hover { color: var(--text); text-decoration: none; }
-:global(.live-workspace) .viewSwitch a[aria-current="page"] { background: color-mix(in srgb, var(--lime) 14%, var(--surface-2)); color: var(--text); }
-:global(.live-workspace) .viewSwitch a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
-
-.cardWorkspace { min-width: 0; }
-.cardGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: 16px; min-width: 0; }
-.cardGrid > :not(a) { grid-column: 1 / -1; }
-:global(.live-workspace) .gridCard { align-content: start; min-height: 13.5rem; padding: 20px; }
-
-.requestModal { width: min(68rem, calc(100vw - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); margin: auto; padding: 0; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); color: var(--text); box-shadow: 0 24px 80px rgba(0, 0, 0, .42); overflow: hidden; }
-.requestModal::backdrop { background: rgba(4, 5, 5, .72); backdrop-filter: blur(5px); }
-.modalFrame { display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: calc(100dvh - 2rem); }
-.modalToolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; padding: 10px 16px 10px 20px; border-bottom: 1px solid var(--line); background: var(--surface); }
-.modalToolbar span { font-weight: 700; }
-:global(.live-workspace) .modalToolbar a { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); text-decoration: none; }
-:global(.live-workspace) .modalToolbar a:hover { border-color: var(--lime); text-decoration: none; }
-:global(.live-workspace) .modalToolbar a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
-.modalBody { padding: 20px; overflow: auto; overscroll-behavior: contain; }
-.modalBody > article { border: 0; padding: 0; background: transparent; }
+/* /admin/requests reuses the Customer quotation list classes with the shell's tokens. */
+.adminScope { --cust-bg: var(--bg); --cust-surface: var(--surface); --cust-surface-2: var(--surface-2); --cust-ink: var(--text); --cust-muted: var(--muted); --cust-line: var(--line); --cust-accent: var(--lime-soft); --cust-tint: color-mix(in srgb, var(--lime) 12%, var(--surface)); --cust-green: var(--success); --cust-action: var(--lime); --cust-focus: var(--lime-soft); display: grid; gap: 20px; }
+.adminScope tbody tr:hover { background: var(--surface-2); }
+.adminScope tbody tr:focus-within { outline: 2px solid var(--lime-soft); outline-offset: -2px; }
+.adminScope tbody a:focus-visible { outline: 0; }
+:global(.live-workspace) .adminPrimary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; margin-top: auto; padding: 0 16px; border-radius: 10px; background: var(--lime); color: #121514; font-weight: 650; text-decoration: none; }
+.adminPrimary::after { content: ""; position: absolute; inset: 0; }
 
 .files { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .files li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
@@ -50,11 +36,6 @@
 .check { align-items: flex-start; line-height: 1.5; }
 
 @media (max-width: 40rem) {
-  .viewSwitch { width: 100%; }
-  :global(.live-workspace) .viewSwitch a { flex: 1; }
-  .requestModal { width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
-  .modalFrame { height: 100dvh; max-height: 100dvh; }
-  .modalBody { padding: 16px; }
   .moneyGrid { grid-template-columns: minmax(0, 1fr); }
   .choices label { flex: 1; justify-content: center; }
 }

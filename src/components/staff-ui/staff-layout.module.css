@@ -42,6 +42,7 @@
 /* Detail */
 .detailCard { display: grid; gap: 20px; padding: clamp(1rem, 2.2vw, 1.75rem); border: 1px solid var(--line); border-radius: 16px; background: var(--surface); min-width: 0; }
 :global(.live-workspace) .back { display: none; align-items: center; gap: 6px; min-height: 44px; width: fit-content; color: var(--lime); font-weight: 650; text-decoration: none; }
+:global(.live-workspace) .fullPage .back { display: inline-flex; margin-bottom: 8px; }
 .back svg { transform: rotate(180deg); }
 .detailHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .detailHeader h2 { margin: 0; font-size: clamp(1.25rem, 2vw, 1.5rem); line-height: 1.35; overflow-wrap: anywhere; }
