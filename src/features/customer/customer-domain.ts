@@ -31,8 +31,10 @@ export function latestQuote(quotes: Quotation[]) {
 export function matchingRequests(items: JobRequest[], query: string, status: string) {
   const term = query.trim().toLocaleLowerCase("th-TH");
   return items.filter((item) => (!status || item.status === status) && (!term || `${item.no_request} ${item.description}`.toLocaleLowerCase("th-TH").includes(term)))
-    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at) || a.id.localeCompare(b.id));
+    .sort((a, b) => Number(b.status === "pending") - Number(a.status === "pending") || Date.parse(b.created_at) - Date.parse(a.created_at) || a.id.localeCompare(b.id));
 }
+export type CustomerRequestLayout = "cards" | "list";
+export function customerRequestLayout(value: string | null): CustomerRequestLayout { return value === "list" ? "list" : "cards"; }
 export function requestStatusCounts(items: JobRequest[], query: string) {
   const matched = matchingRequests(items, query, "");
   const byStatus = Object.fromEntries(Object.keys(REQUEST_LABELS).map((status) => [status, 0]));

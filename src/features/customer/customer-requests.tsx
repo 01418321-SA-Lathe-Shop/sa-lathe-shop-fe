@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import type { Attachment, BackendApi, Customer, Decision, Fulfillment, JobRequest, Quotation } from "../../lib/api/backend-api";
+import type { Attachment, BackendApi, Decision, Fulfillment, JobRequest, Quotation } from "../../lib/api/backend-api";
 import { useResource } from "../../hooks/backend-hooks";
 import { useCollection } from "./customer-hooks";
 import { useSalesIndex } from "./customer-sales-data";
-import { customerHref, dateTH, latestQuote, matchingRequests, QUOTE_LABELS, REQUEST_LABELS } from "./customer-domain";
+import { customerHref, customerRequestLayout, dateTH, latestQuote, matchingRequests, QUOTE_LABELS, REQUEST_LABELS } from "./customer-domain";
 import { Badge, Disclosure, Empty, Field, Limited, LocalPages, PageTitle, PrivateFile, ResourceFeedback } from "./customer-ui";
 import { CustomerUpload } from "./customer-upload";
 import { RequestCard, RequestCardSkeleton, RequestStatusFilters } from "./customer-request-list";
@@ -17,19 +17,18 @@ export function OrderTabs({ active }: { active: "requests" | "jobs" | "history" 
   return <nav className="cust-tabs" aria-label="งานของฉัน">{[["requests", "/customer/requests", "คำขอผลิต"], ["jobs", "/customer/jobs", "งานผลิต"], ["history", "/customer/jobs?view=history", "ประวัติ"]].map(([id, href, label]) => <Link key={id} href={href} aria-current={active === id ? "page" : undefined}>{label}</Link>)}</nav>;
 }
 export function CustomerRequests({ api }: { api: BackendApi }) {
-  const router = useRouter(); const params = useSearchParams(); const resource = useSalesIndex(api); const profiles = useResource<{ items: Customer[] | null }>(api, "/customers");
-  const [page, setPage] = useState(0); const q = params.get("q") ?? ""; const status = params.get("status") ?? "";
+  const router = useRouter(); const params = useSearchParams(); const resource = useSalesIndex(api);
+  const [page, setPage] = useState(0); const q = params.get("q") ?? ""; const status = params.get("status") ?? ""; const layout = customerRequestLayout(params.get("layout"));
   const filtered = matchingRequests(resource.records.map((item) => item.request), q, status);
   const recordsById = new Map(resource.records.map((record) => [record.request.id, record]));
-  const profilesById = new Map((profiles.data?.items ?? []).map((profile) => [profile.id, profile]));
   return <section className={styles.list}><OrderTabs active="requests" /><PageTitle title="คำขอผลิต" description="ดูสถานะและขั้นตอนถัดไป ตั้งแต่ส่งคำขอจนเปิดงานผลิต" action={<Link className="cust-primary" href={customerHref("requests", { view: "new" })}>ส่งคำขอผลิตใหม่</Link>} />
-    <form className={styles.searchForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); router.replace(customerHref("requests", { q: String(data.get("q") ?? ""), status: String(data.get("status") ?? "") }), { scroll: false }); }}><Field label="ค้นหาคำขอ"><input name="q" type="search" defaultValue={q} placeholder="เลขคำขอหรือรายละเอียดงาน" /></Field><input type="hidden" name="status" value={status} /><button type="submit">ค้นหา</button></form>
-    <RequestStatusFilters items={resource.records.map((item) => item.request)} query={q} status={status} loading={resource.loading} countUnavailable={Boolean(resource.error && !resource.data)} />
+    <form className={styles.searchForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); router.replace(customerHref("requests", { q: String(data.get("q") ?? ""), status: String(data.get("status") ?? ""), layout: layout === "list" ? "list" : undefined }), { scroll: false }); }}><Field label="ค้นหาคำขอ"><input name="q" type="search" defaultValue={q} placeholder="เลขคำขอหรือรายละเอียดงาน" /></Field><input type="hidden" name="status" value={status} /><button type="submit">ค้นหา</button></form>
+    <div className={styles.listTools}><RequestStatusFilters items={resource.records.map((item) => item.request)} query={q} status={status} layout={layout} loading={resource.loading} countUnavailable={Boolean(resource.error && !resource.data)} /><nav className={styles.viewSwitch} aria-label="รูปแบบการแสดงคำขอ"><Link href={customerHref("requests", { q, status })} aria-current={layout === "cards" ? "page" : undefined}><span aria-hidden="true">▦</span> การ์ด</Link><Link href={customerHref("requests", { q, status, layout: "list" })} aria-current={layout === "list" ? "page" : undefined}><span aria-hidden="true">☷</span> รายการ</Link></nav></div>
     {(q || status) && <p className="cust-filter-result">ผลจากการค้นหาและตัวกรอง <Link href="/customer/requests">ล้างการค้นหาและตัวกรอง</Link></p>}
     <ResourceFeedback {...resource} loading={false} />{resource.data && !resource.loading && <Limited complete={resource.complete} />}
-    <p className="cust-muted cust-small">เรียงจากวันที่ส่งล่าสุด · ค้นหาจากรายการที่โหลดสำเร็จตามสิทธิ์</p>
-    {resource.loading && !resource.records.length && <RequestCardSkeleton />}
-    <div className={styles.grid}>{filtered.slice(page * 20, page * 20 + 20).map((request) => <RequestCard key={request.id} record={recordsById.get(request.id)!} profile={profilesById.get(request.customer_id)} profileLoading={profiles.loading} profileError={profiles.error} />)}</div>
+    <p className="cust-muted cust-small">คำขอรอประเมินแสดงก่อน จากนั้นเรียงตามวันที่ส่งล่าสุด</p>
+    {resource.loading && !resource.records.length && <RequestCardSkeleton layout={layout} />}
+    <div className={`${styles.grid} ${layout === "list" ? styles.listView : ""}`}>{filtered.slice(page * 20, page * 20 + 20).map((request) => <RequestCard key={request.id} record={recordsById.get(request.id)!} layout={layout} />)}</div>
     {resource.data && !resource.loading && !filtered.length && !resource.error && <Empty title={q || status ? "ไม่พบคำขอที่ตรงกับการค้นหา" : "ยังไม่มีคำขอผลิต"} action={<Link href={q || status ? "/customer/requests" : customerHref("requests", { view: "new" })}>{q || status ? "ล้างการค้นหาและตัวกรอง" : "ส่งคำขอผลิตแรก"}</Link>}>ลองเปลี่ยนตัวกรอง หรือเริ่มส่งรายละเอียดงานให้ร้านประเมินราคา</Empty>}
     <LocalPages count={filtered.length} page={page} setPage={setPage} />
   </section>;

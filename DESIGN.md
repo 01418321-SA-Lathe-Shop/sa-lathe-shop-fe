@@ -752,8 +752,8 @@ Generator อัปเดตเฉพาะภาคผนวกจาก source
 
 Owner-approved reference adaptation changes composition, not the Customer palette.
 The request list has a wrapping status-pill navigation with count badges,
-plus its existing applied search form. Filters retain `q/status` URLs, literal
-matching, newest-first sorting, 20-record pagination and all four request states
+plus its existing applied search form. A compact การ์ด/รายการ control uses `layout=list` (missing/unknown means cards) without colliding with the existing `view=new` request wizard. Filters retain `q/status/layout` URLs, literal
+matching, pending-first then newest-first sorting, 20-record pagination and all four request states
 (pending/ongoing/completed/canceled). Counts describe loaded records matching the
 applied query before the selected status; loading shows an ellipsis, and incomplete
 collections retain their existing warning. No new count/profile endpoint or
@@ -761,8 +761,8 @@ authorization change is introduced. The new CSS Module is scoped under its list
 owner; shared badges, navigation, drawer, detail and wizard remain unchanged.
 
 The reference's composition is translated to the existing dark/orange system,
-not its white/purple identity. A two-column full-width grid above 640px becomes
-one column at 640px and below, with 24px/16px gaps and 24px/20px card padding.
+not its white/purple identity. Card view uses an auto-fill full-width grid with a 19rem minimum and becomes
+one column when space is narrow. List view uses compact bordered rows on desktop/tablet and intentionally collapses to the same readable vertical card structure at 640px and below.
 Cards have a 16px radius and `0 4px 16px rgba(0,0,0,.12)` shadow; hover changes
 only shadow, never position/scale. Fills and text retain existing Customer
 variables and saved Light/Dark preferences; the existing `#ffb16d` focus outline
@@ -771,13 +771,8 @@ existing `#121514` foreground instead of inheriting the generic link hover color
 it is a state-cascade fix, not a palette change. Request-card pill badge geometry (also reused by Jobs) retains the shared badge's exact
 value, wording and color mapping, including its existing neutral canceled tone.
 
-Cards show exact request number/quantity, a two-line description (full text in
-the unchanged detail), request state, Bangkok creation/requested dates, current
-sales step and original follow-up destinations. The small machine/clock/inbox
-icons reuse the existing icon system. A customer-ID lookup from the existing
-`/customers` read supplies the footer's customer name/type, with explicit loading
-or unavailable text instead of invented values. Requested dates retain the
-non-promised-date caveat. A stretched native Link opens the existing request
+Both presentations show only the decision-relevant summary: exact request number and quantity, a two-line description (full text in
+the unchanged detail), request state, requested date, current sales step and Bangkok submission date. Buyer identity, customer type, material specification and the repeated requested-date caveat are removed from list/card summaries; those facts remain in the detail. This also removes the unnecessary `/customers` list read from this page. A stretched native Link opens the existing request
 detail from the card surface; secondary quotation/evidence/job links remain
 independently focusable above it. Card keyboard focus is visible. No request
 detail drawer or sticky selected-card state is added: the current query selector
@@ -901,6 +896,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-30 | Customer คำขอผลิต adds URL-backed การ์ด/รายการ layouts, compact essential-only summaries, removes the redundant customer-profile read, and prioritizes รอประเมิน before newest-first remaining requests | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Customer desktop/narrow with real local API, both layouts, no horizontal overflow or console errors |
 | 2026-10-30 | Admin คำขอและใบเสนอราคา adds URL-backed รายการ/การ์ด views; list keeps the side detail while responsive cards open request detail in an accessible native modal. Staff stays on list/detail regardless of the query | 184 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Admin desktop/narrow with real local API, Escape/URL close checked, no horizontal overflow or console errors |
 | 2026-10-30 | Staff/Admin redesign Step 8: การแจ้งเตือน page in the Thai list style with ทั้งหมด / ยังไม่อ่าน tabs, Bangkok-day groups, read badges, ทำเป็นอ่านแล้ว, read-all and โหลดเพิ่ม; bell and page share one request-link helper | 183 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / Staff 390 Light against the real local API, writes intercepted |
 | 2026-10-30 | Fix: งานผลิต usage form no longer contains the extra-material search form; pressing ค้นหา in เพิ่มวัตถุดิบนอกแผน could also trigger บันทึกการใช้วัตถุดิบ. The usage form saves only from its button, and the shared `SearchForm` stops its submit event from reaching an outer form | 175 native tests, type check, lint, source audit, build; not re-walked in the browser (backend down) |
@@ -2454,13 +2450,20 @@ src/features/workspace/workspace.module.css
 .list .searchForm { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 16px; margin-bottom: 24px; }
 .list .searchForm > label { margin: 0; }
 .list .searchForm > button { min-height: 48px; }
-.list .statusFilters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+.listTools { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.list .statusFilters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
 .list .statusFilters a { min-height: 44px; gap: 10px; padding: 8px 14px; border-radius: 999px; color: var(--cust-muted); background: var(--cust-surface); text-decoration: none; font-size: .875rem; }
 .list .statusFilters a:hover { background: var(--cust-surface-2); color: var(--cust-ink); }
 .list .statusFilters a[aria-current="page"] { background: var(--cust-tint); color: var(--cust-accent); font-weight: 650; }
 .list .count { min-width: 24px; padding: 0 6px; border-radius: 999px; background: var(--cust-surface-2); color: var(--cust-ink); text-align: center; font-variant-numeric: tabular-nums; }
 .list .visuallyHidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
-.list .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 24px; }
+.viewSwitch { display: inline-flex; flex: 0 0 auto; gap: 4px; padding: 4px; border: 1px solid var(--cust-line); border-radius: 12px; background: var(--cust-surface); }
+.viewSwitch a { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 7px 12px; border-radius: 8px; color: var(--cust-muted); text-decoration: none; font-size: .875rem; font-weight: 650; white-space: nowrap; }
+.viewSwitch a:hover { color: var(--cust-ink); text-decoration: none; }
+.viewSwitch a[aria-current="page"] { background: var(--cust-tint); color: var(--cust-accent); }
+.viewSwitch a:focus-visible { outline: 2px solid var(--cust-focus); outline-offset: 2px; }
+.list .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: 18px; margin-top: 20px; }
+.list .grid.listView { grid-template-columns: minmax(0, 1fr); gap: 10px; }
 .list .card { position: relative; min-width: 0; display: flex; flex-direction: column; padding: 24px; border-radius: 16px; background: var(--cust-surface); box-shadow: 0 4px 16px rgba(0, 0, 0, .12); transition: box-shadow 180ms ease-out; }
 .list .card:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
 .list .card:has(.openCard:focus-visible) { outline: 2px solid var(--cust-focus); outline-offset: 3px; }
@@ -2475,29 +2478,41 @@ src/features/workspace/workspace.module.css
 .list .openCard:focus-visible { outline: none; }
 .list .openCard::after { content: ""; position: absolute; inset: 0; border-radius: 16px; }
 .list .card :global(.cust-badge) { border-radius: 999px; }
-.list .dates { display: grid; gap: 16px; margin: 24px 0 20px; }
-.list .dates dt { display: flex; align-items: center; gap: 10px; color: var(--cust-muted); font-size: .875rem; }
-.list .dates dt svg { flex-shrink: 0; }
-.list .dates dd { margin: 4px 0 0 26px; color: var(--cust-ink); font-size: .9375rem; overflow-wrap: anywhere; }
-.list .dates small { display: block; margin-top: 4px; font-size: .8125rem; }
-.list .nextStep { padding-bottom: 20px; color: var(--cust-muted); font-size: .875rem; }
-.list .quantity { color: var(--cust-ink); margin-bottom: 4px; }
+.list .essentials { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 20px 0 16px; }
+.list .essentials > div { padding: 10px 12px; border-radius: 10px; background: var(--cust-surface-2); min-width: 0; }
+.list .essentials dt { color: var(--cust-muted); font-size: .75rem; }
+.list .essentials dd { margin: 3px 0 0; color: var(--cust-ink); font-size: .875rem; font-weight: 600; overflow-wrap: anywhere; }
+.list .nextStep { padding-bottom: 16px; color: var(--cust-muted); font-size: .875rem; }
+.list .nextStep > p { margin: 0; }
 .list .secondaryLink { position: relative; z-index: 1; margin-top: 4px; font-size: .875rem; }
-.list .buyer { position: relative; display: grid; justify-items: start; gap: 4px; padding-top: 20px; margin-top: auto; border-top: 1px solid var(--cust-line); pointer-events: none; overflow-wrap: anywhere; }
-.list .buyer strong { font-size: 1rem; color: var(--cust-ink); }
-.list .buyer > span:not(.openHint) { color: var(--cust-muted); font-size: .875rem; }
-.list .openHint { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; margin-top: 4px; color: var(--cust-accent); font-size: .875rem; }
-.list .skeleton { min-height: 440px; gap: 24px; }
+.list .cardFooter { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; margin-top: auto; border-top: 1px solid var(--cust-line); color: var(--cust-muted); font-size: .8125rem; pointer-events: none; }
+.list .openHint { display: inline-flex; align-items: center; gap: 7px; color: var(--cust-accent); font-size: .875rem; font-weight: 600; }
+.list .skeleton { min-height: 320px; gap: 20px; }
 .list .skeleton > span { height: 16px; width: 70%; border-radius: 6px; background: var(--cust-surface-2); }
 .list .skeleton > span:nth-child(2) { width: 90%; height: 44px; }
 .list .skeleton > span:nth-child(3) { width: 35%; height: 28px; border-radius: 999px; }
 .list .skeleton > span:last-child { margin-top: auto; }
+.list .rowCard { display: grid; grid-template-columns: minmax(7rem, .7fr) minmax(14rem, 2fr) auto minmax(15rem, 1.3fr); grid-template-areas: "number title status facts" "number step step footer"; align-items: center; gap: 8px 20px; min-height: 0; padding: 16px 18px; box-shadow: none; border: 1px solid var(--cust-line); }
+.list .rowCard .cardHeader { grid-area: number; }
+.list .rowCard .cardHeader > svg { display: none; }
+.list .rowCard .cardTitle { grid-area: title; margin: 0; }
+.list .rowCard > :global(.cust-badge) { grid-area: status; justify-self: start; }
+.list .rowCard .essentials { grid-area: facts; margin: 0; }
+.list .rowCard .nextStep { grid-area: step; padding: 0; }
+.list .rowCard .secondaryLink { display: none; }
+.list .rowCard .cardFooter { grid-area: footer; padding: 0; margin: 0; border: 0; justify-content: flex-end; }
+.list .rowCard.skeleton { min-height: 112px; grid-template-areas: none; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 640px) {
   .list .searchForm { gap: 12px; }
   .list .statusFilters a { padding: 8px 12px; }
-  .list .grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .listTools { align-items: stretch; flex-direction: column; }
+  .viewSwitch { align-self: stretch; }
+  .viewSwitch a { flex: 1; }
+  .list .grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .list .card { padding: 20px; }
+  .list .rowCard { display: flex; padding: 16px; }
 }
+@media (min-width: 641px) and (max-width: 1100px) { .list .rowCard { grid-template-columns: minmax(7rem, .6fr) minmax(12rem, 1.5fr) auto; grid-template-areas: "number title status" "facts facts facts" "step step footer"; } }
 @media (prefers-reduced-motion: reduce) { .list .card { transition: none; } }
 ```
 
