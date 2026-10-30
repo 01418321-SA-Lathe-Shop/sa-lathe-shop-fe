@@ -1,3 +1,16 @@
+## Staff/Admin redesign Step 5 (รับเข้าวัตถุดิบ) — 2026-10-30
+
+- Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 5 complete (`2b99aec` domain helpers, `32020b7` page).
+  - Tabs: รอรับของ / รับบางส่วน / รับครบ / มีของเสียหาย / ค้างจ่ายผู้ขาย (Admin). The last two are counted from per-order details, owner-approved: first 100 orders, in parallel.
+  - Search and cards.
+  - Receipt form with remaining quantities and “รับครบตามที่เหลือ” per line and for all lines.
+  - Claim cards and a receipt timeline.
+  - Admin จ่ายผู้ขาย section: credit days, settlement, and a Thai proof upload with a 100 MB check.
+  - Thai validation messages.
+- Checks: 178 native tests (3 new), type check, lint, source audit, DESIGN sync, production build.
+- Chrome walk against a test-only API stub (backend down): `pim.admin` 1280 Dark / 390 Light and `anan.staff` 768 Dark. No overflow or console errors. The intercepted receipt, claim, credit-days and settlement payloads match the earlier shapes. Staff see no payment tab or section.
+- Not exercised against the live API: real data, saves, conflicts, retry, proof upload. Pending owner decision: none.
+
 ## Staff/Admin redesign Step 4 (สั่งซื้อวัตถุดิบ) — 2026-10-30
 
 - Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 4 complete (`ef034d5` shared view-tab/toggle/note styles, `0981939` page, `e5ac7df` Step 1 usage-form fix). Five status tabs with counts and search, one action card per order state, side-panel new-order step form with `MaterialPicker` and exact live total (`MaterialSearch` removed), ผู้ขาย view with side-panel add/edit, Thai validation.

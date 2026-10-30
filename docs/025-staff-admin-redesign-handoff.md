@@ -1,6 +1,6 @@
 # Staff/Admin redesign — plan and handoff
 
-Status date: 2026-10-30 · Branch `develop` · Last code commit `e5ac7df` (Step 4)
+Status date: 2026-10-30 · Branch `develop` · Last code commit `32020b7` (Step 5)
 
 This document holds the complete owner-approved plan for the Staff/Admin redesign (audit, navigation, flow, design system, page specifications and step plan) and the current implementation status. Part A is status; Part B is the plan as approved.
 
@@ -86,6 +86,17 @@ Implemented differences from the spec, all within the approved intent:
 - Search covers the loaded orders only (the list endpoint filters by `job_id` alone). An order whose status/response pair is unknown falls in no tab (code comment marks the limit).
 - The new-order side panel cannot be closed while a send is unresolved, so reopening cannot create a second order key.
 - Verification: 175 tests and all checks; Chrome walk Admin 360/390/768/1280/1920, Light and Dark, against a test-only API stub because the local backend was not running. Not exercised against the live API: real data, saves, conflicts, retry.
+
+## Step 5 — รับเข้าวัตถุดิบ (done)
+
+| Commit | Purpose |
+| --- | --- |
+| `2b99aec` | `receiving-domain.ts`: tab membership and counts, default tab, search match, `originalRemaining` (outstanding minus what open claims still owe), `plainQuantity`, `receiptRowError`; Thai validation messages; tests |
+| `32020b7` | `src/features/receiving/` redesign. Files:<br>• `receiving.tsx`: tabs `?tab=`, search `?q=`, `?order=`, cards, per-order detail reads for counts<br>• `receiving-detail.tsx`: facts, lines, claim cards, receipt timeline<br>• `receiving-receipt.tsx`: receipt form with fill-remaining buttons<br>• `receiving-finance.tsx`: Admin credit days, settlement, proof upload<br>• `receiving.module.css`<br>Also adds the `RECEIVING_STATE`/`CLAIM_STATE` labels |
+
+- The list API has no claim or payment data. The owner chose to read each listed order's detail to count มีของเสียหาย and ค้างจ่ายผู้ขาย. This covers the first 100 orders; a notice appears if details fail or the list is longer, and a `shortcut:` code comment marks the limit.
+- ค้างจ่ายผู้ขาย = fully received and not settled, including orders whose credit days are not yet set. รับครบตามที่เหลือ fills good units only; Staff still confirm and save.
+- Verification: 178 tests and all checks; Chrome walk Admin 1280 Dark / 390 Light, Staff 768 Dark, against a test-only API stub because the local backend was not running. Not exercised against the live API: real data, saves, conflicts, retry, proof upload.
 
 ## Working notes
 
@@ -430,7 +441,7 @@ Rules for every step:
 | 2 | คำขอและใบเสนอราคา as approved: six stage tabs (per-request quotation and Deposit/PO reads, six at a time), one action card, automatic minimum price, customer name To be defined | Done (`1313244`, `d07991e`) |
 | 3 | สต๊อกวัตถุดิบ + ข้อมูลหลัก (see below) | Done (`2067a65`, `64548f1`) |
 | 4 | สั่งซื้อวัตถุดิบ (Admin) (see below) | Done (`ef034d5`, `0981939`, `e5ac7df`) |
-| 5 | รับเข้าวัตถุดิบ (see below) | Not started |
+| 5 | รับเข้าวัตถุดิบ (see below) | Done (`2b99aec`, `32020b7`) |
 | 6 | ส่งมอบและใบแจ้งหนี้ (Staff) / ส่งมอบและรับชำระ (Admin) (see below) | Not started |
 | 7 | จัดการพนักงาน (Admin) (see below) | Not started |
 | 8 | การแจ้งเตือน page (see below) | Not started |
