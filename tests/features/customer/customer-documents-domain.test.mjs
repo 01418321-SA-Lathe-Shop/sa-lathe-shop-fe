@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { documentDetailHref, documentFilterError, documentFilters, documentListHref, documentRows, filterDocuments } from "../../../src/features/customer/customer-documents-domain.ts";
+import { documentDetailHref, documentFilterError, documentFilters, documentListHref, documentNote, documentRows, fileExtension, fileSize, filterDocuments, poAwaiting, revisionEvents } from "../../../src/features/customer/customer-documents-domain.ts";
 
 const customer = { id: "customer", name: "บริษัททดสอบ", customer_type: "company" };
 const request = { id: "request", no_request: "9007199254740993", customer_id: "customer", description: "แม่พิมพ์ [A]", qty: "9007199254740993", material_spec: "S45C", status: "ongoing", created_at: "2026-10-27T00:00:00Z" };
@@ -46,4 +46,32 @@ test("navigation preserves only harmless list context, with PO evidence identity
 });
 test("legacy quotation history links exclude sent records without inventing another status", () => {
   assert.equal(filterDocuments(documentRows([record], [customer], "quotes"), filters({ view: "history" }), "quotes").length, 2);
+});
+
+const accepted = (evidence, extra = {}) => ({ request, quotations: [quote], quote, fulfillment: { terms: { deposit_required: false, po_required: true, documents_due_at: "2026-11-11T00:00:00Z" }, evidence, job: null, canceled_at: null, request_status: "ongoing", ...extra } });
+test("next-step note follows real request, revision and evidence state without inventing statuses", () => {
+  assert.deepEqual(documentNote(accepted([])), { text: "ยังไม่ส่งหลักฐานมัดจำ/PO", warn: true });
+  assert.deepEqual(documentNote(accepted([{ kind: "po", status: "rejected" }])), { text: "หลักฐานต้องแก้ไข ส่งใหม่", warn: true });
+  assert.equal(documentNote(accepted([{ kind: "po", status: "rejected" }, { kind: "po", status: "pending" }])).text, "รอตรวจหลักฐาน");
+  assert.equal(documentNote(accepted([{ kind: "po", status: "approved" }])).text, "หลักฐานผ่านแล้ว รอเปิดงาน");
+  assert.equal(documentNote(accepted([], { job: { id: "job" } })).text, "เปิดงานผลิตแล้ว");
+  assert.equal(documentNote({ request: { ...request, status: "canceled" }, quotations: [quote], quote }).text, "คำขอถูกยกเลิก");
+  const old = { ...quote, id: "old", version: 1, status: "rejected" }; const next = { ...quote, id: "next", version: 2, status: "sent" };
+  assert.equal(documentNote({ request, quotations: [old, next], quote: old }).text, "มีฉบับใหม่แล้ว");
+  assert.equal(documentNote({ request, quotations: [old], quote: old }).text, "รอใบเสนอราคาฉบับใหม่");
+});
+test("PO upload prompt uses the upload form's own gate and lists the nearest deadline first", () => {
+  const now = Date.parse("2026-11-01T00:00:00Z");
+  const row = (id, due, evidence = []) => ({ ...accepted(evidence), id, fulfillment: { ...accepted(evidence).fulfillment, terms: { po_required: true, deposit_required: false, documents_due_at: due } } });
+  const rows = [row("later", "2026-11-10T00:00:00Z"), row("sooner", "2026-11-05T00:00:00Z"), row("sent", "2026-11-05T00:00:00Z", [{ kind: "po", status: "pending" }]), row("late", "2026-10-30T00:00:00Z"), row("redo", "2026-11-06T00:00:00Z", [{ kind: "po", status: "rejected" }])];
+  assert.deepEqual(poAwaiting(rows, now).map((item) => item.id), ["sooner", "redo", "later"]);
+});
+test("revision timeline merges sent revisions and decisions newest first", () => {
+  const first = { ...quote, id: "q1", version: 1, sent_at: "2026-10-01T00:00:00Z" }; const second = { ...quote, id: "q2", version: 2, sent_at: "2026-10-03T00:00:00Z" };
+  const events = revisionEvents([first, second], [{ quotation_id: "q1", outcome: "reject", decided_at: "2026-10-02T00:00:00Z" }, { quotation_id: "unknown", outcome: "accept", decided_at: "2026-10-09T00:00:00Z" }]);
+  assert.deepEqual(events.map((event) => event.id), ["sent:q2", "decision:q1", "sent:q1"]);
+});
+test("file helpers format real attachment metadata", () => {
+  assert.equal(fileExtension("po_final.PDF"), "PDF"); assert.equal(fileExtension("no-extension"), "ไฟล์");
+  assert.equal(fileSize(512), "1 KB"); assert.equal(fileSize(268 * 1024), "268 KB"); assert.equal(fileSize(2202010), "2.1 MB");
 });
