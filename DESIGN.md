@@ -187,7 +187,7 @@ The detail shows facts, the four steps, then one task panel by status. Queued: m
 
 Step 2 of the approved Staff/Admin redesign (`/staff/quotations`, `/admin/requests`; redirects unchanged; Overview untouched). One page named คำขอและใบเสนอราคา uses the shared kit: the header with one อัปเดตข้อมูล button, six status tabs with counts (ต้องทำใบเสนอราคา, รอลูกค้าตอบ, รอมัดจำ/PO, รอตรวจหลักฐาน, เปิดงานแล้ว, ปิดแล้ว) in the URL as `?stage=`, and one search box for request number or description. The 🟠 attention dot appears on ต้องทำใบเสนอราคา for Staff and on รอตรวจหลักฐาน for both roles. Stages are views worked out from existing quotation and Deposit/PO data, not new statuses; the server still decides every transition. Counts read every request 100 per call, up to 1,000, with a warning beyond that; a request whose quotation or Deposit/PO cannot be read is counted separately as “ยังโหลดขั้นตอนล่าสุดไม่ได้” with its own retry, not hidden.
 
-The list and detail use the shared list/detail layout (`staff-layout.module.css`). The detail shows the summary, one next-action card for the current stage, and collapsed secondary sections (ประวัติ, ประวัติระบบ). Staff quote form: material and labour totals, offered price, and a minimum price requested from the existing estimate endpoint (the browser does not calculate it). Inline checks flag an offer below the server minimum and invalid amounts; “ไม่มี VAT” is shown. บันทึกร่าง saves a draft; ส่งใบเสนอราคา saves first if needed, then confirms in a dialog and keeps the existing send API. Refuse-request sits in a collapsed section and requires a customer-visible reason. Deposit/PO review lists one row per evidence item with the file, declared amount and time, approve/reject choice (reason when rejecting), and a file-checked checkbox before confirming. Opened jobs link to `…/production?job=…`. Admin sees costs and reviews evidence but gets no quote or refuse controls.
+The list and detail use the shared list/detail layout (`staff-layout.module.css`). Admin can switch between รายการ and การ์ด from a compact segmented control; the choice is represented by `?view=cards` (missing/unknown values mean list). รายการ preserves the side-by-side list and detail. การ์ด fills the available width with responsive cards (minimum 19rem) and opens the selected request in a centered native modal dialog (maximum 68rem, full-screen at ≤40rem), with a close control, backdrop click and Escape; `?request=` remains the source of truth. Staff always retain the working list/detail view even if a card-view query is supplied. The detail shows the summary, one next-action card for the current stage, and collapsed secondary sections (ประวัติ, ประวัติระบบ). Staff quote form: material and labour totals, offered price, and a minimum price requested from the existing estimate endpoint (the browser does not calculate it). Inline checks flag an offer below the server minimum and invalid amounts; “ไม่มี VAT” is shown. บันทึกร่าง saves a draft; ส่งใบเสนอราคา saves first if needed, then confirms in a dialog and keeps the existing send API. Refuse-request sits in a collapsed section and requires a customer-visible reason. Deposit/PO review lists one row per evidence item with the file, declared amount and time, approve/reject choice (reason when rejecting), and a file-checked checkbox before confirming. Opened jobs link to `…/production?job=…`. Admin sees costs and reviews evidence but gets no quote or refuse controls.
 
 Browser walk (Chrome, real local API, Staff `anan.staff` and Admin `pim.admin`): 1280px and 390px, Light and Dark, no horizontal page scroll, no console errors, and no API writes attempted (non-GET requests aborted and counted, zero). At 390px the status tabs scroll inside their own row; the hidden tab labels previously widened the page to 421px, fixed by making the tab links a positioning context. The งานผลิต page was re-walked the same way after its layout moved. Limits: the customer name is “To be defined” (Staff receive only `customer_id`); saves, send, approve and reject were not exercised against the live API (writes intercepted only); widths 360, 768 and 1920px were not walked.
 
@@ -901,6 +901,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-30 | Admin คำขอและใบเสนอราคา adds URL-backed รายการ/การ์ด views; list keeps the side detail while responsive cards open request detail in an accessible native modal. Staff stays on list/detail regardless of the query | 184 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Admin desktop/narrow with real local API, Escape/URL close checked, no horizontal overflow or console errors |
 | 2026-10-30 | Staff/Admin redesign Step 8: การแจ้งเตือน page in the Thai list style with ทั้งหมด / ยังไม่อ่าน tabs, Bangkok-day groups, read badges, ทำเป็นอ่านแล้ว, read-all and โหลดเพิ่ม; bell and page share one request-link helper | 183 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / Staff 390 Light against the real local API, writes intercepted |
 | 2026-10-30 | Fix: งานผลิต usage form no longer contains the extra-material search form; pressing ค้นหา in เพิ่มวัตถุดิบนอกแผน could also trigger บันทึกการใช้วัตถุดิบ. The usage form saves only from its button, and the shared `SearchForm` stops its submit event from reaching an outer form | 175 native tests, type check, lint, source audit, build; not re-walked in the browser (backend down) |
 | 2026-10-30 | Staff/Admin redesign Step 7: จัดการพนักงาน with searchable list, side-panel create/edit in sections ข้อมูล / ติดต่อ / รหัสผ่านเริ่มต้น, username-change and account-status confirmations, separate password side panel; Thai field rules | 183 native tests (3 new), type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / 390 Light against the real local API, writes intercepted |
@@ -3123,6 +3124,28 @@ src/features/workspace/workspace.module.css
 
 ```css
 /* คำขอและใบเสนอราคา (UC1–UC4) page-specific rules; the list/detail layout is staff-ui/staff-layout.module.css. */
+.viewSwitch { display: inline-flex; flex: 0 0 auto; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+:global(.live-workspace) .viewSwitch a { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 7px 13px; border-radius: 8px; color: var(--muted); font-size: 0.875rem; font-weight: 650; text-decoration: none; }
+:global(.live-workspace) .viewSwitch a:hover { color: var(--text); text-decoration: none; }
+:global(.live-workspace) .viewSwitch a[aria-current="page"] { background: color-mix(in srgb, var(--lime) 14%, var(--surface-2)); color: var(--text); }
+:global(.live-workspace) .viewSwitch a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+
+.cardWorkspace { min-width: 0; }
+.cardGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: 16px; min-width: 0; }
+.cardGrid > :not(a) { grid-column: 1 / -1; }
+:global(.live-workspace) .gridCard { align-content: start; min-height: 13.5rem; padding: 20px; }
+
+.requestModal { width: min(68rem, calc(100vw - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); margin: auto; padding: 0; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); color: var(--text); box-shadow: 0 24px 80px rgba(0, 0, 0, .42); overflow: hidden; }
+.requestModal::backdrop { background: rgba(4, 5, 5, .72); backdrop-filter: blur(5px); }
+.modalFrame { display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: calc(100dvh - 2rem); }
+.modalToolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; padding: 10px 16px 10px 20px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.modalToolbar span { font-weight: 700; }
+:global(.live-workspace) .modalToolbar a { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); text-decoration: none; }
+:global(.live-workspace) .modalToolbar a:hover { border-color: var(--lime); text-decoration: none; }
+:global(.live-workspace) .modalToolbar a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.modalBody { padding: 20px; overflow: auto; overscroll-behavior: contain; }
+.modalBody > article { border: 0; padding: 0; background: transparent; }
+
 .files { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .files li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
 .files li > span { display: grid; gap: 2px; min-width: 0; }
@@ -3152,6 +3175,11 @@ src/features/workspace/workspace.module.css
 .check { align-items: flex-start; line-height: 1.5; }
 
 @media (max-width: 40rem) {
+  .viewSwitch { width: 100%; }
+  :global(.live-workspace) .viewSwitch a { flex: 1; }
+  .requestModal { width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
+  .modalFrame { height: 100dvh; max-height: 100dvh; }
+  .modalBody { padding: 16px; }
   .moneyGrid { grid-template-columns: minmax(0, 1fr); }
   .choices label { flex: 1; justify-content: center; }
 }

@@ -6,6 +6,7 @@ import { latestQuote } from "../customer/customer-domain.ts";
 
 export type RequestRecord = { request: JobRequest; quotations: Quotation[]; fulfillment?: Fulfillment; issue?: boolean };
 export type RequestStage = "quote" | "customer" | "evidence" | "review" | "opened" | "closed";
+export type RequestView = "list" | "cards";
 export const REQUEST_STAGES: readonly RequestStage[] = ["quote", "customer", "evidence", "review", "opened", "closed"];
 /** Customer quotation rejections that cancel a request (five allow a revision). */
 export const CANCELLING_REJECTION = 6;
@@ -13,6 +14,11 @@ export const REQUEST_STEPS = ["ใบเสนอราคา", "ลูกค้
 
 export function requestStage(value: string | null): RequestStage | null {
   return REQUEST_STAGES.find((stage) => stage === value) ?? null;
+}
+
+/** The card popup is an Admin presentation choice; Staff keep the working list/detail view. */
+export function requestView(value: string | null, worker: boolean): RequestView {
+  return !worker && value === "cards" ? "cards" : "list";
 }
 
 /** Finished requests need no quotation/Deposit/PO reads to be placed. */
