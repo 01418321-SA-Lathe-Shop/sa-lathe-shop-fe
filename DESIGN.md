@@ -179,7 +179,7 @@ The navbar bell now matches Customer: a 44px button with an orange count badge (
 
 Step 1 of the approved Staff/Admin redesign. New pages share `src/components/staff-ui/` (Thai labels and formatting plus components): pill `StatusTabs` with counts and an orange count badge where the role must act, a search form (48px input with icon plus ค้นหา), 48px buttons (primary orange / secondary outline / danger / text), `Field` with hint and error, `NextAction` panel, numbered `Steps` (done ✓ in `--success`, current orange), `Collapsible`, native `ConfirmDialog` (centred, ≤32rem; optional checklist must be fully ticked before the confirm button enables; full-width stacked buttons on phones), `RetryPanel` for uncertain writes (ส่งซ้ำแบบเดิม keeps the original key/payload; โหลดข้อมูลล่าสุด re-reads), success `Toast` (5s), skeleton, empty and load-error states, and a notice when a list stops at the 1,000-row read cap. Rules are prefixed with `.live-workspace` so they win over legacy workflow button styles. A `--success` token (dark `#52c480`, light `#1f7048`) is added to both themes for done/ready states only.
 
-งานผลิต (`/staff/production`, `/admin/production`) is a prioritized list beside a detail panel (24rem list column, 24px gap; one column at ≤64rem where the list and detail swap and a กลับรายการ link appears). The toolbar has two rows: tabs รอเริ่มงาน / กำลังผลิต / ผลิตเสร็จ / ทั้งหมด (counts from the full job list read 100 per call; Staff see an attention badge on รอเริ่มงาน), then search (literal request number or description) and อัปเดตข้อมูล. Open work is sorted by the customer-requested date, labelled "ลูกค้าต้องการ … (ไม่ใช่กำหนดส่งที่ร้านยืนยัน)", with a day-countdown chip; undated jobs come last; finished jobs sort newest first. Each card is one link showing request number, status, description, quantity, rework cycle, material readiness for queued jobs (read per job, six at a time: พร้อม ✓ / ยังไม่ครบ N รายการ / ยังไม่มีแผน / แผนเปลี่ยน) and the next action. The selected job, tab and search live in the URL (`?tab=&q=&job=`).
+งานผลิต (`/staff/production`, `/admin/production`) is a prioritized list beside a detail panel (24rem list column, 24px gap; one column at ≤64rem where the list and detail swap and a กลับรายการ link appears). Staff and Admin can switch between การ์ด and รายการ from a compact segmented control in the toolbar; missing/unknown view values mean list, while `?view=cards` explicitly selects cards. In รายการ view, jobs initially render as full-width row cards (`.fullListWorkspace` / `.rowCard`); selecting a job splits into the 24rem list column beside the detail panel (`.splitLayout`). The left queue then keeps only request number, one-line job name and quantity; all three use the inherited family at 0.9375rem while weight still provides hierarchy. Status, dates, readiness and action text are omitted because they are available in the opened detail. The detail remains top-aligned at its original width. Full and collapsed list entries share the same 7rem minimum height, so selection changes width and content density without changing the established row height. A desktop/mobile "กลับรายการ" link returns to the unselected full-width list. The status/material-readiness column stays a fixed 12rem through the tablet layout so every full row begins both labels on the same vertical line. การ์ด fills the available width with responsive cards (minimum 19rem) and opens the selected job in a centered native modal dialog (`ProductionModal`, maximum 68rem, full-screen at ≤40rem), with a close control, backdrop click and Escape; `?job=` remains the source of truth. The toolbar has two rows: tabs รอเริ่มงาน / กำลังผลิต / ผลิตเสร็จ / ทั้งหมด (counts from the full job list read 100 per call; Staff see an attention badge on รอเริ่มงาน), then the view switch, search (literal request number or description) and อัปเดตข้อมูล. Open work is sorted by the customer-requested date, labelled "ลูกค้าต้องการ … (ไม่ใช่กำหนดส่งที่ร้านยืนยัน)", with a day-countdown chip; undated jobs come last; finished jobs sort newest first. Each full row/card is one link showing request number, status, description, quantity, rework cycle, material readiness for queued jobs (read per job, six at a time: พร้อม ✓ / ยังไม่ครบ / ยังไม่มีแผน / แผนเปลี่ยน) and the next action. The selected job, tab, search and view live in the URL (`?tab=&q=&job=&view=`).
 
 The detail shows facts, the four steps, then one task panel by status. Queued: material plan lines with names, units and shortages, the material-plan editor (moved here from the materials page and the request opened-job section) with the shared material picker, จองเพิ่มตามแผนเดิม, and เริ่มผลิต (enabled only when the saved plan is ready at the job's plan version, confirmed in a dialog). In progress (Staff): segments ใช้วัตถุดิบ (prefill "ใช้ตามที่จองไว้", extra materials via picker), เวลาทำงาน (+15/+30/+60 chips with a running "จะเพิ่ม…" summary), รูปงาน (image upload with อัปโหลดอีกครั้ง after failure), and ปิดงาน behind a two-item checklist dialog. Completed: a NextAction to ส่งมอบ. Admin sees the same list and detail read-only, plus the actual-cost section and labor-cost form; no Staff write buttons are rendered. History and system events are collapsed. Endpoints, payloads, idempotency, version checks, statuses and permissions are unchanged; the separate “Job material plans” list on สต๊อกวัตถุดิบ and the plan panel inside the request opened-job section are removed because the plan now lives in production.
 
@@ -935,6 +935,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 | 2026-10-30 | Customer คำขอผลิต adds URL-backed การ์ด/รายการ layouts, compact essential-only summaries, and removes the redundant customer-profile read | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Customer desktop/narrow with real local API, both layouts, no horizontal overflow or console errors |
 | 2026-10-30 | Admin คำขอและใบเสนอราคา adds URL-backed รายการ/การ์ด views; list keeps the side detail while responsive cards open request detail in an accessible native modal. Staff stays on list/detail regardless of the query | 184 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Admin desktop/narrow with real local API, Escape/URL close checked, no horizontal overflow or console errors |
 | 2026-10-30 | Customer ใบเสนอราคา and มัดจำและ PO list/detail pages from the Claude Design boards: รอคุณตอบ cards plus one panel with status tabs, search, collapsible filters and table with a next-step column; PO banner and อัปโหลด PO entry; quotation detail with status banner, summary cells, whole-job price, request, terms and attachment cards, revision timeline, sticky decision bar and modal confirm; PO detail with review steps, shop feedback, preview, details and history. On-screen paper removed (print only). `sent` badge is now the info tone. No VAT, no itemised costs, no invented PO number or under-review status | Type check, lint, native tests, source audit, DESIGN sync; headless Chromium against the real local API with new test records: re-quote, revised quote, accept, PO upload, Admin rejection reason, corrected re-upload; 1280 Dark/Light and 390 Light/Dark, blocked-API error, delayed loading, empty state, no horizontal overflow |
+| 2026-10-30 | Staff/Admin งานผลิต, สั่งซื้อวัตถุดิบ (orders), รับเข้าวัตถุดิบ (receiving), and ส่งมอบ (delivery-payment) card & list views: Card view is the default across production, orders, receiving, and delivery-payment with responsive card grid and centered modal dialog popup on selection; list view starts unselected full width and collapses into the same-size 24rem list column beside the detail panel with a back link to deselect; view switcher provides seamless toggle | 192 native tests, type check, lint, source audit, DESIGN sync |
 | 2026-10-30 | Customer payments table with history view, Customer account panels, and one role-aware Settings page (new `/staff/settings`, `/admin/settings`; Admin-only ระบบ section). Unsupported profile, address, password and preference actions are stated as unavailable | Type check, lint, native tests, source audit, DESIGN sync; browser against the real local API as Customer, Staff and Admin: row navigation, sign-out confirm and cancel, Staff redirected from Admin settings, 1440 and 390 widths with no horizontal overflow |
 | 2026-10-30 | สต๊อกวัตถุดิบ layout from the Claude Design board: summary cells (ทั้งหมด / หมด / มีของแต่ถูกจองหมด / หน่วยวัดที่ใช้), out-of-stock banner linking to หมด, one panel with tabs + search, unit pill and per-quantity units, reserved-share bar, footer count; no Create PO, Reserved-for-jobs total or unit conversion | Type check, lint, 185 native tests (summary helpers new), DESIGN sync; headless Chromium against the real local API: Staff 1280 Dark / 390 Light, Admin 1280 Light with side panel, blocked-API error state |
 | 2026-10-30 | Staff/Admin redesign Step 8: การแจ้งเตือน page in the Thai list style with ทั้งหมด / ยังไม่อ่าน tabs, Bangkok-day groups, read badges, ทำเป็นอ่านแล้ว, read-all and โหลดเพิ่ม; bell and page share one request-link helper | 183 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / Staff 390 Light against the real local API, writes intercepted |
@@ -3229,10 +3230,86 @@ src/features/workspace/workspace.module.css
 .materials dd small { display: block; font-size: 0.75rem; }
 :global(.live-workspace) .photoRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 
+@media (max-width: 64rem) {
+  :global(.live-workspace) .rowCard { grid-template-columns: minmax(12rem, 1.6fr) 12rem; gap: 10px 16px; }
+  :global(.live-workspace) .rowCard .rowMeta { grid-column: 1 / -1; }
+  :global(.live-workspace) .rowCard > :global(.cardNext) { grid-column: 1 / -1; justify-self: start; }
+}
+
 @media (max-width: 40rem) {
+  .toolbarHead { flex-direction: column; align-items: stretch; gap: 10px; }
+  .viewSwitch { width: 100%; margin-left: 0; }
+  :global(.live-workspace) .viewSwitch a { flex: 1; }
+  .productionModal { width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
+  .modalFrame { height: 100dvh; max-height: 100dvh; }
+  .modalBody { padding: 16px; }
   .materials dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .closeJob { grid-template-columns: minmax(0, 1fr); }
+  :global(.live-workspace) .rowCard { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 16px 18px; }
+  :global(.live-workspace) .rowCard .rowMain { display: contents; }
+  :global(.live-workspace) .rowCard .rowStatus { display: contents; }
+  :global(.live-workspace) .rowCard .rowMeta { display: contents; }
 }
+
+/* View switcher and card presentation */
+.toolbarHead { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-width: 0; }
+.toolbarHead > :first-child { flex: 1 1 auto; min-width: 0; }
+.viewSwitch { display: inline-flex; flex: 0 0 auto; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); margin-left: auto; }
+:global(.live-workspace) .viewSwitch a { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 7px 13px; border-radius: 8px; color: var(--muted); font-size: 0.875rem; font-weight: 650; text-decoration: none; }
+:global(.live-workspace) .viewSwitch a:hover { color: var(--text); text-decoration: none; }
+:global(.live-workspace) .viewSwitch a[aria-current="page"] { background: color-mix(in srgb, var(--lime) 14%, var(--surface-2)); color: var(--text); }
+:global(.live-workspace) .viewSwitch a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+
+.cardWorkspace { min-width: 0; }
+.cardGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: 16px; min-width: 0; }
+.cardGrid > :not(a) { grid-column: 1 / -1; }
+:global(.live-workspace) .gridCard { position: relative; min-width: 0; display: flex; flex-direction: column; padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--text); text-decoration: none; box-shadow: 0 4px 16px rgba(0, 0, 0, .08); transition: border-color .15s, box-shadow .18s ease-out; }
+:global(.live-workspace) .gridCard:hover { border-color: color-mix(in srgb, var(--lime) 60%, var(--line)); box-shadow: 0 8px 24px rgba(0, 0, 0, .14); text-decoration: none; }
+:global(.live-workspace) .gridCard:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+:global(.live-workspace) .gridCard[aria-current="true"] { border-color: var(--lime); background: color-mix(in srgb, var(--lime) 7%, var(--surface)); box-shadow: inset 4px 0 0 var(--lime); }
+.cardHeader { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.metaLabel { display: block; color: var(--muted); font-size: 0.8125rem; }
+.cardHeader strong { display: block; color: var(--text); font-size: 1.125rem; font-weight: 700; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.cardTitle { margin: 14px 0 12px; font-size: 1.0625rem; line-height: 1.45; font-weight: 650; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cardStatus { display: flex; align-items: center; margin-bottom: 16px; }
+.essentials { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 16px; }
+.essentials > div { padding: 10px 12px; border-radius: 10px; background: var(--surface-2); min-width: 0; }
+.essentials dt { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 0.75rem; }
+.essentials dd { margin: 4px 0 0; color: var(--text); font-size: 0.875rem; font-weight: 600; overflow-wrap: anywhere; }
+.cardStep { padding-bottom: 14px; font-size: 0.875rem; color: var(--muted); display: grid; gap: 4px; }
+.cycleNote { font-size: 0.8125rem; color: var(--muted); }
+.cardFooter { display: flex; align-items: center; justify-content: flex-start; margin-top: auto; padding-top: 10px; }
+.openHint { display: inline-flex; align-items: center; gap: 6px; color: var(--lime); font-size: 0.875rem; font-weight: 650; }
+:global([data-theme="light"]) .openHint { color: var(--lime-soft); }
+
+/* Full-width list and row presentation */
+.fullListWorkspace { min-width: 0; }
+.fullList { display: grid; gap: 10px; min-width: 0; }
+:global(.live-workspace) .rowCard { display: grid; grid-template-columns: minmax(14rem, 2fr) 12rem minmax(13rem, 1.4fr) auto; align-items: center; gap: 12px 24px; min-height: 7rem; padding: 16px 20px; }
+.compactCard { min-height: 7rem; align-content: center; padding-block: 14px; }
+:global(.live-workspace) .compactCard > span, :global(.live-workspace) .compactCard strong { font-family: inherit; font-size: 0.9375rem; }
+:global(.live-workspace) .compactCard > span:nth-child(2) { -webkit-line-clamp: 1; }
+.rowMain { display: grid; gap: 4px; min-width: 0; }
+.rowStatus { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 8px; width: 12rem; min-width: 0; }
+.rowMeta { display: grid; gap: 4px; min-width: 0; }
+:global(.live-workspace) .rowCard > :global(.cardNext) { margin-top: 0; justify-self: end; white-space: nowrap; }
+
+/* Show back link in split layout on desktop */
+:global(.live-workspace) .splitLayout :global([class*="back"]) { display: inline-flex; }
+:global(.live-workspace) .splitLayout :global([class*="cardNext"]) { display: none; }
+
+/* Modal dialog for card-view job detail */
+.productionModal { width: min(68rem, calc(100vw - 3.5rem)); max-width: none; max-height: calc(100dvh - 4.5rem); margin: auto; padding: 0; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); color: var(--text); box-shadow: 0 24px 80px rgba(0, 0, 0, .42); overflow: hidden; }
+.productionModal::backdrop { background: rgba(4, 5, 5, .72); backdrop-filter: blur(5px); }
+.modalFrame { display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: calc(100dvh - 4.5rem); }
+.modalToolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; padding: 14px 24px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.modalToolbar span { font-weight: 700; }
+:global(.live-workspace) .modalToolbar a { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); text-decoration: none; }
+:global(.live-workspace) .modalToolbar a:hover { border-color: var(--lime); text-decoration: none; }
+:global(.live-workspace) .modalToolbar a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.modalBody { padding: 24px 28px 36px; overflow: auto; overscroll-behavior: contain; }
+.modalBody > article { border: 0; padding: 0 0 16px; background: transparent; }
+.modalBody :global(.live-workspace) :global([class*="back"]) { display: none; }
 ```
 
 ### A11. Staff/Admin shared list and detail layout — src/components/staff-ui/staff-layout.module.css
@@ -3556,11 +3633,84 @@ src/features/workspace/workspace.module.css
 .suppliers li > span:first-child { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
 .suppliers small { color: var(--muted); font-size: 0.875rem; }
 
+@media (max-width: 64rem) {
+  :global(.live-workspace) .rowCard { grid-template-columns: minmax(12rem, 1.6fr) auto; gap: 10px 16px; }
+  :global(.live-workspace) .rowCard .rowMeta { grid-column: 1 / -1; }
+  :global(.live-workspace) .rowCard > :global(.cardNext) { grid-column: 1 / -1; justify-self: start; }
+}
+
 @media (max-width: 40rem) {
   .draftLines li { grid-template-columns: minmax(0, 1fr); }
   .suppliers li { grid-template-columns: minmax(0, 1fr) auto; }
   .suppliers li > :last-child { grid-column: 1 / -1; justify-self: start; }
+  .toolbarHead { flex-direction: column; align-items: stretch; gap: 10px; }
+  .viewSwitch { width: 100%; margin-left: 0; }
+  :global(.live-workspace) .viewSwitch a { flex: 1; }
+  .orderModal { width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
+  .modalFrame { height: 100dvh; max-height: 100dvh; }
+  .modalBody { padding: 16px; }
+  :global(.live-workspace) .gridCard { padding: 18px; }
+  :global(.live-workspace) .rowCard { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 16px 18px; }
+  :global(.live-workspace) .rowCard .rowMain { display: contents; }
+  :global(.live-workspace) .rowCard .rowStatus { display: contents; }
+  :global(.live-workspace) .rowCard .rowMeta { display: contents; }
 }
+
+/* View switcher and card presentation */
+.toolbarHead { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-width: 0; }
+.toolbarHead > :first-child { flex: 1 1 auto; min-width: 0; }
+.viewSwitch { display: inline-flex; flex: 0 0 auto; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); margin-left: auto; }
+:global(.live-workspace) .viewSwitch a { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 7px 13px; border-radius: 8px; color: var(--muted); font-size: 0.875rem; font-weight: 650; text-decoration: none; }
+:global(.live-workspace) .viewSwitch a:hover { color: var(--text); text-decoration: none; }
+:global(.live-workspace) .viewSwitch a[aria-current="page"] { background: color-mix(in srgb, var(--lime) 14%, var(--surface-2)); color: var(--text); }
+:global(.live-workspace) .viewSwitch a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+
+.cardWorkspace { min-width: 0; }
+.cardGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: 16px; min-width: 0; }
+.cardGrid > :not(a) { grid-column: 1 / -1; }
+:global(.live-workspace) .gridCard { position: relative; min-width: 0; display: flex; flex-direction: column; padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--text); text-decoration: none; box-shadow: 0 4px 16px rgba(0, 0, 0, .08); transition: border-color .15s, box-shadow .18s ease-out; }
+:global(.live-workspace) .gridCard:hover { border-color: color-mix(in srgb, var(--lime) 60%, var(--line)); box-shadow: 0 8px 24px rgba(0, 0, 0, .14); text-decoration: none; }
+:global(.live-workspace) .gridCard:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+:global(.live-workspace) .gridCard[aria-current="true"] { border-color: var(--lime); background: color-mix(in srgb, var(--lime) 7%, var(--surface)); box-shadow: inset 4px 0 0 var(--lime); }
+.cardHeader { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.metaLabel { display: block; color: var(--muted); font-size: 0.8125rem; }
+.cardHeader strong { display: block; color: var(--text); font-size: 1.125rem; font-weight: 700; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.cardTitle { margin: 14px 0 12px; font-size: 1.0625rem; line-height: 1.45; font-weight: 650; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cardStatus { display: flex; align-items: center; margin-bottom: 16px; }
+.essentials { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 16px; }
+.essentials > div { padding: 10px 12px; border-radius: 10px; background: var(--surface-2); min-width: 0; }
+.essentials dt { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 0.75rem; }
+.essentials dd { margin: 4px 0 0; color: var(--text); font-size: 0.875rem; font-weight: 600; overflow-wrap: anywhere; }
+.cardStep { padding-bottom: 14px; font-size: 0.875rem; color: var(--muted); display: grid; gap: 4px; }
+.cardFooter { display: flex; align-items: center; justify-content: flex-start; margin-top: auto; padding-top: 10px; }
+.openHint { display: inline-flex; align-items: center; gap: 6px; color: var(--lime); font-size: 0.875rem; font-weight: 650; }
+:global([data-theme="light"]) .openHint { color: var(--lime-soft); }
+
+/* Full-width list and row presentation */
+.fullListWorkspace { min-width: 0; }
+.fullList { display: grid; gap: 10px; min-width: 0; }
+:global(.live-workspace) .rowCard { display: grid; grid-template-columns: minmax(14rem, 2fr) 12rem minmax(13rem, 1.4fr) auto; align-items: center; gap: 12px 24px; min-height: 0; padding: 16px 20px; }
+.rowMain { display: grid; gap: 4px; min-width: 0; }
+.rowStatus { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 6px; min-width: 0; }
+.rowMeta { display: grid; gap: 4px; min-width: 0; }
+:global(.live-workspace) .rowCard > :global(.cardNext) { margin-top: 0; justify-self: end; white-space: nowrap; }
+
+/* Show back link in split layout on desktop */
+:global(.live-workspace) .splitLayout :global([class*="back"]) { display: inline-flex; }
+:global(.live-workspace) .splitLayout :global([class*="cardNext"]) { display: none; }
+
+/* Modal dialog for card-view order detail */
+.orderModal { width: min(68rem, calc(100vw - 3.5rem)); max-width: none; max-height: calc(100dvh - 4.5rem); margin: auto; padding: 0; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); color: var(--text); box-shadow: 0 24px 80px rgba(0, 0, 0, .42); overflow: hidden; }
+.orderModal::backdrop { background: rgba(4, 5, 5, .72); backdrop-filter: blur(5px); }
+.modalFrame { display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: calc(100dvh - 4.5rem); }
+.modalToolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; padding: 14px 24px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.modalToolbar span { font-weight: 700; }
+:global(.live-workspace) .modalToolbar a { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); text-decoration: none; }
+:global(.live-workspace) .modalToolbar a:hover { border-color: var(--lime); text-decoration: none; }
+:global(.live-workspace) .modalToolbar a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.modalBody { padding: 24px 28px 36px; overflow: auto; overscroll-behavior: contain; }
+.modalBody > article { border: 0; padding: 0 0 16px; background: transparent; }
+.modalBody :global(.live-workspace) :global([class*="back"]) { display: none; }
 ```
 
 ### A15. Staff/Admin receiving — src/features/receiving/receiving.module.css
@@ -3585,9 +3735,82 @@ src/features/workspace/workspace.module.css
 .receipt li > :last-child { grid-column: 1 / -1; justify-self: start; }
 .confirmList { display: grid; gap: 4px; margin: 0; padding-left: 1.25rem; font-variant-numeric: tabular-nums; }
 
+@media (max-width: 64rem) {
+  :global(.live-workspace) .rowCard { grid-template-columns: minmax(12rem, 1.6fr) auto; gap: 10px 16px; }
+  :global(.live-workspace) .rowCard .rowMeta { grid-column: 1 / -1; }
+  :global(.live-workspace) .rowCard > :global(.cardNext) { grid-column: 1 / -1; justify-self: start; }
+}
+
 @media (max-width: 40rem) {
   .receipt li { grid-template-columns: minmax(0, 1fr); }
+  .toolbarHead { flex-direction: column; align-items: stretch; gap: 10px; }
+  .viewSwitch { width: 100%; margin-left: 0; }
+  :global(.live-workspace) .viewSwitch a { flex: 1; }
+  .receivingModal { width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
+  .modalFrame { height: 100dvh; max-height: 100dvh; }
+  .modalBody { padding: 16px; }
+  :global(.live-workspace) .gridCard { padding: 18px; }
+  :global(.live-workspace) .rowCard { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 16px 18px; }
+  :global(.live-workspace) .rowCard .rowMain { display: contents; }
+  :global(.live-workspace) .rowCard .rowStatus { display: contents; }
+  :global(.live-workspace) .rowCard .rowMeta { display: contents; }
 }
+
+/* View switcher and card presentation */
+.toolbarHead { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-width: 0; }
+.toolbarHead > :first-child { flex: 1 1 auto; min-width: 0; }
+.viewSwitch { display: inline-flex; flex: 0 0 auto; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); margin-left: auto; }
+:global(.live-workspace) .viewSwitch a { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 7px 13px; border-radius: 8px; color: var(--muted); font-size: 0.875rem; font-weight: 650; text-decoration: none; }
+:global(.live-workspace) .viewSwitch a:hover { color: var(--text); text-decoration: none; }
+:global(.live-workspace) .viewSwitch a[aria-current="page"] { background: color-mix(in srgb, var(--lime) 14%, var(--surface-2)); color: var(--text); }
+:global(.live-workspace) .viewSwitch a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+
+.cardWorkspace { min-width: 0; }
+.cardGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: 16px; min-width: 0; }
+.cardGrid > :not(a) { grid-column: 1 / -1; }
+:global(.live-workspace) .gridCard { position: relative; min-width: 0; display: flex; flex-direction: column; padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--text); text-decoration: none; box-shadow: 0 4px 16px rgba(0, 0, 0, .08); transition: border-color .15s, box-shadow .18s ease-out; }
+:global(.live-workspace) .gridCard:hover { border-color: color-mix(in srgb, var(--lime) 60%, var(--line)); box-shadow: 0 8px 24px rgba(0, 0, 0, .14); text-decoration: none; }
+:global(.live-workspace) .gridCard:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+:global(.live-workspace) .gridCard[aria-current="true"] { border-color: var(--lime); background: color-mix(in srgb, var(--lime) 7%, var(--surface)); box-shadow: inset 4px 0 0 var(--lime); }
+.cardHeader { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.metaLabel { display: block; color: var(--muted); font-size: 0.8125rem; }
+.cardHeader strong { display: block; color: var(--text); font-size: 1.125rem; font-weight: 700; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.cardTitle { margin: 14px 0 12px; font-size: 1.0625rem; line-height: 1.45; font-weight: 650; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cardStatus { display: flex; align-items: center; margin-bottom: 16px; }
+.essentials { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 16px; }
+.essentials > div { padding: 10px 12px; border-radius: 10px; background: var(--surface-2); min-width: 0; }
+.essentials dt { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 0.75rem; }
+.essentials dd { margin: 4px 0 0; color: var(--text); font-size: 0.875rem; font-weight: 600; overflow-wrap: anywhere; }
+.cardStep { padding-bottom: 14px; font-size: 0.875rem; color: var(--muted); display: grid; gap: 4px; }
+.cardFooter { display: flex; align-items: center; justify-content: flex-start; margin-top: auto; padding-top: 10px; }
+.openHint { display: inline-flex; align-items: center; gap: 6px; color: var(--lime); font-size: 0.875rem; font-weight: 650; }
+:global([data-theme="light"]) .openHint { color: var(--lime-soft); }
+
+/* Full-width list and row presentation */
+.fullListWorkspace { min-width: 0; }
+.fullList { display: grid; gap: 10px; min-width: 0; }
+:global(.live-workspace) .rowCard { display: grid; grid-template-columns: minmax(14rem, 2fr) 12rem minmax(13rem, 1.4fr) auto; align-items: center; gap: 12px 24px; min-height: 0; padding: 16px 20px; }
+.rowMain { display: grid; gap: 4px; min-width: 0; }
+.rowStatus { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 6px; min-width: 0; }
+.rowMeta { display: grid; gap: 4px; min-width: 0; }
+:global(.live-workspace) .rowCard > :global(.cardNext) { margin-top: 0; justify-self: end; white-space: nowrap; }
+
+/* Show back link in split layout on desktop */
+:global(.live-workspace) .splitLayout :global([class*="back"]) { display: inline-flex; }
+:global(.live-workspace) .splitLayout :global([class*="cardNext"]) { display: none; }
+
+/* Modal dialog for card-view receiving detail */
+.receivingModal { width: min(68rem, calc(100vw - 3.5rem)); max-width: none; max-height: calc(100dvh - 4.5rem); margin: auto; padding: 0; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); color: var(--text); box-shadow: 0 24px 80px rgba(0, 0, 0, .42); overflow: hidden; }
+.receivingModal::backdrop { background: rgba(4, 5, 5, .72); backdrop-filter: blur(5px); }
+.modalFrame { display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: calc(100dvh - 4.5rem); }
+.modalToolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; padding: 14px 24px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.modalToolbar span { font-weight: 700; }
+:global(.live-workspace) .modalToolbar a { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); text-decoration: none; }
+:global(.live-workspace) .modalToolbar a:hover { border-color: var(--lime); text-decoration: none; }
+:global(.live-workspace) .modalToolbar a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.modalBody { padding: 24px 28px 36px; overflow: auto; overscroll-behavior: contain; }
+.modalBody > article { border: 0; padding: 0 0 16px; background: transparent; }
+.modalBody :global(.live-workspace) :global([class*="back"]) { display: none; }
 ```
 
 ### A16. Staff/Admin delivery and invoices — src/features/delivery/delivery.module.css
@@ -3609,6 +3832,82 @@ src/features/workspace/workspace.module.css
 .payments li { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; overflow-wrap: anywhere; }
 .payments small { color: var(--muted); font-size: 0.875rem; }
 .paymentTop { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 64rem) {
+  :global(.live-workspace) .rowCard { grid-template-columns: minmax(12rem, 1.6fr) auto; gap: 10px 16px; }
+  :global(.live-workspace) .rowCard .rowMeta { grid-column: 1 / -1; }
+  :global(.live-workspace) .rowCard > :global(.cardNext) { grid-column: 1 / -1; justify-self: start; }
+}
+
+@media (max-width: 40rem) {
+  .toolbarHead { flex-direction: column; align-items: stretch; gap: 10px; }
+  .viewSwitch { width: 100%; margin-left: 0; }
+  :global(.live-workspace) .viewSwitch a { flex: 1; }
+  .deliveryModal { width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
+  .modalFrame { height: 100dvh; max-height: 100dvh; }
+  .modalBody { padding: 16px; }
+  :global(.live-workspace) .gridCard { padding: 18px; }
+  :global(.live-workspace) .rowCard { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 16px 18px; }
+  :global(.live-workspace) .rowCard .rowMain { display: contents; }
+  :global(.live-workspace) .rowCard .rowStatus { display: contents; }
+  :global(.live-workspace) .rowCard .rowMeta { display: contents; }
+}
+
+/* View switcher and card presentation */
+.toolbarHead { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-width: 0; }
+.toolbarHead > :first-child { flex: 1 1 auto; min-width: 0; }
+.viewSwitch { display: inline-flex; flex: 0 0 auto; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); margin-left: auto; }
+:global(.live-workspace) .viewSwitch a { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 7px 13px; border-radius: 8px; color: var(--muted); font-size: 0.875rem; font-weight: 650; text-decoration: none; }
+:global(.live-workspace) .viewSwitch a:hover { color: var(--text); text-decoration: none; }
+:global(.live-workspace) .viewSwitch a[aria-current="page"] { background: color-mix(in srgb, var(--lime) 14%, var(--surface-2)); color: var(--text); }
+:global(.live-workspace) .viewSwitch a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+
+.cardWorkspace { min-width: 0; }
+.cardGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: 16px; min-width: 0; }
+.cardGrid > :not(a) { grid-column: 1 / -1; }
+:global(.live-workspace) .gridCard { position: relative; min-width: 0; display: flex; flex-direction: column; padding: 24px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--text); text-decoration: none; box-shadow: 0 4px 16px rgba(0, 0, 0, .08); transition: border-color .15s, box-shadow .18s ease-out; }
+:global(.live-workspace) .gridCard:hover { border-color: color-mix(in srgb, var(--lime) 60%, var(--line)); box-shadow: 0 8px 24px rgba(0, 0, 0, .14); text-decoration: none; }
+:global(.live-workspace) .gridCard:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+:global(.live-workspace) .gridCard[aria-current="true"] { border-color: var(--lime); background: color-mix(in srgb, var(--lime) 7%, var(--surface)); box-shadow: inset 4px 0 0 var(--lime); }
+.cardHeader { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.metaLabel { display: block; color: var(--muted); font-size: 0.8125rem; }
+.cardHeader strong { display: block; color: var(--text); font-size: 1.125rem; font-weight: 700; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.cardTitle { margin: 14px 0 12px; font-size: 1.0625rem; line-height: 1.45; font-weight: 650; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cardStatus { display: flex; align-items: center; margin-bottom: 16px; }
+.essentials { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0 0 16px; }
+.essentials > div { padding: 10px 12px; border-radius: 10px; background: var(--surface-2); min-width: 0; }
+.essentials dt { display: flex; align-items: center; gap: 5px; color: var(--muted); font-size: 0.75rem; }
+.essentials dd { margin: 4px 0 0; color: var(--text); font-size: 0.875rem; font-weight: 600; overflow-wrap: anywhere; }
+.cardStep { padding-bottom: 14px; font-size: 0.875rem; color: var(--muted); display: grid; gap: 4px; }
+.cardFooter { display: flex; align-items: center; justify-content: flex-start; margin-top: auto; padding-top: 10px; }
+.openHint { display: inline-flex; align-items: center; gap: 6px; color: var(--lime); font-size: 0.875rem; font-weight: 650; }
+:global([data-theme="light"]) .openHint { color: var(--lime-soft); }
+
+/* Full-width list and row presentation */
+.fullListWorkspace { min-width: 0; }
+.fullList { display: grid; gap: 10px; min-width: 0; }
+:global(.live-workspace) .rowCard { display: grid; grid-template-columns: minmax(14rem, 2fr) 12rem minmax(13rem, 1.4fr) auto; align-items: center; gap: 12px 24px; min-height: 0; padding: 16px 20px; }
+.rowMain { display: grid; gap: 4px; min-width: 0; }
+.rowStatus { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 6px; min-width: 0; }
+.rowMeta { display: grid; gap: 4px; min-width: 0; }
+:global(.live-workspace) .rowCard > :global(.cardNext) { margin-top: 0; justify-self: end; white-space: nowrap; }
+
+/* Show back link in split layout on desktop */
+:global(.live-workspace) .splitLayout :global([class*="back"]) { display: inline-flex; }
+:global(.live-workspace) .splitLayout :global([class*="cardNext"]) { display: none; }
+
+/* Modal dialog for card-view delivery detail */
+.deliveryModal { width: min(68rem, calc(100vw - 3.5rem)); max-width: none; max-height: calc(100dvh - 4.5rem); margin: auto; padding: 0; border: 1px solid var(--line); border-radius: 20px; background: var(--surface); color: var(--text); box-shadow: 0 24px 80px rgba(0, 0, 0, .42); overflow: hidden; }
+.deliveryModal::backdrop { background: rgba(4, 5, 5, .72); backdrop-filter: blur(5px); }
+.modalFrame { display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: calc(100dvh - 4.5rem); }
+.modalToolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; padding: 14px 24px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.modalToolbar span { font-weight: 700; }
+:global(.live-workspace) .modalToolbar a { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); text-decoration: none; }
+:global(.live-workspace) .modalToolbar a:hover { border-color: var(--lime); text-decoration: none; }
+:global(.live-workspace) .modalToolbar a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.modalBody { padding: 24px 28px 36px; overflow: auto; overscroll-behavior: contain; }
+.modalBody > article { border: 0; padding: 0 0 16px; background: transparent; }
+.modalBody :global(.live-workspace) :global([class*="back"]) { display: none; }
 ```
 
 ### A17. Admin Staff accounts — src/features/workers/workers.module.css
