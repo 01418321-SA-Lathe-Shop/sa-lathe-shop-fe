@@ -908,6 +908,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-30 | Customer request-card footer keeps ดูรายละเอียด and its arrow on one line at narrow card widths | Focused CSS/DESIGN sync check |
 | 2026-10-30 | Customer ประวัติการสั่งงาน now uses the compact Jobs list composition with literal request-number/description search, clear-search empty state and local pagination | Focused TypeScript and DESIGN sync check |
 | 2026-10-30 | Customer งานผลิต adds URL-backed การ์ด/รายการ views with compact essential-only summaries and no machine/date icons; the redundant local คำขอผลิต / งานผลิต / ประวัติ tabs are removed from all three pages | Focused Customer job-card tests and TypeScript check |
 | 2026-10-30 | Customer request refinement: sort คำขอผลิต, งานผลิต and ประวัติ by exact request number descending; center the shared empty-state icon/content; move the request number immediately before the description in List; remove the request-card machine icon; improve detail spacing; and separate the Deposit/PO evidence link from the primary ติดตามงานผลิต button | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk against the real local API confirms request order #11→#2, production order #11→#6, centered filtered-empty state and separated detail actions |
@@ -2511,7 +2512,7 @@ src/features/workspace/workspace.module.css
 .list .secondaryLink { position: relative; z-index: 1; margin-top: 4px; font-size: .875rem; }
 .list .cardFooter { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; margin-top: auto; border-top: 1px solid var(--cust-line); color: var(--cust-muted); font-size: .8125rem; pointer-events: none; }
 .list .jobFooter { justify-content: flex-end; }
-.list .openHint { display: inline-flex; align-items: center; gap: 7px; color: var(--cust-accent); font-size: .875rem; font-weight: 600; }
+.list .openHint { display: inline-flex; flex-shrink: 0; align-items: center; gap: 7px; color: var(--cust-accent); font-size: .875rem; font-weight: 600; white-space: nowrap; }
 .list .skeleton { min-height: 320px; gap: 20px; }
 .list .skeleton > span { height: 16px; width: 70%; border-radius: 6px; background: var(--cust-surface-2); }
 .list .skeleton > span:nth-child(2) { width: 90%; height: 44px; }

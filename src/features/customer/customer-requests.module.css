@@ -41,7 +41,7 @@
 .list .secondaryLink { position: relative; z-index: 1; margin-top: 4px; font-size: .875rem; }
 .list .cardFooter { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; margin-top: auto; border-top: 1px solid var(--cust-line); color: var(--cust-muted); font-size: .8125rem; pointer-events: none; }
 .list .jobFooter { justify-content: flex-end; }
-.list .openHint { display: inline-flex; align-items: center; gap: 7px; color: var(--cust-accent); font-size: .875rem; font-weight: 600; }
+.list .openHint { display: inline-flex; flex-shrink: 0; align-items: center; gap: 7px; color: var(--cust-accent); font-size: .875rem; font-weight: 600; white-space: nowrap; }
 .list .skeleton { min-height: 320px; gap: 20px; }
 .list .skeleton > span { height: 16px; width: 70%; border-radius: 6px; background: var(--cust-surface-2); }
 .list .skeleton > span:nth-child(2) { width: 90%; height: 44px; }
