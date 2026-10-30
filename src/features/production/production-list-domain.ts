@@ -7,9 +7,17 @@ export type ProductionSummary = { job_id: string; request_id: string; status: st
 export type Readiness = { state: "ready" | "short" | "empty" | "changed"; short: number };
 export type ProductionTab = "queued" | "in_progress" | "completed" | "all";
 export const PRODUCTION_TABS: readonly ProductionTab[] = ["queued", "in_progress", "completed", "all"];
+export type ProductionView = "list" | "cards";
 
 export function productionTab(value: string | null): ProductionTab | null {
   return PRODUCTION_TABS.find((tab) => tab === value) ?? null;
+}
+
+export function productionView(value: string | null, fallback?: string | null): ProductionView {
+  if (value === "list") return "list";
+  if (value === "cards") return "cards";
+  if (fallback === "list") return "list";
+  return "cards";
 }
 
 const at = (value?: string) => value && Number.isFinite(Date.parse(value)) ? Date.parse(value) : null;

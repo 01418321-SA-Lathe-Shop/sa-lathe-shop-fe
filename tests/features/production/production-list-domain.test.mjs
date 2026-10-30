@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { defaultProductionTab, editableQuantity, isPositiveQuantity, planReadiness, productionCounts, productionRows, productionTab } from "../../../src/features/production/production-list-domain.ts";
+import { defaultProductionTab, editableQuantity, isPositiveQuantity, planReadiness, productionCounts, productionRows, productionTab, productionView } from "../../../src/features/production/production-list-domain.ts";
 
 const requests = [
   { id: "r1", no_request: "9007199254740993", description: "เพลา S45C", deadline: "2026-11-20T03:00:00Z" },
@@ -37,6 +37,17 @@ test("tabs parse strictly and default to the first tab with work", () => {
   assert.equal(productionTab("cancelled"), null);
   assert.equal(defaultProductionTab({ queued: 0, in_progress: 2, completed: 1, all: 3 }), "in_progress");
   assert.equal(defaultProductionTab({ queued: 0, in_progress: 0, completed: 0, all: 0 }), "queued");
+});
+
+test("production view parses cards and list with cards as the default", () => {
+  assert.equal(productionView("cards"), "cards");
+  assert.equal(productionView("list"), "list");
+  assert.equal(productionView(null), "cards");
+  assert.equal(productionView("unknown"), "cards");
+  assert.equal(productionView(null, "cards"), "cards");
+  assert.equal(productionView(null, "list"), "list");
+  assert.equal(productionView("list", "cards"), "list");
+  assert.equal(productionView("cards", "list"), "cards");
 });
 
 test("readiness mirrors the Start rule: a ready plan at the job's plan version", () => {
