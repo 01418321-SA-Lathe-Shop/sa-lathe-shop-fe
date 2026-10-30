@@ -13,8 +13,8 @@ import { CustomerWriteRetry } from "./customer-write";
 import { CustomerPoPreview } from "./customer-po-preview";
 import styles from "./customer-documents.module.css";
 
-export function DepositChecklist({ state }: { state: Fulfillment }) {
-  return <ul className="cust-checklist">{(["deposit", "po"] as const).filter((kind) => kind === "deposit" ? state.terms.deposit_required : state.terms.po_required).map((kind) => {
+export function DepositChecklist({ state, className = "cust-checklist" }: { state: Fulfillment; className?: string }) {
+  return <ul className={className}>{(["deposit", "po"] as const).filter((kind) => kind === "deposit" ? state.terms.deposit_required : state.terms.po_required).map((kind) => {
     const active = state.evidence?.find((item) => item.kind === kind && item.status !== "rejected");
     const rejected = state.evidence?.some((item) => item.kind === kind && item.status === "rejected");
     return <li key={kind}><span>{kind === "deposit" ? `มัดจำขั้นต่ำ ${moneyTH(state.terms.deposit_amount)}` : "ใบสั่งซื้อ PO"}</span>{active ? <Badge value={active.status} labels={EVIDENCE_LABELS} /> : <span>{rejected ? "ต้องแก้ไขและส่งใหม่" : "ยังไม่ส่ง"}</span>}</li>;

@@ -20,6 +20,8 @@
 .scope .rowTitle:hover { color: var(--cust-accent); }
 .scope .row p { margin-top: 8px; color: var(--cust-muted); font-size: .875rem; }
 .scope .workName { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.scope .evidenceLine { display: flex; flex-wrap: wrap; gap: 8px 16px; list-style: none; margin: 12px 0 0; padding: 0; }
+.scope .evidenceLine li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0; border: 0; color: var(--cust-muted); font-size: .875rem; }
 .scope .label { display: block; color: var(--cust-muted); font-size: .875rem; margin-bottom: 8px; }
 .scope .row time { font-size: .875rem; }
 .scope .rowActions { text-align: right; }
