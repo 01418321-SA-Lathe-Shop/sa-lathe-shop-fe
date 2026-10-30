@@ -32,7 +32,6 @@
 .stock tbody > tr > * { border-top: 1px solid var(--line); }
 .stock thead th { color: var(--muted); font-size: 0.8125rem; font-weight: 650; }
 .stock :is(thead th, tbody th):first-child { text-align: left; }
-.stock td:last-child, .stock thead th:last-child { text-align: left; }
 .stock tbody th { font-weight: 400; }
 .stock tbody th > * { display: block; width: fit-content; }
 .stock tbody th > * + * { margin-top: 4px; }
