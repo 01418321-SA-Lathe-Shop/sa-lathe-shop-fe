@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { draftOf, matchWorker, usernameChanged, workerErrors, workerPasswordError, workerPayload } from "../../../src/features/workers/workers-domain.ts";
+import { draftOf, initials, matchWorker, usernameChanged, workerErrors, workerPasswordError, workerPayload } from "../../../src/features/workers/workers-domain.ts";
 
 const draft = { name: " สมชาย ใจดี ", username: "somchai.w", employee_no: "EMP-001", email: " a@b.com ", phone: "+66 81 234 5678", position: " ช่างกลึง " };
 
@@ -24,4 +24,11 @@ test("username change is case-insensitive; legacy null contacts become blank dra
   assert.equal(usernameChanged({ username: "somchai.w" }, "somchai2"), true);
   const legacy = { id: "1", username: "old", name: "Old", role: "worker", is_active: true, employee_no: "E1", email: null, phone: null };
   assert.equal(draftOf(legacy).email, ""); assert.equal(matchWorker(legacy, "e1"), true); assert.equal(matchWorker(legacy, "zzz"), false);
+});
+
+test("worker avatar initials skip Thai leading vowels", () => {
+  assert.equal(initials(" สมชาย  ใจดี "), "สจ");
+  assert.equal(initials("wichai thongdee extra"), "WT");
+  assert.equal(initials("เอก"), "อ");
+  assert.equal(initials(""), "");
 });

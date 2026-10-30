@@ -31,4 +31,6 @@ export function workerPayload(draft: WorkerDraft) {
 // The server stores usernames in lowercase, so only a real change logs the person out.
 export const usernameChanged = (worker: Pick<Worker, "username">, username: string) => worker.username.toLowerCase() !== username.trim().toLowerCase();
 export const draftOf = (worker?: Worker): WorkerDraft => ({ name: worker?.name ?? "", username: worker?.username ?? "", employee_no: worker?.employee_no ?? "", email: worker?.email ?? "", phone: worker?.phone ?? "", position: worker?.position ?? "" });
+// Avatar letters: first character of the first two words; Thai leading vowels (เ แ โ ใ ไ) are skipped.
+export const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map((part) => [...part.replace(/^[เแโใไ]/, "")][0] ?? "").join("").toUpperCase();
 export const matchWorker = (worker: Worker, q: string) => !q.trim() || [worker.name, worker.username, worker.employee_no, worker.position ?? ""].join(" ").toLowerCase().includes(q.trim().toLowerCase());

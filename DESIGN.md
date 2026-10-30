@@ -205,6 +205,8 @@ Step 7 of the approved Staff/Admin redesign (`/admin/workers`, Admin only; no ne
 
 **List.** Staff accounts load 100 per call, up to 1,000, with the cap notice. Search matches name, username, employee number or position within the loaded list, because the API has no search parameter. Each row shows the name, the username · employee number · position, the contacts (or “ยังไม่มีข้อมูลติดต่อ (บัญชีเก่า)” for old accounts), a ใช้งานอยู่/ปิดใช้งาน badge, and แก้ไข / เปลี่ยนรหัสผ่าน. On phones the buttons move under the text. The redo adds the shared status tabs (ทั้งหมด / ใช้งานอยู่ / ปิดใช้งาน, with counts from the loaded list) in the URL as `?status=`, so the list matches the materials, delivery and inbox pages; the status filter combines with search, and the empty state names the filter.
 
+**Layout (2026-10-30, from the Claude Design worker-management board).** Right-aligned อัปเดตข้อมูล and เพิ่มพนักงาน (with plus icon); three summary cells (พนักงานทั้งหมด, ใช้งานอยู่ in `--success`, ปิดใช้งาน muted; 1.75rem/650 tabular numbers, 12px radius, auto-fit 12rem columns); then one 14px-radius panel holding the status tabs and search in a top bar, a table (ชื่อ with a 36px initials avatar plus employee number · username, ตำแหน่งและติดต่อ, สถานะ badge, and a 44px ⋯ row menu offering แก้ไขข้อมูลและสถานะ / เปลี่ยนรหัสผ่าน), and a footer “แสดง X จาก Y คน”. The table keeps a 42rem minimum and scrolls sideways inside the panel on narrow screens. The row menu is a native disclosure that closes after a choice. Not taken from the board: Export and Delete (no endpoint; accounts are deactivated, never deleted), the inline status switch (status still changes through แก้ไข with its confirmation), a role dropdown (position stays free text), the board's own sidebar, fonts and colors (the app's theme tokens are used), and its centred modal (the side panel stays because the forms are sectioned and include passwords).
+
 **เพิ่มพนักงาน and แก้ไข** open the side panel as one sectioned form:
 - ข้อมูล: name, username, employee number, optional position.
 - ติดต่อ: email and phone, with a warning when an old account has no contacts yet.
@@ -902,6 +904,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 | Date | Change | Verification |
 | --- | --- | --- |
 | 2026-10-30 | Staff/Admin redesign Step 8: การแจ้งเตือน page in the Thai list style with ทั้งหมด / ยังไม่อ่าน tabs, Bangkok-day groups, read badges, ทำเป็นอ่านแล้ว, read-all and โหลดเพิ่ม; bell and page share one request-link helper | 183 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / Staff 390 Light against the real local API, writes intercepted |
+| 2026-10-30 | Admin จัดการพนักงาน layout from the Claude Design board: summary cells, one panel with tabs + search bar, table with initials avatars and ⋯ row menu, footer count; Export/Delete/inline switch/role list not adopted | Type check, lint, native tests (initials test new), DESIGN sync; browser check pending real API data |
 | 2026-10-30 | Admin จัดการพนักงาน redo: shared status tabs with counts (`?status=`) above search, so the list follows the other staff list pages; combined filter and empty state | Type check, lint, native tests, DESIGN sync; browser check pending real API data |
 | 2026-10-30 | Customer Deposit/PO list: evidence checklist in สิ่งที่ต้องส่ง rows changed from bordered full-width rows to a compact inline line so the rows match the quotation list layout; detail price-panel checklist unchanged | Type check, lint, native tests, DESIGN sync check, Chrome check on /customer/deposit-po pending real API data |
 | 2026-10-30 | Fix: งานผลิต usage form no longer contains the extra-material search form; pressing ค้นหา in เพิ่มวัตถุดิบนอกแผน could also trigger บันทึกการใช้วัตถุดิบ. The usage form saves only from its button, and the shared `SearchForm` stops its submit event from reaching an outer form | 175 native tests, type check, lint, source audit, build; not re-walked in the browser (backend down) |
@@ -3309,19 +3312,51 @@ src/features/workspace/workspace.module.css
 ```css
 /* จัดการพนักงาน (Admin) page-specific rules; list/form pieces come from staff-ui/staff-layout.module.css. */
 
-.workers { display: grid; margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
-.workers li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
-.workers li:last-child { border-bottom: 0; }
-.workers li > span:first-child { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
-.workers small { color: var(--muted); font-size: 0.875rem; }
+.head { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.head svg { margin-right: 6px; }
+
+/* Summary cells: total / active / inactive from the loaded list. */
+.summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: 16px; margin: 0; }
+.summary > div { display: grid; gap: 6px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.summary dt { color: var(--muted); font-size: 0.875rem; }
+.summary dd { margin: 0; font-size: 1.75rem; font-weight: 650; font-variant-numeric: tabular-nums; }
+.summary dd[data-tone="done"] { color: var(--success); }
+.summary dd[data-tone="quiet"] { color: var(--muted); }
+
+/* One panel: filter bar, table, footer count. */
+.panel { display: grid; min-width: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.panelBar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.panelBar > nav { padding-bottom: 0; }
+.panelBar > form { flex: 0 1 24rem; }
+.note { margin: 0; padding: 12px 16px; color: var(--muted); font-size: 0.875rem; }
+.scroll { overflow-x: auto; }
+.table { width: 100%; min-width: 42rem; border-collapse: collapse; font-size: 0.9375rem; }
+.table th { padding: 12px 16px; color: var(--muted); font-size: 0.8125rem; font-weight: 650; text-align: left; }
+.table td { padding: 10px 16px; border-top: 1px solid var(--line); vertical-align: middle; }
+.table th:last-child, .table td:last-child { width: 1%; text-align: right; }
+.person { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.person > span:last-child, .stack { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.avatar { flex: none; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; background: var(--surface-2); color: var(--text); font-size: 0.8125rem; font-weight: 650; }
+.table small { color: var(--muted); font-size: 0.8125rem; }
+.code { font-variant-numeric: tabular-nums; }
+.footer { margin: 0; padding: 12px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.875rem; }
+
+/* Row actions menu (native disclosure). */
+.menu { position: relative; display: inline-block; }
+.menu summary { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); cursor: pointer; list-style: none; }
+.menu summary::-webkit-details-marker { display: none; }
+.menu[open] summary { background: var(--surface-2); }
+.menu summary:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.menu > div { position: absolute; right: 0; top: calc(100% + 4px); z-index: 5; display: grid; min-width: 12rem; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
+:global(.live-workspace) .menu button { min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 0.9375rem; text-align: left; white-space: nowrap; cursor: pointer; }
+:global(.live-workspace) .menu button:hover, :global(.live-workspace) .menu button:focus-visible { background: var(--surface-2); outline: none; }
 
 /* Side-panel form sections: ข้อมูล / ติดต่อ / รหัสผ่านเริ่มต้น / สถานะบัญชี */
 .section { display: grid; gap: 12px; min-width: 0; margin: 0; padding: 0 0 16px; border: 0; border-bottom: 1px solid var(--line); }
 .section > legend, .section > h3 { padding: 0 0 4px; margin: 0; font-size: 1.0625rem; font-weight: 650; }
 
 @media (max-width: 40rem) {
-  .workers li { grid-template-columns: minmax(0, 1fr) auto; }
-  .workers li > :last-child { grid-column: 1 / -1; }
+  .panelBar > form { flex-basis: 100%; }
 }
 ```
 
