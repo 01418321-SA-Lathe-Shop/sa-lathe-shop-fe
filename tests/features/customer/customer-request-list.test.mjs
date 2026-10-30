@@ -33,32 +33,29 @@ function text(value) {
   return typeof value === "string" || typeof value === "number" ? String(value) : "";
 }
 
-test("request cards preserve exact IDs, quantities, detail links and missing-date wording", () => {
-  const tree = RequestCard({ record: base, profileLoading: false });
+test("request cards preserve exact IDs, essential facts and detail links", () => {
+  const tree = RequestCard({ record: base });
   const link = nodes(tree).find((node) => node.type === "link");
   assert.equal(link.props.href, "/customer/requests?request=request-id");
   assert.match(link.props["aria-label"], /9007199254740993/);
   assert.match(text(tree), /จำนวน\s+9007199254740993\s+ชิ้น/);
-  assert.match(text(tree), /ไม่ได้ระบุวันที่ต้องการ/);
-  assert.match(text(tree), /ไม่ใช่กำหนดส่งที่ร้านยืนยัน/);
-  assert.match(text(tree), /บัญชีผู้สั่ง/);
+  assert.match(text(tree), /ไม่ได้ระบุ/);
+  assert.doesNotMatch(text(tree), /ผู้สั่ง|ข้อกำหนดวัตถุดิบ/);
   assert.doesNotMatch(text(tree), /undefined|NaN|%/);
+  assert.equal(nodes(tree).some((node) => node.type === "icon" && node.props.name === "machine"), false);
+  assert.match(text(RequestCard({ record: base, layout: "list" })), /คำขอ\s*#\s*9007199254740993\s*·\s*ชิ้นงานตามแบบ/);
 });
 test("request cards reuse the existing badge mapping and never guess customer type", () => {
   for (const status of Object.keys(domain.REQUEST_LABELS)) {
-    const tree = RequestCard({ record: { ...base, request: { ...request, status } }, profileLoading: false, profile: { name: "ตัวอย่างบริษัท", customer_type: "company" } });
+    const tree = RequestCard({ record: { ...base, request: { ...request, status } } });
     const badge = nodes(tree).find((node) => node.type === "badge");
     assert.equal(badge.props.value, status);
     assert.equal(badge.props.labels, domain.REQUEST_LABELS);
-    assert.match(text(tree), /ตัวอย่างบริษัท/);
   }
-  const unavailable = text(RequestCard({ record: base, profileLoading: false, profileError: "offline" }));
-  assert.match(unavailable, /ยังโหลดข้อมูลผู้สั่งไม่ได้/);
-  assert.doesNotMatch(unavailable, /บริษัท|บุคคล/);
 });
 test("card secondary actions preserve quotation, evidence and job destinations", () => {
   const quotation = { id: "quote-id", version: 1, status: "sent" };
-  const hrefs = (record) => nodes(RequestCard({ record, profileLoading: false })).filter((node) => node.type === "link").map((node) => node.props.href);
+  const hrefs = (record) => nodes(RequestCard({ record })).filter((node) => node.type === "link").map((node) => node.props.href);
   assert.equal(hrefs({ ...base, quotations: [quotation] })[1], "/customer/quotations?request=request-id&quotation=quote-id");
   assert.equal(hrefs({ ...base, quotations: [{ ...quotation, status: "approved" }] })[1], "/customer/deposit-po?request=request-id&quotation=quote-id");
   assert.equal(hrefs({ ...base, quotations: [quotation], fulfillment: { job: { id: "job-id" } } })[1], "/customer/jobs?job=job-id");
@@ -72,11 +69,11 @@ test("loading is announced once and decorative skeleton cards stay hidden from a
   assert.equal(grid.props.children.length, 4);
 });
 test("status pills distinguish unavailable counts from known zero and preserve applied query links", () => {
-  const props = { items: [], query: "S45C [test]", status: "completed", loading: false };
+  const props = { items: [], query: "S45C [test]", status: "completed", layout: "list", loading: false };
   const unknown = RequestStatusFilters({ ...props, countUnavailable: true });
   assert.match(text(unknown), /ยังโหลดจำนวนไม่ได้/);
   assert.doesNotMatch(text(unknown), /0 รายการ/);
   assert.match(text(RequestStatusFilters(props)), /0 รายการที่โหลดสำเร็จ/);
   const completed = nodes(unknown).find((node) => node.props?.["aria-current"] === "page");
-  assert.equal(completed.props.href, "/customer/requests?q=S45C+%5Btest%5D&status=completed");
+  assert.equal(completed.props.href, "/customer/requests?q=S45C+%5Btest%5D&status=completed&layout=list");
 });

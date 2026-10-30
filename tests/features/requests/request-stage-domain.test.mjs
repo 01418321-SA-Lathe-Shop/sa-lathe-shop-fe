@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  defaultStage, evidenceChecklist, priceCheck, rejectionCount, satang, stageCounts, stageOf, stageRows,
+  defaultStage, evidenceChecklist, priceCheck, rejectionCount, requestView, satang, stageCounts, stageOf, stageRows,
 } from "../../../src/features/requests/request-stage-domain.ts";
 
 const request = (no, status = "pending", extra = {}) => ({ no_request: no, description: `Part ${no}`, status, created_at: "2026-10-01T00:00:00Z", ...extra });
@@ -49,6 +49,13 @@ test("default stage opens the linked request, else the first stage needing this 
   assert.equal(defaultStage({ ...counts, review: 0 }, true), "customer");
   const linked = { request: request("R9"), quotations: [quote("draft")] };
   assert.equal(defaultStage(counts, false, linked), "quote");
+});
+
+test("card view is available to Admin while Staff stay in list view", () => {
+  assert.equal(requestView("cards", false), "cards");
+  assert.equal(requestView("list", false), "list");
+  assert.equal(requestView("unknown", false), "list");
+  assert.equal(requestView("cards", true), "list");
 });
 
 test("rows sort evidence by the server deadline and closed requests newest first", () => {

@@ -169,7 +169,9 @@
 .root :global(.cust-alert.danger) { color: var(--cust-red); }
 .root :global(.cust-alert.success) { color: var(--cust-green); }
 .root :global(.cust-alert button) { margin-top: 8px; }
-.root :global(.cust-empty) { padding: 40px 24px; text-align: center; color: var(--cust-muted); }
+.root :global(.cust-empty) { display: grid; justify-items: center; align-content: center; width: 100%; box-sizing: border-box; padding: 40px 24px; text-align: center; color: var(--cust-muted); }
+.root :global(.cust-empty > svg) { display: block; justify-self: center; }
+.root :global(.cust-empty > p) { max-width: 42rem; margin: 0; }
 .root :global(.cust-empty h2) { color: var(--cust-ink); margin: 16px 0 8px; }
 .root :global(.cust-empty > a) { margin-top: 20px; }
 .root :global(.cust-loading) { padding: 16px 0; color: var(--cust-muted); display: flex; align-items: center; gap: 12px; }

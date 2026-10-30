@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Icon } from "../../components/appearance/icons";
 import type { Account, BackendApi, JobRequest } from "../../lib/api/backend-api";
@@ -9,27 +9,42 @@ import type { FulfillmentJob } from "../delivery/delivery-domain";
 import { availableActions } from "../delivery/delivery-domain";
 import { useResource } from "../../hooks/backend-hooks";
 import { useCollection } from "./customer-hooks";
-import { customerHref, dateTH, DELIVERY_LABELS, INVOICE_LABELS, JOB_LABELS, moneyTH, REQUEST_LABELS } from "./customer-domain";
+import { customerHref, dateTH, DELIVERY_LABELS, INVOICE_LABELS, JOB_LABELS, matchingRequests, moneyTH, REQUEST_LABELS } from "./customer-domain";
 import { Badge, Empty, Field, Limited, LocalPages, PageTitle, ResourceFeedback } from "./customer-ui";
-import { OrderTabs } from "./customer-requests";
 import { CustomerInspection } from "./customer-job-actions";
 import { CustomerInvoice } from "./customer-invoice";
 import { CustomerInvoiceList } from "./customer-invoice-list";
 import { CustomerJobList } from "./customer-job-list";
+import styles from "./customer-requests.module.css";
 
 export function CustomerJobs({ api, mode = "jobs" }: { api: BackendApi; mode?: "jobs" | "payments" | "inspection" }) {
-  const query = useSearchParams(); const history = query.get("view") === "history"; const jobs = useCollection<FulfillmentJob>(api, "/fulfillment/jobs"); const requests = useCollection<JobRequest>(api, "/requests");
+  const router = useRouter(); const query = useSearchParams(); const history = query.get("view") === "history"; const q = query.get("q") ?? ""; const jobs = useCollection<FulfillmentJob>(api, "/fulfillment/jobs"); const requests = useCollection<JobRequest>(api, "/requests");
   const [filter, setFilter] = useState(""); const [page, setPage] = useState(0);
   const lookup = new Map(requests.data?.items.map((request) => [request.id, request]));
   const rows = (jobs.data?.items ?? []).filter((job) => mode === "inspection" ? Boolean(job.deliveries?.length) && (!filter || job.deliveries?.at(-1)?.status === filter) : !filter || job.job_status === filter);
-  const archived = requests.data?.items.filter((request) => ["completed", "canceled"].includes(request.status)) ?? [];
+  const archived = matchingRequests(requests.data?.items.filter((request) => ["completed", "canceled"].includes(request.status)) ?? [], q, "");
+  const historyPage = Math.min(page, Math.max(0, Math.ceil(archived.length / 20) - 1));
   const labels = mode === "inspection" ? DELIVERY_LABELS : JOB_LABELS;
   const section = mode === "inspection" ? "delivery-payment" : "jobs";
   if (mode === "jobs" && !history) return <CustomerJobList jobs={jobs} requests={requests} />;
   if (mode === "payments") return <CustomerInvoiceList jobs={jobs} requests={requests} />;
-  return <>{mode === "jobs" && <OrderTabs active={history ? "history" : "jobs"} />}<PageTitle title={history ? "ประวัติการสั่งงาน" : mode === "inspection" ? "ตรวจรับงาน" : "งานผลิต"} description={history ? "คำขอที่เสร็จสิ้นหรือยกเลิก เชื่อมกลับข้อมูลเดิม" : mode === "inspection" ? "ตรวจงานที่ร้านส่งมอบ ก่อนยืนยันรับหรือส่งคืนเพื่อแก้ไข" : "งานที่ร้านรับเข้าคิวหลังอนุมัติหลักฐานแล้ว"} />
+  if (mode === "jobs" && history) return <section className={styles.list}><PageTitle title="ประวัติการสั่งงาน" description="คำขอที่เสร็จสิ้นหรือยกเลิก เชื่อมกลับข้อมูลเดิม" />
+    <form key={q} className={styles.searchForm} onSubmit={(event) => { event.preventDefault(); const data = new FormData(event.currentTarget); setPage(0); router.replace(customerHref("jobs", { view: "history", q: String(data.get("q") ?? "") }), { scroll: false }); }}><Field label="ค้นหาประวัติ"><input name="q" type="search" defaultValue={q} placeholder="เลขคำขอหรือรายละเอียดงาน" /></Field><button type="submit">ค้นหา</button></form>
+    {q && <p className="cust-filter-result">ผลจากการค้นหา <Link href={customerHref("jobs", { view: "history" })}>ล้างการค้นหา</Link></p>}
+    <ResourceFeedback {...requests} /><Limited complete={requests.data?.complete} />
+    <p className="cust-muted cust-small">เรียงตามเลขคำขอจากมากไปน้อย</p>
+    <div className={`${styles.grid} ${styles.listView}`}>{archived.slice(historyPage * 20, historyPage * 20 + 20).map((request) => <article className={`${styles.card} ${styles.rowCard}`} key={request.id} aria-label={`ประวัติคำขอ #${request.no_request}`}>
+      <h2 className={styles.cardTitle}><Link className={styles.openCard} href={customerHref("requests", { request: request.id })} aria-label={`ดูคำขอ #${request.no_request} · ${request.description}`}><span className={styles.rowNumber}>คำขอ #{request.no_request} · </span>{request.description}</Link></h2>
+      <Badge value={request.status} labels={REQUEST_LABELS} />
+      <dl className={styles.essentials}><div><dt>จำนวน</dt><dd>{request.qty} ชิ้น</dd></div><div><dt>ส่งคำขอเมื่อ</dt><dd>{dateTH(request.created_at)}</dd></div></dl>
+      <footer className={`${styles.cardFooter} ${styles.jobFooter}`}><span className={styles.openHint} aria-hidden="true">ดูคำขอและเอกสาร <Icon name="arrow" size={14} /></span></footer>
+    </article>)}</div>
+    {requests.data && !requests.loading && !requests.error && !archived.length && <Empty title={q ? "ไม่พบประวัติที่ตรงกับการค้นหา" : "ยังไม่มีประวัติงานที่ปิดแล้ว"} action={q ? <Link href={customerHref("jobs", { view: "history" })}>ล้างการค้นหา</Link> : undefined}>{q ? "ลองค้นหาด้วยเลขคำขอหรือรายละเอียดงานอื่น" : "คำขอจะเสร็จสิ้นเมื่อรับงานแล้วและชำระครบ"}</Empty>}
+    <LocalPages count={archived.length} page={historyPage} setPage={setPage} />
+  </section>;
+  return <><PageTitle title={history ? "ประวัติการสั่งงาน" : mode === "inspection" ? "ตรวจรับงาน" : "งานผลิต"} description={history ? "คำขอที่เสร็จสิ้นหรือยกเลิก เชื่อมกลับข้อมูลเดิม" : mode === "inspection" ? "ตรวจงานที่ร้านส่งมอบ ก่อนยืนยันรับหรือส่งคืนเพื่อแก้ไข" : "งานที่ร้านรับเข้าคิวหลังอนุมัติหลักฐานแล้ว"} />
     <ResourceFeedback {...jobs} /><ResourceFeedback {...requests} /><Limited complete={jobs.data?.complete && requests.data?.complete} />
-    {history ? <>{archived.map((request) => <article className="cust-document-row" key={request.id}><div><h2>{request.description}</h2><p>คำขอ #{request.no_request}</p><Badge value={request.status} labels={REQUEST_LABELS} /></div><Link href={customerHref("requests", { request: request.id })}>ดูคำขอและเอกสาร →</Link></article>)}{requests.data && !requests.loading && !requests.error && !archived.length && <Empty title="ยังไม่มีประวัติงานที่ปิดแล้ว">คำขอจะเสร็จสิ้นเมื่อรับงานแล้วและชำระครบ</Empty>}</> : <>
+    <>
       <div className="cust-list-filter"><Field label={mode === "inspection" ? "สถานะการส่งมอบ" : "สถานะการผลิต"}><select value={filter} onChange={(event) => { setFilter(event.target.value); setPage(0); }}><option value="">ทั้งหมด</option>{Object.entries(labels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field></div>
       {rows.slice(page * 20, page * 20 + 20).map((job) => {
         const request = lookup.get(job.request_id); const delivery = job.deliveries?.at(-1); const actions = availableActions(job, "customer");
@@ -37,7 +52,7 @@ export function CustomerJobs({ api, mode = "jobs" }: { api: BackendApi; mode?: "
       })}
       {jobs.data && !jobs.loading && !jobs.error && !rows.length && <Empty title={filter ? "ไม่พบงานในสถานะที่เลือก" : mode === "inspection" ? "ยังไม่มีงานส่งมอบให้ตรวจรับ" : "ยังไม่มีงานผลิต"} action={<Link href="/customer/requests">ดูคำขอผลิต</Link>}>{mode === "jobs" ? "งานจะปรากฏหลังเจ้าหน้าที่อนุมัติหลักฐานมัดจำ / PO ครบ" : "เมื่อร้านดำเนินการแล้ว รายการจะแสดงที่นี่"}</Empty>}
       <LocalPages count={rows.length} page={page} setPage={setPage} />
-    </>}
+    </>
   </>;
 }
 

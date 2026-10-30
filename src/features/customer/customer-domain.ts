@@ -28,11 +28,24 @@ export function customerHref(section: string, values: Record<string, string | un
 export function latestQuote(quotes: Quotation[]) {
   return [...quotes].sort((a, b) => BigInt(a.version) > BigInt(b.version) ? -1 : BigInt(a.version) < BigInt(b.version) ? 1 : a.id.localeCompare(b.id))[0];
 }
+export function compareRequestNumbers(a: Pick<JobRequest, "no_request" | "id">, b: Pick<JobRequest, "no_request" | "id">) {
+  const left = String(a.no_request); const right = String(b.no_request);
+  if (/^\d+$/.test(left) && /^\d+$/.test(right)) {
+    const leftNumber = BigInt(left); const rightNumber = BigInt(right);
+    if (leftNumber !== rightNumber) return leftNumber > rightNumber ? -1 : 1;
+  } else {
+    const compared = right.localeCompare(left, "th-TH", { numeric: true });
+    if (compared) return compared;
+  }
+  return a.id.localeCompare(b.id);
+}
 export function matchingRequests(items: JobRequest[], query: string, status: string) {
   const term = query.trim().toLocaleLowerCase("th-TH");
   return items.filter((item) => (!status || item.status === status) && (!term || `${item.no_request} ${item.description}`.toLocaleLowerCase("th-TH").includes(term)))
-    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at) || a.id.localeCompare(b.id));
+    .sort(compareRequestNumbers);
 }
+export type CustomerRequestLayout = "cards" | "list";
+export function customerRequestLayout(value: string | null): CustomerRequestLayout { return value === "list" ? "list" : "cards"; }
 export function requestStatusCounts(items: JobRequest[], query: string) {
   const matched = matchingRequests(items, query, "");
   const byStatus = Object.fromEntries(Object.keys(REQUEST_LABELS).map((status) => [status, 0]));
