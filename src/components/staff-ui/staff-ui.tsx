@@ -73,14 +73,21 @@ export function ConfirmDialog({ open, title, children, checks = [], confirmLabel
   </dialog>;
 }
 
-/** Native modal side panel: slides in from the right on desktop, full screen on phones. */
-export function Drawer({ open, title, children, onClose }: { open: boolean; title: string; children: ReactNode; onClose: () => void }) {
-  const dialog = useRef<HTMLDialogElement>(null); const titleId = useId();
+/** Native modal side panel: slides in from the right on desktop, full screen on phones.
+ *  `centered` makes it a centred modal that also closes on a click outside the box. */
+export function Drawer({ open, title, children, onClose, centered = false }: { open: boolean; title: string; children: ReactNode; onClose: () => void; centered?: boolean }) {
+  const dialog = useRef<HTMLDialogElement>(null); const titleId = useId(); const pressedOutside = useRef(false);
   useEffect(() => {
     const node = dialog.current; if (!node) return;
     if (open && !node.open) node.showModal(); else if (!open && node.open) node.close();
   }, [open]);
-  return <dialog ref={dialog} className={styles.drawer} aria-labelledby={titleId} onCancel={(event) => { event.preventDefault(); onClose(); }}>
+  // The dialog has no padding, so a hit on the element itself is the backdrop. Press and release must
+  // both land there, so a text selection dragged out of the box does not close it.
+  const outside = centered ? {
+    onMouseDown: (event: React.MouseEvent<HTMLDialogElement>) => { pressedOutside.current = event.target === event.currentTarget; },
+    onClick: (event: React.MouseEvent<HTMLDialogElement>) => { if (pressedOutside.current && event.target === event.currentTarget) onClose(); pressedOutside.current = false; },
+  } : {};
+  return <dialog ref={dialog} className={centered ? styles.modal : styles.drawer} aria-labelledby={titleId} onCancel={(event) => { event.preventDefault(); onClose(); }} {...outside}>
     {open && <><header className={styles.drawerHeader}><h2 id={titleId}>{title}</h2><button type="button" className={styles.secondary} onClick={onClose} aria-label="ปิดแผงนี้"><Icon name="close" size={18} /></button></header>
       <div className={styles.drawerBody}>{children}</div></>}
   </dialog>;

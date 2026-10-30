@@ -205,7 +205,7 @@ Step 7 of the approved Staff/Admin redesign (`/admin/workers`, Admin only; no ne
 
 **List.** Staff accounts load 100 per call, up to 1,000, with the cap notice. Search matches name, username, employee number or position within the loaded list, because the API has no search parameter. Each row shows the name, the username · employee number · position, the contacts (or “ยังไม่มีข้อมูลติดต่อ (บัญชีเก่า)” for old accounts), a ใช้งานอยู่/ปิดใช้งาน badge, and แก้ไข / เปลี่ยนรหัสผ่าน. On phones the buttons move under the text. The redo adds the shared status tabs (ทั้งหมด / ใช้งานอยู่ / ปิดใช้งาน, with counts from the loaded list) in the URL as `?status=`, so the list matches the materials, delivery and inbox pages; the status filter combines with search, and the empty state names the filter.
 
-**Layout (2026-10-30, from the Claude Design worker-management board).** Right-aligned อัปเดตข้อมูล and เพิ่มพนักงาน (with plus icon); three summary cells (พนักงานทั้งหมด, ใช้งานอยู่ in `--success`, ปิดใช้งาน muted; 1.75rem/650 tabular numbers, 12px radius, auto-fit 12rem columns); then one 14px-radius panel holding the status tabs and search in a top bar, a table (ชื่อ with a 36px initials avatar plus employee number · username, ตำแหน่งและติดต่อ, สถานะ badge, and a 44px ⋯ row menu offering แก้ไขข้อมูลและสถานะ / เปลี่ยนรหัสผ่าน), and a footer “แสดง X จาก Y คน”. The table keeps a 42rem minimum and scrolls sideways inside the panel on narrow screens. The row menu is a native disclosure that closes after a choice. Not taken from the board: Export and Delete (no endpoint; accounts are deactivated, never deleted), the inline status switch (status still changes through แก้ไข with its confirmation), a role dropdown (position stays free text), the board's own sidebar, fonts and colors (the app's theme tokens are used), and its centred modal (the side panel stays because the forms are sectioned and include passwords).
+**Layout (2026-10-30, from the Claude Design worker-management board).** Right-aligned อัปเดตข้อมูล and เพิ่มพนักงาน (with plus icon); three summary cells (พนักงานทั้งหมด, ใช้งานอยู่ in `--success`, ปิดใช้งาน muted; 1.75rem/650 tabular numbers, 12px radius, auto-fit 12rem columns); then one 14px-radius panel holding the status tabs and search in a top bar, a table (ชื่อ with a 36px initials avatar plus employee number · username, ตำแหน่งและติดต่อ, สถานะ badge, and a 44px ⋯ row menu offering แก้ไขข้อมูลและสถานะ / เปลี่ยนรหัสผ่าน), and a footer “แสดง X จาก Y คน”. The table has no overflow wrapper (an `overflow-x` wrapper clipped the ⋯ menu); at ≤48rem each row stacks into a two-column grid (details left, ⋯ right) instead of scrolling sideways, the panel's single column is `minmax(0, 1fr)` so the tab strip scrolls inside it, and at ≤40rem the three summary cells sit in one compact row. The row menu is a native disclosure that closes after a choice; its items are left-aligned. Add, edit and password open in a centred modal (`Drawer centered`: 40rem wide, 16px radius, at most viewport height minus 2rem with the body scrolling inside) that also closes on Escape, the ✕ button or a click on the dimmed area outside the box; the click must both start and end outside, so dragging a text selection out of the box does not close it. Other pages keep the right-edge side panel. Not taken from the board: Export and Delete (no endpoint; accounts are deactivated, never deleted), the inline status switch (status still changes through แก้ไข with its confirmation), a role dropdown (position stays free text), the board's own sidebar, fonts and colors (the app's theme tokens are used), and the board modal's three fields (the modal keeps the full sectioned form).
 
 **เพิ่มพนักงาน and แก้ไข** open the side panel as one sectioned form:
 - ข้อมูล: name, username, employee number, optional position.
@@ -904,6 +904,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 | Date | Change | Verification |
 | --- | --- | --- |
 | 2026-10-30 | Staff/Admin redesign Step 8: การแจ้งเตือน page in the Thai list style with ทั้งหมด / ยังไม่อ่าน tabs, Bangkok-day groups, read badges, ทำเป็นอ่านแล้ว, read-all and โหลดเพิ่ม; bell and page share one request-link helper | 183 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / Staff 390 Light against the real local API, writes intercepted |
+| 2026-10-30 | Admin จัดการพนักงาน fixes: ⋯ row menu no longer clipped (overflow wrapper removed, rows stack at ≤48rem); add/edit/password open in a centred modal that closes on an outside click (`Drawer centered`, workers only); panel no longer overflows on phones; compact summary row at ≤40rem | Type check, lint, native tests, DESIGN sync; built-in browser on the local dev server as the local-test Admin at 800px and 375px: last-row menu fully visible, modal centred with its bottom reachable, inside click keeps it open, outside click closes it, no horizontal page overflow; no writes made |
 | 2026-10-30 | Admin จัดการพนักงาน layout from the Claude Design board: summary cells, one panel with tabs + search bar, table with initials avatars and ⋯ row menu, footer count; Export/Delete/inline switch/role list not adopted | Type check, lint, native tests (initials test new), DESIGN sync; browser check pending real API data |
 | 2026-10-30 | Admin จัดการพนักงาน redo: shared status tabs with counts (`?status=`) above search, so the list follows the other staff list pages; combined filter and empty state | Type check, lint, native tests, DESIGN sync; browser check pending real API data |
 | 2026-10-30 | Customer Deposit/PO list: evidence checklist in สิ่งที่ต้องส่ง rows changed from bordered full-width rows to a compact inline line so the rows match the quotation list layout; detail price-panel checklist unchanged | Type check, lint, native tests, DESIGN sync check, Chrome check on /customer/deposit-po pending real API data |
@@ -2947,6 +2948,12 @@ src/features/workspace/workspace.module.css
 .drawer[open] { display: grid; grid-template-rows: auto minmax(0, 1fr); animation: drawerIn .2s ease-out; }
 .drawer::backdrop { background: rgba(0, 0, 0, .5); }
 @keyframes drawerIn { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+/* Centred variant (Drawer centered): same header/body, flex column so the body scrolls inside the height cap. */
+.modal { width: min(40rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); margin: auto; padding: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--text); box-shadow: 0 24px 64px rgba(0, 0, 0, .4); }
+.modal[open] { display: flex; flex-direction: column; animation: modalIn .18s ease-out; }
+.modal::backdrop { background: rgba(0, 0, 0, .5); }
+.modal > .drawerBody { flex: 1 1 auto; min-height: 0; }
+@keyframes modalIn { from { transform: translateY(8px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
 .drawerHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
 .drawerHeader h2 { margin: 0; font-size: 1.25rem; line-height: 1.35; overflow-wrap: anywhere; }
 :global(.live-workspace) .drawerHeader > button { min-width: 48px; padding: 10px; }
@@ -2975,7 +2982,7 @@ src/features/workspace/workspace.module.css
   .dialogActions { flex-direction: column-reverse; }
   :global(.live-workspace) .dialogActions > button { width: 100%; }
 }
-@media (prefers-reduced-motion: reduce) { .skeleton > span, .drawer[open] { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .skeleton > span, .drawer[open], .modal[open] { animation: none; } }
 ```
 
 ### A10. Staff/Admin production — src/features/production/production.module.css
@@ -3324,13 +3331,13 @@ src/features/workspace/workspace.module.css
 .summary dd[data-tone="quiet"] { color: var(--muted); }
 
 /* One panel: filter bar, table, footer count. */
-.panel { display: grid; min-width: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.panel { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
 .panelBar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
-.panelBar > nav { padding-bottom: 0; }
+.panelBar > nav { min-width: 0; max-width: 100%; padding-bottom: 0; }
 .panelBar > form { flex: 0 1 24rem; }
 .note { margin: 0; padding: 12px 16px; color: var(--muted); font-size: 0.875rem; }
-.scroll { overflow-x: auto; }
-.table { width: 100%; min-width: 42rem; border-collapse: collapse; font-size: 0.9375rem; }
+/* No overflow wrapper: it would clip the row menu. Narrow screens stack rows instead of scrolling. */
+.table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
 .table th { padding: 12px 16px; color: var(--muted); font-size: 0.8125rem; font-weight: 650; text-align: left; }
 .table td { padding: 10px 16px; border-top: 1px solid var(--line); vertical-align: middle; }
 .table th:last-child, .table td:last-child { width: 1%; text-align: right; }
@@ -3348,15 +3355,27 @@ src/features/workspace/workspace.module.css
 .menu[open] summary { background: var(--surface-2); }
 .menu summary:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
 .menu > div { position: absolute; right: 0; top: calc(100% + 4px); z-index: 5; display: grid; min-width: 12rem; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
-:global(.live-workspace) .menu button { min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 0.9375rem; text-align: left; white-space: nowrap; cursor: pointer; }
+:global(.live-workspace) .menu button { display: flex; align-items: center; justify-content: flex-start; min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 0.9375rem; text-align: left; white-space: nowrap; cursor: pointer; }
 :global(.live-workspace) .menu button:hover, :global(.live-workspace) .menu button:focus-visible { background: var(--surface-2); outline: none; }
 
 /* Side-panel form sections: ข้อมูล / ติดต่อ / รหัสผ่านเริ่มต้น / สถานะบัญชี */
 .section { display: grid; gap: 12px; min-width: 0; margin: 0; padding: 0 0 16px; border: 0; border-bottom: 1px solid var(--line); }
 .section > legend, .section > h3 { padding: 0 0 4px; margin: 0; font-size: 1.0625rem; font-weight: 650; }
 
+@media (max-width: 48rem) {
+  .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .table tbody { display: block; }
+  .table tr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; padding: 14px 16px; border-top: 1px solid var(--line); }
+  .table td { display: block; padding: 0; border: 0; }
+  .table td:nth-child(2), .table td:nth-child(3) { grid-column: 1; }
+  .table td:last-child { grid-column: 2; grid-row: 1 / span 3; width: auto; }
+}
 @media (max-width: 40rem) {
   .panelBar > form { flex-basis: 100%; }
+  .summary { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .summary > div { padding: 12px; }
+  .summary dt { font-size: 0.8125rem; }
+  .summary dd { font-size: 1.375rem; }
 }
 ```
 

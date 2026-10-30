@@ -47,7 +47,7 @@ export function LiveWorkers({ api }: { api: BackendApi }) {
       {workers.loading && !workers.data && <div className={styles.note}><Skeleton label="กำลังโหลดพนักงาน…" /></div>}
       {workers.error && !workers.data && <div className={styles.note}><LoadError title="โหลดรายชื่อพนักงานไม่สำเร็จ" onRetry={workers.reload} /></div>}
       {workers.data && !items.length && <EmptyState title={q || status !== "all" ? "ไม่พบพนักงานที่ตรงกับตัวกรอง" : "ยังไม่มีบัญชีพนักงาน"}>{q || status !== "all" ? "ลองเปลี่ยนคำค้นหาหรือสถานะบัญชี" : "เพิ่มพนักงานเพื่อสร้างบัญชีเข้าใช้งาน"}</EmptyState>}
-      {items.length > 0 && <div className={styles.scroll}><table className={styles.table}>
+      {items.length > 0 && <table className={styles.table}>
         <thead><tr><th scope="col">ชื่อ</th><th scope="col">ตำแหน่งและติดต่อ</th><th scope="col">สถานะ</th><th scope="col"><span className={layout.visuallyHidden}>จัดการ</span></th></tr></thead>
         <tbody>{items.map((worker) => <tr key={worker.id}>
           <td><span className={styles.person}><span className={styles.avatar} aria-hidden="true">{initials(worker.name)}</span><span><strong>{worker.name}</strong><small className={styles.code}>{worker.employee_no} · {worker.username}</small></span></span></td>
@@ -61,10 +61,10 @@ export function LiveWorkers({ api }: { api: BackendApi }) {
             </div>
           </details></td>
         </tr>)}</tbody>
-      </table></div>}
+      </table>}
       {loaded && <p className={styles.footer} aria-live="polite">แสดง {items.length.toLocaleString("th-TH")} จาก {all.length.toLocaleString("th-TH")} คน</p>}
     </section>
-    <Drawer open={panel !== null} title={title} onClose={() => setPanel(null)}>
+    <Drawer centered open={panel !== null} title={title} onClose={() => setPanel(null)}>
       {panel?.kind === "new" && <WorkerForm api={api} onSaved={() => saved("เพิ่มพนักงานแล้ว")} />}
       {panel?.kind === "edit" && <EditWorker key={panel.worker.id} api={api} id={panel.worker.id} onSaved={saved} />}
       {panel?.kind === "password" && <PasswordForm key={panel.worker.id} api={api} worker={panel.worker} onSaved={() => saved(`เปลี่ยนรหัสผ่าน ${panel.worker.name} แล้ว ต้องเข้าสู่ระบบใหม่ทุกเครื่อง`)} />}

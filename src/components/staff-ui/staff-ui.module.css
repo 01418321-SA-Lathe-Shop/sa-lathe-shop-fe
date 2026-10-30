@@ -87,6 +87,12 @@
 .drawer[open] { display: grid; grid-template-rows: auto minmax(0, 1fr); animation: drawerIn .2s ease-out; }
 .drawer::backdrop { background: rgba(0, 0, 0, .5); }
 @keyframes drawerIn { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+/* Centred variant (Drawer centered): same header/body, flex column so the body scrolls inside the height cap. */
+.modal { width: min(40rem, calc(100vw - 2rem)); max-height: calc(100dvh - 2rem); margin: auto; padding: 0; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--text); box-shadow: 0 24px 64px rgba(0, 0, 0, .4); }
+.modal[open] { display: flex; flex-direction: column; animation: modalIn .18s ease-out; }
+.modal::backdrop { background: rgba(0, 0, 0, .5); }
+.modal > .drawerBody { flex: 1 1 auto; min-height: 0; }
+@keyframes modalIn { from { transform: translateY(8px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
 .drawerHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
 .drawerHeader h2 { margin: 0; font-size: 1.25rem; line-height: 1.35; overflow-wrap: anywhere; }
 :global(.live-workspace) .drawerHeader > button { min-width: 48px; padding: 10px; }
@@ -115,4 +121,4 @@
   .dialogActions { flex-direction: column-reverse; }
   :global(.live-workspace) .dialogActions > button { width: 100%; }
 }
-@media (prefers-reduced-motion: reduce) { .skeleton > span, .drawer[open] { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .skeleton > span, .drawer[open], .modal[open] { animation: none; } }
