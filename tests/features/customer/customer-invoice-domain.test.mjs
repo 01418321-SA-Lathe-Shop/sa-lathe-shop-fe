@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { amountFeedback, dueCountdown, invoicedJobs, invoiceStatusCounts, invoiceSummary, paidPercent, pendingAmount } from "../../../src/features/customer/customer-invoice-domain.ts";
+import { amountFeedback, dueCountdown, invoicedJobs, paymentLedger, invoiceStatusCounts, invoiceSummary, paidPercent, pendingAmount } from "../../../src/features/customer/customer-invoice-domain.ts";
 
 const now = Date.parse("2026-10-29T05:00:00Z"); // 12:00 Bangkok
 const invoice = (status, balance, due_at, extra = {}) => ({ id: status, number: `INV-${status}`, amount: "10000.00", paid: "0.00", balance, status, credit_days: 30, issued_at: "2026-10-01T00:00:00Z", due_at, ...extra });
@@ -29,7 +29,7 @@ test("due countdown counts Bangkok calendar days and matches overview overdue wo
 test("summary and counts cover only invoiced jobs and keep exact totals", () => {
   assert.deepEqual(invoicedJobs(jobs, "partial").map((job) => job.job_id), ["j2"]);
   assert.deepEqual(invoiceStatusCounts(jobs), { all: 3, byStatus: { unpaid: 1, partial: 1, paid: 1 } });
-  assert.deepEqual(invoiceSummary(jobs, now), { outstanding: "12500.50", open: 2, overdue: 1, pending: 1 });
+  assert.deepEqual(invoiceSummary(jobs, now), { outstanding: "12500.50", open: 2, overdue: 1, pending: 1, paid: "17499.50" });
   assert.equal(invoiceSummary(jobs, null).overdue, null);
   assert.equal(pendingAmount(jobs[1].payments), "1000.50");
   assert.equal(pendingAmount([{ status: "pending", amount: "1e3" }]), undefined);
@@ -41,4 +41,14 @@ test("amount guidance mirrors the payload limits without changing them", () => {
   assert.match(amountFeedback("2500.51", "2500.50").problem, /เกินยอดคงเหลือ/);
   assert.match(amountFeedback("0", "2500.50").problem, /มากกว่า 0/);
   assert.match(amountFeedback("1,500", "2500.50").problem, /จุลภาค/);
+});
+
+test("payment ledger lists approved deposits and invoice payments newest first, with no invented deposit date", () => {
+  const rows = paymentLedger([
+    { job_id: "a", deposit: "500.00", payments: [{ id: "abcdef12-x", amount: "100.00", paid_at: "2026-10-01T00:00:00Z", method: "bank", status: "pending", evidence_id: "e" }, { id: "22222222-x", amount: "50.00", paid_at: "2026-10-05T00:00:00Z", method: "cash", status: "approved" }] },
+    { job_id: "b", deposit: "0.00", payments: null },
+  ]);
+  assert.deepEqual(rows.map((row) => [row.kind, row.reference, row.amount, row.hasEvidence]), [["invoice", "22222222", "50.00", false], ["invoice", "ABCDEF12", "100.00", true], ["deposit", undefined, "500.00", true]]);
+  assert.equal(rows[2].paidAt, undefined);
+  assert.equal(rows[2].status, "approved");
 });

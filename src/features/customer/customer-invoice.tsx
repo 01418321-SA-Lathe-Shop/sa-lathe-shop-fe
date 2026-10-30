@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "../../components/appearance/icons";
-import type { Account, Attachment, BackendApi } from "../../lib/api/backend-api";
+import type { Account, Attachment, BackendApi, Quotation } from "../../lib/api/backend-api";
 import { useRetryableWrite } from "../../hooks/backend-hooks";
 import { paymentPayload, type FulfillmentJob } from "../delivery/delivery-domain";
 import { customerHref, dateTH, EVIDENCE_LABELS, INVOICE_LABELS, moneyTH } from "./customer-domain";
@@ -15,7 +15,7 @@ import { CustomerUpload } from "./customer-upload";
 import { CustomerWriteRetry } from "./customer-write";
 import styles from "./customer-invoices.module.css";
 
-export function CustomerInvoice({ api, account, state, canPay, saved, reload }: { api: BackendApi; account: Account; state: FulfillmentJob; canPay: boolean; saved: (message: string) => void; reload: () => void }) {
+export function CustomerInvoice({ api, account, state, quote, canPay, saved, reload }: { api: BackendApi; account: Account; state: FulfillmentJob; quote?: Quotation; canPay: boolean; saved: (message: string) => void; reload: () => void }) {
   const invoice = state.invoice; const now = useNow();
   if (!invoice) return <Empty title="ยังไม่มีใบแจ้งหนี้" action={<Link href={customerHref("jobs", { job: state.job_id })}>กลับรายละเอียดงานผลิต</Link>}>ยอดหลังมัดจำยังไม่ใช่ใบแจ้งหนี้ รอร้านออกเอกสารก่อนส่งหลักฐานชำระเงิน</Empty>;
   const pending = pendingAmount(state.payments); const hasPending = state.payments?.some((item) => item.status === "pending");
@@ -31,6 +31,7 @@ export function CustomerInvoice({ api, account, state, canPay, saved, reload }: 
         <div><dt>ครบกำหนดชำระ</dt><dd><time dateTime={invoice.due_at}>{dateTH(invoice.due_at)}</time></dd></div>
         <div><dt>ออกเอกสารเมื่อ</dt><dd><time dateTime={invoice.issued_at}>{dateTH(invoice.issued_at)}</time></dd></div>
         <div><dt>เครดิต</dt><dd>{invoice.credit_days} วัน</dd></div>
+        <div><dt>เลขอ้างอิงงาน</dt><dd>{state.job_id.slice(0, 8).toUpperCase()}</dd></div>
       </dl>
     </section>
     {hasPending && <p className={`cust-alert ${styles.pendingAlert}`}>มีหลักฐานรอตรวจ{pending ? ` ${moneyTH(pending)}` : ""} ยอดคงเหลือยังไม่ลดจนกว่า Admin อนุมัติ ตรวจประวัติด้านล่างก่อนส่งหลักฐานรายการใหม่</p>}
@@ -48,6 +49,7 @@ export function CustomerInvoice({ api, account, state, canPay, saved, reload }: 
       <div className={styles.depositNote}><span>มัดจำก่อนเปิดงาน</span><strong>{moneyTH(state.deposit)}</strong><small>หักแล้วก่อนออกใบแจ้งหนี้ ไม่หักซ้ำ</small></div>
       <p className="cust-muted cust-small">เงินบาท · ไม่มี VAT</p>
       <Link className="cust-link" href={customerHref("jobs", { job: state.job_id })}>ติดตามงานผลิตและการส่งมอบ <Icon name="arrow" size={14} /></Link>
+      {quote && <Link className="cust-link" href={customerHref("quotations", { request: state.request_id, quotation: quote.id })}>ใบเสนอราคา #{quote.quotation_no} <Icon name="arrow" size={14} /></Link>}
     </aside>
     <section className={styles.history} aria-labelledby="payment-history">
       <div className={styles.sectionHead}><h2 id="payment-history">ประวัติการชำระเงิน</h2>{Boolean(state.payments?.length) && <span>{state.payments!.length} รายการ</span>}</div>
@@ -55,7 +57,7 @@ export function CustomerInvoice({ api, account, state, canPay, saved, reload }: 
         <span className={styles.timelineDot} aria-hidden="true" />
         <div className={styles.entry}>
           <div className={styles.entryHead}><strong>{moneyTH(payment.amount)}</strong><Badge value={payment.status} labels={EVIDENCE_LABELS} /></div>
-          <p className={styles.entryMeta}>{payment.method === "bank" ? "โอนเงิน" : "เงินสดที่ร้านบันทึก"} · <time dateTime={payment.paid_at}>{dateTH(payment.paid_at)}</time></p>
+          <p className={styles.entryMeta}>เลขอ้างอิง {payment.id.slice(0, 8).toUpperCase()} · {payment.method === "bank" ? "โอนเงิน" : "เงินสดที่ร้านบันทึก"} · <time dateTime={payment.paid_at}>{dateTH(payment.paid_at)}</time></p>
           {payment.reason && <p className="cust-alert danger">เหตุผล: {payment.reason}</p>}
           {payment.evidence_id && payment.submitted_by === account.id && <PrivateFile api={api} path={`/customer-evidence/${payment.evidence_id}/download`} name="เปิดหลักฐานของคุณ" />}
         </div>
