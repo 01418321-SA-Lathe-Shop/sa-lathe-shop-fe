@@ -811,6 +811,9 @@ clearing filters resets the input. Counts distinguish loading/failed/partial
 reads; four static skeletons share one announcement. Job details, history,
 inspection and payment screens, all commands and the original two list reads
 remain unchanged. No Customer inventory/cost/supplier access is introduced.
+The history view uses the same compact full-width row composition, searches
+literally by request number or description, retains 20-item local pagination,
+and keeps exact request-number descending order.
 
 ### Customer documents — approved Customer-only UC4/quotation adaptation
 
@@ -899,6 +902,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-30 | Customer ประวัติการสั่งงาน now uses the compact Jobs list composition with literal request-number/description search, clear-search empty state and local pagination | Focused TypeScript and DESIGN sync check |
 | 2026-10-30 | Customer งานผลิต adds URL-backed การ์ด/รายการ views with compact essential-only summaries and no machine/date icons; the redundant local คำขอผลิต / งานผลิต / ประวัติ tabs are removed from all three pages | Focused Customer job-card tests and TypeScript check |
 | 2026-10-30 | Customer request refinement: sort คำขอผลิต, งานผลิต and ประวัติ by exact request number descending; center the shared empty-state icon/content; move the request number immediately before the description in List; remove the request-card machine icon; improve detail spacing; and separate the Deposit/PO evidence link from the primary ติดตามงานผลิต button | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk against the real local API confirms request order #11→#2, production order #11→#6, centered filtered-empty state and separated detail actions |
 | 2026-10-30 | Customer คำขอผลิต adds URL-backed การ์ด/รายการ layouts, compact essential-only summaries, and removes the redundant customer-profile read | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Customer desktop/narrow with real local API, both layouts, no horizontal overflow or console errors |
