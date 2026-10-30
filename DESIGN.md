@@ -480,6 +480,12 @@ Implemented from the Claude Design boards (Customer payments, Customer account, 
 
 **Known limitations.** The backend has no command for editing a profile, changing your own password, saved addresses, notification or language preferences, session lists or shop configuration, so those are stated as unavailable, not simulated.
 
+## Staff/Admin overview from the Claude Design board (2026-10-30)
+
+`/staff` and `/admin` follow the Overview (Admin · Worker) board in one column, using the shell's tokens: a four-cell summary strip (ต้องจัดการ from the all-date queue; กำลังผลิต, รอเริ่มงาน and ผลิตเสร็จ filter the job list for the chosen range), a วันนี้ panel with three boxes (เปิดงานใหม่ and ผลิตเสร็จ filter the job list; การแจ้งเตือน opens the inbox) above today's notifications with Bangkok time, ประวัติผลิตเสร็จ, a ต้องจัดการ list with one link per non-empty queue and an all-clear state, and รายการงานผลิต with underline tabs. At 44rem and below the strip has two columns. The ไปทำงานต่อ shortcuts were removed because the sidebar has the same links.
+
+Not taken from the board, because the API has no such data: Shift timeline (ประวัติผลิตเสร็จ stays in its place), per-person activity log (notifications stand in, so there are no actors), pieces and machine hours, Stock/Sales/Money digest boxes, overdue payments cell, job assignee, progress and due columns, and My jobs (the queue is shared). Job actions stay on งานผลิต; the page remains read-only.
+
 ## Visual direction
 
 Private-file viewing correction (2026-10-27): files without a download filename
@@ -937,6 +943,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 | 2026-10-30 | Customer ใบเสนอราคา and มัดจำและ PO list/detail pages from the Claude Design boards: รอคุณตอบ cards plus one panel with status tabs, search, collapsible filters and table with a next-step column; PO banner and อัปโหลด PO entry; quotation detail with status banner, summary cells, whole-job price, request, terms and attachment cards, revision timeline, sticky decision bar and modal confirm; PO detail with review steps, shop feedback, preview, details and history. On-screen paper removed (print only). `sent` badge is now the info tone. No VAT, no itemised costs, no invented PO number or under-review status | Type check, lint, native tests, source audit, DESIGN sync; headless Chromium against the real local API with new test records: re-quote, revised quote, accept, PO upload, Admin rejection reason, corrected re-upload; 1280 Dark/Light and 390 Light/Dark, blocked-API error, delayed loading, empty state, no horizontal overflow |
 | 2026-10-30 | Staff/Admin งานผลิต, สั่งซื้อวัตถุดิบ (orders), รับเข้าวัตถุดิบ (receiving), and ส่งมอบ (delivery-payment) card & list views: Card view is the default across production, orders, receiving, and delivery-payment with responsive card grid and centered modal dialog popup on selection; list view starts unselected full width and collapses into the same-size 24rem list column beside the detail panel with a back link to deselect; view switcher provides seamless toggle | 192 native tests, type check, lint, source audit, DESIGN sync |
 | 2026-10-30 | Customer payments table with history view, Customer account panels, and one role-aware Settings page (new `/staff/settings`, `/admin/settings`; Admin-only ระบบ section). Unsupported profile, address, password and preference actions are stated as unavailable | Type check, lint, native tests, source audit, DESIGN sync; browser against the real local API as Customer, Staff and Admin: row navigation, sign-out confirm and cancel, Staff redirected from Admin settings, 1440 and 390 widths with no horizontal overflow |
+| 2026-10-30 | Staff/Admin overview laid out from the Claude Design board: summary strip, วันนี้ panel with today's notifications, ต้องจัดการ list and underline job tabs; ไปทำงานต่อ shortcuts removed | Type check, lint, native tests, source audit, DESIGN sync; browser against the real local API as Admin and Staff at desktop and 390 width |
 | 2026-10-30 | สต๊อกวัตถุดิบ layout from the Claude Design board: summary cells (ทั้งหมด / หมด / มีของแต่ถูกจองหมด / หน่วยวัดที่ใช้), out-of-stock banner linking to หมด, one panel with tabs + search, unit pill and per-quantity units, reserved-share bar, footer count; no Create PO, Reserved-for-jobs total or unit conversion | Type check, lint, 185 native tests (summary helpers new), DESIGN sync; headless Chromium against the real local API: Staff 1280 Dark / 390 Light, Admin 1280 Light with side panel, blocked-API error state |
 | 2026-10-30 | Staff/Admin redesign Step 8: การแจ้งเตือน page in the Thai list style with ทั้งหมด / ยังไม่อ่าน tabs, Bangkok-day groups, read badges, ทำเป็นอ่านแล้ว, read-all and โหลดเพิ่ม; bell and page share one request-link helper | 183 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / Staff 390 Light against the real local API, writes intercepted |
 | 2026-10-30 | Admin จัดการพนักงาน fixes: ⋯ row menu no longer clipped (overflow wrapper removed, rows stack at ≤48rem); add/edit/password open in a centred modal that closes on an outside click (`Drawer centered`, workers only); panel no longer overflows on phones; compact summary row at ≤40rem | Type check, lint, native tests, DESIGN sync; built-in browser on the local dev server as the local-test Admin at 800px and 375px: last-row menu fully visible, modal centred with its bottom reachable, inside click keeps it open, outside click closes it, no horizontal page overflow; no writes made |
@@ -2906,7 +2913,7 @@ src/features/workspace/workspace.module.css
 ### A8. Staff/Admin overview — src/features/staff-overview/overview.module.css
 
 ```css
-.dashboard { display: grid; grid-template-columns: minmax(0, 2fr) minmax(17rem, 1fr); grid-template-areas: "toolbar toolbar" "summary rail" "activity rail" "jobs rail"; align-items: start; gap: 1.5rem; color: var(--text); font-size: 1rem; line-height: 1.6; }
+.dashboard { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; color: var(--text); font-size: 1rem; line-height: 1.6; }
 .dashboard, .dashboard * { min-width: 0; }
 .dashboard h2, .dashboard h3, .dashboard p { margin: 0; }
 .dashboard h2 { font-size: 1.125rem; line-height: 1.5; font-weight: 650; }
@@ -2919,39 +2926,17 @@ src/features/workspace/workspace.module.css
 .dashboard a:hover { text-decoration: underline; }
 .dashboard ::selection { background: var(--lime); color: var(--bg); }
 .dashboard input { accent-color: var(--lime); caret-color: var(--text); }
-.toolbar { grid-area: toolbar; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; }
+.toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; }
 .toolbar > .error, .toolbar > [role="status"] { flex-basis: 100%; }
 .controls { display: flex; align-items: end; flex-wrap: wrap; gap: .75rem; }
 .controls label { display: grid; gap: .25rem; font-size: .875rem; color: var(--muted); }
 .controls select { min-width: 8rem; }
 .controls button { display: flex; align-items: center; gap: .5rem; }
 .muted { color: var(--muted); font-size: .875rem; }
-.summary { grid-area: summary; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
-.dashboard .metric { padding: 1.25rem; min-height: 8.5rem; display: grid; gap: .5rem; text-align: left; border-radius: 1rem; background: var(--surface); }
-.metric > span { display: flex; justify-content: space-between; gap: .5rem; font-size: .875rem; }
-.metric > span svg { color: var(--muted); flex-shrink: 0; }
-.metric strong { font-size: 2rem; font-weight: 650; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; line-height: 1.2; }
-.metric small { font-size: .875rem; color: var(--muted); }
-.dashboard .metric[data-selected="true"] { border-color: var(--lime-soft); background: color-mix(in srgb, var(--lime) 8%, var(--surface)); }
 .panel { padding: 1.5rem; background: var(--surface); border: 1px solid var(--line); border-radius: 1rem; }
 .panel > .muted { margin-top: .375rem; }
-.rail { grid-area: rail; display: grid; gap: 1.5rem; }
-.priorityList { display: grid; margin-top: 1.5rem; }
-.priorityList a { display: grid; grid-template-columns: 1.25rem minmax(0, 1fr) auto 1rem; gap: .75rem; padding: 1.125rem 0; align-items: start; border-bottom: 1px solid var(--line-soft); }
-.priorityList a:last-child { border: 0; padding-bottom: 0; }
-.priorityList a:first-child { padding-top: 0; }
-.priorityList svg { margin-top: .2rem; color: var(--lime-soft); }
-.priorityList strong { font-size: .875rem; font-weight: 600; }
-.priorityList small { display: block; margin-top: .375rem; color: var(--muted); font-size: .875rem; }
-.priorityList a > span { font-size: 1.125rem; font-weight: 650; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
-.shortcuts { display: grid; margin-top: 1.5rem; }
-.shortcuts a { display: flex; gap: .75rem; align-items: center; min-height: 3.25rem; border-bottom: 1px solid var(--line-soft); font-size: .875rem; }
-.shortcuts a > svg:first-child { color: var(--lime-soft); }
-.shortcuts a > svg:last-child { margin-left: auto; }
-.shortcuts a:last-child { border: 0; }
-.quick > .textLink { margin-top: 1rem; }
 .textLink { display: inline-flex; align-items: center; min-height: 2.75rem; gap: .5rem; font-size: .875rem; font-weight: 600; }
-.activity { grid-area: activity; min-height: 12rem; }
+.activity { min-height: 12rem; }
 .heatmap { margin-top: 1.5rem; }
 .heatmapMeta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; font-size: .875rem; color: var(--muted); }
 .calendarScroll { overflow-x: auto; max-width: 100%; margin-top: 1.25rem; padding: .25rem .25rem .75rem; scrollbar-color: var(--line) var(--surface); overscroll-behavior-x: contain; }
@@ -2985,14 +2970,9 @@ src/features/workspace/workspace.module.css
 .dayPreview ul { margin: .75rem 0; padding-left: 1.25rem; }
 .dayPreview li { margin-top: .375rem; overflow-wrap: anywhere; }
 .previewActions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .75rem; }
-.jobs { grid-area: jobs; }
 .sectionHead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: start; gap: 1rem; }
 .sectionHead p { margin-top: .375rem; }
 .sectionHead h2 { scroll-margin-top: 7rem; }
-.tabs { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.25rem 0 .5rem; }
-.dashboard .tabs button { display: flex; gap: .5rem; align-items: center; border-radius: 2rem; background: transparent; }
-.tabs button span { padding: 0 .375rem; background: var(--surface-2); border-radius: 1rem; font-size: .875rem; font-variant-numeric: tabular-nums; }
-.dashboard .tabs button[aria-pressed="true"] { border-color: var(--lime-soft); background: color-mix(in srgb, var(--lime) 10%, var(--surface)); }
 .table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 1rem; }
 .table th, .table td { text-align: left; vertical-align: top; padding: 1rem .5rem; border-bottom: 1px solid var(--line-soft); font-size: .875rem; overflow-wrap: anywhere; }
 .table th:first-child { width: 40%; padding-left: 0; }
@@ -3022,29 +3002,66 @@ src/features/workspace/workspace.module.css
 :global(.page-content):has(.dashboard) { max-width: none; padding: 2rem; }
 :global(.page-content):has(.dashboard) > :global(.page-heading) { min-height: 0; margin-bottom: 1.25rem; }
 :global(.page-content):has(.dashboard) > :global(.page-heading) h1 { font-size: 1.75rem; line-height: 1.4; letter-spacing: -.02em; }
-@media (min-width: 90rem) { .summary { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (max-width: 79.999rem) {
-  .dashboard { grid-template-columns: minmax(0, 1fr); grid-template-areas: "toolbar" "summary" "queue" "activity" "jobs" "quick"; }
-  .rail { display: contents; }
-  .queue { grid-area: queue; }
-  .quick { grid-area: quick; }
-  .priorityList { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
-  .priorityList a { border-bottom: 0; padding: 0; grid-template-columns: 1.25rem minmax(0, 1fr) auto; }
-  .priorityList a > svg:last-child { display: none; }
-  .shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 1.5rem; }
-}
+/* Layout from the Claude Design Overview board */
+.cell { cursor: pointer; }
+.strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: hidden; background: var(--surface); border: 1px solid var(--line); border-radius: .875rem; }
+.dashboard .strip > * { display: grid; gap: .25rem; min-height: 5.5rem; padding: 1rem 1.25rem; border: 0; border-radius: 0; border-left: 1px solid var(--line-soft); background: none; text-align: left; }
+.dashboard .strip > :first-child { border-left: 0; }
+.strip span { color: var(--muted); font-size: .8125rem; }
+.strip strong { font-size: 1.5rem; font-weight: 600; line-height: 1.3; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.strip [data-tone="action"] strong { color: var(--warning); }
+.strip [data-tone="completed"] strong { color: var(--lime); }
+.dashboard .strip button:hover:not(:disabled) { background: var(--surface-2); }
+.dashboard .strip button[aria-pressed="true"] { background: color-mix(in srgb, var(--lime) 10%, var(--surface)); }
+.panelFlush { background: var(--surface); border: 1px solid var(--line); border-radius: .875rem; }
+.flushHead { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .5rem 1rem; padding: .875rem 1.25rem; border-bottom: 1px solid var(--line-soft); }
+.digest { display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: .625rem; padding: 1rem 1.25rem; }
+.dashboard .digest > * { display: flex; flex-direction: column; gap: .25rem; min-height: 6rem; padding: .75rem .875rem; border: 1px solid var(--line); border-radius: .625rem; background: var(--surface-2); color: var(--text); text-align: left; text-decoration: none; }
+.digest span { display: flex; align-items: center; gap: .375rem; font-size: .75rem; font-weight: 600; }
+.digest i { width: .5rem; height: .5rem; border-radius: 50%; background: var(--cyan); }
+.digest i[data-dot="done"] { background: var(--lime); }
+.digest i[data-dot="notice"] { background: var(--warning); }
+.digest strong { font-size: 1.125rem; font-weight: 600; line-height: 1.3; }
+.digest small { color: var(--muted); font-size: .75rem; }
+.dashboard .digest > :hover { border-color: var(--lime); }
+.dashboard .digest button[aria-pressed="true"] { border-color: var(--lime-soft); background: color-mix(in srgb, var(--lime) 12%, var(--surface)); }
+.log { padding: 0 1.25rem 1rem; }
+.dashboard .log h3 { padding: .25rem 0 .375rem; color: var(--muted); font-size: .8125rem; font-weight: 600; }
+.log ol { list-style: none; margin: 0; padding: 0; }
+.log li { display: grid; grid-template-columns: 3.5rem minmax(0, 1fr); gap: .75rem; align-items: center; padding: .5625rem 0; border-top: 1px solid var(--line-soft); font-size: .875rem; }
+.log time { color: var(--muted); font-size: .75rem; font-variant-numeric: tabular-nums; }
+.log b { color: var(--muted); font-weight: 500; }
+.dashboard .more { width: 100%; margin-top: .5rem; }
+.titleCount { display: flex; align-items: center; gap: .625rem; }
+.titleCount span { padding: 0 .5rem; border-radius: 1rem; background: var(--text); color: var(--bg); font-size: .75rem; font-variant-numeric: tabular-nums; }
+.todo { list-style: none; margin: 0; padding: 0; }
+.todo li { display: grid; grid-template-columns: .625rem minmax(0, 1fr) 7rem auto; gap: 1rem; align-items: center; padding: .625rem 1.25rem; border-top: 1px solid var(--line-soft); }
+.todo li:first-child { border-top: 0; }
+.todo i { width: .625rem; height: .625rem; border-radius: 50%; background: var(--warning); }
+.todo strong { display: block; font-size: .875rem; font-weight: 600; }
+.todo small { display: block; color: var(--muted); font-size: .8125rem; }
+.todo li > span { color: var(--muted); font-size: .8125rem; font-variant-numeric: tabular-nums; }
+.dashboard .todo a { display: inline-flex; align-items: center; justify-content: center; gap: .375rem; min-height: 2.75rem; padding: 0 .75rem; border: 1px solid var(--line); border-radius: .5rem; font-size: .8125rem; font-weight: 600; white-space: nowrap; }
+.dashboard .todo a:hover { border-color: var(--lime); text-decoration: none; }
+.caughtUp { padding: 1.25rem; color: var(--muted); font-size: .875rem; }
+.tabs { display: flex; flex-wrap: wrap; gap: .125rem; margin: 1rem 0 0; border-bottom: 1px solid var(--line); }
+.dashboard .tabs button { display: flex; gap: .5rem; align-items: center; margin-bottom: -1px; padding: 0 .75rem; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; color: var(--muted); }
+.tabs button span { font-size: .75rem; font-variant-numeric: tabular-nums; }
+.dashboard .tabs button:hover:not(:disabled) { color: var(--text); }
+.dashboard .tabs button[aria-pressed="true"] { border-bottom-color: var(--lime); color: var(--text); font-weight: 600; }
 @media (max-width: 44rem) {
+  .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard .strip > :nth-child(3) { border-left: 0; }
+  .dashboard .strip > :nth-child(n + 3) { border-top: 1px solid var(--line-soft); }
+  .todo li { grid-template-columns: .625rem minmax(0, 1fr) auto; }
+  .todo li > span { grid-column: 2; grid-row: 2; }
+  .todo li > a { grid-column: 3; grid-row: 1 / 3; }
   :global(.page-content):has(.dashboard) { padding: 1.5rem 1rem 2.5rem; }
   .dashboard { gap: 1rem; }
   .panel { padding: 1.25rem; }
   .calendarHint { display: block; }
-  .summary { gap: .75rem; }
-  .dashboard .metric { padding: 1rem; }
-  .metric > span svg { display: none; }
   .controls { width: 100%; }
   .controls label { flex: 1; }
-  .priorityList { grid-template-columns: minmax(0, 1fr); gap: 0; }
-  .priorityList a { padding: 1rem 0; border-bottom: 1px solid var(--line-soft); }
   .table, .table tbody { display: block; }
   .table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .table tr { display: grid; grid-template-columns: minmax(0, 1fr); padding: 1rem 0; gap: .625rem; border-bottom: 1px solid var(--line); }

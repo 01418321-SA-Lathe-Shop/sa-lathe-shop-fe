@@ -1,7 +1,9 @@
 import Link from "next/link";
-import { useId } from "react";
+import { useId, useState } from "react";
 import { Icon } from "../../components/appearance/icons";
-import { countText, STATUSES, STATUS_LABELS, type JobStatus, type OverviewReport } from "./overview-domain";
+import type { Notification } from "../../lib/api/backend-api";
+import { staffNotice, staffNoticeHref } from "../workspace/workspace-notifications";
+import { bangkokTime, countText, dayLabel, queueTotal, STATUS_LABELS, type Count, type Filter, type JobStatus, type OverviewReport } from "./overview-domain";
 import styles from "./overview.module.css";
 
 export function ReportError({ error, retry }: { error?: string; retry: () => void }) {
@@ -14,32 +16,49 @@ export function Skeleton({ label = "กำลังโหลดข้อมู�
 export function StatusBadge({ status }: { status: JobStatus }) {
   return <span className={styles.badge} data-status={status}><i aria-hidden="true" />{STATUS_LABELS[status] ?? "ยังไม่ระบุสถานะ"}</span>;
 }
-export function SummaryCards({ data, loading, selected, choose }: { data?: OverviewReport; loading: boolean; selected: JobStatus | ""; choose: (status: JobStatus) => void }) {
-  return <section className={styles.summary} aria-label="สถานะปัจจุบันของงานที่เปิดในช่วงที่เลือก" aria-busy={loading}>
-    {STATUSES.map(status => <button key={status} className={styles.metric} data-selected={selected === status} aria-pressed={selected === status} disabled={!data} onClick={() => choose(status)}>
-      <span>{STATUS_LABELS[status]}<Icon name="arrow" size={16} /></span><strong>{data ? countText(data.counts[status]) : loading ? "…" : "—"}</strong>
-      <small>{data ? `${countText(data.counts[status])} จากทั้งหมด ${countText(data.counts.total)} งาน` : loading ? "กำลังตรวจสอบจำนวนงาน" : "ยังไม่มีข้อมูลรายงาน"}</small>
-    </button>)}
+
+const STRIP_STATUSES: JobStatus[] = ["in_progress", "queued", "completed"];
+export function SummaryStrip({ data, loading, selected, choose }: { data?: OverviewReport; loading: boolean; selected: JobStatus | ""; choose: (status: JobStatus) => void }) {
+  const empty = loading ? "…" : "—";
+  return <section className={styles.strip} aria-label="สรุปงานในช่วงที่เลือก" aria-busy={loading}>
+    <div data-tone="action"><span>ต้องจัดการ</span><strong>{data ? countText(queueTotal(data.queue)) : empty}</strong></div>
+    {STRIP_STATUSES.map(status => <button key={status} className={styles.cell} data-tone={status} aria-pressed={selected === status} disabled={!data} onClick={() => choose(status)}><span>{STATUS_LABELS[status]}</span><strong>{data ? countText(data.counts[status]) : empty}</strong></button>)}
   </section>;
 }
+
+export function TodayDigest({ admin, inbox, report, notices, choose }: { admin: boolean; inbox: string; report?: OverviewReport; notices?: Notification[]; choose: { opened: () => void; finished: (day: string) => void; active: Filter } }) {
+  const id = useId(); const [all, setAll] = useState(false);
+  const today = report?.heatmap.end_date;
+  const finished: Count | undefined = report?.heatmap.days.find(day => day.date === today)?.count;
+  const openedOn = choose.active.range === "today" && !choose.active.day && !choose.active.status;
+  const finishedOn = Boolean(today) && choose.active.day === today;
+  return <section className={styles.panelFlush} aria-labelledby={id}>
+    <div className={styles.flushHead}><h2 id={id}>{today ? `วันนี้ ${dayLabel(today, true)}` : "วันนี้"}</h2><span className={styles.muted}>ทั้งร้าน · กดกล่องเพื่อดูงาน</span></div>
+    <div className={styles.digest}>
+      <button className={styles.cell} aria-pressed={openedOn} disabled={!report} onClick={choose.opened}><span><i data-dot="open" aria-hidden="true" />เปิดงานใหม่</span><strong>{report ? countText(report.counts.total) : "—"} งาน</strong><small>{report ? `กำลังผลิต ${countText(report.counts.in_progress)} งาน` : "ยังไม่มีข้อมูล"}</small></button>
+      <button className={styles.cell} aria-pressed={finishedOn} disabled={!today} onClick={() => today && choose.finished(today)}><span><i data-dot="done" aria-hidden="true" />ผลิตเสร็จ</span><strong>{finished === undefined ? "—" : countText(finished)} งาน</strong><small>นับครั้งแรกของแต่ละงาน</small></button>
+      <Link href={inbox}><span><i data-dot="notice" aria-hidden="true" />การแจ้งเตือน</span><strong>{notices ? countText(notices.length) : "—"} รายการ</strong><small>ของวันนี้ · เปิดกล่องแจ้งเตือน</small></Link>
+    </div>
+    <div className={styles.log}>
+      <h3>เกิดอะไรขึ้นวันนี้</h3>
+      {notices && !notices.length && <p className={styles.muted}>ยังไม่มีการแจ้งเตือนวันนี้</p>}
+      {Boolean(notices?.length) && <ol>{notices!.slice(0, all ? undefined : 5).map(item => { const notice = staffNotice(item.title); return <li key={item.id}><time dateTime={item.created_at}>{bangkokTime(item.created_at)}</time><Link href={staffNoticeHref(admin, item.request_id)}>{notice.text}{notice.reference && <b> คำขอ #{notice.reference}</b>}</Link></li>; })}</ol>}
+      {notices && notices.length > 5 && <button className={styles.more} onClick={() => setAll(!all)}>{all ? "แสดงน้อยลง" : `แสดงทั้งหมด ${countText(notices.length)} รายการ`}</button>}
+    </div>
+  </section>;
+}
+
 export function PriorityQueue({ data, admin }: { data?: OverviewReport; admin: boolean }) {
   const id = useId();
   const root = admin ? "/admin" : "/staff";
   const tasks = [
-    { label: "คำขอรอประเมิน", hint: admin ? "ติดตามคิวคำขอและใบเสนอราคา" : "เปิดคิวเพื่อประเมินราคา", value: data?.queue.pending_requests, href: `${root}/${admin ? "requests" : "quotations"}`, icon: "file" as const },
-    { label: "งานรอเริ่มผลิต", hint: "ตรวจแผนวัตถุดิบก่อนเริ่มงาน", value: data?.queue.queued_jobs, href: `${root}/production`, icon: "machine" as const },
-    { label: "วัตถุดิบรอรับเข้า", hint: "คำสั่งซื้อที่ Supplier ตอบรับแล้ว", value: data?.queue.receiving_orders, href: `${root}/receiving`, icon: "layers" as const },
-  ];
-  return <section className={`${styles.panel} ${styles.queue}`} aria-labelledby={id}><h2 id={id}>ต้องจัดการ</h2><p className={styles.muted}>คิวปัจจุบันทั้งหมด · ไม่จำกัดช่วงเวลา</p><div className={styles.priorityList}>{tasks.map(task => <Link href={task.href} key={task.label}><Icon name={task.icon} size={20} /><div><strong>{task.label}</strong><small>{task.hint}</small></div><span>{task.value === undefined ? "—" : countText(task.value)}</span><Icon name="arrow" size={16} /></Link>)}</div></section>;
-}
-export function QuickActions({ admin }: { admin: boolean }) {
-  const id = useId();
-  const root = admin ? "/admin" : "/staff";
-  const actions = [
-    { label: "เปิดงานผลิต", href: `${root}/production`, icon: "machine" as const },
-    { label: "ตรวจวัตถุดิบ", href: `${root}/materials`, icon: "layers" as const },
-    { label: "รับเข้าวัตถุดิบ", href: `${root}/receiving`, icon: "inbox" as const },
-    { label: admin ? "จัดการพนักงาน" : "คิวใบเสนอราคา", href: `${root}/${admin ? "workers" : "quotations"}`, icon: "grid" as const },
-  ];
-  return <section className={`${styles.panel} ${styles.quick}`} aria-labelledby={id}><h2 id={id}>ไปทำงานต่อ</h2><p className={styles.muted}>{admin ? "ติดตามงานและจัดการร้าน" : "เปิดพื้นที่ทำงานที่ใช้บ่อย"}</p><nav className={styles.shortcuts} aria-label="ทางลัดการทำงาน">{actions.map(action => <Link href={action.href} key={action.href}><Icon name={action.icon} size={22} /><span>{action.label}</span><Icon name="arrow" size={16} /></Link>)}</nav>{admin && <Link className={styles.textLink} href="/admin/orders">สั่งซื้อวัตถุดิบ<Icon name="arrow" size={16} /></Link>}</section>;
+    { label: "คำขอรอประเมิน", hint: admin ? "ติดตามคิวคำขอและใบเสนอราคา" : "เปิดคิวเพื่อประเมินราคา", action: admin ? "ดูคำขอ" : "ประเมินราคา", value: data?.queue.pending_requests, href: `${root}/${admin ? "requests" : "quotations"}` },
+    { label: "งานรอเริ่มผลิต", hint: "ตรวจแผนวัตถุดิบก่อนเริ่มงาน", action: "เปิดงานผลิต", value: data?.queue.queued_jobs, href: `${root}/production` },
+    { label: "วัตถุดิบรอรับเข้า", hint: "คำสั่งซื้อที่ Supplier ตอบรับแล้ว", action: "รับเข้าวัตถุดิบ", value: data?.queue.receiving_orders, href: `${root}/receiving` },
+  ].filter(task => !data || countText(task.value!) !== "0");
+  return <section className={styles.panelFlush} aria-labelledby={id}>
+    <div className={styles.flushHead}><div className={styles.titleCount}><h2 id={id}>ต้องจัดการ</h2><span>{data ? countText(queueTotal(data.queue)) : "—"}</span></div><span className={styles.muted}>คิวปัจจุบันทั้งหมด · ไม่จำกัดช่วงเวลา</span></div>
+    {tasks.length ? <ul className={styles.todo}>{tasks.map(task => <li key={task.label}><i aria-hidden="true" /><div><strong>{task.label}</strong><small>{task.hint}</small></div><span>{task.value === undefined ? "—" : `${countText(task.value)} รายการ`}</span><Link href={task.href}>{task.action}<Icon name="arrow" size={14} /></Link></li>)}</ul>
+      : <p className={styles.caughtUp}>ไม่มีงานค้าง ตอนนี้ไม่มีอะไรต้องจัดการ</p>}
+  </section>;
 }

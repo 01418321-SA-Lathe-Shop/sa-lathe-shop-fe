@@ -30,6 +30,12 @@ export function exactCount(value: Count): bigint {
 export function countText(value: Count): string {
   try { return new Intl.NumberFormat("th-TH").format(exactCount(value)); } catch { return "—"; }
 }
+/** All-date backlog total; an invalid part yields NaN, which countText shows as a dash, never as a smaller sum. */
+export function queueTotal(queue: OverviewReport["queue"]): Count {
+  try { return (exactCount(queue.pending_requests) + exactCount(queue.queued_jobs) + exactCount(queue.receiving_orders)).toString(); } catch { return NaN; }
+}
+export function noticesOn<T extends { created_at: string }>(items: T[], day: string): T[] { return items.filter(item => Number.isFinite(Date.parse(item.created_at)) && bangkokDay(item.created_at) === day); }
+export function bangkokTime(instant: string): string { return new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", hour: "2-digit", minute: "2-digit", hour12: false }).format(new Date(instant)); }
 export function jobsPath(filter: Filter, limit = 20): string {
   const query = new URLSearchParams({ limit: String(limit), offset: String(filter.offset) });
   if (filter.day) query.set("first_completed_on", filter.day);
