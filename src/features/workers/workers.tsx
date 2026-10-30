@@ -53,7 +53,7 @@ export function LiveWorkers({ api }: { api: BackendApi }) {
           <td><span className={styles.person}><span className={styles.avatar} aria-hidden="true">{initials(worker.name)}</span><span><strong>{worker.name}</strong><small className={styles.code}>{worker.employee_no} · {worker.username}</small></span></span></td>
           <td><span className={styles.stack}><span>{worker.position || "ไม่ระบุตำแหน่ง"}</span><small>{worker.email && worker.phone ? `${worker.phone} · ${worker.email}` : "ยังไม่มีข้อมูลติดต่อ (บัญชีเก่า) กรอกได้ที่แก้ไข"}</small></span></td>
           <td>{worker.is_active ? <ToneBadge tone="done">ใช้งานอยู่</ToneBadge> : <ToneBadge tone="quiet">ปิดใช้งาน</ToneBadge>}</td>
-          <td><details className={styles.menu}>
+          <td><details className={layout.menu}>
             <summary aria-label={`ตัวเลือกสำหรับ ${worker.name}`} title="ตัวเลือก"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" /></svg></summary>
             <div>
               <button type="button" onClick={(event) => { closeMenu(event); setPanel({ kind: "edit", worker }); }}>แก้ไขข้อมูลและสถานะ</button>

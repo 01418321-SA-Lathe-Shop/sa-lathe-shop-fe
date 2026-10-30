@@ -1,31 +1,38 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import type { BackendApi } from "../../lib/api/backend-api";
 import { useRetryableWrite } from "../../hooks/backend-hooks";
 import { dateTimeTH, quantityTH } from "../../components/staff-ui/staff-format";
 import { MOVEMENT_MODE } from "../../components/staff-ui/staff-labels";
 import { Collapsible, ConfirmDialog, ErrorText, Field, LoadError, RetryPanel, Skeleton, StatusBadge, ToneBadge, TruncatedNotice } from "../../components/staff-ui/staff-ui";
-import { useCollection } from "../customer/customer-hooks";
-import { inventoryDecimal, isBelow, stockAfter, stockFields, type InventoryMaterial, type InventoryMovement } from "./inventory-domain";
+import { useCollection, useNow } from "../customer/customer-hooks";
+import { consumedTotal, consumptionByMonth, inventoryDecimal, isBelow, stockAfter, stockFields, type InventoryMaterial, type InventoryMovement } from "./inventory-domain";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./inventory.module.css";
 
-// UC5 material detail inside the side panel. Workers read quantities and
-// history only; costs, reasons and stock adjustment are Admin-only (redacted by the API).
-export function MaterialPanel({ api, material, admin, onSaved }: { api: BackendApi; material: InventoryMaterial; admin: boolean; onSaved: (message: string) => void }) {
+// UC5 material detail page. Workers read quantities and history only;
+// costs, reasons and stock adjustment are Admin-only (redacted by the API).
+export function MaterialDetail({ api, material, admin, back, onSaved }: { api: BackendApi; material: InventoryMaterial; admin: boolean; back: string; onSaved: (message: string) => void }) {
   const history = useCollection<InventoryMovement>(api, `/materials/${material.id}/movements`);
-  const unit = material.unit_name;
+  const unit = material.unit_name; const movements = history.data?.items;
   return <>
-    <div className={layout.actions}><MaterialState material={material} /><span className={layout.muted}>หน่วย {unit}</span></div>
-    <dl className={layout.facts}>
-      <div><dt>คงเหลือ</dt><dd>{quantityTH(material.qty_on_hand)} {unit}</dd></div>
-      <div><dt>จองให้งานแล้ว</dt><dd>{quantityTH(material.qty_reserved)} {unit}</dd></div>
-      <div><dt>พร้อมใช้</dt><dd>{quantityTH(material.qty_available)} {unit}</dd></div>
-      {admin && <div><dt>ต้นทุนเฉลี่ย (เฉพาะ Admin)</dt><dd>{material.avg_cost === undefined ? "—" : `${quantityTH(material.avg_cost)} บาท/${unit}`}</dd></div>}
+    <Link className={styles.back} href={back} scroll={false}>← สต๊อกวัตถุดิบ</Link>
+    <header className={styles.detailHead}><h2>{material.name}</h2><MaterialState material={material} /><span className={styles.unit}>หน่วย {unit}</span></header>
+    <dl className={styles.summary}>
+      <div><dt>คงเหลือ</dt><dd>{quantityTH(material.qty_on_hand)}</dd><small>{unit}</small></div>
+      <div><dt>จองให้งานแล้ว</dt><dd data-tone="warning">{quantityTH(material.qty_reserved)}</dd><small>{unit} · ยังไม่ตัดสต๊อกจริง</small></div>
+      <div><dt>พร้อมใช้</dt><dd>{quantityTH(material.qty_available)}</dd><small>{unit}</small></div>
+      <div><dt>ใช้ในงานแล้ว</dt><dd>{movements ? quantityTH(consumedTotal(movements)) : "—"}</dd><small>{unit} · ตัดเมื่อบันทึกการใช้ในงานผลิต</small></div>
+      {admin && <div><dt>ต้นทุนเฉลี่ย (เฉพาะ Admin)</dt><dd>{material.avg_cost === undefined ? "—" : quantityTH(material.avg_cost)}</dd><small>บาท/{unit}</small></div>}
     </dl>
-    <p className={layout.muted}>การจองไม่ตัดสต๊อกจริง สต๊อกถูกตัดเมื่อบันทึกการใช้ในงานผลิต</p>
-    {admin && <StockForm key={String(material.version)} api={api} material={material} onSaved={onSaved} />}
+    <section className={styles.detailCard} aria-labelledby="usage-title"><h3 id="usage-title">การใช้ในงาน 6 เดือนล่าสุด ({unit})</h3>
+      {movements && <UsageChart movements={movements} unit={unit} />}
+      <TruncatedNotice show={history.data?.complete === false} />
+    </section>
+    {admin && <div id="adjust" className={styles.detailCard}><StockForm key={String(material.version)} api={api} material={material} onSaved={onSaved} /></div>}
+    <div className={styles.detailCard}>
     <section className={layout.section} aria-label="ประวัติการเคลื่อนไหว">
       <h3>ประวัติการเคลื่อนไหว</h3>
       {history.loading && !history.data && <Skeleton label="กำลังโหลดประวัติ…" rows={2} />}
@@ -40,7 +47,23 @@ export function MaterialPanel({ api, material, admin, onSaved }: { api: BackendA
         {admin && (item.before_cost !== undefined || item.after_cost !== undefined) && <span>ต้นทุนเฉลี่ย {quantityTH(item.before_cost)} → {quantityTH(item.after_cost)} บาท</span>}
       </li>)}</ol>}
     </section>
+    </div>
     <Collapsible title="ประวัติระบบ"><p className={layout.code}>รหัสวัตถุดิบ {material.id} · หน่วย {material.unit_id} · เวอร์ชัน {String(material.version)}</p></Collapsible>
+  </>;
+}
+
+const monthTH = (key: string) => new Intl.DateTimeFormat("th-TH", { month: "short", year: "2-digit", timeZone: "UTC" }).format(new Date(`${key}-15T00:00:00Z`));
+function UsageChart({ movements, unit }: { movements: InventoryMovement[]; unit: string }) {
+  const now = useNow();
+  if (now === null) return null;
+  const months = consumptionByMonth(movements, now);
+  if (!months.some((item) => item.percent > 0)) return <p className={layout.muted}>ไม่มีการเบิกใช้ในงานในช่วงนี้</p>;
+  return <>
+    <div className={styles.chart} aria-hidden="true">{months.map((item) => <div key={item.month} title={`${monthTH(item.month)}: ${quantityTH(item.total)} ${unit}`}>
+      <span className={styles.chartPlot}>{item.percent > 0 && <><small>{quantityTH(item.total)}</small><i style={{ height: `${Math.max(item.percent, 2)}%` }} /></>}</span>
+      <span>{monthTH(item.month)}</span>
+    </div>)}</div>
+    <table className={layout.visuallyHidden}><caption>การใช้ในงานรายเดือน</caption><tbody>{months.map((item) => <tr key={item.month}><th scope="row">{monthTH(item.month)}</th><td>{quantityTH(item.total)} {unit}</td></tr>)}</tbody></table>
   </>;
 }
 

@@ -13,6 +13,7 @@ export function inventoryDecimal(value: string, positive = false): string {
 }
 
 function decimalUnits(value: string): bigint { return BigInt(value.replace(".", "")); }
+function fromUnits(units: bigint): string { const text = units.toString().padStart(7, "0"); return `${text.slice(0, -6)}.${text.slice(-6)}`; }
 
 export function inventoryDisplay(value: string): string {
   if (!/^\d{1,12}\.\d{6}$/.test(value)) return "Unavailable";
@@ -82,8 +83,7 @@ export function stockAfter(material: Pick<InventoryMaterial, "qty_on_hand">, mod
   let amount: string;
   try { amount = inventoryDecimal(quantity, mode === "addition"); } catch { return null; }
   if (mode === "correction") return amount;
-  const total = (decimalUnits(inventoryDecimal(material.qty_on_hand)) + decimalUnits(amount)).toString().padStart(7, "0");
-  return `${total.slice(0, -6)}.${total.slice(-6)}`;
+  return fromUnits(decimalUnits(inventoryDecimal(material.qty_on_hand)) + decimalUnits(amount));
 }
 
 export function isBelow(value: string, floor: string): boolean {
@@ -96,4 +96,19 @@ export function stockFields(material: InventoryMaterial, mode: "addition" | "cor
   if (!material.is_active && mode === "addition") throw new Error("Reactivate the material before adding stock.");
   if (mode === "correction" && decimalUnits(amount) < decimalUnits(inventoryDecimal(material.qty_reserved))) throw new Error("Counted stock cannot be below active reserved stock.");
   return { mode, quantity: amount, reason, ...(mode === "addition" ? { unit_cost: inventoryDecimal(unitCost) } : {}) };
+}
+
+/** Real consumption only: `job_issue` is the ledger entry production usage writes. */
+export function consumedTotal(items: InventoryMovement[]): string {
+  return fromUnits(items.filter((item) => item.mode === "job_issue").reduce((sum, item) => sum + decimalUnits(item.quantity), BigInt(0)));
+}
+
+const bangkokMonth = (value: string | number) => new Date(value).toLocaleDateString("en-CA", { timeZone: "Asia/Bangkok" }).slice(0, 7);
+/** Consumption per Bangkok calendar month, oldest first, including months with none. */
+export function consumptionByMonth(items: InventoryMovement[], now: number, months = 6) {
+  const [year, month] = bangkokMonth(now).split("-").map(Number);
+  const keys = Array.from({ length: months }, (_, index) => new Date(Date.UTC(year, month - months + index, 1)).toISOString().slice(0, 7));
+  const totals = keys.map((key) => items.filter((item) => item.mode === "job_issue" && bangkokMonth(item.created_at) === key).reduce((sum, item) => sum + decimalUnits(item.quantity), BigInt(0)));
+  const peak = totals.reduce((max, value) => value > max ? value : max, BigInt(0));
+  return keys.map((key, index) => ({ month: key, total: fromUnits(totals[index]), percent: peak > BigInt(0) ? Number(totals[index] * BigInt(100) / peak) : 0 }));
 }

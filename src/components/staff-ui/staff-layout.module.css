@@ -89,3 +89,13 @@
   .submitBar[data-sticky] { position: sticky; bottom: 0; z-index: 2; box-shadow: 0 -8px 24px rgba(0, 0, 0, .18); }
 }
 @media (prefers-reduced-motion: reduce) { :global(.live-workspace) .card { transition: none; } }
+
+/* Row actions menu (native disclosure). */
+.menu { position: relative; display: inline-block; }
+.menu summary { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); cursor: pointer; list-style: none; }
+.menu summary::-webkit-details-marker { display: none; }
+.menu[open] summary { background: var(--surface-2); }
+.menu summary:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.menu > div { position: absolute; right: 0; top: calc(100% + 4px); z-index: 5; display: grid; min-width: 12rem; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
+:global(.live-workspace) .menu :is(button, a) { display: flex; align-items: center; justify-content: flex-start; min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text); text-decoration: none; font: inherit; font-size: 0.9375rem; text-align: left; white-space: nowrap; cursor: pointer; }
+:global(.live-workspace) .menu :is(button, a):hover, :global(.live-workspace) .menu :is(button, a):focus-visible { background: var(--surface-2); outline: none; }

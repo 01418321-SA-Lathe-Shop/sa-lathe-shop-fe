@@ -327,6 +327,8 @@ Noto Sans Thai is self-hosted through Next/font for Customer only, with a sans-s
 
 ## Layout
 
+List rows that have a detail page open it from anywhere on the row: the title link stretches over the row, and other controls sit above it. Material detail is a full page at `?material=`, not a side panel.
+
 Customer ใบเสนอราคา and มัดจำและ PO share one pattern. Lists: page head, optional banner, then one panel (status tabs, search, collapsible filters, table; one card per row at ≤48rem); quotations awaiting an answer lead as cards above the panel. Details: back link, title with status badge, then section cards at 12px radius. Quotation detail keeps its decision in a sticky bottom bar with a modal confirm; ขอใบเสนอราคาใหม่ records the backend's `reject` decision with a reason. The backend exposes no customer-visible cost breakdown, validity date, lead time, PO number or under-review status, so these pages show none of them. The printable paper renders only in the print portal.
 
 On desktop (>1024px), Customer navigation docks on the left as a 17rem persistent sidebar drawer (`width: 17rem; height: 100dvh; background: #060707`), sharing the obsidian background with the workspace stage offset (`margin-left: 17rem; width: calc(100% - 17rem); max-width: calc(100% - 17rem)`). Content spans the full available width with fluid side padding (`clamp(1.25rem, 2.5vw, 2.5rem)`), eliminating artificial max-width constraints on wide viewports (1280px, 1440px, 1920px, and 2560px ultrawide). Dashboards, request lists, quotations, invoices, and job tracking expand to fill the full stage. Forms and single-column steps maintain an ergonomic readable maximum width (`clamp(540px, 60vw, 760px)`) or use a balanced 2-column layout with a sticky summary panel. The desktop stage features a sticky 64px topbar with fluid padding, mode indicators, mock controls, and notification access.
@@ -907,6 +909,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-10-30 | Whole-row navigation on สต๊อกวัตถุดิบ, ใบเสนอราคา and เอกสาร PO lists and รอคุณตอบ cards (stretched title link, hover and focus states; menus, downloads and nested links stay separate). Material detail is now a page at `?material=` instead of a side panel: stock cells, ใช้ในงานแล้ว from `job_issue` movements, 6-month usage bars, stock form, history. Admin ⋯ row menu shared with workers. No unit-conversion page: not in the backend contract | Type check, lint, native tests, source audit, DESIGN sync; headless Chromium against the real local API: row, menu, download and keyboard navigation, chart values against the movements API, 1280 and 390 |
 | 2026-10-30 | Customer ใบเสนอราคา and มัดจำและ PO list/detail pages from the Claude Design boards: รอคุณตอบ cards plus one panel with status tabs, search, collapsible filters and table with a next-step column; PO banner and อัปโหลด PO entry; quotation detail with status banner, summary cells, whole-job price, request, terms and attachment cards, revision timeline, sticky decision bar and modal confirm; PO detail with review steps, shop feedback, preview, details and history. On-screen paper removed (print only). `sent` badge is now the info tone. No VAT, no itemised costs, no invented PO number or under-review status | Type check, lint, native tests, source audit, DESIGN sync; headless Chromium against the real local API with new test records: re-quote, revised quote, accept, PO upload, Admin rejection reason, corrected re-upload; 1280 Dark/Light and 390 Light/Dark, blocked-API error, delayed loading, empty state, no horizontal overflow |
 | 2026-10-30 | สต๊อกวัตถุดิบ layout from the Claude Design board: summary cells (ทั้งหมด / หมด / มีของแต่ถูกจองหมด / หน่วยวัดที่ใช้), out-of-stock banner linking to หมด, one panel with tabs + search, unit pill and per-quantity units, reserved-share bar, footer count; no Create PO, Reserved-for-jobs total or unit conversion | Type check, lint, 185 native tests (summary helpers new), DESIGN sync; headless Chromium against the real local API: Staff 1280 Dark / 390 Light, Admin 1280 Light with side panel, blocked-API error state |
 | 2026-10-30 | Staff/Admin redesign Step 8: การแจ้งเตือน page in the Thai list style with ทั้งหมด / ยังไม่อ่าน tabs, Bangkok-day groups, read badges, ทำเป็นอ่านแล้ว, read-all and โหลดเพิ่ม; bell and page share one request-link helper | 183 native tests, type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / Staff 390 Light against the real local API, writes intercepted |
@@ -2625,8 +2628,7 @@ src/features/workspace/workspace.module.css
 .scope .quiet { color: var(--cust-muted); font-size: .875rem; }
 .scope .warn { color: var(--cust-accent); font-size: .875rem; font-weight: 600; }
 .scope .openCell { width: 44px; padding-left: 0 !important; }
-.scope .openCell a { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 10px; color: var(--cust-muted); }
-.scope .openCell a:hover { background: var(--cust-surface-2); color: var(--cust-ink); }
+.scope .openCell { color: var(--cust-muted); vertical-align: middle; }
 .scope .fileCell { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .scope .fileTag { flex: none; display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 4px; border: 1px solid var(--cust-line); border-radius: 6px; color: var(--cust-accent); font-size: .6875rem; font-weight: 700; }
 .scope .evidenceLine { display: grid; gap: 6px; list-style: none; margin: 0; padding: 0; }
@@ -2744,6 +2746,15 @@ src/features/workspace/workspace.module.css
 @media (max-width: 48rem) { .scope .table tbody td[data-numeric] { text-align: left; } .scope .table time { white-space: normal; } }
 @media (max-width: 1200px) { .scope .depositLayout > aside { order: 0; } }
 @media (min-width: 48.01rem) { .scope .table .fileCell { min-width: 13rem; } .scope .table td > small { white-space: nowrap; } }
+
+/* Whole row/card opens the record: the title link stretches over it; other controls sit above. */
+.scope .table tbody tr, .scope .card { position: relative; }
+.scope .rowTitle::after, .scope .card :global(.cust-primary)::after { content: ""; position: absolute; inset: 0; }
+.scope .table tbody tr:has(.rowTitle):hover td { background: var(--cust-surface-2); }
+.scope .card:hover { border-color: var(--cust-accent); }
+.scope .table tbody tr:has(.rowTitle:focus-visible) { outline: 2px solid var(--cust-focus); outline-offset: -2px; }
+.scope .rowTitle:focus-visible { outline: none; }
+.scope .plainLink, .scope .fileMeta :global(.cust-link) { position: relative; z-index: 1; }
 ```
 
 ### A7. Customer overview dashboard — src/features/customer/customer-overview.module.css
@@ -3278,6 +3289,16 @@ src/features/workspace/workspace.module.css
   .submitBar[data-sticky] { position: sticky; bottom: 0; z-index: 2; box-shadow: 0 -8px 24px rgba(0, 0, 0, .18); }
 }
 @media (prefers-reduced-motion: reduce) { :global(.live-workspace) .card { transition: none; } }
+
+/* Row actions menu (native disclosure). */
+.menu { position: relative; display: inline-block; }
+.menu summary { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); cursor: pointer; list-style: none; }
+.menu summary::-webkit-details-marker { display: none; }
+.menu[open] summary { background: var(--surface-2); }
+.menu summary:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+.menu > div { position: absolute; right: 0; top: calc(100% + 4px); z-index: 5; display: grid; min-width: 12rem; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
+:global(.live-workspace) .menu :is(button, a) { display: flex; align-items: center; justify-content: flex-start; min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text); text-decoration: none; font: inherit; font-size: 0.9375rem; text-align: left; white-space: nowrap; cursor: pointer; }
+:global(.live-workspace) .menu :is(button, a):hover, :global(.live-workspace) .menu :is(button, a):focus-visible { background: var(--surface-2); outline: none; }
 ```
 
 ### A12. Staff/Admin requests and quotations — src/features/requests/requests.module.css
@@ -3368,7 +3389,25 @@ src/features/workspace/workspace.module.css
 /* Reserved share of on-hand; no min/max level exists, so the bar never implies a reorder point. */
 .bar { display: block; height: 6px; margin-top: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
 .bar > span { display: block; height: 100%; background: var(--warning); }
-.stock tbody tr[aria-current="true"] > * { background: color-mix(in srgb, var(--lime) 7%, var(--surface)); }
+/* Whole row opens the detail: the name link stretches over the row, so keyboard, middle-click and screen readers keep a real link. */
+.stock tbody tr { position: relative; }
+.stock tbody th a::after { content: ""; position: absolute; inset: 0; }
+.stock tbody tr:hover { background: var(--surface-2); }
+.stock tbody tr:has(th a:focus-visible) { outline: 2px solid var(--lime); outline-offset: -2px; }
+:global(.live-workspace) .stock tbody th a:focus-visible { outline: none; }
+.menuCell { position: relative; z-index: 1; }
+.menuCell:has(details[open]) { z-index: 6; }
+
+/* Material detail page. */
+:global(.live-workspace) .back { width: fit-content; color: var(--muted); font-size: 0.9375rem; text-decoration: none; }
+.detailHead { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.detailHead h2 { margin: 0; overflow-wrap: anywhere; }
+.detailCard { display: grid; gap: 12px; min-width: 0; padding: 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.detailCard h3 { margin: 0; font-size: 1rem; }
+.chart { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; color: var(--muted); font-size: 0.8125rem; text-align: center; font-variant-numeric: tabular-nums; }
+.chartPlot { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 180px; margin-bottom: 6px; border-bottom: 1px solid var(--line); }
+.chartPlot small { color: var(--text); font-size: 0.75rem; }
+.chartPlot i { display: block; flex: 0 1 auto; width: min(100%, 2.5rem); min-height: 3px; border-radius: 4px 4px 0 0; background: var(--lime); }
 
 .movementTitle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
 .modeGroup { display: grid; gap: 6px; }
@@ -3402,6 +3441,9 @@ src/features/workspace/workspace.module.css
   .stock td[data-label]::before { content: attr(data-label); display: block; color: var(--muted); font-size: 0.75rem; }
   .stock td:last-child::before { display: none; }
   .qty { white-space: normal; }
+  .stock tbody td.menuCell { position: absolute; top: 6px; right: 10px; z-index: 1; }
+  .stock tbody td.menuCell:has(details[open]) { z-index: 6; }
+  .stock tbody th:has(+ td ~ .menuCell) { padding-right: 52px; }
   .catalogList li { grid-template-columns: minmax(0, 1fr) auto; }
   .catalogList li > :last-child { grid-column: 1 / -1; justify-self: start; }
 }
@@ -3534,16 +3576,6 @@ src/features/workspace/workspace.module.css
 .table small { color: var(--muted); font-size: 0.8125rem; }
 .code { font-variant-numeric: tabular-nums; }
 .footer { margin: 0; padding: 12px 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.875rem; }
-
-/* Row actions menu (native disclosure). */
-.menu { position: relative; display: inline-block; }
-.menu summary { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); cursor: pointer; list-style: none; }
-.menu summary::-webkit-details-marker { display: none; }
-.menu[open] summary { background: var(--surface-2); }
-.menu summary:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
-.menu > div { position: absolute; right: 0; top: calc(100% + 4px); z-index: 5; display: grid; min-width: 12rem; padding: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 8px 24px rgba(0, 0, 0, .18); }
-:global(.live-workspace) .menu button { display: flex; align-items: center; justify-content: flex-start; min-height: 44px; padding: 0 14px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 0.9375rem; text-align: left; white-space: nowrap; cursor: pointer; }
-:global(.live-workspace) .menu button:hover, :global(.live-workspace) .menu button:focus-visible { background: var(--surface-2); outline: none; }
 
 /* Side-panel form sections: ข้อมูล / ติดต่อ / รหัสผ่านเริ่มต้น / สถานะบัญชี */
 .section { display: grid; gap: 12px; min-width: 0; margin: 0; padding: 0 0 16px; border: 0; border-bottom: 1px solid var(--line); }
