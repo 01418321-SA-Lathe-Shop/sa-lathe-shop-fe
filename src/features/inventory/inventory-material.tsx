@@ -8,7 +8,8 @@ import { dateTimeTH, quantityTH } from "../../components/staff-ui/staff-format";
 import { MOVEMENT_MODE } from "../../components/staff-ui/staff-labels";
 import { Collapsible, ConfirmDialog, ErrorText, Field, LoadError, RetryPanel, Skeleton, StatusBadge, ToneBadge, TruncatedNotice } from "../../components/staff-ui/staff-ui";
 import { useCollection, useNow } from "../customer/customer-hooks";
-import { consumedTotal, consumptionByMonth, inventoryDecimal, isBelow, stockAfter, stockFields, type InventoryMaterial, type InventoryMovement } from "./inventory-domain";
+import { consumedTotal, consumptionByMonth, convertToBase, inventoryDecimal, isBelow, stockAfter, stockFields, type InventoryMaterial, type InventoryMovement, type UnitConversion } from "./inventory-domain";
+import { EntryUnit, enteredNote, SupportedUnits } from "./entry-unit";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./inventory.module.css";
 
@@ -28,7 +29,7 @@ export function MaterialDetail({ api, material, admin, back, onSaved }: { api: B
       {admin && <div><dt>ต้นทุนเฉลี่ย (เฉพาะ Admin)</dt><dd>{material.avg_cost === undefined ? "—" : quantityTH(material.avg_cost)}</dd><small>บาท/{unit}</small></div>}
     </dl>
     <section className={styles.detailCard} aria-labelledby="units-title"><h3 id="units-title">หน่วยที่รองรับ</h3>
-      <p className={styles.unitLine}><span className={styles.unit}>หน่วยหลัก {unit}</span> ทุกจำนวนในหน้านี้ใช้หน่วยหลัก ระบบยังไม่รองรับการแปลงหน่วย</p>
+      <SupportedUnits api={api} materialId={material.id} baseUnit={unit} available={material.qty_available} />
     </section>
     <section className={styles.detailCard} aria-labelledby="usage-title"><h3 id="usage-title">การใช้ในงาน 6 เดือนล่าสุด ({unit})</h3>
       {movements && <UsageChart movements={movements} unit={unit} />}
@@ -45,8 +46,9 @@ export function MaterialDetail({ api, material, admin, back, onSaved }: { api: B
       {history.data && history.data.items.length > 0 && <ol className={layout.timeline}>{history.data.items.map((item) => <li key={item.id}>
         <strong className={styles.movementTitle}><StatusBadge map={MOVEMENT_MODE} value={item.mode} />{quantityTH(item.before_quantity)} → {quantityTH(item.after_quantity)} {unit}</strong>
         <span>{dateTimeTH(item.created_at)}{item.mode !== "correction" ? ` · จำนวน ${quantityTH(item.quantity)} ${unit}` : ""}</span>
+        {item.entered_quantity && <span>{enteredNote(item, unit)}</span>}
         {item.reason && <span>เหตุผล: {item.reason}</span>}
-        {admin && item.unit_cost !== undefined && <span>ต้นทุนต่อหน่วย {quantityTH(item.unit_cost)} บาท</span>}
+        {admin && item.unit_cost !== undefined && <span>ต้นทุนต่อ {unit} {quantityTH(item.unit_cost)} บาท</span>}
         {admin && (item.before_cost !== undefined || item.after_cost !== undefined) && <span>ต้นทุนเฉลี่ย {quantityTH(item.before_cost)} → {quantityTH(item.after_cost)} บาท</span>}
       </li>)}</ol>}
     </section>
@@ -83,9 +85,11 @@ const valid = (value: string, positive: boolean) => { try { inventoryDecimal(val
 function StockForm({ api, material, onSaved }: { api: BackendApi; material: InventoryMaterial; onSaved: (message: string) => void }) {
   const [mode, setMode] = useState<Mode>(material.is_active ? "addition" : "correction");
   const [quantity, setQuantity] = useState(""); const [cost, setCost] = useState(""); const [reason, setReason] = useState("");
-  const [confirming, setConfirming] = useState(false);
+  const [confirming, setConfirming] = useState(false); const [conversion, setConversion] = useState<UnitConversion | null>(null);
   const write = useRetryableWrite(api, () => onSaved(mode === "addition" ? "เพิ่มสต๊อกแล้ว" : "แก้ยอดตามที่นับแล้ว"));
-  const unit = material.unit_name; const after = stockAfter(material, mode, quantity.trim());
+  const unit = material.unit_name; const typedUnit = conversion?.unit_name ?? unit;
+  const base = conversion ? convertToBase(quantity.trim(), conversion.factor) : quantity.trim();
+  const after = base ? stockAfter(material, mode, base) : null;
   const quantityError = quantity.trim() && !after ? (mode === "addition" ? "ตัวเลขมากกว่า 0 ทศนิยมไม่เกิน 6 ตำแหน่ง" : "ตัวเลข 0 ขึ้นไป ทศนิยมไม่เกิน 6 ตำแหน่ง")
     : after && mode === "correction" && isBelow(after, material.qty_reserved) ? `ต่ำกว่าจำนวนที่จองให้งานไว้ (${quantityTH(material.qty_reserved)} ${unit}) ไม่ได้` : "";
   const costError = mode === "addition" && cost.trim() && !valid(cost.trim(), false) ? "ตัวเลข 0 ขึ้นไป ทศนิยมไม่เกิน 6 ตำแหน่ง" : "";
@@ -102,8 +106,9 @@ function StockForm({ api, material, onSaved }: { api: BackendApi; material: Inve
           <label><input type="radio" name="mode" checked={mode === "correction"} onChange={() => choose("correction")} />แก้ยอดตามที่นับ</label>
         </div></div>
         {!material.is_active && <p className={layout.muted}>วัตถุดิบนี้ปิดใช้งานอยู่ จึงแก้ยอดตามที่นับได้อย่างเดียว</p>}
-        <Field label={mode === "addition" ? `② จำนวนที่เพิ่ม (${unit})` : `② ยอดที่นับได้ทั้งหมด (${unit})`} error={quantityError || undefined}><input inputMode="decimal" autoComplete="off" required value={quantity} aria-invalid={Boolean(quantityError) || undefined} onChange={(event) => setQuantity(event.target.value)} /></Field>
-        {mode === "addition" && <Field label="③ ต้นทุนต่อหน่วย (บาท)" hint="ใช้คำนวณต้นทุนเฉลี่ยใหม่" error={costError || undefined}><input inputMode="decimal" autoComplete="off" required value={cost} aria-invalid={Boolean(costError) || undefined} onChange={(event) => setCost(event.target.value)} /></Field>}
+        <Field label={mode === "addition" ? `② จำนวนที่เพิ่ม (${typedUnit})` : `② ยอดที่นับได้ทั้งหมด (${typedUnit})`} error={quantityError || undefined}><input inputMode="decimal" autoComplete="off" required value={quantity} aria-invalid={Boolean(quantityError) || undefined} onChange={(event) => setQuantity(event.target.value)} /></Field>
+        <EntryUnit api={api} materialId={material.id} baseUnit={unit} unitId={conversion?.unit_id} quantity={quantity} onChange={setConversion} />
+        {mode === "addition" && <Field label={`③ ต้นทุนต่อ ${unit} (บาท)`} hint={conversion ? `กรอกต้นทุนต่อ ${unit} ไม่ใช่ต่อ ${conversion.unit_name}` : "ใช้คำนวณต้นทุนเฉลี่ยใหม่"} error={costError || undefined}><input inputMode="decimal" autoComplete="off" required value={cost} aria-invalid={Boolean(costError) || undefined} onChange={(event) => setCost(event.target.value)} /></Field>}
         <Field label={mode === "addition" ? "④ เหตุผล" : "③ เหตุผล"} error={reasonError || undefined}><textarea required value={reason} onChange={(event) => setReason(event.target.value)} /></Field>
       </fieldset>
       <div className={layout.submitBar} data-sticky>
@@ -115,7 +120,7 @@ function StockForm({ api, material, onSaved }: { api: BackendApi; material: Inve
     <details className={layout.note}><summary>เงื่อนไข</summary><p>ปรับได้ไม่เกิน 12 หลัก ทศนิยม 6 ตำแหน่ง ไม่ปัดเศษ · แก้ยอดตามที่นับจะคงต้นทุนเฉลี่ยเดิม และตั้งยอดต่ำกว่าที่จองให้งานไว้ไม่ได้ · การรับของจากผู้ขายให้บันทึกที่หน้ารับเข้าวัตถุดิบ</p></details>
     <ConfirmDialog open={confirming} title={mode === "addition" ? "เพิ่มสต๊อก?" : "แก้ยอดตามที่นับ?"} confirmLabel="ยืนยันปรับสต๊อก" checks={["ตรวจจำนวน หน่วย และเหตุผลแล้ว"]} onClose={() => setConfirming(false)} onConfirm={() => {
       setConfirming(false);
-      write.submit(`/materials/${material.id}/stock`, "POST", () => ({ ...stockFields(material, mode, quantity.trim(), cost.trim(), reason), idempotency_key: crypto.randomUUID(), expected_version: material.version }), "");
+      write.submit(`/materials/${material.id}/stock`, "POST", () => ({ ...stockFields(material, mode, quantity.trim(), cost.trim(), reason, conversion), idempotency_key: crypto.randomUUID(), expected_version: material.version }), "");
     }}>
       <p>{material.name}: คงเหลือ {quantityTH(material.qty_on_hand)} → {after ? quantityTH(after) : "…"} {unit} ระบบจะบันทึกประวัติการปรับนี้และแก้ไขย้อนหลังไม่ได้</p>
     </ConfirmDialog>

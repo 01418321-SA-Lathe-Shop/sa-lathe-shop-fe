@@ -1,71 +1,77 @@
 "use client";
 
-import { useState, type FormEvent, type MouseEvent } from "react";
-import { quantityTH } from "../../components/staff-ui/staff-format";
-import { EmptyState, Field, ToneBadge } from "../../components/staff-ui/staff-ui";
-import { inventoryDecimal } from "./inventory-domain";
+import { useState, type FormEvent } from "react";
+import type { BackendApi } from "../../lib/api/backend-api";
+import { useCommand, useResource } from "../../hooks/backend-hooks";
+import { dateTimeTH, quantityTH } from "../../components/staff-ui/staff-format";
+import { ConfirmDialog, EmptyState, ErrorText, Field, LoadError, Skeleton, ToneBadge } from "../../components/staff-ui/staff-ui";
+import { inventoryDecimal, type InventoryMaterial, type UnitConversion } from "./inventory-domain";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./inventory.module.css";
 
-type Conversion = { id: string; material: string; base: string; unit: string; factor: string; active: boolean };
+type Unit = { id: string; name: string };
 
-// shortcut: owner-approved sample data for the page design only; replace with the Phase A API in backend PLAN.md. Never saved and never touches stock.
-const SAMPLE: Conversion[] = [
-  { id: "1", material: "ตัวอย่าง เหล็กแผ่น", base: "kg", unit: "แผ่น", factor: "12.500000", active: true },
-  { id: "2", material: "ตัวอย่าง เหล็กแผ่น", base: "kg", unit: "มัด", factor: "125.000000", active: true },
-  { id: "3", material: "ตัวอย่าง ทองเหลืองเส้น", base: "เมตร", unit: "เส้น", factor: "6.000000", active: true },
-  { id: "4", material: "ตัวอย่าง ทองเหลืองเส้น", base: "เมตร", unit: "ม้วน", factor: "50.000000", active: false },
-];
-const SAMPLE_MATERIALS = [...new Map(SAMPLE.map((item) => [item.material, item.base])).entries()];
+// Admin per-material conversions. A factor is never edited: past records keep it, so correcting one means deactivating it and adding another.
+export function ConversionsView({ api, materials }: { api: BackendApi; materials: InventoryMaterial[] | undefined }) {
+  const [chosen, setChosen] = useState("");
+  const material = materials?.find((item) => item.id === chosen) ?? materials?.[0];
+  if (!materials) return <Skeleton label="กำลังโหลดวัตถุดิบ…" />;
+  if (!material) return <EmptyState title="ยังไม่มีวัตถุดิบ">เพิ่มวัตถุดิบได้ที่ข้อมูลหลัก</EmptyState>;
+  return <>
+    <section className={styles.detailCard} aria-labelledby="conversion-material">
+      <h3 id="conversion-material">เลือกวัตถุดิบ</h3>
+      <Field label="วัตถุดิบ" hint={`หน่วยหลัก ${material.unit_name}`}><select value={material.id} onChange={(event) => setChosen(event.target.value)}>{materials.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field>
+    </section>
+    <MaterialConversions key={material.id} api={api} material={material} />
+  </>;
+}
 
-export function ConversionsView() {
-  const [items, setItems] = useState(SAMPLE); const [material, setMaterial] = useState(SAMPLE_MATERIALS[0][0]);
-  const [unit, setUnit] = useState(""); const [factor, setFactor] = useState(""); const [error, setError] = useState("");
-  const base = SAMPLE_MATERIALS.find(([name]) => name === material)?.[1] ?? "";
-  const active = items.filter((item) => item.active);
+function MaterialConversions({ api, material }: { api: BackendApi; material: InventoryMaterial }) {
+  const conversions = useResource<{ items: UnitConversion[] | null }>(api, `/materials/${material.id}/conversions`);
+  const units = useResource<{ items: Unit[] | null }>(api, "/units");
+  const command = useCommand(); const [unitId, setUnitId] = useState(""); const [factor, setFactor] = useState(""); const [problem, setProblem] = useState(""); const [closing, setClosing] = useState<UnitConversion | null>(null);
+  const items = conversions.data?.items ?? [];
+  const taken = new Set(items.filter((item) => item.is_active).map((item) => item.unit_id));
+  const choices = (units.data?.items ?? []).filter((unit) => unit.id !== material.unit_id && !taken.has(unit.id));
+  const unitName = choices.find((unit) => unit.id === unitId)?.name;
   function add(event: FormEvent) {
-    event.preventDefault(); const name = unit.trim(); let value: string;
-    try { value = inventoryDecimal(factor.trim(), true); } catch { setError("ตัวคูณต้องมากกว่า 0 ทศนิยมไม่เกิน 6 ตำแหน่ง"); return; }
-    if (!name || name === base) { setError("ระบุหน่วยที่ไม่ใช่หน่วยหลักของวัตถุดิบ"); return; }
-    if (active.some((item) => item.material === material && item.unit === name)) { setError("วัตถุดิบนี้มีหน่วยนี้อยู่แล้ว"); return; }
-    setItems([{ id: crypto.randomUUID(), material, base, unit: name, factor: value, active: true }, ...items]); setUnit(""); setFactor(""); setError("");
-  }
-  function deactivate(event: MouseEvent<HTMLElement>, id: string) {
-    event.currentTarget.closest("details")?.removeAttribute("open");
-    setItems(items.map((item) => item.id === id ? { ...item, active: false } : item));
+    event.preventDefault(); let value: string;
+    if (!unitName) { setProblem("เลือกหน่วยที่ต้องการแปลง"); return; }
+    try { value = inventoryDecimal(factor.trim(), true); } catch { setProblem("ตัวคูณต้องมากกว่า 0 ทศนิยมไม่เกิน 6 ตำแหน่ง"); return; }
+    setProblem(""); void command.run(async (signal) => { await api.call(`/materials/${material.id}/conversions`, "POST", { unit_id: unitId, factor: value }, signal); setUnitId(""); setFactor(""); conversions.reload(); }, "");
   }
   return <>
-    <p className={styles.sample} role="status"><strong>ตัวอย่างหน้าจอ</strong> ข้อมูลในหน้านี้เป็นข้อมูลสมมติ ยังไม่เชื่อมต่อระบบ ไม่ถูกบันทึก และไม่มีผลกับสต๊อก</p>
-    <dl className={styles.summary}>
-      <div><dt>การแปลงที่ใช้งาน</dt><dd>{active.length.toLocaleString("th-TH")}</dd></div>
-      <div><dt>วัตถุดิบที่มีการแปลง</dt><dd>{new Set(active.map((item) => item.material)).size.toLocaleString("th-TH")}</dd></div>
-      <div><dt>ปิดใช้งาน</dt><dd>{(items.length - active.length).toLocaleString("th-TH")}</dd><small>ประวัติเดิมยังใช้ตัวคูณที่บันทึกไว้</small></div>
-    </dl>
     <section className={styles.detailCard} aria-labelledby="conversion-add"><h3 id="conversion-add">เพิ่มการแปลงหน่วย</h3>
+      {units.error && !units.data && <LoadError title="โหลดหน่วยไม่สำเร็จ" onRetry={units.reload} />}
       <form className={styles.inlineForm} onSubmit={add}>
-        <Field label="วัตถุดิบ"><select value={material} onChange={(event) => setMaterial(event.target.value)}>{SAMPLE_MATERIALS.map(([name]) => <option key={name}>{name}</option>)}</select></Field>
-        <Field label="หน่วยที่ต้องการ"><input value={unit} autoComplete="off" onChange={(event) => setUnit(event.target.value)} /></Field>
-        <Field label={`1 ${unit.trim() || "หน่วย"} เท่ากับกี่ ${base}`}><input inputMode="decimal" autoComplete="off" value={factor} onChange={(event) => setFactor(event.target.value)} /></Field>
-        <button type="submit" className={layout.submit}>เพิ่มการแปลง</button>
-        {error && <p role="alert" className={styles.formError}>{error}</p>}
+        <Field label="หน่วยที่ต้องการ"><select value={unitId} disabled={command.busy} onChange={(event) => setUnitId(event.target.value)}><option value="">เลือกหน่วย</option>{choices.map((unit) => <option key={unit.id} value={unit.id}>{unit.name}</option>)}</select></Field>
+        <Field label={`1 ${unitName ?? "หน่วย"} เท่ากับกี่ ${material.unit_name}`}><input inputMode="decimal" autoComplete="off" value={factor} disabled={command.busy} onChange={(event) => setFactor(event.target.value)} /></Field>
+        <button type="submit" className={layout.submit} disabled={command.busy}>เพิ่มการแปลง</button>
+        {problem && <p role="alert" className={styles.formError}>{problem}</p>}
       </form>
-      <p className={layout.muted}>แต่ละวัตถุดิบมีตัวคูณของตัวเอง สต๊อกยังเก็บเป็นหน่วยหลักเสมอ ตัวคูณที่ใช้แล้วแก้ไม่ได้ ต้องปิดใช้งานแล้วเพิ่มใหม่</p>
+      <ErrorText error={command.error} />
+      <p className={layout.muted}>ไม่มีหน่วยที่ต้องการ เพิ่มได้ที่ข้อมูลหลัก สต๊อกยังเก็บเป็นหน่วยหลักเสมอ ตัวคูณแก้ไขไม่ได้ ต้องปิดใช้งานแล้วเพิ่มใหม่</p>
     </section>
     <section className={styles.panel} aria-label="รายการการแปลงหน่วย">
-      {!items.length ? <EmptyState title="ยังไม่มีการแปลงหน่วย">เพิ่มการแปลงหน่วยด้านบน</EmptyState> : <table className={styles.stock}>
-        <thead><tr><th scope="col">วัตถุดิบ</th><th scope="col">หน่วยหลัก</th><th scope="col">หน่วยที่แปลง</th><th scope="col">ตัวคูณ</th><th scope="col">สถานะ</th><th scope="col"><span className={layout.visuallyHidden}>จัดการ</span></th></tr></thead>
+      {conversions.loading && !conversions.data && <div className={styles.note}><Skeleton label="กำลังโหลดการแปลงหน่วย…" /></div>}
+      {conversions.error && !conversions.data && <div className={styles.note}><LoadError title="โหลดการแปลงหน่วยไม่สำเร็จ" onRetry={conversions.reload} /></div>}
+      {conversions.data && !items.length && <EmptyState title="ยังไม่มีการแปลงหน่วย">เพิ่มการแปลงหน่วยด้านบน</EmptyState>}
+      {items.length > 0 && <table className={styles.stock}>
+        <thead><tr><th scope="col">หน่วยที่แปลง</th><th scope="col">ตัวคูณ</th><th scope="col">เพิ่มเมื่อ</th><th scope="col">สถานะ</th><th scope="col"><span className={layout.visuallyHidden}>จัดการ</span></th></tr></thead>
         <tbody>{items.map((item) => <tr key={item.id}>
-          <th scope="row"><span>{item.material}</span></th>
-          <td data-label="หน่วยหลัก">{item.base}</td>
-          <td data-label="หน่วยที่แปลง">{item.unit}</td>
-          <td data-label="ตัวคูณ"><span className={styles.qty}>1 {item.unit} = {quantityTH(item.factor)} <small>{item.base}</small></span></td>
-          <td data-label="สถานะ">{item.active ? <ToneBadge tone="done">ใช้งานอยู่</ToneBadge> : <ToneBadge tone="quiet">ปิดใช้งาน</ToneBadge>}</td>
-          <td className={styles.menuCell}>{item.active && <details className={layout.menu}>
-            <summary aria-label={`ตัวเลือกสำหรับ ${item.material} ${item.unit}`} title="ตัวเลือก"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" /></svg></summary>
-            <div><button type="button" onClick={(event) => deactivate(event, item.id)}>ปิดใช้งาน</button></div>
+          <th scope="row"><span>{item.unit_name}</span></th>
+          <td data-label="ตัวคูณ"><span className={styles.qty}>1 {item.unit_name} = {quantityTH(item.factor)} <small>{material.unit_name}</small></span></td>
+          <td data-label="เพิ่มเมื่อ">{dateTimeTH(item.created_at)}</td>
+          <td data-label="สถานะ">{item.is_active ? <ToneBadge tone="done">ใช้งานอยู่</ToneBadge> : <ToneBadge tone="quiet">ปิดใช้งาน</ToneBadge>}</td>
+          <td className={styles.menuCell}>{item.is_active && <details className={layout.menu}>
+            <summary aria-label={`ตัวเลือกสำหรับ ${item.unit_name}`} title="ตัวเลือก"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" /></svg></summary>
+            <div><button type="button" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); setClosing(item); }}>ปิดใช้งาน</button></div>
           </details>}</td>
         </tr>)}</tbody>
       </table>}
     </section>
+    <ConfirmDialog open={Boolean(closing)} title={`ปิดใช้งานหน่วย ${closing?.unit_name ?? ""}?`} confirmLabel="ปิดใช้งาน" danger onClose={() => setClosing(null)} onConfirm={() => { const target = closing; setClosing(null); if (target) void command.run(async (signal) => { await api.call(`/materials/${material.id}/conversions/${target.id}/deactivate`, "POST", {}, signal); conversions.reload(); }, ""); }}>
+      <p>หลังปิดใช้งานจะกรอกจำนวนด้วยหน่วยนี้ไม่ได้ รายการเดิมยังใช้ตัวคูณที่บันทึกไว้</p>
+    </ConfirmDialog>
   </>;
 }

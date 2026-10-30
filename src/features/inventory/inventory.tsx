@@ -51,7 +51,7 @@ function InventoryWorkspace({ api, account }: { api: BackendApi; account: Accoun
     </nav>}
     {view !== "conversions" && <div className={styles.head}><Button onClick={materials.reload} disabled={materials.loading}>อัปเดตข้อมูล</Button></div>}
     <TruncatedNotice show={materials.data?.complete === false} />
-    {view === "conversions" ? <ConversionsView /> : view === "catalog" ? <>
+    {view === "conversions" ? <ConversionsView api={api} materials={items} /> : view === "catalog" ? <>
       <div className={layout.toolbarEnd}>{search}</div>
       {materials.error && !materials.data && <LoadError title="โหลดสต๊อกวัตถุดิบไม่สำเร็จ" onRetry={materials.reload} />}
       {searchNote}

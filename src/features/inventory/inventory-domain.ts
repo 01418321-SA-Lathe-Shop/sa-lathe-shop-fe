@@ -1,8 +1,10 @@
 // UC5 quantities/unit costs are NUMERIC(18,6), not two-place quotation money.
 export type InventoryMaterial = { id: string; name: string; unit_id: string; unit_name: string; is_active: boolean; version: number | string; qty_on_hand: string; qty_reserved: string; qty_available: string; avg_cost?: string };
-export type InventoryPlan = { job_id: string; version: number | string; ready: boolean; lines: { material_id: string; required: string; reserved: string; consumed: string; shortage: string }[] | null };
-export type InventoryMovement = { id: string; material_id: string; actor_id: string; mode: string; quantity: string; before_quantity: string; after_quantity: string; version: number | string; created_at: string; reason?: string; unit_cost?: string; before_cost?: string; after_cost?: string };
-export type PlanDraftLine = { material_id: string; quantity: string };
+export type EnteredValues = { entered_quantity?: string; entered_unit_name?: string; factor_used?: string };
+export type UnitConversion = { id: string; material_id: string; unit_id: string; unit_name: string; factor: string; is_active: boolean; created_at: string };
+export type InventoryPlan = { job_id: string; version: number | string; ready: boolean; lines: ({ material_id: string; required: string; reserved: string; consumed: string; shortage: string } & EnteredValues)[] | null };
+export type InventoryMovement = { id: string; material_id: string; actor_id: string; mode: string; quantity: string; before_quantity: string; after_quantity: string; version: number | string; created_at: string; reason?: string; unit_cost?: string; before_cost?: string; after_cost?: string } & EnteredValues;
+export type PlanDraftLine = { material_id: string; quantity: string; unit_id?: string; unit_name?: string };
 
 export function inventoryDecimal(value: string, positive = false): string {
   if (!/^\d{1,12}(?:\.\d{1,6})?$/.test(value)) throw new Error("Use a decimal with up to 12 whole digits and six decimal places; no negative values or exponents.");
@@ -14,6 +16,21 @@ export function inventoryDecimal(value: string, positive = false): string {
 
 function decimalUnits(value: string): bigint { return BigInt(value.replace(".", "")); }
 function fromUnits(units: bigint): string { const text = units.toString().padStart(7, "0"); return `${text.slice(0, -6)}.${text.slice(-6)}`; }
+
+/** Exact base quantity for a typed amount, or null when invalid or it would need rounding. */
+export function convertToBase(quantity: string, factor: string): string | null {
+  try {
+    const product = decimalUnits(inventoryDecimal(quantity)) * decimalUnits(inventoryDecimal(factor));
+    if (product % BigInt(1000000) !== BigInt(0)) return null;
+    return inventoryDecimal(fromUnits(product / BigInt(1000000)));
+  } catch { return null; }
+}
+
+/** Read-only display of a base balance in another unit, rounded down when it does not divide evenly. */
+export function baseToUnit(base: string, factor: string): { value: string; exact: boolean } {
+  const scaled = decimalUnits(inventoryDecimal(base)) * BigInt(1000000); const divisor = decimalUnits(inventoryDecimal(factor));
+  return { value: fromUnits(scaled / divisor), exact: scaled % divisor === BigInt(0) };
+}
 
 export function inventoryDisplay(value: string): string {
   if (!/^\d{1,12}\.\d{6}$/.test(value)) return "Unavailable";
@@ -33,7 +50,7 @@ export function planLines(lines: PlanDraftLine[]): PlanDraftLine[] {
   return lines.map((line) => {
     const id = line.material_id.toLowerCase();
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id) || seen.has(id)) throw new Error("Each plan line needs a distinct material ID.");
-    seen.add(id); return { material_id: id, quantity: inventoryDecimal(line.quantity, true) };
+    seen.add(id); return { material_id: id, quantity: inventoryDecimal(line.quantity, true), ...(line.unit_id ? { unit_id: line.unit_id } : {}) };
   });
 }
 
@@ -90,12 +107,14 @@ export function isBelow(value: string, floor: string): boolean {
   return decimalUnits(inventoryDecimal(value)) < decimalUnits(inventoryDecimal(floor));
 }
 
-export function stockFields(material: InventoryMaterial, mode: "addition" | "correction", quantity: string, unitCost: string, rawReason: string) {
+export function stockFields(material: InventoryMaterial, mode: "addition" | "correction", quantity: string, unitCost: string, rawReason: string, conversion?: Pick<UnitConversion, "unit_id" | "factor"> | null) {
   const amount = inventoryDecimal(quantity, mode === "addition");
+  const base = conversion ? convertToBase(amount, conversion.factor) : amount;
+  if (!base) throw new Error("This quantity cannot be converted exactly.");
   const reason = catalogName(rawReason, 2000);
   if (!material.is_active && mode === "addition") throw new Error("Reactivate the material before adding stock.");
-  if (mode === "correction" && decimalUnits(amount) < decimalUnits(inventoryDecimal(material.qty_reserved))) throw new Error("Counted stock cannot be below active reserved stock.");
-  return { mode, quantity: amount, reason, ...(mode === "addition" ? { unit_cost: inventoryDecimal(unitCost) } : {}) };
+  if (mode === "correction" && decimalUnits(base) < decimalUnits(inventoryDecimal(material.qty_reserved))) throw new Error("Counted stock cannot be below active reserved stock.");
+  return { mode, quantity: amount, reason, ...(conversion ? { unit_id: conversion.unit_id } : {}), ...(mode === "addition" ? { unit_cost: inventoryDecimal(unitCost) } : {}) };
 }
 
 /** Real consumption only: `job_issue` is the ledger entry production usage writes. */
