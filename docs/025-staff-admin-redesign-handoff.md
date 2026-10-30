@@ -98,6 +98,18 @@ Implemented differences from the spec, all within the approved intent:
 - ค้างจ่ายผู้ขาย = fully received and not settled, including orders whose credit days are not yet set. รับครบตามที่เหลือ fills good units only; Staff still confirm and save.
 - Verification: 178 tests and all checks; Chrome walk Admin 1280 Dark / 390 Light, Staff 768 Dark, against a test-only API stub because the local backend was not running. Not exercised against the live API: real data, saves, conflicts, retry, proof upload.
 
+## Real-API re-check of Steps 1, 4 and 5 (2026-10-30)
+
+The local backend was running with demo data. Reads and login went to the real API; every business write was intercepted and answered with a 500, so the database was not changed.
+- `pim.admin` at 1280 Dark:
+  - รับเข้าวัตถุดิบ: tab counts match the data (1 partial with a claimed damaged line, 1 received and owed). The partial order offers only a replacement row of 5, since its original deliveries already reached the ordered 20. รับครบตามที่เหลือ filled 5.
+  - The intercepted receipt showed the RetryPanel, and ส่งซ้ำแบบเดิม resent the identical key and payload.
+  - สั่งซื้อวัตถุดิบ: pending, partial and received orders, related job label “คำขอ #6 · …”, and the supplier list are correct.
+- `anan.staff` at 390 Light:
+  - Receiving behaves the same, with no payment tab or section.
+  - The Step 1 fix holds: searching inside the งานผลิต usage form returned 6 materials and sent no write.
+- No horizontal scroll and no console errors in either run. Saves that really reach the backend (successes and conflicts) remain unexercised by design.
+
 ## Working notes
 
 - Every step: tests, type check, lint, `npm run audit:source` (unused exports fail), build; `src` `.ts`/`.tsx` files must stay at 310 lines or fewer; update DESIGN.md in the same step; commit and push per step.
