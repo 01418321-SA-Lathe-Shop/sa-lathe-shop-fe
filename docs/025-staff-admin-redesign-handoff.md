@@ -1,6 +1,6 @@
 # Staff/Admin redesign — plan and handoff
 
-Status date: 2026-10-30 · Branch `develop` · Last code commit `32020b7` (Step 5)
+Status date: 2026-10-30 · Branch `develop` · Last code commit `86c99a8` (Step 6)
 
 This document holds the complete owner-approved plan for the Staff/Admin redesign (audit, navigation, flow, design system, page specifications and step plan) and the current implementation status. Part A is status; Part B is the plan as approved.
 
@@ -97,6 +97,18 @@ Implemented differences from the spec, all within the approved intent:
 - The list API has no claim or payment data. The owner chose to read each listed order's detail to count มีของเสียหาย and ค้างจ่ายผู้ขาย. This covers the first 100 orders; a notice appears if details fail or the list is longer, and a `shortcut:` code comment marks the limit.
 - ค้างจ่ายผู้ขาย = fully received and not settled, including orders whose credit days are not yet set. รับครบตามที่เหลือ fills good units only; Staff still confirm and save.
 - Verification: 178 tests and all checks; Chrome walk Admin 1280 Dark / 390 Light, Staff 768 Dark, against a test-only API stub because the local backend was not running. Not exercised against the live API: real data, saves, conflicts, retry, proof upload.
+
+## Step 6 — ส่งมอบและใบแจ้งหนี้ / ส่งมอบและรับชำระ (done)
+
+| Commit | Purpose |
+| --- | --- |
+| `cd6c27f` | `delivery-domain.ts`: `DELIVERY_TABS`, `inDeliveryTab`/`deliveryCounts`/`defaultDeliveryTab`/`matchDelivery`; Thai validation messages; test |
+| `55b3845` | Proof upload moved from รับเข้าวัตถุดิบ to `src/components/staff-ui/staff-upload.tsx` with intent/complete paths as props |
+| `86c99a8` | `src/features/delivery/` redesign. Files:<br>• `delivery.tsx`: tabs `?tab=`, search `?q=`, `?job=`, cards with request labels<br>• `delivery-detail.tsx`: balance panel, action cards, timelines<br>• `delivery-actions.tsx`: credit days, invoice, shipment, cash<br>• `delivery-payments.tsx`: Admin proof cards with review<br>• `delivery.module.css`<br>Also: delivery label maps, a Thai message for malformed amounts, and the unused English `RequestLabel` removed |
+
+- Tabs overlap where the rules overlap (e.g. รอลูกค้าตรวจรับ and ค้างชำระ). Jobs still in production, including free rework, are in no tab; they are visible in งานผลิต.
+- Staff have no credit-days permission, so jobs awaiting Admin credit days show under รอออกใบแจ้งหนี้ as “รอแอดมินตั้งเครดิต”.
+- Verification: 180 tests and all checks; real-API walk with writes intercepted (Admin 1280 Dark, Staff 390/360 Light) plus a stubbed Staff 768 walk for invoice and shipment. Not exercised: real saves, conflicts, uploads.
 
 ## Real-API re-check of Steps 1, 4 and 5 (2026-10-30)
 
@@ -454,7 +466,7 @@ Rules for every step:
 | 3 | สต๊อกวัตถุดิบ + ข้อมูลหลัก (see below) | Done (`2067a65`, `64548f1`) |
 | 4 | สั่งซื้อวัตถุดิบ (Admin) (see below) | Done (`ef034d5`, `0981939`, `e5ac7df`) |
 | 5 | รับเข้าวัตถุดิบ (see below) | Done (`2b99aec`, `32020b7`) |
-| 6 | ส่งมอบและใบแจ้งหนี้ (Staff) / ส่งมอบและรับชำระ (Admin) (see below) | Not started |
+| 6 | ส่งมอบและใบแจ้งหนี้ (Staff) / ส่งมอบและรับชำระ (Admin) (see below) | Done (`cd6c27f`, `55b3845`, `86c99a8`) |
 | 7 | จัดการพนักงาน (Admin) (see below) | Not started |
 | 8 | การแจ้งเตือน page (see below) | Not started |
 | 9 | Wrap-up: handoff doc update, DESIGN.md consolidation, final full walk of every page for both roles | Not started |

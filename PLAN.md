@@ -1,3 +1,16 @@
+## Staff/Admin redesign Step 6 (ส่งมอบและใบแจ้งหนี้ / ส่งมอบและรับชำระ) — 2026-10-30
+
+- Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 6 complete (`cd6c27f` domain tabs and Thai messages, `55b3845` shared proof upload, `86c99a8` page).
+  - Seven role-filtered tabs from the existing action rules.
+  - Large balance panel.
+  - Per-role action cards: credit days, invoice, shipment.
+  - Admin payment cards with proof download, approve/reject and a cash form.
+  - Delivery, rework and event timelines.
+- Checks: 180 native tests (2 new), type check, lint, source audit, DESIGN sync, production build.
+- Chrome walk against the real local API, writes intercepted: Admin 1280 Dark, Staff 390/360 Light. Invoice and shipment forms were walked against a stub (Staff 768), because the demo data has no job in those states. No overflow or console errors; payload shapes unchanged.
+- Also re-checked Steps 1, 4 and 5 against the real API (`9a9c386`).
+- Not exercised: saves that really reach the backend, conflicts, uploads. Pending owner decision: none.
+
 ## Staff/Admin redesign Step 5 (รับเข้าวัตถุดิบ) — 2026-10-30
 
 - Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 5 complete (`2b99aec` domain helpers, `32020b7` page).
