@@ -8,6 +8,7 @@ import { useCommand, useResource, useRetryableWrite } from "../../hooks/backend-
 import { bahtTH, dateTH, dateTimeTH, minutesTH, quantityTH, requestedDayCountdown } from "../../components/staff-ui/staff-format";
 import { JOB_STATUS } from "../../components/staff-ui/staff-labels";
 import { Button, Collapsible, ConfirmDialog, ErrorText, Field, LoadError, NextAction, RetryPanel, Skeleton, StatusBadge, Steps, ToneBadge } from "../../components/staff-ui/staff-ui";
+import { EntryUnit, enteredNote } from "../inventory/entry-unit";
 import { planLines, type InventoryPlan, type PlanDraftLine } from "../inventory/inventory-domain";
 import { MaterialPicker } from "../inventory/material-picker";
 import { laborPayload, type ProductionState } from "./production-domain";
@@ -72,7 +73,7 @@ function PlanStep({ api, job, canWrite, onSaved }: { api: BackendApi; job: Produ
         {plan.data.lines?.length ? <ul className={styles.planLines}>{plan.data.lines.map((line) => {
           const known = names.get(line.material_id); const short = /[1-9]/.test(line.shortage);
           return <li key={line.material_id} data-short={short || undefined}><strong>{known ? `${known.name} (${known.unit})` : "วัตถุดิบในแผน"}</strong>
-            <span>ต้องใช้ {quantityTH(line.required)}</span><span>จองแล้ว {quantityTH(line.reserved)}</span>{short && <span className={styles.short}>ขาด {quantityTH(line.shortage)}</span>}</li>;
+            <span>ต้องใช้ {quantityTH(line.required)}</span><span>จองแล้ว {quantityTH(line.reserved)}</span>{line.entered_quantity && <span>{enteredNote(line, known?.unit ?? "")}</span>}{short && <span className={styles.short}>ขาด {quantityTH(line.shortage)}</span>}</li>;
         })}</ul> : <p className={layout.muted}>ยังไม่มีแผนวัตถุดิบ กด “แก้ไขแผนวัตถุดิบ” เพื่อเพิ่มรายการ</p>}
         {readiness?.state === "short" && <p className={layout.muted}>บางรายการยังจองไม่ครบ กด “จองเพิ่มตามแผนเดิม” เมื่อมีของเข้า หรือแจ้ง Admin สั่งซื้อวัตถุดิบ</p>}
         {readiness?.state === "changed" && <p className={layout.muted}>แผนมีการเปลี่ยนแปลง กด “อัปเดตข้อมูล” ก่อนเริ่มงาน</p>}
@@ -98,6 +99,8 @@ function PlanEditor({ api, job, plan, names, onSaved, onCancel }: { api: Backend
   const [problem, setProblem] = useState(""); const [confirmEmpty, setConfirmEmpty] = useState(false);
   const write = useRetryableWrite(api, onSaved);
   const label = (id: string) => { const known = added[id] ?? names.get(id); return known ? `${known.name} (${known.unit})` : "วัตถุดิบในแผน"; };
+  const baseUnit = (id: string) => (added[id] ?? names.get(id))?.unit ?? "";
+  const change = (index: number, changes: Partial<PlanDraftLine>) => setLines((current) => current.map((value, position) => position === index ? { ...value, ...changes } : value));
   function send() {
     write.submit(`/jobs/${job.job_id}/materials`, "PUT", () => {
       let validated: PlanDraftLine[];
@@ -110,7 +113,8 @@ function PlanEditor({ api, job, plan, names, onSaved, onCancel }: { api: Backend
     <fieldset disabled={write.frozen}>
       <legend className={layout.visuallyHidden}>รายการวัตถุดิบในแผน</legend>
       {lines.map((line, index) => <div className={styles.editorLine} key={line.material_id}>
-        <Field label={`ต้องใช้ · ${label(line.material_id)}`} error={line.quantity && !isPositiveQuantity(line.quantity) ? "ตัวเลขมากกว่า 0 ทศนิยมไม่เกิน 6 ตำแหน่ง" : undefined}><input inputMode="decimal" autoComplete="off" value={line.quantity} aria-invalid={line.quantity && !isPositiveQuantity(line.quantity) ? true : undefined} onChange={(event) => setLines((current) => current.map((value, position) => position === index ? { ...value, quantity: event.target.value } : value))} /></Field>
+        <Field label={`ต้องใช้ · ${label(line.material_id)}${line.unit_name ? ` · กรอกเป็น ${line.unit_name}` : ""}`} error={line.quantity && !isPositiveQuantity(line.quantity) ? "ตัวเลขมากกว่า 0 ทศนิยมไม่เกิน 6 ตำแหน่ง" : undefined}><input inputMode="decimal" autoComplete="off" value={line.quantity} aria-invalid={line.quantity && !isPositiveQuantity(line.quantity) ? true : undefined} onChange={(event) => setLines((current) => current.map((value, position) => position === index ? { ...value, quantity: event.target.value } : value))} /></Field>
+        <EntryUnit api={api} materialId={line.material_id} baseUnit={baseUnit(line.material_id)} unitId={line.unit_id} quantity={line.quantity} onChange={(conversion) => change(index, { unit_id: conversion?.unit_id, unit_name: conversion?.unit_name })} />
         <Button variant="text" onClick={() => setLines((current) => current.filter((_, position) => position !== index))} aria-label={`ลบ ${label(line.material_id)}`}>ลบ</Button>
       </div>)}
       {!lines.length && <p className={layout.muted}>ยังไม่มีรายการ ถ้าบันทึกแผนว่าง วัตถุดิบที่จองไว้ให้งานนี้จะถูกคืนทั้งหมด</p>}
@@ -162,7 +166,7 @@ function History({ api, job, admin }: { api: BackendApi; job: ProductionState; a
   return <>
     <section className={layout.historyBlock}><h4>การใช้วัตถุดิบ</h4>{!job.usage?.length ? <p className={layout.muted}>ยังไม่มีการบันทึกการใช้วัตถุดิบ</p> : <ul className={layout.timeline}>{job.usage.map((entry) => <li key={entry.id}>
       <strong>{entry.material_name} · {quantityTH(entry.quantity)} {entry.unit_name}</strong>
-      <span>{dateTimeTH(entry.created_at)} · ใช้จากที่จอง {quantityTH(entry.reservation_used)}{admin && entry.total_amount ? ` · ต้นทุน ${bahtTH(entry.total_amount)} (หน่วยละ ${quantityTH(entry.unit_cost)})` : ""}</span>
+      <span>{dateTimeTH(entry.created_at)} · ใช้จากที่จอง {quantityTH(entry.reservation_used)}{entry.entered_quantity ? ` · ${enteredNote(entry, entry.unit_name)}` : ""}{admin && entry.total_amount ? ` · ต้นทุน ${bahtTH(entry.total_amount)} (หน่วยละ ${quantityTH(entry.unit_cost)})` : ""}</span>
     </li>)}</ul>}</section>
     <section className={layout.historyBlock}><h4>เวลาทำงาน</h4>{!job.time_entries?.length ? <p className={layout.muted}>ยังไม่มีการบันทึกเวลา</p> : <ul className={layout.timeline}>{job.time_entries.map((entry) => <li key={entry.id}><strong>{minutesTH(entry.minutes)}</strong><span>{dateTimeTH(entry.created_at)}{entry.note ? ` · ${entry.note}` : ""}</span></li>)}</ul>}</section>
     <section className={layout.historyBlock}><h4>รูปงาน</h4>{!job.photos?.length ? <p className={layout.muted}>ยังไม่มีรูปงาน</p> : <ul className={layout.timeline}>{job.photos.map((photo) => <li key={photo.id} className={styles.photoRow}><span>{photo.file_name}</span><Button variant="text" disabled={download.busy} onClick={() => void download.run((signal) => api.download(`/job-photos/${photo.id}/download`, photo.file_name, signal), "")}>เปิดรูป</Button></li>)}</ul>}<ErrorText error={download.error} /></section>
