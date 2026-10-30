@@ -94,7 +94,7 @@ function PlanStep({ api, job, canWrite, onSaved }: { api: BackendApi; job: Produ
 }
 
 function PlanEditor({ api, job, plan, names, onSaved, onCancel }: { api: BackendApi; job: ProductionState; plan: InventoryPlan; names: Map<string, { name: string; unit: string }>; onSaved: () => void; onCancel: () => void }) {
-  const [lines, setLines] = useState<PlanDraftLine[]>(() => plan.lines?.map((line) => ({ material_id: line.material_id, quantity: editableQuantity(line.required) })) ?? []);
+  const [lines, setLines] = useState<PlanDraftLine[]>(() => plan.lines?.map((line) => ({ material_id: line.material_id, quantity: editableQuantity(line.required), restore: line.entered_quantity ? line : undefined })) ?? []);
   const [added, setAdded] = useState<Record<string, { name: string; unit: string }>>({});
   const [problem, setProblem] = useState(""); const [confirmEmpty, setConfirmEmpty] = useState(false);
   const write = useRetryableWrite(api, onSaved);
@@ -113,8 +113,8 @@ function PlanEditor({ api, job, plan, names, onSaved, onCancel }: { api: Backend
     <fieldset disabled={write.frozen}>
       <legend className={layout.visuallyHidden}>รายการวัตถุดิบในแผน</legend>
       {lines.map((line, index) => <div className={styles.editorLine} key={line.material_id}>
-        <Field label={`ต้องใช้ · ${label(line.material_id)}${line.unit_name ? ` · กรอกเป็น ${line.unit_name}` : ""}`} error={line.quantity && !isPositiveQuantity(line.quantity) ? "ตัวเลขมากกว่า 0 ทศนิยมไม่เกิน 6 ตำแหน่ง" : undefined}><input inputMode="decimal" autoComplete="off" value={line.quantity} aria-invalid={line.quantity && !isPositiveQuantity(line.quantity) ? true : undefined} onChange={(event) => setLines((current) => current.map((value, position) => position === index ? { ...value, quantity: event.target.value } : value))} /></Field>
-        <EntryUnit api={api} materialId={line.material_id} baseUnit={baseUnit(line.material_id)} unitId={line.unit_id} quantity={line.quantity} onChange={(conversion) => change(index, { unit_id: conversion?.unit_id, unit_name: conversion?.unit_name })} />
+        <Field label={`ต้องใช้ · ${label(line.material_id)}${line.unit_name ? ` · กรอกเป็น ${line.unit_name}` : ""}`} error={line.quantity && !isPositiveQuantity(line.quantity) ? "ตัวเลขมากกว่า 0 ทศนิยมไม่เกิน 6 ตำแหน่ง" : undefined}><input inputMode="decimal" autoComplete="off" value={line.quantity} aria-invalid={line.quantity && !isPositiveQuantity(line.quantity) ? true : undefined} onChange={(event) => setLines((current) => current.map((value, position) => position === index ? { ...value, quantity: event.target.value, restore: undefined } : value))} /></Field>
+        <EntryUnit api={api} materialId={line.material_id} baseUnit={baseUnit(line.material_id)} unitId={line.unit_id} quantity={line.quantity} onChange={(conversion) => change(index, { unit_id: conversion?.unit_id, unit_name: conversion?.unit_name, restore: undefined })} restore={line.restore} onRestore={(conversion) => change(index, { unit_id: conversion.unit_id, unit_name: conversion.unit_name, quantity: editableQuantity(line.restore?.entered_quantity ?? line.quantity), restore: undefined })} />
         <Button variant="text" onClick={() => setLines((current) => current.filter((_, position) => position !== index))} aria-label={`ลบ ${label(line.material_id)}`}>ลบ</Button>
       </div>)}
       {!lines.length && <p className={layout.muted}>ยังไม่มีรายการ ถ้าบันทึกแผนว่าง วัตถุดิบที่จองไว้ให้งานนี้จะถูกคืนทั้งหมด</p>}

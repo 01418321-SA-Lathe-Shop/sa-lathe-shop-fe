@@ -1,17 +1,22 @@
 "use client";
 
+import { useEffect } from "react";
 import type { BackendApi } from "../../lib/api/backend-api";
 import { useResource } from "../../hooks/backend-hooks";
 import { quantityTH } from "../../components/staff-ui/staff-format";
 import { Field } from "../../components/staff-ui/staff-ui";
-import { baseToUnit, convertToBase, type EnteredValues, type UnitConversion } from "./inventory-domain";
+import { baseToUnit, convertToBase, restorableConversion, type EnteredValues, type UnitConversion } from "./inventory-domain";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./inventory.module.css";
 
 // Stock stays in the base unit; the server converts what is typed here and rejects any result needing rounding.
-export function EntryUnit({ api, materialId, baseUnit, unitId, quantity, disabled, onChange }: { api: BackendApi; materialId: string; baseUnit: string; unitId?: string; quantity: string; disabled?: boolean; onChange: (conversion: UnitConversion | null) => void }) {
+export function EntryUnit({ api, materialId, baseUnit, unitId, quantity, disabled, onChange, restore, onRestore }: { api: BackendApi; materialId: string; baseUnit: string; unitId?: string; quantity: string; disabled?: boolean; onChange: (conversion: UnitConversion | null) => void; restore?: EnteredValues; onRestore?: (conversion: UnitConversion) => void }) {
   const resource = useResource<{ items: UnitConversion[] | null }>(api, `/materials/${materialId}/conversions`);
   const options = (resource.data?.items ?? []).filter((item) => item.is_active);
+  useEffect(() => {
+    const match = restore && restorableConversion(resource.data?.items ?? [], restore);
+    if (match) onRestore?.(match);
+  }, [resource.data, restore, onRestore]);
   if (!options.length) return null;
   const selected = options.find((item) => item.unit_id === unitId);
   const typed = quantity.trim();

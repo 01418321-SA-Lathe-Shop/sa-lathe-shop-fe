@@ -4,7 +4,7 @@ export type EnteredValues = { entered_quantity?: string; entered_unit_name?: str
 export type UnitConversion = { id: string; material_id: string; unit_id: string; unit_name: string; factor: string; is_active: boolean; created_at: string };
 export type InventoryPlan = { job_id: string; version: number | string; ready: boolean; lines: ({ material_id: string; required: string; reserved: string; consumed: string; shortage: string } & EnteredValues)[] | null };
 export type InventoryMovement = { id: string; material_id: string; actor_id: string; mode: string; quantity: string; before_quantity: string; after_quantity: string; version: number | string; created_at: string; reason?: string; unit_cost?: string; before_cost?: string; after_cost?: string } & EnteredValues;
-export type PlanDraftLine = { material_id: string; quantity: string; unit_id?: string; unit_name?: string };
+export type PlanDraftLine = { material_id: string; quantity: string; unit_id?: string; unit_name?: string; restore?: EnteredValues };
 
 export function inventoryDecimal(value: string, positive = false): string {
   if (!/^\d{1,12}(?:\.\d{1,6})?$/.test(value)) throw new Error("Use a decimal with up to 12 whole digits and six decimal places; no negative values or exponents.");
@@ -30,6 +30,11 @@ export function convertToBase(quantity: string, factor: string): string | null {
 export function baseToUnit(base: string, factor: string): { value: string; exact: boolean } {
   const scaled = decimalUnits(inventoryDecimal(base)) * BigInt(1000000); const divisor = decimalUnits(inventoryDecimal(factor));
   return { value: fromUnits(scaled / divisor), exact: scaled % divisor === BigInt(0) };
+}
+
+/** The conversion a saved entry used, only if still active at the same factor; otherwise re-saving would change the quantity. */
+export function restorableConversion(options: UnitConversion[], entered: EnteredValues): UnitConversion | null {
+  return options.find((item) => item.is_active && item.unit_name === entered.entered_unit_name && item.factor === entered.factor_used) ?? null;
 }
 
 export function inventoryDisplay(value: string): string {

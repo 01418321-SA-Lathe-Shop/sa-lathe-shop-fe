@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { baseToUnit, convertToBase, inventoryDecimal, inventoryDisplay, planLines, stockFields, catalogName, stockFilter, stockCounts, filterStock, stockAfter, isBelow, consumedTotal, consumptionByMonth } from "../../../src/features/inventory/inventory-domain.ts";
+import { baseToUnit, convertToBase, restorableConversion, inventoryDecimal, inventoryDisplay, planLines, stockFields, catalogName, stockFilter, stockCounts, filterStock, stockAfter, isBelow, consumedTotal, consumptionByMonth } from "../../../src/features/inventory/inventory-domain.ts";
 const material = { is_active: true, qty_reserved: "2.000001" };
 const id = "10000000-0000-4000-8000-000000000001";
 test("six-place quantities/unit costs retain full PostgreSQL precision without rounding", () => {
@@ -99,4 +99,13 @@ test("entered unit is sent only when chosen", () => {
   assert.throws(() => stockFields(material, "correction", "1", "", "Count", conversion), /below active reserved/);
   assert.throws(() => stockFields(material, "addition", "0.0000001", "1", "Add", conversion));
   assert.equal("unit_id" in stockFields(material, "correction", "25", "", "Count"), false);
+});
+
+test("a saved plan unit is restored only at the same active factor", () => {
+  const sheet = { id: "1", material_id: "m", unit_id: "u", unit_name: "sheet", factor: "12.500000", is_active: true, created_at: "" };
+  const entered = { entered_quantity: "1.000000", entered_unit_name: "sheet", factor_used: "12.500000" };
+  assert.equal(restorableConversion([sheet], entered), sheet);
+  assert.equal(restorableConversion([{ ...sheet, factor: "13.000000" }], entered), null);
+  assert.equal(restorableConversion([{ ...sheet, is_active: false }], entered), null);
+  assert.equal(restorableConversion([], entered), null);
 });
