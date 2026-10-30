@@ -482,9 +482,17 @@ Implemented from the Claude Design boards (Customer payments, Customer account, 
 
 ## Staff/Admin overview from the Claude Design board (2026-10-30)
 
-`/staff` and `/admin` follow the Overview (Admin · Worker) board in one column, using the shell's tokens: a four-cell summary strip (ต้องจัดการ from the all-date queue; กำลังผลิต, รอเริ่มงาน and ผลิตเสร็จ filter the job list for the chosen range), a วันนี้ panel with three boxes (เปิดงานใหม่ and ผลิตเสร็จ filter the job list; การแจ้งเตือน opens the inbox) above today's notifications with Bangkok time, ประวัติผลิตเสร็จ, a ต้องจัดการ list with one link per non-empty queue and an all-clear state, and รายการงานผลิต with underline tabs. At 44rem and below the strip has two columns. The ไปทำงานต่อ shortcuts were removed because the sidebar has the same links.
+`/staff` and `/admin` share one layout in the shell's tokens, in this order: toolbar; four-cell summary strip (ต้องจัดการ; กำลังผลิต, รอเริ่มงาน and ผลิตเสร็จ filter the job list); Admin-only business strip; quick links; ต้องจัดการ; a two-column panel grid (one column at 64rem and below); วันนี้; ประวัติผลิตเสร็จ; รายการงานผลิต. ต้องจัดการ sits above วันนี้, unlike the board, so problems are seen first.
 
-Not taken from the board, because the API has no such data: Shift timeline (ประวัติผลิตเสร็จ stays in its place), per-person activity log (notifications stand in, so there are no actors), pieces and machine hours, Stock/Sales/Money digest boxes, overdue payments cell, job assignee, progress and due columns, and My jobs (the queue is shared). Job actions stay on งานผลิต; the page remains read-only.
+- **Both roles:** สถานะงานผลิต (stacked bar with a labelled, clickable legend; 2px gaps, status colors), งานใกล้ถึงกำหนด (open jobs by the customer's requested date, labelled as not shop-confirmed), วัตถุดิบหมด. On Staff the status chart spans both columns.
+- **Admin only:** business strip (ลูกค้าที่มีคำขอ, ยอดออกใบแจ้งหนี้, รับชำระแล้ว, ค้างชำระ), คำขอและใบเสนอราคา by stage (bars link to `/admin/requests?stage=`), การรับชำระ, การตรวจมัดจำและ PO. These reads are mounted only for Admin, so Staff sessions do not request them from the overview.
+- **ต้องจัดการ total** adds the queue counts to the page's alerts: overdue jobs and stock-outs for both roles; evidence to review, payments to review and overdue invoices for Admin. Until every part has loaded, or if one fails, it shows a dash instead of a smaller number.
+
+Known limits: the backend has no minimum-stock field, so the stock alert means zero available on an active material, not "below minimum". `/customers` is Customer-only, so the Admin figure counts distinct customers on requests, not all registered customers. The board's shift timeline, assignees, per-job progress and revenue trend are left out because no endpoint provides them. Totals are limited to what the list reads return (1,000 records), with a notice when incomplete. Evidence counts skip closed requests.
+
+## Admin requests (2026-10-30)
+
+`/admin/requests` uses the Customer quotation list structure and CSS classes (`customer-documents.module.css`) with the shell's tokens mapped onto `--cust-*`: รอคุณตรวจ cards for evidence awaiting review, then one panel with stage tabs (ทั้งหมด plus six stages, counts), search, refresh and a 20-per-page table (คำขอ, งาน, ส่งคำขอเมื่อ, ราคาล่าสุด, สถานะ, ขั้นถัดไป). The whole row and card open the request through a stretched link, so tabs, search and refresh never trigger it; below 48rem the table becomes labelled stacks. `?request=` shows the unchanged `RequestDetail` as a full page with a visible กลับรายการ link, replacing the Admin side panel and the `?view=cards` modal and list/card switch, which are removed because the lead cards and table replace them. Admin permissions are unchanged: read quotations and internal costs, review Deposit/PO evidence. Staff keep `/staff/quotations` as before.
 
 ## Visual direction
 
@@ -940,6 +948,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 | 2026-10-30 | Customer request refinement: sort คำขอผลิต, งานผลิต and ประวัติ by exact request number descending; center the shared empty-state icon/content; move the request number immediately before the description in List; remove the request-card machine icon; improve detail spacing; and separate the Deposit/PO evidence link from the primary ติดตามงานผลิต button | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk against the real local API confirms request order #11→#2, production order #11→#6, centered filtered-empty state and separated detail actions |
 | 2026-10-30 | Customer คำขอผลิต adds URL-backed การ์ด/รายการ layouts, compact essential-only summaries, and removes the redundant customer-profile read | 185 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Customer desktop/narrow with real local API, both layouts, no horizontal overflow or console errors |
 | 2026-10-30 | Admin คำขอและใบเสนอราคา adds URL-backed รายการ/การ์ด views; list keeps the side detail while responsive cards open request detail in an accessible native modal. Staff stays on list/detail regardless of the query | 184 native tests, type check, lint, source audit, DESIGN sync and production build; browser walk Admin desktop/narrow with real local API, Escape/URL close checked, no horizontal overflow or console errors |
+| 2026-10-30 | Staff/Admin overview: role-specific panels from real reads (job status chart, upcoming jobs, stock-outs; Admin business strip, request stages, payments, Deposit/PO review), quick links and combined ต้องจัดการ total. `/admin/requests` rebuilt on the Customer quotation list with whole-row navigation and a full-page detail; Admin list/card switch and modal removed | Type check, lint, native tests, source audit, DESIGN sync, production build; headless Chromium against the real local API at 1440 and 390: Admin and Staff, row navigation, tabs, search, no finance reads for Staff, no horizontal overflow |
 | 2026-10-30 | Customer ใบเสนอราคา and มัดจำและ PO list/detail pages from the Claude Design boards: รอคุณตอบ cards plus one panel with status tabs, search, collapsible filters and table with a next-step column; PO banner and อัปโหลด PO entry; quotation detail with status banner, summary cells, whole-job price, request, terms and attachment cards, revision timeline, sticky decision bar and modal confirm; PO detail with review steps, shop feedback, preview, details and history. On-screen paper removed (print only). `sent` badge is now the info tone. No VAT, no itemised costs, no invented PO number or under-review status | Type check, lint, native tests, source audit, DESIGN sync; headless Chromium against the real local API with new test records: re-quote, revised quote, accept, PO upload, Admin rejection reason, corrected re-upload; 1280 Dark/Light and 390 Light/Dark, blocked-API error, delayed loading, empty state, no horizontal overflow |
 | 2026-10-30 | Staff/Admin งานผลิต, สั่งซื้อวัตถุดิบ (orders), รับเข้าวัตถุดิบ (receiving), and ส่งมอบ (delivery-payment) card & list views: Card view is the default across production, orders, receiving, and delivery-payment with responsive card grid and centered modal dialog popup on selection; list view starts unselected full width and collapses into the same-size 24rem list column beside the detail panel with a back link to deselect; view switcher provides seamless toggle | 192 native tests, type check, lint, source audit, DESIGN sync |
 | 2026-10-30 | Customer payments table with history view, Customer account panels, and one role-aware Settings page (new `/staff/settings`, `/admin/settings`; Admin-only ระบบ section). Unsupported profile, address, password and preference actions are stated as unavailable | Type check, lint, native tests, source audit, DESIGN sync; browser against the real local API as Customer, Staff and Admin: row navigation, sign-out confirm and cancel, Staff redirected from Admin settings, 1440 and 390 widths with no horizontal overflow |
@@ -3049,6 +3058,47 @@ src/features/workspace/workspace.module.css
 .tabs button span { font-size: .75rem; font-variant-numeric: tabular-nums; }
 .dashboard .tabs button:hover:not(:disabled) { color: var(--text); }
 .dashboard .tabs button[aria-pressed="true"] { border-bottom-color: var(--lime); color: var(--text); font-weight: 600; }
+.quickLinks { display: flex; flex-wrap: wrap; gap: .5rem; }
+.dashboard .quickLinks a { display: inline-flex; align-items: center; gap: .375rem; min-height: 2.75rem; padding: 0 .875rem; background: var(--surface); border: 1px solid var(--line); border-radius: .625rem; font-size: .875rem; font-weight: 600; }
+.dashboard .quickLinks a:hover { border-color: var(--lime); text-decoration: none; }
+.insights { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; align-items: stretch; }
+.insights[data-role="staff"] > :first-child { grid-column: 1 / -1; }
+.panelBody { display: grid; gap: .875rem; padding: 1rem 1.25rem; }
+.bar { display: flex; gap: 2px; height: .75rem; }
+.bar i { min-width: 4px; flex-basis: 0; border-radius: 2px; }
+.bar i:first-child { border-radius: 4px 2px 2px 4px; }
+.bar i:last-child { border-radius: 2px 4px 4px 2px; }
+.bar i:only-child { border-radius: 4px; }
+:is(.bar, .barLegend) i[data-status="queued"] { background: var(--warning); }
+:is(.bar, .barLegend) i[data-status="in_progress"] { background: var(--cyan); }
+:is(.bar, .barLegend) i[data-status="completed"] { background: var(--lime); }
+:is(.bar, .barLegend) i[data-status="cancelled"] { background: var(--danger); }
+:is(.bar, .facts) i[data-pay="paid"] { background: var(--success); }
+:is(.bar, .facts) i[data-pay="balance"] { background: var(--warning); }
+.barLegend { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: .5rem; }
+.dashboard .barLegend button { display: flex; align-items: center; gap: .5rem; text-align: left; }
+.barLegend i, .facts i { flex: none; display: inline-block; width: .625rem; height: .625rem; border-radius: 2px; }
+.barLegend strong { margin-left: auto; font-variant-numeric: tabular-nums; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: .75rem; margin: 0; }
+.facts dt { display: flex; align-items: center; gap: .375rem; color: var(--muted); font-size: .8125rem; }
+.facts dd { margin: .125rem 0 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.rows, .stages { display: grid; list-style: none; margin: 0; padding: 0; }
+.rows li + li { border-top: 1px solid var(--line-soft); }
+.dashboard .rows a { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .25rem .75rem; min-height: 2.75rem; padding: .5rem 0; }
+.rows a > span:first-child { flex: 1 1 12rem; }
+.rows strong { display: block; font-size: .875rem; font-weight: 600; overflow-wrap: anywhere; }
+.rows small { color: var(--muted); font-size: .8125rem; }
+.dashboard .stages a { display: grid; grid-template-columns: minmax(7.5rem, 10rem) minmax(0, 1fr) 2rem; gap: .75rem; align-items: center; min-height: 2.75rem; font-size: .875rem; }
+.stageTrack { height: .5rem; border-radius: 4px; background: var(--surface-2); }
+.stageTrack i { display: block; height: 100%; border-radius: 4px; background: var(--cyan); }
+.stageTrack i[data-stage="review"] { background: var(--warning); }
+.stages strong { text-align: right; font-variant-numeric: tabular-nums; }
+.mini { width: 100%; border-collapse: collapse; font-size: .875rem; }
+.mini th, .mini td { padding: .5rem 0; text-align: right; font-weight: 400; font-variant-numeric: tabular-nums; border-top: 1px solid var(--line-soft); }
+.mini thead th { border-top: 0; color: var(--muted); font-size: .8125rem; }
+.mini th:first-child { text-align: left; }
+.mini td[data-attention] { color: var(--warning); font-weight: 650; }
+@media (max-width: 64rem) { .insights { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 44rem) {
   .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dashboard .strip > :nth-child(3) { border-left: 0; }
@@ -3376,6 +3426,7 @@ src/features/workspace/workspace.module.css
 /* Detail */
 .detailCard { display: grid; gap: 20px; padding: clamp(1rem, 2.2vw, 1.75rem); border: 1px solid var(--line); border-radius: 16px; background: var(--surface); min-width: 0; }
 :global(.live-workspace) .back { display: none; align-items: center; gap: 6px; min-height: 44px; width: fit-content; color: var(--lime); font-weight: 650; text-decoration: none; }
+:global(.live-workspace) .fullPage .back { display: inline-flex; margin-bottom: 8px; }
 .back svg { transform: rotate(180deg); }
 .detailHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .detailHeader h2 { margin: 0; font-size: clamp(1.25rem, 2vw, 1.5rem); line-height: 1.35; overflow-wrap: anywhere; }
@@ -3439,27 +3490,13 @@ src/features/workspace/workspace.module.css
 
 ```css
 /* คำขอและใบเสนอราคา (UC1–UC4) page-specific rules; the list/detail layout is staff-ui/staff-layout.module.css. */
-.viewSwitch { display: inline-flex; flex: 0 0 auto; gap: 4px; padding: 4px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
-:global(.live-workspace) .viewSwitch a { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 7px 13px; border-radius: 8px; color: var(--muted); font-size: 0.875rem; font-weight: 650; text-decoration: none; }
-:global(.live-workspace) .viewSwitch a:hover { color: var(--text); text-decoration: none; }
-:global(.live-workspace) .viewSwitch a[aria-current="page"] { background: color-mix(in srgb, var(--lime) 14%, var(--surface-2)); color: var(--text); }
-:global(.live-workspace) .viewSwitch a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
-
-.cardWorkspace { min-width: 0; }
-.cardGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: 16px; min-width: 0; }
-.cardGrid > :not(a) { grid-column: 1 / -1; }
-:global(.live-workspace) .gridCard { align-content: start; min-height: 13.5rem; padding: 20px; }
-
-.requestModal { width: min(68rem, calc(100vw - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); margin: auto; padding: 0; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); color: var(--text); box-shadow: 0 24px 80px rgba(0, 0, 0, .42); overflow: hidden; }
-.requestModal::backdrop { background: rgba(4, 5, 5, .72); backdrop-filter: blur(5px); }
-.modalFrame { display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: calc(100dvh - 2rem); }
-.modalToolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 60px; padding: 10px 16px 10px 20px; border-bottom: 1px solid var(--line); background: var(--surface); }
-.modalToolbar span { font-weight: 700; }
-:global(.live-workspace) .modalToolbar a { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border: 1px solid var(--line); border-radius: 10px; color: var(--text); text-decoration: none; }
-:global(.live-workspace) .modalToolbar a:hover { border-color: var(--lime); text-decoration: none; }
-:global(.live-workspace) .modalToolbar a:focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
-.modalBody { padding: 20px; overflow: auto; overscroll-behavior: contain; }
-.modalBody > article { border: 0; padding: 0; background: transparent; }
+/* /admin/requests reuses the Customer quotation list classes with the shell's tokens. */
+.adminScope { --cust-bg: var(--bg); --cust-surface: var(--surface); --cust-surface-2: var(--surface-2); --cust-ink: var(--text); --cust-muted: var(--muted); --cust-line: var(--line); --cust-accent: var(--lime-soft); --cust-tint: color-mix(in srgb, var(--lime) 12%, var(--surface)); --cust-green: var(--success); --cust-action: var(--lime); --cust-focus: var(--lime-soft); display: grid; gap: 20px; }
+.adminScope tbody tr:hover { background: var(--surface-2); }
+.adminScope tbody tr:focus-within { outline: 2px solid var(--lime-soft); outline-offset: -2px; }
+.adminScope tbody a:focus-visible { outline: 0; }
+:global(.live-workspace) .adminPrimary { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; margin-top: auto; padding: 0 16px; border-radius: 10px; background: var(--lime); color: #121514; font-weight: 650; text-decoration: none; }
+.adminPrimary::after { content: ""; position: absolute; inset: 0; }
 
 .files { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .files li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; min-width: 0; }
@@ -3490,11 +3527,6 @@ src/features/workspace/workspace.module.css
 .check { align-items: flex-start; line-height: 1.5; }
 
 @media (max-width: 40rem) {
-  .viewSwitch { width: 100%; }
-  :global(.live-workspace) .viewSwitch a { flex: 1; }
-  .requestModal { width: 100vw; height: 100dvh; max-height: 100dvh; border: 0; border-radius: 0; }
-  .modalFrame { height: 100dvh; max-height: 100dvh; }
-  .modalBody { padding: 16px; }
   .moneyGrid { grid-template-columns: minmax(0, 1fr); }
   .choices label { flex: 1; justify-content: center; }
 }

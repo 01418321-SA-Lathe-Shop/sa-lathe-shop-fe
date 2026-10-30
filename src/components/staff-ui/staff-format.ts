@@ -41,7 +41,7 @@ function bangkokDaysUntil(value: string | null | undefined, now: number | null):
   return bangkokDay(Date.parse(value)) - bangkokDay(now);
 }
 
-type Countdown = { text: string; tone: "danger" | "today" | "quiet" };
+export type Countdown = { text: string; tone: "danger" | "today" | "quiet" };
 
 /** Day distance worded for a customer-requested date (not a promise by the shop). */
 export function requestedDayCountdown(value: string | null | undefined, now: number | null): Countdown | null {

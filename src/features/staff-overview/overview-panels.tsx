@@ -3,7 +3,7 @@ import { useId, useState } from "react";
 import { Icon } from "../../components/appearance/icons";
 import type { Notification } from "../../lib/api/backend-api";
 import { staffNotice, staffNoticeHref } from "../workspace/workspace-notifications";
-import { bangkokTime, countText, dayLabel, queueTotal, STATUS_LABELS, type Count, type Filter, type JobStatus, type OverviewReport } from "./overview-domain";
+import { bangkokTime, countText, dayLabel, exactCount, queueTotal, STATUS_LABELS, type Count, type Filter, type JobStatus, type OverviewReport } from "./overview-domain";
 import styles from "./overview.module.css";
 
 export function ReportError({ error, retry }: { error?: string; retry: () => void }) {
@@ -18,10 +18,16 @@ export function StatusBadge({ status }: { status: JobStatus }) {
 }
 
 const STRIP_STATUSES: JobStatus[] = ["in_progress", "queued", "completed"];
-export function SummaryStrip({ data, loading, selected, choose }: { data?: OverviewReport; loading: boolean; selected: JobStatus | ""; choose: (status: JobStatus) => void }) {
+export type ActionTask = { label: string; hint: string; action: string; value?: Count; href: string };
+/** Queue backlog plus the page's own alerts; a read still missing gives NaN (a dash), never a smaller total. */
+export function actionTotal(queue: OverviewReport["queue"], tasks: ActionTask[]): Count {
+  try { return tasks.reduce((sum, task) => sum + exactCount(task.value ?? NaN), exactCount(queueTotal(queue))).toString(); } catch { return NaN; }
+}
+
+export function SummaryStrip({ data, loading, total, selected, choose }: { data?: OverviewReport; loading: boolean; total?: Count; selected: JobStatus | ""; choose: (status: JobStatus) => void }) {
   const empty = loading ? "…" : "—";
   return <section className={styles.strip} aria-label="สรุปงานในช่วงที่เลือก" aria-busy={loading}>
-    <div data-tone="action"><span>ต้องจัดการ</span><strong>{data ? countText(queueTotal(data.queue)) : empty}</strong></div>
+    <div data-tone="action"><span>ต้องจัดการ</span><strong>{total !== undefined ? countText(total) : empty}</strong></div>
     {STRIP_STATUSES.map(status => <button key={status} className={styles.cell} data-tone={status} aria-pressed={selected === status} disabled={!data} onClick={() => choose(status)}><span>{STATUS_LABELS[status]}</span><strong>{data ? countText(data.counts[status]) : empty}</strong></button>)}
   </section>;
 }
@@ -48,16 +54,17 @@ export function TodayDigest({ admin, inbox, report, notices, choose }: { admin: 
   </section>;
 }
 
-export function PriorityQueue({ data, admin }: { data?: OverviewReport; admin: boolean }) {
+export function PriorityQueue({ data, admin, extra }: { data?: OverviewReport; admin: boolean; extra: ActionTask[] }) {
   const id = useId();
   const root = admin ? "/admin" : "/staff";
-  const tasks = [
+  const tasks: ActionTask[] = [
     { label: "คำขอรอประเมิน", hint: admin ? "ติดตามคิวคำขอและใบเสนอราคา" : "เปิดคิวเพื่อประเมินราคา", action: admin ? "ดูคำขอ" : "ประเมินราคา", value: data?.queue.pending_requests, href: `${root}/${admin ? "requests" : "quotations"}` },
     { label: "งานรอเริ่มผลิต", hint: "ตรวจแผนวัตถุดิบก่อนเริ่มงาน", action: "เปิดงานผลิต", value: data?.queue.queued_jobs, href: `${root}/production` },
     { label: "วัตถุดิบรอรับเข้า", hint: "คำสั่งซื้อที่ Supplier ตอบรับแล้ว", action: "รับเข้าวัตถุดิบ", value: data?.queue.receiving_orders, href: `${root}/receiving` },
-  ].filter(task => !data || countText(task.value!) !== "0");
+    ...extra,
+  ].filter(task => task.value === undefined || countText(task.value) !== "0");
   return <section className={styles.panelFlush} aria-labelledby={id}>
-    <div className={styles.flushHead}><div className={styles.titleCount}><h2 id={id}>ต้องจัดการ</h2><span>{data ? countText(queueTotal(data.queue)) : "—"}</span></div><span className={styles.muted}>คิวปัจจุบันทั้งหมด · ไม่จำกัดช่วงเวลา</span></div>
+    <div className={styles.flushHead}><div className={styles.titleCount}><h2 id={id}>ต้องจัดการ</h2><span>{data ? countText(actionTotal(data.queue, extra)) : "—"}</span></div><span className={styles.muted}>คิวปัจจุบันทั้งหมด · ไม่จำกัดช่วงเวลา</span></div>
     {tasks.length ? <ul className={styles.todo}>{tasks.map(task => <li key={task.label}><i aria-hidden="true" /><div><strong>{task.label}</strong><small>{task.hint}</small></div><span>{task.value === undefined ? "—" : `${countText(task.value)} รายการ`}</span><Link href={task.href}>{task.action}<Icon name="arrow" size={14} /></Link></li>)}</ul>
       : <p className={styles.caughtUp}>ไม่มีงานค้าง ตอนนี้ไม่มีอะไรต้องจัดการ</p>}
   </section>;
