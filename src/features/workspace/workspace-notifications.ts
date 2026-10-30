@@ -15,3 +15,6 @@ export function staffNotice(title: string): { text: string; reference?: string }
   const known = TITLES.find(([pattern]) => pattern.test(title.trim()));
   return { text: known ? known[1] : "มีความคืบหน้าของคำขอผลิต", reference };
 }
+
+// Admin reviews requests on คำขอและใบเสนอราคา (/requests); Staff on /quotations.
+export const staffNoticeHref = (admin: boolean, requestId: string) => `${admin ? "/admin/requests" : "/staff/quotations"}?request=${requestId}`;

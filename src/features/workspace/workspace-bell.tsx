@@ -10,8 +10,8 @@ import { relativeTH, unreadCount } from "../customer/customer-domain";
 import { useCollection, useNow } from "../customer/customer-hooks";
 import { markNotifications } from "../customer/customer-notification-domain";
 import type { Role } from "./workspace-access";
-import { ROLE_ROOTS, workspacePath } from "./workspace-routes";
-import { staffNotice } from "./workspace-notifications";
+import { workspacePath } from "./workspace-routes";
+import { staffNotice, staffNoticeHref } from "./workspace-notifications";
 
 // Same bell pattern as the Customer navbar: full unread count, a dropdown of the
 // newest items, and a link to the full inbox. Items open the related request.
@@ -27,7 +27,6 @@ export function WorkspaceBell({ api, role }: { api: BackendApi; role: Role }) {
   const items = resource.data?.items ?? [];
   const unread = items.filter((item) => !item.read_at && !read.has(item.id));
   const badge = resource.data && !resource.error ? unreadCount(unread, resource.data.complete) : "";
-  const requestPage = `${ROLE_ROOTS[role]}/${role === "Admin" ? "requests" : "quotations"}`;
   function close() { dialog.current?.close(); setOpen(false); bell.current?.focus(); }
   async function mark(ids: string[], signal: AbortSignal) {
     await markNotifications(api, ids, signal, (id) => setRead((old) => new Set([...old, id])), () => window.dispatchEvent(new Event("lathe-inbox-read")));
@@ -48,7 +47,7 @@ export function WorkspaceBell({ api, role }: { api: BackendApi; role: Role }) {
         {resource.data && !items.length && <p className="workspace-bell-note">ยังไม่มีการแจ้งเตือน</p>}
         <ol>{items.slice(0, 8).map((item) => {
           const isRead = Boolean(item.read_at) || read.has(item.id); const notice = staffNotice(item.title);
-          const href = `${requestPage}?request=${item.request_id}`;
+          const href = staffNoticeHref(role === "Admin", item.request_id);
           return <li key={item.id} data-unread={isRead ? undefined : "true"}>
             <Link href={href} onClick={(event) => { if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return; event.preventDefault(); void action.run(async (signal) => { if (!isRead) await mark([item.id], signal); }, "").then(() => { close(); router.push(href); }); }}>
               <strong>{notice.text}</strong>
