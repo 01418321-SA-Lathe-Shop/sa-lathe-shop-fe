@@ -6,12 +6,11 @@ import { useCommand, useRetryableWrite } from "../../hooks/backend-hooks";
 import type { ReadyFile } from "../../components/ui/backend-ui";
 import { bahtTH, dateTimeTH } from "../../components/staff-ui/staff-format";
 import { Button, ConfirmDialog, ErrorText, Field, RetryPanel, ToneBadge } from "../../components/staff-ui/staff-ui";
+import { ProofUpload } from "../../components/staff-ui/staff-upload";
 import { creditDays, settlementPayload, type ReceivingState } from "./receiving-domain";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 
 const METHOD = { bank: "โอนผ่านธนาคาร", cash: "เงินสด" } as const;
-const MAX_BYTES = 100 * 1024 * 1024;
-const FILES = ".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png";
 
 // UC7 supplier payment (Admin only): credit days are set once, counted from full
 // good receipt; one full settlement records an outside payment, it moves no money.
@@ -63,7 +62,7 @@ function SettleForm({ api, state, onSaved }: { api: BackendApi; state: Receiving
     <fieldset disabled={write.frozen}>
       <Field label="วิธีจ่าย"><select value={method} onChange={(event) => { setMethod(event.target.value as "bank" | "cash"); setError(""); }}><option value="bank">โอนผ่านธนาคาร (ต้องแนบหลักฐาน)</option><option value="cash">เงินสด (แนบหลักฐานหรือไม่ก็ได้)</option></select></Field>
       <Field label="วันเวลาที่จ่าย" hint="เวลาประเทศไทย"><input type="datetime-local" value={paidAt} onChange={(event) => { setPaidAt(event.target.value); setError(""); }} /></Field>
-      <ProofUpload api={api} orderId={state.order_id} label={method === "bank" ? "หลักฐานการโอน" : "ใบเสร็จหรือรูป (ไม่บังคับ)"} ready={proof} onReady={(file) => { setProof(file); setError(""); }} />
+      <ProofUpload api={api} intentPath={`/material-orders/${state.order_id}/evidence/uploads`} completePath={(id) => `/order-evidence/${id}/complete`} label={method === "bank" ? "หลักฐานการโอน" : "ใบเสร็จหรือรูป (ไม่บังคับ)"} ready={proof} onReady={(file) => { setProof(file); setError(""); }} />
     </fieldset>
     <div className={layout.submitBar}><span>จ่ายเต็มจำนวน {bahtTH(finance.total_amount)} ครั้งเดียว (ไม่มี VAT)</span><button type="button" className={layout.submit} disabled={write.frozen || !paidAt} onClick={() => { try { build(); setConfirming(true); } catch (problem) { setError((problem as Error).message); } }}>บันทึกการจ่าย</button></div>
     {error && <p className={layout.problem} role="alert">{error}</p>}
@@ -72,21 +71,5 @@ function SettleForm({ api, state, onSaved }: { api: BackendApi; state: Receiving
       setConfirming(false);
       write.submit(`/receiving/orders/${state.order_id}/settlement`, "POST", build, "");
     }}><p>{state.order_no} · {state.supplier_name} · {bahtTH(finance.total_amount)} · {METHOD[method]}</p><p>มีการจ่ายได้ครั้งเดียวต่อใบสั่งซื้อ ระบบบันทึกการจ่ายเท่านั้น ไม่ได้โอนเงิน</p></ConfirmDialog>
-  </div>;
-}
-
-// Each attempt is a fresh private upload; a failure offers "อัปโหลดอีกครั้ง".
-function ProofUpload({ api, orderId, label, ready, onReady }: { api: BackendApi; orderId: string; label: string; ready: ReadyFile | null; onReady: (file: ReadyFile | null) => void }) {
-  const command = useCommand(); const [file, setFile] = useState<File | null>(null); const [failed, setFailed] = useState(false); const [tooBig, setTooBig] = useState(false);
-  if (ready) return <div className={layout.submitBar}><span>แนบแล้ว: {ready.file_name}</span><Button variant="text" onClick={() => { onReady(null); setFile(null); }}>เลือกไฟล์อื่น</Button></div>;
-  return <div className={layout.form}>
-    <Field label={label} hint="PDF, Word, Excel, TXT, JPEG หรือ PNG ไม่เกิน 100 MB เป็นไฟล์ส่วนตัว"><input type="file" accept={FILES} disabled={command.busy} onChange={(event) => { const next = event.target.files?.[0] ?? null; setFailed(false); setTooBig(Boolean(next && next.size > MAX_BYTES)); setFile(next && next.size <= MAX_BYTES ? next : null); }} /></Field>
-    {tooBig && <p className={layout.problem} role="alert">ไฟล์ใหญ่เกิน 100 MB เลือกไฟล์อื่น</p>}
-    <div className={layout.actions}><Button disabled={command.busy || !file} onClick={() => { if (!file) return; void command.run(async (signal) => {
-      try { onReady(await api.privateUpload<ReadyFile>(`/material-orders/${orderId}/evidence/uploads`, (id) => `/order-evidence/${id}/complete`, file, signal)); setFailed(false); }
-      catch (error) { if (!signal.aborted) setFailed(true); throw error; }
-    }, ""); }}>{command.busy ? "กำลังอัปโหลด…" : failed ? "อัปโหลดอีกครั้ง" : "อัปโหลดหลักฐาน"}</Button></div>
-    {failed && <p className={layout.muted}>อัปโหลดอีกครั้งจะเริ่มอัปโหลดใหม่ ไม่ใช้รายการที่ล้มเหลว</p>}
-    <ErrorText error={command.error} />
   </div>;
 }
