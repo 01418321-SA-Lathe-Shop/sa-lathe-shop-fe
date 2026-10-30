@@ -199,6 +199,30 @@ Opening a material (`?material=`) shows the new shared side panel (`Drawer`, nat
 
 Browser walk (Chrome, real local API, writes intercepted): `pim.admin` at 1280 Dark, 390 Light, 360 Dark, 768 Light and 1920 Dark; `anan.staff` at 1280 Dark and 390 Light. No horizontal page scroll and no console errors. The intercepted stock addition, unit creation and material PATCH bodies matched the previous payloads, and toasts cleared after 5 s. Not exercised against the live API: actual saves, conflicts, and the retry path. Known limit: ข้อมูลหลัก is not a separate sidebar item; it is reached through the view tab.
 
+### Admin จัดการพนักงาน — 2026-10-30
+
+Step 7 of the approved Staff/Admin redesign (`/admin/workers`, Admin only; no new route).
+
+**List.** Staff accounts load 100 per call, up to 1,000, with the cap notice. Search matches name, username, employee number or position within the loaded list, because the API has no search parameter. Each row shows the name, the username · employee number · position, the contacts (or “ยังไม่มีข้อมูลติดต่อ (บัญชีเก่า)” for old accounts), a ใช้งานอยู่/ปิดใช้งาน badge, and แก้ไข / เปลี่ยนรหัสผ่าน. On phones the buttons move under the text.
+
+**เพิ่มพนักงาน and แก้ไข** open the side panel as one sectioned form:
+- ข้อมูล: name, username, employee number, optional position.
+- ติดต่อ: email and phone, with a warning when an old account has no contacts yet.
+- รหัสผ่านเริ่มต้น: create only, password plus confirmation.
+- Thai field errors appear after the first save attempt. Password fields are read once and cleared on every save, including on failure.
+- A changed username (compared case-insensitively, since the server stores lowercase) opens a checklist confirmation warning that the person is logged out everywhere.
+- Edit adds a สถานะบัญชี section: ปิดใช้งานบัญชี / เปิดใช้งานบัญชี through a confirmation. Deactivation logs the person out everywhere; reactivation does not restore sessions.
+
+**เปลี่ยนรหัสผ่าน** opens its own small side panel: new password plus confirmation, the same 12-character / 128-byte rule, and a warning that the person is logged out everywhere.
+
+**Unchanged rules:** the role is always Staff (no promotion to Admin) and nothing is deleted. Writes are plain POST/PATCH without retry keys, as before, so after an unclear failure the panel tells Admin to refresh and check before trying again.
+
+**Browser walk** (Chrome, `pim.admin`), real local API with writes intercepted (500), at 1280 Dark and 390 Light:
+- Search, field and password errors, password clearing, the username-change and deactivate confirmations, and the error path all work.
+- The intercepted create POST, profile PATCH, `is_active` PATCH and password PATCH bodies matched the previous payload shapes.
+- No horizontal page scroll and no console errors.
+- Not exercised: saves that really reach the backend, and duplicate-username responses.
+
 ### Staff/Admin ส่งมอบและใบแจ้งหนี้ / ส่งมอบและรับชำระ — 2026-10-30
 
 Step 6 of the approved Staff/Admin redesign (`/staff/delivery-payment` and `/admin/delivery-payment`; no new route). Jobs load 100 per call, up to 1,000, with the cap notice. The list already carries full fulfillment documents (payments for Admin only), so it needs no extra reads. Request labels “คำขอ #N · description” come from `/requests`.
@@ -866,6 +890,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 | Date | Change | Verification |
 | --- | --- | --- |
 | 2026-10-30 | Fix: งานผลิต usage form no longer contains the extra-material search form; pressing ค้นหา in เพิ่มวัตถุดิบนอกแผน could also trigger บันทึกการใช้วัตถุดิบ. The usage form saves only from its button, and the shared `SearchForm` stops its submit event from reaching an outer form | 175 native tests, type check, lint, source audit, build; not re-walked in the browser (backend down) |
+| 2026-10-30 | Staff/Admin redesign Step 7: จัดการพนักงาน with searchable list, side-panel create/edit in sections ข้อมูล / ติดต่อ / รหัสผ่านเริ่มต้น, username-change and account-status confirmations, separate password side panel; Thai field rules | 183 native tests (3 new), type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / 390 Light against the real local API, writes intercepted |
 | 2026-10-30 | Staff/Admin redesign Step 6: ส่งมอบและใบแจ้งหนี้ / ส่งมอบและรับชำระ with seven role-filtered tabs from the action rules, search and cards with request labels, large balance panel, per-role action cards (credit days, invoice, shipment), Admin payment cards with proof download, review and a cash form, delivery/rework/event timelines; proof upload shared in `staff-ui`; Thai delivery validation; English `RequestLabel` removed | 180 native tests (tab and amount tests new), type check, lint, source audit, DESIGN sync, build; Chrome walk against the real local API (writes intercepted) Admin 1280 Dark, Staff 390/360 Light, plus a stubbed Staff 768 walk for invoice and shipment |
 | 2026-10-30 | Staff/Admin redesign Step 5: รับเข้าวัตถุดิบ with status tabs plus มีของเสียหาย and Admin-only ค้างจ่ายผู้ขาย (counted from per-order details, first 100), search, cards, receipt form with remaining quantities and “รับครบตามที่เหลือ” per line and for all lines, claim cards, receipt timeline, Admin จ่ายผู้ขาย section with Thai proof upload; Thai receiving validation | 178 native tests (tab, remaining and row-check tests new), type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 1280 Dark / 390 Light and Staff 768 Dark against a test-only API stub (backend down), writes intercepted |
 | 2026-10-30 | Staff/Admin redesign Step 4: สั่งซื้อวัตถุดิบ with ใบสั่งซื้อ/ผู้ขาย view tabs, five status tabs with counts and search, one action card per order state with checklist confirmations, new-order step form in the side panel with `MaterialPicker` and exact live total (English `MaterialSearch` removed), supplier list with side-panel add/edit, Thai validation; view-tab, toggle and note styles shared in the staff layout | 175 native tests (order-tab test new), type check, lint, source audit, DESIGN sync, build; Chrome walk Admin 360/390/768/1280/1920 both themes against a test-only API stub (backend down), writes intercepted |
@@ -3260,6 +3285,27 @@ src/features/workspace/workspace.module.css
 .payments li { display: grid; gap: 8px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; overflow-wrap: anywhere; }
 .payments small { color: var(--muted); font-size: 0.875rem; }
 .paymentTop { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-variant-numeric: tabular-nums; }
+```
+
+### A17. Admin Staff accounts — src/features/workers/workers.module.css
+
+```css
+/* จัดการพนักงาน (Admin) page-specific rules; list/form pieces come from staff-ui/staff-layout.module.css. */
+
+.workers { display: grid; margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.workers li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.workers li:last-child { border-bottom: 0; }
+.workers li > span:first-child { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.workers small { color: var(--muted); font-size: 0.875rem; }
+
+/* Side-panel form sections: ข้อมูล / ติดต่อ / รหัสผ่านเริ่มต้น / สถานะบัญชี */
+.section { display: grid; gap: 12px; min-width: 0; margin: 0; padding: 0 0 16px; border: 0; border-bottom: 1px solid var(--line); }
+.section > legend, .section > h3 { padding: 0 0 4px; margin: 0; font-size: 1.0625rem; font-weight: 650; }
+
+@media (max-width: 40rem) {
+  .workers li { grid-template-columns: minmax(0, 1fr) auto; }
+  .workers li > :last-child { grid-column: 1 / -1; }
+}
 ```
 
 ### B. Font loading and root layout — app/layout.tsx

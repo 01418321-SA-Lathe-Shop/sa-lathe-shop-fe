@@ -1,0 +1,16 @@
+/* จัดการพนักงาน (Admin) page-specific rules; list/form pieces come from staff-ui/staff-layout.module.css. */
+
+.workers { display: grid; margin: 0; padding: 0; list-style: none; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+.workers li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.workers li:last-child { border-bottom: 0; }
+.workers li > span:first-child { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.workers small { color: var(--muted); font-size: 0.875rem; }
+
+/* Side-panel form sections: ข้อมูล / ติดต่อ / รหัสผ่านเริ่มต้น / สถานะบัญชี */
+.section { display: grid; gap: 12px; min-width: 0; margin: 0; padding: 0 0 16px; border: 0; border-bottom: 1px solid var(--line); }
+.section > legend, .section > h3 { padding: 0 0 4px; margin: 0; font-size: 1.0625rem; font-weight: 650; }
+
+@media (max-width: 40rem) {
+  .workers li { grid-template-columns: minmax(0, 1fr) auto; }
+  .workers li > :last-child { grid-column: 1 / -1; }
+}
