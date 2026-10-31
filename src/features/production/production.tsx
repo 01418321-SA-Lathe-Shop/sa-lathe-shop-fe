@@ -198,9 +198,8 @@ function JobCard({ job, request, requestLoading, readiness, now, worker, selecte
 
   if (compact) {
     return <Link id={`production-card-${job.job_id}`} href={href} scroll={false} className={`${layout.card} ${styles.compactCard}`} aria-current={selected ? "true" : undefined} aria-label={`${request ? `คำขอ #${request.no_request} · ` : ""}${request?.description ?? "รายละเอียดงานยังไม่พร้อม"}`}>
-      <span className={layout.cardTop}><strong>{request ? `คำขอ #${request.no_request}` : requestLoading ? "กำลังโหลดคำขอ…" : "คำขอผลิต"}</strong></span>
+      <span className={layout.cardTop}><strong>{request ? `คำขอ #${request.no_request}` : requestLoading ? "กำลังโหลดคำขอ…" : "คำขอผลิต"}</strong><StatusBadge map={JOB_STATUS} value={job.status} /></span>
       <span className={layout.cardTitle}>{request?.description ?? (requestLoading ? "กำลังโหลดชื่องาน…" : "รายละเอียดงานยังไม่พร้อม")}</span>
-      <span className={layout.cardMeta}>{request ? `${request.qty} ชิ้น` : ""}</span>
     </Link>;
   }
 
@@ -208,17 +207,17 @@ function JobCard({ job, request, requestLoading, readiness, now, worker, selecte
     <div className={row ? styles.rowMain : undefined}>
       <span className={layout.cardTop}><strong>{request ? `คำขอ #${request.no_request}` : requestLoading ? "กำลังโหลดคำขอ…" : "คำขอผลิต"}</strong>{!row && <StatusBadge map={JOB_STATUS} value={job.status} />}</span>
       <span className={layout.cardTitle}>{request?.description ?? "รายละเอียดงานยังไม่พร้อม"}</span>
-      <span className={layout.cardMeta}>{request ? `${request.qty} ชิ้น` : ""}{Number(job.cycle) > 1 ? `${request ? " · " : ""}รอบแก้ไขที่ ${Number(job.cycle) - 1} (แก้ไขฟรี)` : ""}</span>
+      {row && <span className={layout.cardMeta}>{request ? `${request.qty} ชิ้น` : ""}{Number(job.cycle) > 1 ? `${request ? " · " : ""}รอบแก้ไขที่ ${Number(job.cycle) - 1} (แก้ไขฟรี)` : ""}</span>}
     </div>
     {row && <div className={styles.rowStatus}>
       <StatusBadge map={JOB_STATUS} value={job.status} />
       {job.status === "queued" && <span className={styles.readiness} data-state={readiness === null ? "error" : readiness?.state}>{readinessText(readiness)}</span>}
     </div>}
     <div className={row ? styles.rowMeta : undefined}>
-      {open && <span className={layout.cardMeta}>{request?.deadline ? <>ลูกค้าต้องการ {dateTH(request.deadline)}{countdown && <ToneBadge tone={countdown.tone}>{countdown.text}</ToneBadge>}</> : request ? "ลูกค้าไม่ได้ระบุวันที่ต้องการ" : ""}</span>}
+      {row && open && <span className={layout.cardMeta}>{request?.deadline ? <>ลูกค้าต้องการ {dateTH(request.deadline)}{countdown && <ToneBadge tone={countdown.tone}>{countdown.text}</ToneBadge>}</> : request ? "ลูกค้าไม่ได้ระบุวันที่ต้องการ" : ""}</span>}
       {!row && job.status === "queued" && <span className={styles.readiness} data-state={readiness === null ? "error" : readiness?.state}>{readinessText(readiness)}</span>}
-      {job.status === "in_progress" && <span className={layout.cardMeta}>เริ่มผลิต {dateTimeTH(job.started_at)}</span>}
-      {job.status === "completed" && <span className={layout.cardMeta}>ผลิตเสร็จ {dateTimeTH(job.completed_at)}</span>}
+      {row && job.status === "in_progress" && <span className={layout.cardMeta}>เริ่มผลิต {dateTimeTH(job.started_at)}</span>}
+      {row && job.status === "completed" && <span className={layout.cardMeta}>ผลิตเสร็จ {dateTimeTH(job.completed_at)}</span>}
     </div>
     {row && <span className={layout.cardNext}>{next} <Icon name="arrow" size={14} /></span>}
   </Link>;

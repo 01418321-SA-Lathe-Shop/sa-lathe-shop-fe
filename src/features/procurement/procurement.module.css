@@ -84,7 +84,13 @@
 .fullListWorkspace { min-width: 0; }
 .fullList { display: grid; gap: 10px; min-width: 0; }
 :global(.live-workspace) .rowCard { display: grid; grid-template-columns: minmax(14rem, 2fr) 12rem minmax(13rem, 1.4fr) auto; align-items: center; gap: 12px 24px; min-height: 0; padding: 16px 20px; }
+.compactCard { min-height: 7rem; align-content: center; padding-block: 14px; }
+.compactCard > div { min-width: 0; }
+:global(.live-workspace) .compactCard span, :global(.live-workspace) .compactCard strong { font-family: inherit; font-size: 0.9375rem; }
+:global(.live-workspace) .compactCard > div > span:nth-child(2) { -webkit-line-clamp: 1; }
 .rowMain { display: grid; gap: 4px; min-width: 0; }
+.orderNumber { display: block; flex: 1 1 0; min-width: 0; max-width: 100%; overflow: hidden; overflow-wrap: normal; text-overflow: ellipsis; white-space: nowrap; }
+.orderNumber + * { flex-shrink: 0; }
 .rowStatus { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 6px; min-width: 0; }
 .rowMeta { display: grid; gap: 4px; min-width: 0; }
 :global(.live-workspace) .rowCard > :global(.cardNext) { margin-top: 0; justify-self: end; white-space: nowrap; }

@@ -163,17 +163,17 @@ function OrderCard({ order, tab, selected, href, grid = false, row = false }: { 
     </Link>;
   }
 
-  return <Link id={`order-card-${order.id}`} href={href} scroll={false} className={`${layout.card} ${row ? styles.rowCard : ""}`} aria-current={selected ? "true" : undefined}>
+  return <Link id={`order-card-${order.id}`} href={href} scroll={false} className={`${layout.card} ${row ? styles.rowCard : styles.compactCard}`} aria-current={selected ? "true" : undefined}>
     <div className={row ? styles.rowMain : undefined}>
-      <span className={layout.cardTop}><strong>{order.order_no}</strong>{!row && <StatusBadge map={ORDER_STATE} value={tab} />}</span>
+      <span className={layout.cardTop}><strong className={!row ? styles.orderNumber : undefined}>{order.order_no}</strong>{!row && <StatusBadge map={ORDER_STATE} value={tab} />}</span>
       <span className={layout.cardTitle}>{order.supplier.name}</span>
-      <span className={layout.cardMeta}>{bahtTH(order.total_amount)} · วัตถุดิบ {lines} รายการ</span>
+      <span className={layout.cardMeta}>{bahtTH(order.total_amount)}{row ? ` · วัตถุดิบ ${lines} รายการ` : ""}</span>
     </div>
     {row && <div className={styles.rowStatus}>
       <StatusBadge map={ORDER_STATE} value={tab} />
     </div>}
     <div className={row ? styles.rowMeta : undefined}>
-      <span className={layout.cardMeta}>{dateLabel}</span>
+      {row && <span className={layout.cardMeta}>{dateLabel}</span>}
     </div>
     {row && <span className={layout.cardNext} data-quiet={tab === "pending" ? undefined : ""}>{NEXT[tab]} <Icon name="arrow" size={14} /></span>}
   </Link>;

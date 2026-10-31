@@ -32,7 +32,7 @@ export function LiveDelivery({ api, account }: { api: BackendApi; account: Accou
 
 function DeliveryWorkspace({ api, admin }: { api: BackendApi; admin: boolean }) {
   const params = useSearchParams(); const pathname = usePathname(); const router = useRouter();
-  const cardView = params.get("layout") !== "list" && params.get("view") !== "list";
+  const cardView = params.get("view") === "cards" || params.get("layout") === "cards";
   const q = params.get("q") ?? ""; const selected = params.get("job") ?? "";
   const jobs = useCollection<FulfillmentJob>(api, "/fulfillment/jobs");
   const requests = useCollection<JobRequest>(api, "/requests");
@@ -55,8 +55,8 @@ function DeliveryWorkspace({ api, admin }: { api: BackendApi; admin: boolean }) 
       <div className={styles.toolbarHead}>
         <StatusTabs label="สถานะการส่งมอบ" tabs={deliveryTabs(admin).map((key) => ({ key, label: DELIVERY_STATE[key][0], count: counts[key], attention: ["terms", "invoice", "ship", "review"].includes(key) }))} current={tab} href={(key) => href({ tab: key, job: undefined })} loading={listLoading} unavailable={Boolean(jobs.error && !jobs.data)} />
         <nav className={styles.viewSwitch} aria-label="รูปแบบการแสดงงานส่งมอบ">
-          <Link href={href({ layout: undefined, job: undefined })} scroll={false} aria-current={cardView ? "page" : undefined}><Icon name="grid" size={17} /> การ์ด</Link>
-          <Link href={href({ layout: "list", job: undefined })} scroll={false} aria-current={!cardView ? "page" : undefined}><Icon name="file" size={17} /> รายการ</Link>
+          <Link href={href({ view: "cards", layout: undefined, job: undefined })} scroll={false} aria-current={cardView ? "page" : undefined}><Icon name="grid" size={17} /> การ์ด</Link>
+          <Link href={href({ view: undefined, layout: undefined, job: undefined })} scroll={false} aria-current={!cardView ? "page" : undefined}><Icon name="file" size={17} /> รายการ</Link>
         </nav>
       </div>
       <div className={layout.toolbarEnd}>
@@ -168,9 +168,9 @@ function DeliveryCard({ job, label, tab, admin, selected, href, grid = false, ro
     </Link>;
   }
 
-  return <Link id={`delivery-card-${job.job_id}`} href={href} scroll={false} className={`${layout.card} ${row ? styles.rowCard : ""}`} aria-current={selected ? "true" : undefined}>
+  return <Link id={`delivery-card-${job.job_id}`} href={href} scroll={false} className={`${layout.card} ${row ? styles.rowCard : styles.compactCard}`} aria-current={selected ? "true" : undefined}>
     <div className={row ? styles.rowMain : undefined}>
-      <span className={layout.cardTop}><strong>{job.invoice?.number ?? "ยังไม่มีใบแจ้งหนี้"}</strong>{!row && <StatusBadge map={DELIVERY_STATE} value={tab} />}</span>
+      <span className={layout.cardTop}><strong className={!row ? styles.documentNumber : undefined}>{job.invoice?.number ?? "ยังไม่มีใบแจ้งหนี้"}</strong>{!row && <StatusBadge map={DELIVERY_STATE} value={tab} />}</span>
       <span className={layout.cardTitle}>{label}</span>
       <span className={layout.cardMeta}>{job.invoice ? `คงเหลือ ${bahtTH(job.invoice.balance)} · ครบกำหนด ${dateTH(job.invoice.due_at)}` : `ยอดที่จะออกใบแจ้งหนี้ ${bahtTH(job.opening_balance)}`}</span>
     </div>

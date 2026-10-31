@@ -176,9 +176,10 @@ function ReceivingCard({ row, state, tab, admin, selected, href, grid = false, i
 
   return <Link id={`receiving-card-${row.order_id}`} href={href} scroll={false} className={`${layout.card} ${isRow ? styles.rowCard : ""}`} aria-current={selected ? "true" : undefined}>
     <div className={isRow ? styles.rowMain : undefined}>
-      <span className={layout.cardTop}><strong>{row.order_no}</strong>{!isRow && status && <StatusBadge map={RECEIVING_STATE} value={status} />}</span>
+      <span className={layout.cardTop}><strong className={!isRow ? styles.orderNumber : undefined}>{row.order_no}</strong></span>
       <span className={layout.cardTitle}>{row.supplier_name}</span>
-      {state && <span className={layout.cardMeta}>วัตถุดิบ {lines.length} รายการ{left && status !== "received" ? ` · ค้างรับ ${left} รายการ` : ""}{row.full_received_at ? ` · รับครบ ${dateTH(row.full_received_at)}` : ""}</span>}
+      {state && isRow && <span className={layout.cardMeta}>วัตถุดิบ {lines.length} รายการ{left && status !== "received" ? ` · ค้างรับ ${left} รายการ` : ""}{row.full_received_at ? ` · รับครบ ${dateTH(row.full_received_at)}` : ""}</span>}
+      {!isRow && <span className={styles.compactBadges}>{status && <StatusBadge map={RECEIVING_STATE} value={status} />}{hasOpenClaim(state) && <ToneBadge tone="problem">มีของเสียหาย</ToneBadge>}{admin && owesSupplier(state) && <ToneBadge tone="action">ค้างจ่ายผู้ขาย</ToneBadge>}</span>}
     </div>
     {isRow && <div className={styles.rowStatus}>
       {status && <StatusBadge map={RECEIVING_STATE} value={status} />}
@@ -188,7 +189,6 @@ function ReceivingCard({ row, state, tab, admin, selected, href, grid = false, i
       </>}
     </div>}
     <div className={isRow ? styles.rowMeta : undefined}>
-      {!isRow && (hasOpenClaim(state) || (admin && owesSupplier(state))) && <span className={layout.cardMeta}>{hasOpenClaim(state) && <ToneBadge tone="problem">มีของเสียหาย</ToneBadge>}{admin && owesSupplier(state) && <ToneBadge tone="action">ค้างจ่ายผู้ขาย</ToneBadge>}</span>}
       {isRow && row.full_received_at && <span className={layout.cardMeta}>รับครบ {dateTH(row.full_received_at)}</span>}
     </div>
     {isRow && <span className={layout.cardNext} data-quiet={tab === "received" ? "" : undefined}>{NEXT[tab]} <Icon name="arrow" size={14} /></span>}
