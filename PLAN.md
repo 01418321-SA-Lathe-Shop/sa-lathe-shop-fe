@@ -1,3 +1,12 @@
+## Password change and printable documents — 2026-11-03
+
+- Handoff: `docs/026-printable-documents.md`. Backend `7cf805a` adds `POST /auth/password` (no migration).
+  - Settings ความปลอดภัย: change own password for Customer, Staff and Admin; other sessions revoked.
+  - A4 print/PDF for Quotation, supplier Purchase Order and a Thai job contract (`src/features/documents`).
+- Checks: native tests, type check, lint, source audit, DESIGN sync, production build; backend `go test ./...`.
+- Browser walk against the local API: password flow end to end; all three documents rendered from demo data.
+- Not exercised: real print dialog/PDF pagination. Pending owner decisions: shop address/phone/tax ID, customer address storage, legal review of contract wording.
+
 ## Staff/Admin redesign Step 8 (การแจ้งเตือน) — 2026-10-30
 
 - Handoff: `docs/025-staff-admin-redesign-handoff.md`, Step 8 complete (`9de567b` shared request link, `f128f5a` page).

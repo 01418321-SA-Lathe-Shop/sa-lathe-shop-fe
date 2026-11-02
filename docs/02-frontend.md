@@ -26,6 +26,9 @@ Staff/Admin redesign (2026-10-29): Steps 0–1 (Thai grouped navigation, bell,
 shared staff UI kit, งานผลิต) are pushed; Step 2 onward is in progress. See
 `025-staff-admin-redesign-handoff.md` for decisions, status and remaining steps.
 
+Password change and printable Quotation/PO/Job contract (2026-11-03): see
+`026-printable-documents.md` for scope, data sources and missing information.
+
 Use `NEXT_PUBLIC_API_BASE_URL` (public API origin only). Real seeded demo accounts
 require an operator-prepared dedicated database and private passwords; no real
 password belongs in frontend source/config. Account-only seeds contain no
