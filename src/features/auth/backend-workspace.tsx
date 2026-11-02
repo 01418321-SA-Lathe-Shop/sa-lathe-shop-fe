@@ -3,7 +3,7 @@ import { authStyles as styles } from "../../components/ui/style-scopes";
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect,useRef,useState,type FormEvent } from "react";
+import { useEffect,useRef,useState,useSyncExternalStore,type FormEvent } from "react";
 import { ThemeToggle } from "../../components/appearance/appearance";
 import { Icon,Logo } from "../../components/appearance/icons";
 
@@ -29,6 +29,7 @@ export default function BackendWorkspace({ initialRegister = false }: { initialR
   }
   return <LiveLogin key={initialRegister ? "register" : "login"} base={liveBase} notice={notice} initialRegister={initialRegister} onLogin={enter} localTestEnabled={localTestEnabled} onLocalLogin={enterLocalTest} />;
 }
+const noSubscribe = () => () => {};
 function LiveLogin({ base, notice, initialRegister, onLogin, localTestEnabled, onLocalLogin }: { base: string; notice: string; initialRegister: boolean; onLogin: (username: string, password: string) => Promise<void>; localTestEnabled: boolean; onLocalLogin: (username: string) => Promise<void> }) {
   const showTestAccounts = useSearchParams().get("accounts") === "test";
   const router = useRouter();
@@ -38,6 +39,8 @@ function LiveLogin({ base, notice, initialRegister, onLogin, localTestEnabled, o
   const action = useCommand();
   const registrationApi = useRef<BackendApi | null>(null);
   const loginForm = useRef<HTMLFormElement>(null);
+  // False in server HTML and during hydration: a native submit then would put the password in the URL.
+  const hydrated = useSyncExternalStore(noSubscribe, () => true, () => false);
   useEffect(() => {
     if (register || !showTestAccounts || !localTestEnabled) return;
     const picker = document.querySelector<HTMLDetailsElement>(".auth-account-picker");
@@ -63,7 +66,7 @@ function LiveLogin({ base, notice, initialRegister, onLogin, localTestEnabled, o
     <section className="login-panel"><div className="auth-toolbar"><Link className="login-back" href="/">← กลับหน้าแรก</Link><ThemeToggle/></div>
       <div className="login-card"><span className="eyebrow">{register ? "CREATE ACCOUNT" : "WELCOME BACK"}</span><h2>{register ? "สมัครบัญชี" : "เข้าสู่ระบบ"}</h2><p>{register ? "สร้างบัญชีลูกค้าเพื่อส่งคำขอผลิตและติดตามงาน" : "ลูกค้า Staff และ Admin ใช้หน้าเข้าสู่ระบบเดียวกัน"}</p>
       {notice && <p className="workflow-success" role="status">{notice}</p>}
-      <form ref={loginForm} onSubmit={submit} aria-busy={action.busy}><fieldset disabled={action.busy} className="live-fields">
+      <form ref={loginForm} method="post" onSubmit={submit} aria-busy={action.busy}><fieldset disabled={action.busy || !hydrated} className="live-fields">
         {register && <label className="login-field"><span>ชื่อผู้ติดต่อ</span><div><Icon name="file"/><input name="name" required maxLength={200} autoComplete="name" placeholder="ชื่อผู้ติดต่อ"/></div></label>}
         <label className="login-field"><span>ชื่อผู้ใช้</span><div><Icon name="inbox"/><input name="username" required minLength={3} maxLength={64} pattern="[A-Za-z0-9_.\-]+" autoComplete="username" placeholder="username"/></div></label>
         <label className="login-field"><span>รหัสผ่าน</span><div><Icon name="clock"/><input name="password" type="password" required autoComplete={register ? "new-password" : "current-password"} placeholder="กรอกรหัสผ่าน"/></div></label>

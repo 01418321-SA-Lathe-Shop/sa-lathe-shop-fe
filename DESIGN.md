@@ -89,7 +89,9 @@ This supersedes historical mock-mode descriptions below. `/login` and `/register
 use the configured real API only. Login has a collapsed, explicitly labelled
 real-backend demo-account picker approved by the owner. With the explicit public
 UI flag enabled and a loopback API base, its summary is "บัญชีทดสอบ Local · เข้าสู่ระบบทันที".
-Each button clears the password and calls `/auth/local-test/login` with username
+Until hydration the login/register fieldset is disabled and the form uses
+`method="post"` (2026-11-03), so an early Enter or click can never put a
+password into the URL. Each button clears the password and calls `/auth/local-test/login` with username
 only, then confirms `/auth/me` and navigates by server role. Without that opt-in,
 selection only fills username and clears/focuses password for normal sign-in.
 The panel explains privileged local-only access; no passwords or roles are sent
@@ -956,6 +958,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-03 | Login/register fields stay disabled until hydration and the form is `method="post"`, preventing a pre-hydration native GET that put the password in the URL | Native test, TypeScript, lint, server-HTML and browser check |
 | 2026-11-03 | Printable A4 Quotation, supplier Purchase Order and Thai job contract in `src/features/documents`; replaces the customer-only quotation print and its `.paper` styles | Native tests, TypeScript, lint, source audit, production build, browser render against local demo data (Customer, Staff, Admin) |
 | 2026-11-03 | Settings ความปลอดภัย: self-service เปลี่ยนรหัสผ่าน form for Customer, Staff and Admin on the new `POST /auth/password` | Native tests, TypeScript, lint, production build, browser walk against the local API (validation, wrong current password, success, other session revoked) |
 | 2026-10-31 | Delivery/Payment now defaults to list view; card view remains explicitly available through `?view=cards` | Focused TypeScript and DESIGN sync check |
