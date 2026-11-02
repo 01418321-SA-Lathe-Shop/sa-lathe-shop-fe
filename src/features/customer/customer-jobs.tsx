@@ -15,6 +15,7 @@ import { CustomerInspection } from "./customer-job-actions";
 import { CustomerInvoice } from "./customer-invoice";
 import { CustomerInvoiceList } from "./customer-invoice-list";
 import { CustomerJobList } from "./customer-job-list";
+import { JobContractPrint } from "../documents/job-contract-print";
 import styles from "./customer-requests.module.css";
 
 export function CustomerJobs({ api, mode = "jobs" }: { api: BackendApi; mode?: "jobs" | "payments" | "inspection" }) {
@@ -76,7 +77,7 @@ function JobContent({ api, account, state, mode, settled, reload, saved }: { api
       {Boolean(state.rework_history?.length) && <section className="cust-section"><h2>ประวัติการแก้ไขงาน</h2>{state.rework_history?.map((cycle) => <p className="cust-history-row" key={cycle.cycle}>งานรอบ {cycle.cycle} · ส่งคืนเมื่อ {dateTH(cycle.reopened_at)}</p>)}</section>}
     </section><aside className="cust-job-summary"><section><h2>การส่งมอบ</h2>{delivery ? <><Badge value={delivery.status} labels={DELIVERY_LABELS} /><p>{delivery.method === "third_party" ? "ผู้ให้บริการภายนอก" : "ร้านจัดส่ง / รับเอง"} · ผู้รับ {delivery.receiver_name}</p><p>ส่งเมื่อ {dateTH(delivery.shipped_at)}</p></> : <p>ยังไม่มีการจัดส่ง</p>}{actions.includes("inspect") && <Link className="cust-primary" href={customerHref("delivery-payment", { job: state.job_id })}>ตรวจรับงาน</Link>}</section>
       <section><h2>การชำระเงิน</h2><p>มัดจำที่อนุมัติจริง {moneyTH(state.deposit)}</p>{state.invoice ? <><Badge value={state.invoice.status} labels={INVOICE_LABELS} /><p>ยอดคงเหลือ {moneyTH(state.invoice.balance)}</p><Link className={actions.includes("inspect") ? "cust-link" : actions.includes("bank") ? "cust-primary" : "cust-link"} href={customerHref("payments", { job: state.job_id })}>{actions.includes("bank") ? "ดูใบแจ้งหนี้และชำระเงิน" : "ดูใบแจ้งหนี้"}</Link></> : <p>ยอดหลังมัดจำ {moneyTH(state.opening_balance)} · ยังไม่มีใบแจ้งหนี้</p>}</section>
-      <section><h2>เอกสารที่เกี่ยวข้อง</h2><div className="cust-related-links"><Link className="cust-link" href={customerHref("requests", { request: state.request_id })}>ดูคำขอเดิม →</Link>{quote && <Link className="cust-link" href={customerHref("quotations", { request: state.request_id, quotation: quote.id })}>ดูใบเสนอราคาที่ตอบรับ →</Link>}</div><ResourceFeedback {...quoteData} /><Limited complete={quoteData.data?.complete} /></section>
+      <section><h2>เอกสารที่เกี่ยวข้อง</h2><div className="cust-related-links"><Link className="cust-link" href={customerHref("requests", { request: state.request_id })}>ดูคำขอเดิม →</Link>{quote && <Link className="cust-link" href={customerHref("quotations", { request: state.request_id, quotation: quote.id })}>ดูใบเสนอราคาที่ตอบรับ →</Link>}<JobContractPrint api={api} requestId={state.request_id} jobId={state.job_id} customerView button={(props) => <button type="button" className="cust-link" {...props} />} /></div><ResourceFeedback {...quoteData} /><Limited complete={quoteData.data?.complete} /></section>
     </aside></div>}
     {state.request_status === "completed" && <p className="cust-alert success">คำขอเสร็จสิ้นแล้ว · รับงานแล้วและชำระครบ</p>}
     <div className="cust-page-end"><Link href={customerHref("jobs", { job: state.job_id })}>รายละเอียดงานผลิต</Link><button onClick={reload}>อัปเดตข้อมูลล่าสุด</button></div>

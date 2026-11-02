@@ -1,0 +1,62 @@
+/* Printed business documents (A4). Independent of the app theme: fixed black on white. */
+.printRoot { display: none; }
+@media print {
+  :global(html):has(.printRoot), :global(body):has(.printRoot) { background: #fff !important; color-scheme: light; }
+  :global(body):has(.printRoot) > :not(.printRoot) { display: none !important; }
+  .printRoot { display: block !important; }
+}
+
+.sheet { color: #111; background: #fff; font-size: 11pt; line-height: 1.65; letter-spacing: 0; overflow-wrap: anywhere; word-break: normal; line-break: auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+/* :where keeps the reset weaker than the component rules below. */
+.sheet :where(h1, h2, h3, p, dl, dd, ol) { margin: 0; }
+.sheet h2 { margin: 6mm 0 2mm; font-size: 12pt; font-weight: 700; break-after: avoid; }
+.sheet p + p { margin-top: 1.5mm; }
+.preserve { white-space: pre-wrap; }
+.muted { color: #555; font-size: 9.5pt; }
+
+.letterhead { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8mm; align-items: end; padding-bottom: 3mm; border-bottom: 1.5pt solid #111; }
+.shopName { font-size: 15pt; font-weight: 700; line-height: 1.3; }
+.letterhead .muted { margin-top: 1mm; }
+.docTitle { max-width: 88mm; text-align: right; }
+.docTitle h1 { font-size: 19pt; font-weight: 700; line-height: 1.2; }
+.docTitle p { color: #333; font-size: 10pt; }
+
+.meta { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 0.5mm 4mm; }
+.meta dt { color: #444; }
+.meta dd { font-weight: 600; }
+
+.parties { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5mm; margin-top: 5mm; }
+.party { padding: 3mm 4mm; border: 0.75pt solid #999; break-inside: avoid; }
+.party h2 { margin: 0 0 1.5mm; font-size: 10pt; color: #444; font-weight: 600; }
+
+.items { width: 100%; margin-top: 5mm; border-collapse: collapse; font-size: 10.5pt; }
+.items thead { display: table-header-group; }
+.items tr { break-inside: avoid; }
+.items th, .items td { padding: 1.8mm 2.5mm; border: 0.5pt solid #888; vertical-align: top; text-align: left; }
+.items th { background: #ececec; font-weight: 600; white-space: nowrap; }
+.items [data-numeric] { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.totals { display: grid; grid-template-columns: minmax(0, 1fr) max-content; width: min(100%, 85mm); margin: 3mm 0 0 auto; break-inside: avoid; }
+.totals > * { padding: 1mm 2.5mm; }
+.totals dd { text-align: right; font-variant-numeric: tabular-nums; }
+.totals .grand { border-top: 1pt solid #111; border-bottom: 2.5pt double #111; font-weight: 700; }
+
+.terms { margin-top: 5mm; padding-left: 5mm; }
+.terms li + li { margin-top: 1mm; }
+
+.clauses { margin: 0; padding: 0; list-style: none; counter-reset: clause; }
+.clauses > li { margin-top: 4mm; counter-increment: clause; break-inside: auto; }
+.clauses > li > h2 { margin: 0 0 1mm; font-size: 11pt; }
+.clauses > li > h2::before { content: "ข้อ " counter(clause) ". "; }
+.clauses ol { margin-top: 1mm; padding-left: 6mm; }
+.contractTitle { margin-top: 4mm; text-align: center; }
+.contractTitle h1 { font-size: 18pt; font-weight: 700; }
+.indent { text-indent: 12mm; }
+
+.blank { display: inline-block; min-width: 45mm; min-height: 1em; border-bottom: 0.75pt dotted #333; vertical-align: baseline; }
+.blankLine { display: block; height: 7mm; border-bottom: 0.75pt dotted #333; }
+
+.signatures { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12mm 14mm; margin-top: 12mm; break-inside: avoid; }
+.signature { display: grid; gap: 2mm; text-align: center; font-size: 10.5pt; }
+.signRow { display: flex; align-items: flex-end; gap: 2mm; }
+.signLine { flex: 1; height: 10mm; border-bottom: 0.75pt dotted #333; }

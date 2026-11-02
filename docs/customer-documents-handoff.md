@@ -72,12 +72,12 @@ explicitly approved storage GET. It never changes the existing `download()` path
 | `customer-documents.tsx`, `customer-document-filters.tsx` | Shared list presentation, actual-status tabs, filters/chips/pagination and per-row file/print actions |
 | `customer-document-navigation.tsx`, `customer-shell.tsx` | Account-lifetime navigation memory and filter/page/scroll restoration |
 | `customer-sales.tsx`, `customer-deposits.tsx` | Existing workflows with the new document surfaces composed around unchanged commands |
-| `customer-quotation-document.tsx` | Safe document rendering and native print lifecycle |
+| `../documents/*` (since 2026-11-03, see `026-printable-documents.md`) | Safe document rendering and native print lifecycle |
 | `customer-po-preview.tsx` | Authorized evidence selection, attachment reads, native preview and recovery |
 | `customer-documents.module.css` | Scoped shared lists, paper/preview/detail layout and isolated print styles |
 | `src/lib/api/private-preview.ts`, `backend-api.ts` | Read-only private preview transport; existing downloads/uploads unchanged |
 | `customer-content.tsx` | Evidence-selector UUID validation |
-| `tests/features/customer/customer-documents-domain.test.mjs`, `tests/features/customer/customer-document-filters.test.mjs`, `tests/features/customer/customer-quotation-document.test.mjs`, `tests/lib/api/private-preview.test.mjs` | Exact filters, URL-bound form resets, safe projections/print fields, private read security and cancellation |
+| `tests/features/customer/customer-documents-domain.test.mjs`, `tests/features/customer/customer-document-filters.test.mjs`, `tests/features/documents/business-documents.test.mjs`, `tests/lib/api/private-preview.test.mjs` | Exact filters, URL-bound form resets, safe projections/print fields, private read security and cancellation |
 | `DESIGN.md`, `scripts/sync-design.mjs` | Implemented visual contract and generated source appendix |
 
 Unqualified feature filenames above are under `src/features/customer/`.

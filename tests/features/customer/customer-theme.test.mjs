@@ -47,11 +47,11 @@ test("Settings isolate native radio groups in retained App Router trees", () => 
   assert.doesNotMatch(source, /name="settings-(?:size|theme)"/);
 });
 
-test("white quotation paper isolates its secondary ink from the workspace theme", () => {
-  const source = readFileSync(new URL("../../../src/features/customer/customer-documents.module.css", import.meta.url), "utf8");
-  const body = source.match(/\.paper \{([^}]+)\}/)[1];
-  assert.match(body, /--cust-muted: #57615b/);
-  assert.match(body, /--cust-ink: #202623/);
-  assert.match(body, /color-scheme: light/);
-  assert(ratio(rgb("#57615b"), rgb("#ffffff")) >= 4.5);
+test("printed documents use fixed dark ink on white, isolated from the workspace theme", () => {
+  const source = readFileSync(new URL("../../../src/features/documents/documents.module.css", import.meta.url), "utf8");
+  const body = source.match(/\.sheet \{([^}]+)\}/)[1];
+  assert.match(body, /color: #111/); assert.match(body, /background: #fff/);
+  assert.match(source, /color-scheme: light/);
+  assert.doesNotMatch(source, /var\(--/);
+  assert(ratio(rgb("#555555"), rgb("#ffffff")) >= 4.5);
 });

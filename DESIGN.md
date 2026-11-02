@@ -492,6 +492,22 @@ Implemented from the Claude Design boards (Customer payments, Customer account, 
 
 Known limits: the backend has no minimum-stock field, so the stock alert means zero available on an active material, not "below minimum". `/customers` is Customer-only, so the Admin figure counts distinct customers on requests, not all registered customers. The board's shift timeline, assignees, per-job progress and revenue trend are left out because no endpoint provides them. Totals are limited to what the list reads return (1,000 records), with a notice when incomplete. Evidence counts skip closed requests.
 
+## Printable business documents (2026-11-03)
+
+One module, `src/features/documents`, prints three documents through the browser's print dialog (print or save as PDF). See `docs/026-printable-documents.md` for data sources and missing information.
+
+**Print mechanics.** `PrintDocument` shows one action button (the caller passes the shell's own button: Customer `fileAction`/`cust-link`, Staff/Admin `Button` secondary) and, only while printing, a body-level portal. Print CSS hides every other body child, forces a white page and light color scheme. A portal-scoped `@page` sets A4 with 16/15/18 mm margins, the document reference at bottom-left and `หน้า n / N` at bottom-right. Lists can still deep-link with `?print=1`. Data must be fully loaded before the button enables; otherwise a small hint explains what is loading or failed.
+
+**Paper style.** Fixed black-on-white, no app tokens. Sarabun (next/font, Thai + Latin, 400/600/700), 11pt, line-height 1.65, no letter spacing, browser Thai line breaking, `overflow-wrap: anywhere` for long identifiers. Letterhead: shop name and contact lines left, document title (Thai 19pt + English caption) and a key/value block right (max 88 mm), 1.5pt rule below. Party boxes in two columns with 0.75pt grey borders. Item tables: 0.5pt cell borders, grey header with no-wrap labels, header repeated on each page, rows never split, numbers right-aligned tabular. Totals block right-aligned with a double rule under the grand total. Signature blocks: two columns of ลงชื่อ line, name in parentheses, role and date. Unknown facts print as dotted fill-in lines, never as placeholders or guesses.
+
+**Quotation (ใบเสนอราคา / QUOTATION).** Number, version, sent date, status, request number; customer box (name on Customer copies, type, customer code; address/phone lines), request dates; one line item (description + material spec, qty, ชิ้น, unit price —, amount = whole-job price); totals; conditions from saved acceptance terms (or the deposit/PO preview rule before acceptance) and the 14-day evidence deadline; proposer and customer acceptance signatures. Customer quotation detail and Staff/Admin request detail (latest non-draft quote).
+
+**Purchase order (ใบสั่งซื้อ / PURCHASE ORDER).** UC6 supplier order on Admin order detail: number, date, status, supplier contacts, expected receipt date, job references, all lines with quantity, unit, unit cost and line total, grand total, receiving/rounding conditions, approver and supplier signatures.
+
+**Job contract (สัญญาจ้างทำของ).** Formal Thai contract on Customer job detail (เอกสารที่เกี่ยวข้อง) and Staff/Admin production detail (new เอกสาร section): JOB-reference, quotation and request numbers, parties paragraph (individual vs company wording), seven numbered clauses (scope table, price, payment from saved terms/approved deposit/invoice, whole-job delivery, inspection and free rework, duties, additional terms lines), duplicate-original closing, signatures for both parties and two witnesses. Next to the button the UI states that the wording needs legal review and lists information the system does not hold.
+
+**Known limitations.** No shop address/phone/tax ID (landing placeholders), no customer address/ID, no customer name for Staff copies, no confirmed delivery date (`job.due_at` copies the requested date), no quotation validity/discounts/unit prices. The real print dialog and paper pagination were not exercised in the preview pane.
+
 ## Admin requests (2026-10-30)
 
 `/admin/requests` uses the Customer quotation list structure and CSS classes (`customer-documents.module.css`) with the shell's tokens mapped onto `--cust-*`: รอคุณตรวจ cards for evidence awaiting review, then one panel with stage tabs (ทั้งหมด plus six stages, counts), search, refresh and a 20-per-page table (คำขอ, งาน, ส่งคำขอเมื่อ, ราคาล่าสุด, สถานะ, ขั้นถัดไป). The whole row and card open the request through a stretched link, so tabs, search and refresh never trigger it; below 48rem the table becomes labelled stacks. `?request=` shows the unchanged `RequestDetail` as a full page with a visible กลับรายการ link, replacing the Admin side panel and the `?view=cards` modal and list/card switch, which are removed because the lead cards and table replace them. Admin permissions are unchanged: read quotations and internal costs, review Deposit/PO evidence. Staff keep `/staff/quotations` as before.
@@ -940,6 +956,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-03 | Printable A4 Quotation, supplier Purchase Order and Thai job contract in `src/features/documents`; replaces the customer-only quotation print and its `.paper` styles | Native tests, TypeScript, lint, source audit, production build, browser render against local demo data (Customer, Staff, Admin) |
 | 2026-11-03 | Settings ความปลอดภัย: self-service เปลี่ยนรหัสผ่าน form for Customer, Staff and Admin on the new `POST /auth/password` | Native tests, TypeScript, lint, production build, browser walk against the local API (validation, wrong current password, success, other session revoked) |
 | 2026-10-31 | Delivery/Payment now defaults to list view; card view remains explicitly available through `?view=cards` | Focused TypeScript and DESIGN sync check |
 | 2026-10-30 | Collapsed Delivery/Payment entries match Production and Orders: fixed compact height, one-line ellipsized invoice and job labels, an aligned full badge, and retained monetary/payment context | Focused TypeScript and DESIGN sync check |
@@ -2596,31 +2613,9 @@ src/features/workspace/workspace.module.css
 .scope .depositLayout :global(.cust-document) > h2 { margin-bottom: 24px; }
 .scope .depositLayout :global(.cust-price-panel) :global(.cust-definition) > div { grid-template-columns: minmax(0, 1fr); gap: 4px; }
 .scope .depositLayout :global(.cust-price-panel) :global(.cust-checklist li) { flex-wrap: wrap; gap: 8px; }
-.paper { --cust-ink: #202623; --cust-muted: #57615b; color-scheme: light; margin: 16px 0 24px; padding: 32px; background: #fff; color: #202623; box-shadow: 0 8px 24px rgb(0 0 0 / .06); border-radius: 12px; overflow-wrap: anywhere; font-size: .9375rem; }
-.paper h2 { font-size: 1.5rem; font-weight: 700; margin: 0 0 12px; }
-.paper h3 { font-size: 1rem; font-weight: 650; margin: 0 0 16px; }
-.paper p { margin: 8px 0; }
-.paperHeader { padding-bottom: 24px; border-bottom: 1px solid #dce1dd; }
-.documentFacts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin: 24px 0; }
-.documentFacts > div { min-width: 0; }
-.documentFacts dt { color: #57615b; font-size: .8125rem; margin-bottom: 6px; }
-.documentFacts dd { margin: 0; font-weight: 600; }
-.documentFacts small { display: block; font-weight: 400; margin-top: 6px; font-size: .8125rem; color: #57615b; }
-.paperScope { margin-top: 32px; }
-.paperTotal { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 12px; padding: 24px 0; border-block: 1px solid #dce1dd; font-variant-numeric: tabular-nums; }
-.paperTotal strong { font-size: 1.5rem; }
-.paperTotal small { grid-column: 1 / -1; color: #57615b; }
-.paperFooter { margin-top: 32px; color: #57615b; font-size: .8125rem; }
 .scope .filePreview object { display: block; width: 100%; height: 680px; background: #fff; border: 0; border-radius: 12px; }
 .scope .filePreview > p { margin-top: 16px; }
 .scope .previewFallback { min-height: 280px; padding: 32px; display: flex; flex-direction: column; align-items: start; justify-content: center; gap: 16px; background: var(--cust-surface); border-radius: 12px; overflow-wrap: anywhere; }
-.printRoot { display: none; }
-@media print {
-  :global(body):has(.printRoot) > :not(.printRoot) { display: none !important; }
-  .printRoot { display: block !important; color: #202623; background: #fff; font-size: 11pt; }
-  .printRoot .paper { box-shadow: none; border-radius: 0; margin: 0; padding: 0; font-size: 11pt; }
-  .printRoot .paperHeader, .printRoot .paperTotal, .printRoot .documentFacts > div { break-inside: avoid; }
-}
 
 /* Quotation / PO list and detail pages (Claude Design boards), one pattern for all four. */
 .scope { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
@@ -2799,9 +2794,6 @@ src/features/workspace/workspace.module.css
   .scope .decisionActions > * { flex: 1 1 10rem; }
   .scope .steps li { padding-right: 8px; }
   .scope .activity li { grid-template-columns: minmax(0, 1fr); }
-  .paper { padding: 20px; }
-  .documentFacts { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-  .paperTotal { grid-template-columns: minmax(0, 1fr); }
   .scope .filePreview object { height: 480px; }
   .scope .previewFallback { padding: 20px; }
 }
