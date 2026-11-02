@@ -79,7 +79,7 @@ components:
 
 # Lathe Shop Control — Design specification
 
-อัปเดตล่าสุด: 2026-10-30 · สถานะ: login และ workspace ใช้ real API เท่านั้น; ปุ่ม Local test เชื่อม password-free endpoint เมื่อเปิด config เฉพาะ local; browser login จริงผ่านครบ 6 บัญชี ไม่ใช่การรับรอง workflow ทั้งหมด
+อัปเดตล่าสุด: 2026-11-03 · สถานะ: login และ workspace ใช้ real API เท่านั้น; ปุ่ม Local test เชื่อม password-free endpoint เมื่อเปิด config เฉพาะ local; browser login จริงผ่านครบ 6 บัญชี ไม่ใช่การรับรอง workflow ทั้งหมด
 
 เอกสารนี้ใช้ส่งต่องานให้ designer และ developer เพื่อสร้าง UI ให้ตรงกับระบบปัจจุบัน อ่านคู่กับ `docs/02-frontend.md` ซึ่งเป็นแหล่งอ้างอิง Business Flow และ permission การตรวจ frontend ด้วย unit tests ไม่ใช่หลักฐานว่า real Backend หรือ UC1–UC9 ทำงานครบ
 
@@ -478,7 +478,9 @@ Implemented from the Claude Design boards (Customer payments, Customer account, 
 
 **ตั้งค่า (`/customer?view=settings`, `/staff/settings`, `/admin/settings`).** One `SettingsPage` in `src/features/settings` for all roles, with underline tabs บัญชีของฉัน, การตั้งค่าส่วนตัว, ความปลอดภัย and, for Admin only, ระบบ. Everything is read-only except display size (browser only) and sign-out, which has a confirmation dialog. ระบบ links to จัดการพนักงาน and shows which pages each fixed role can open, from the route guard's map. The Staff/Admin sidebar item replaces the old ตั้งค่า dialog there; the landing page keeps the dialog. Theme stays on the navbar toggle. `--s-*` tokens resolve to the Customer or Staff tokens, so one stylesheet serves both shells.
 
-**Known limitations.** The backend has no command for editing a profile, changing your own password, saved addresses, notification or language preferences, session lists or shop configuration, so those are stated as unavailable, not simulated.
+**เปลี่ยนรหัสผ่าน (2026-11-03).** The ความปลอดภัย tab now holds a เปลี่ยนรหัสผ่าน panel for every role, calling backend `POST /auth/password` (current password verified with the existing Argon2id hasher; every other session of the account is revoked, this one stays signed in). Three uncontrolled `type="password"` fields (รหัสผ่านปัจจุบัน `current-password`, รหัสผ่านใหม่ / ยืนยันรหัสผ่านใหม่ `new-password`) at max 26rem width, 44px inputs with `--s-line` borders, a hint/error line under each (`--s-red` and `aria-invalid` on error), and one primary button in `--s-accent` with dark ink. Client checks mirror the server: at least 12 characters, at most 128 UTF-8 bytes, different from the current password, must not contain the username, confirmation must match. A wrong current password is a 400 `invalid_current_password` (shown as รหัสผ่านปัจจุบันไม่ถูกต้อง, never a sign-out); 429 and other 400s get their own Thai messages. Values never enter React state and the form is cleared after success. Worker keeps a note that Admin resets forgotten passwords; Admin keeps the link to จัดการพนักงาน.
+
+**Known limitations.** The backend has no command for editing a profile, saved addresses, notification or language preferences, session lists or shop configuration, so those are stated as unavailable, not simulated.
 
 ## Staff/Admin overview from the Claude Design board (2026-10-30)
 
@@ -938,6 +940,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-03 | Settings ความปลอดภัย: self-service เปลี่ยนรหัสผ่าน form for Customer, Staff and Admin on the new `POST /auth/password` | Native tests, TypeScript, lint, production build, browser walk against the local API (validation, wrong current password, success, other session revoked) |
 | 2026-10-31 | Delivery/Payment now defaults to list view; card view remains explicitly available through `?view=cards` | Focused TypeScript and DESIGN sync check |
 | 2026-10-30 | Collapsed Delivery/Payment entries match Production and Orders: fixed compact height, one-line ellipsized invoice and job labels, an aligned full badge, and retained monetary/payment context | Focused TypeScript and DESIGN sync check |
 | 2026-10-30 | Collapsed Orders entries now use the same fixed-height compact presentation as Production: one-line ellipsized order number, one-line supplier, aligned full badge and retained monetary total | Focused TypeScript and DESIGN sync check |

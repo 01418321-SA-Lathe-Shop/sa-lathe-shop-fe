@@ -40,3 +40,16 @@ test("settings expose the system section to Admin only", async () => {
   assert.deepEqual(roleAccessRows().find((row) => row.label === "จัดการพนักงาน").roles, [false, false, true]);
   assert(!canAccessWorkspace("Customer", "workers") && canAccessWorkspace("Worker", "settings") && canAccessWorkspace("Admin", "settings"));
 });
+
+test("password change validation mirrors the backend rule", async () => {
+  const { passwordErrors } = await import("../../../src/features/settings/settings-domain.ts");
+  const ok = { current: "Old-password-1234", next: "New-password-5678", confirm: "New-password-5678" };
+  assert.deepEqual(passwordErrors("pim.admin", ok), {});
+  assert(passwordErrors("pim.admin", { ...ok, current: "" }).current);
+  assert(passwordErrors("pim.admin", { ...ok, next: "short", confirm: "short" }).next);
+  assert.deepEqual(passwordErrors("pim.admin", { ...ok, next: "รหัสผ่านไทยสิบสองตัว" , confirm: "รหัสผ่านไทยสิบสองตัว" }), {});
+  assert(passwordErrors("pim.admin", { ...ok, next: "a".repeat(129), confirm: "a".repeat(129) }).next);
+  assert(passwordErrors("pim.admin", { ...ok, next: ok.current, confirm: ok.current }).next);
+  assert(passwordErrors("pim.admin", { ...ok, next: "my-PIM.ADMIN-pass", confirm: "my-PIM.ADMIN-pass" }).next);
+  assert(passwordErrors("pim.admin", { ...ok, confirm: "different-value-1" }).confirm);
+});

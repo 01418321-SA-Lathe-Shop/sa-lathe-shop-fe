@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useId, useRef, useState, type ReactNode } from "react";
+import { useId, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { ApiError, type BackendApi } from "../../lib/api/backend-api";
+import { useCommand } from "../../hooks/backend-hooks";
 import { useAppearance } from "../../components/appearance/appearance";
 import { useApiSession } from "../auth/api-session";
 import { dateTH } from "../customer/customer-domain";
 import { ROLES } from "../workspace/workspace-access";
-import { roleAccessRows, settingsTabs, type SettingsTab } from "./settings-domain";
+import { passwordErrors, roleAccessRows, settingsTabs, type PasswordDraft, type SettingsTab } from "./settings-domain";
 import styles from "./settings.module.css";
 
 export const ROLE_NAMES = { customer: "ลูกค้า", worker: "พนักงาน", admin: "ผู้ดูแลระบบ" } as const;
@@ -58,16 +60,51 @@ function Security() {
     <SettingsPanel title="เซสชันนี้" description="เซสชันเก็บในหน่วยความจำเท่านั้น รีโหลดหน้าแล้วต้องเข้าสู่ระบบใหม่" action={<button type="button" className={styles.secondary} onClick={() => dialog.current?.showModal()}>ออกจากระบบ</button>}>
       <Facts rows={[["หมดอายุ", dateTH(session.expiresAt)]]} />
     </SettingsPanel>
-    <SettingsPanel title="รหัสผ่าน">
-      {role === "worker" ? <p className={styles.note}>หากต้องการเปลี่ยนรหัสผ่าน ให้ติดต่อผู้ดูแลระบบ เมื่อเปลี่ยนแล้วทุกเซสชันของบัญชีจะถูกยกเลิก</p>
-        : role === "admin" ? <p className={styles.note}>ระบบยังไม่มีคำสั่งเปลี่ยนรหัสผ่านผู้ดูแลด้วยตนเอง รหัสผ่านพนักงานเปลี่ยนได้ที่ <Link href="/admin/workers">จัดการพนักงาน</Link></p>
-          : <p className={styles.note}>ระบบยังไม่มีคำสั่งเปลี่ยนรหัสผ่านลูกค้าด้วยตนเอง</p>}
+    <SettingsPanel title="เปลี่ยนรหัสผ่าน" description="เปลี่ยนรหัสผ่านของบัญชีนี้เท่านั้น เมื่อสำเร็จ เซสชันอื่นของบัญชีจะถูกยกเลิก เซสชันนี้ยังใช้งานต่อได้">
+      <ChangePassword api={session.api} username={session.account.username} />
+      {role === "worker" ? <p className={styles.note}>ลืมรหัสผ่าน? ให้ผู้ดูแลระบบตั้งรหัสผ่านใหม่ให้</p>
+        : role === "admin" && <p className={styles.note}>รหัสผ่านพนักงานตั้งใหม่ได้ที่ <Link href="/admin/workers">จัดการพนักงาน</Link></p>}
     </SettingsPanel>
     <dialog ref={dialog} className={styles.dialog} aria-labelledby="settings-sign-out">
       <h2 id="settings-sign-out">ออกจากระบบ?</h2><p>เซสชันนี้จะถูกยกเลิก และต้องเข้าสู่ระบบใหม่เพื่อใช้งานต่อ</p>
       <div><button type="button" className={styles.secondary} disabled={busy} onClick={() => dialog.current?.close()}>ยกเลิก</button><button type="button" className={styles.danger} disabled={busy} onClick={() => { setBusy(true); void signOut().then(() => router.push("/login")); }}>ออกจากระบบ</button></div>
     </dialog>
   </>;
+}
+
+// Uncontrolled inputs: passwords live only in the form until submit, then the form is cleared.
+function ChangePassword({ api, username }: { api: BackendApi; username: string }) {
+  const command = useCommand(); const [errors, setErrors] = useState<Partial<Record<keyof PasswordDraft, string>>>({}); const id = useId();
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); const form = event.currentTarget; const data = new FormData(form);
+    const draft = { current: String(data.get("current") ?? ""), next: String(data.get("next") ?? ""), confirm: String(data.get("confirm") ?? "") };
+    const found = passwordErrors(username, draft); setErrors(found);
+    if (Object.keys(found).length) return;
+    void command.run(async (signal) => {
+      try { await api.call<void>("/auth/password", "POST", { current_password: draft.current, new_password: draft.next }, signal); form.reset(); }
+      catch (error) {
+        (form.elements.namedItem("current") as HTMLInputElement | null)?.select();
+        if (error instanceof ApiError && error.code === "invalid_current_password") { setErrors({ current: "รหัสผ่านปัจจุบันไม่ถูกต้อง" }); throw new Error("เปลี่ยนรหัสผ่านไม่สำเร็จ ตรวจรหัสผ่านปัจจุบันแล้วลองอีกครั้ง"); }
+        if (error instanceof ApiError && error.status === 429) throw new Error("ลองเปลี่ยนรหัสผ่านหลายครั้งเกินไป รอสักครู่แล้วลองใหม่");
+        if (error instanceof ApiError && error.status === 400) throw new Error("รหัสผ่านใหม่ไม่ผ่านเงื่อนไขของระบบ ตรวจเงื่อนไขด้านล่างแล้วลองอีกครั้ง");
+        throw error;
+      }
+    }, "เปลี่ยนรหัสผ่านแล้ว ใช้รหัสผ่านใหม่ในการเข้าสู่ระบบครั้งถัดไป");
+  }
+  const field = (name: keyof PasswordDraft, label: string, autoComplete: string, hint?: string) => <label className={styles.field}>
+    <span>{label}</span>
+    <input name={name} type="password" required autoComplete={autoComplete} maxLength={128} disabled={command.busy} aria-invalid={errors[name] ? true : undefined} aria-describedby={`${id}-${name}`} onInput={() => errors[name] && setErrors(({ [name]: _cleared, ...rest }) => rest)} />
+    <small id={`${id}-${name}`} className={errors[name] ? styles.fieldError : undefined}>{errors[name] ?? hint}</small>
+  </label>;
+  return <form className={styles.form} onSubmit={submit} noValidate>
+    <input type="text" name="username" autoComplete="username" value={username} readOnly hidden />
+    {field("current", "รหัสผ่านปัจจุบัน", "current-password")}
+    {field("next", "รหัสผ่านใหม่", "new-password", "อย่างน้อย 12 ตัวอักษร ไม่ซ้ำรหัสเดิม และไม่มีชื่อผู้ใช้อยู่ในรหัส")}
+    {field("confirm", "ยืนยันรหัสผ่านใหม่", "new-password")}
+    <div><button type="submit" className={styles.primary} disabled={command.busy}>{command.busy ? "กำลังเปลี่ยนรหัสผ่าน…" : "เปลี่ยนรหัสผ่าน"}</button></div>
+    {command.error && <p role="alert" className={styles.alert}>{command.error}</p>}
+    {command.message && <p role="status" className={styles.success}>{command.message}</p>}
+  </form>;
 }
 
 function System() {
