@@ -12,6 +12,7 @@ import { Badge, Field, PageTitle, PrivateFile, ResourceFeedback } from "./custom
 import { CustomerUpload } from "./customer-upload";
 import { CustomerWriteRetry } from "./customer-write";
 import { CustomerPoPreview } from "./customer-po-preview";
+import { CustomerPoForm } from "./customer-po-form";
 import styles from "./customer-documents.module.css";
 
 export function DepositChecklist({ state, className = "cust-checklist" }: { state: Fulfillment; className?: string }) {
@@ -33,6 +34,7 @@ export function CustomerDepositDetail({ api, request, quote }: { api: BackendApi
     {notice && <p role="status" className="cust-alert success">{notice}</p>}
     {state && <CustomerPoPreview key={`${quote.id}:${state.evidence?.map((item) => item.id).join(":")}`} api={api} request={request} quote={quote} state={state} onUpload={canUploadPo ? () => { setKind("po"); uploadSection.current?.scrollIntoView({ block: "start" }); } : undefined} />}
     {state && <div className={`${styles.quotationLayout} ${styles.depositLayout}`}><section>
+      {state.terms.po_required && <CustomerPoForm api={api} request={request} quote={quote} state={state} />}
       <section ref={uploadSection} id="upload" className="cust-document"><h2>{state.job ? "ประวัติหลักฐาน" : "ส่งหลักฐานให้ครบตามเงื่อนไข"}</h2>
       {state.canceled_at && <p className="cust-alert danger">คำขอถูกยกเลิกแล้วเมื่อ {dateTH(state.canceled_at)} ไม่สามารถส่งหลักฐานใหม่</p>}
       {!state.job && !state.canceled_at && now !== null && now > Date.parse(state.terms.documents_due_at) && <p className="cust-alert">พ้นกำหนดส่งหลักฐานแล้ว หากส่งครบและทันเวลาก่อนหน้านี้ เจ้าหน้าที่ยังตรวจได้ ระบบเป็นผู้ตัดสินการหมดเวลา หน้านี้ไม่ต่อเวลาให้เอง</p>}

@@ -2,8 +2,10 @@
 
 Status (2026-11-03): implemented on `develop`. Backend endpoint in
 SA-Lathe-Shop-BE `7cf805a` (`POST /auth/password`, documented in backend
-`docs/000-auth.md` and `docs/openapi.yaml`). No migration, no new runtime
-dependency.
+`docs/000-auth.md` and `docs/openapi.yaml`). Document details (shop profile,
+customer billing, quotation note/valid-until, customer PO) use backend
+migration 000017 and the endpoints in backend `docs/020-printed-documents.md`.
+No new runtime dependency.
 
 ## Password change (all roles)
 
@@ -21,31 +23,35 @@ Shared module `src/features/documents/`:
 
 | File | Purpose |
 | --- | --- |
-| `document-print.tsx` | `PrintDocument`: portal rendered only while printing, A4 `@page`, page numbers (`หน้า n / N`) and document reference in the page margin, Sarabun Thai font, `?print=1` auto-print from lists |
-| `business-documents.tsx` | `QuotationDocument`, `PurchaseOrderDocument`, `JobContractDocument` |
-| `job-contract-print.tsx` | Loads accepted quotation, saved terms, opened job and invoice state for the contract |
-| `documents-domain.ts` | Placeholder detection for shop facts, job reference, missing-contract-information list, long Thai dates |
-| `documents.module.css` | Print-only black-on-white A4 styles, independent of the app theme |
+| `document-print.tsx` | `PrintDocument`: portal rendered only while printing, A4 `@page`, page numbers (`หน้า n / N`) and document reference in the page margin, Sarabun Thai font loaded explicitly before printing, `?print=1` auto-print from lists |
+| `business-documents.tsx` | `QuotationDocument`, `PurchaseOrderDocument` (supplier), `JobContractDocument` |
+| `customer-po-document.tsx` | `CustomerPurchaseOrderDocument` (customer's own bilingual PO) |
+| `document-parties.tsx` | `useDocumentParties` (shop profile + customer billing) and `QuotationPrint` |
+| `job-contract-print.tsx` | Loads accepted quotation, saved terms, opened job, invoice state and both parties for the contract |
+| `documents-domain.ts` | Shop/customer parties, missing-contract-information list, long Thai dates, `bahtText` (amount in Thai words, BAHTTEXT style) |
+| `documents.module.css` | Print-only A4 styles, independent of the app theme |
 
-| Document | Where | Roles | Data source |
+| Document | Where | Who fills it in | Data source |
 | --- | --- | --- | --- |
-| Quotation (ใบเสนอราคา / QUOTATION) | Customer quotation detail; Staff/Admin request detail (latest non-draft quote) | Customer member, Worker, Admin | `/requests/{id}`, `/requests/{id}/quotations`, accept decision `terms`, `/customers` (Customer only) |
-| Purchase order (ใบสั่งซื้อ / PURCHASE ORDER) | Admin material-order detail | Admin (UC6 is Admin-only) | the order from `/material-orders` |
-| Job contract (สัญญาจ้างทำของ) | Customer job detail; Staff/Admin production detail | Customer member, Worker, Admin | above plus `/quotations/{id}/fulfillment`, `/fulfillment/jobs/{id}` |
+| Quotation (ใบเสนอราคา) | Customer quotation detail; Staff/Admin request detail (latest non-draft quote) | Worker (price, note, valid-until) | request, quotation, accept decision `terms`, shop profile, customer billing |
+| Customer PO (ใบสั่งซื้อ) | Customer มัดจำและ PO, when terms require a PO | Customer (PO number, date, remarks) | `/quotations/{id}/customer-po`, accepted terms (amount), shop profile, customer billing |
+| Material purchase order (ใบสั่งซื้อวัสดุ) | Admin material-order detail | Admin (UC6 order) | the order from `/material-orders` |
+| Job contract (สัญญาจ้างทำของ) | Customer job detail; Staff/Admin production detail | built from saved data | above plus `/quotations/{id}/fulfillment`, `/fulfillment/jobs/{id}` |
 
-The PO is the shop's UC6 supplier purchase order: it is the only purchase order
-the system holds as structured data (lines, quantities, unit costs). A
-customer's PO for UC4 is an uploaded file and keeps its existing original
-download; the system does not extract its number or amounts.
+Shop details are edited by Admin in Settings → ระบบ → ข้อมูลร้านบนเอกสาร;
+customer billing details by the customer owner in Settings → บัญชีของฉัน →
+ข้อมูลออกเอกสาร. Writing the PO does not submit it: the customer prints, signs
+and uploads it through the existing PO evidence form, and staff review that
+upload as before. No document adds VAT.
 
 ## Missing information (printed as dotted fill-in lines, never guessed)
 
-- Shop address, phone and tax ID: `landing-content.ts` still holds `[...]` placeholders; the shop name is used as published there.
-- Customer address, phone, tax/ID number and company signatory: not stored by the backend.
-- Customer name on Staff/Admin copies: Staff cannot read customer profiles; the customer code (first 8 characters of `customer_id`) is shown instead.
+- Any shop or customer detail not yet saved in the settings forms (the landing page's confirmed shop name is used until Admin saves one).
+- Shop logo: no upload exists, so the letterhead is text only.
+- Company signatory name on the contract.
 - Confirmed delivery date and place: `job.due_at` is copied from the customer's requested date, so it is not printed as a commitment.
-- Quotation validity period, discounts, per-unit prices: not supported (quotes are a single whole-job price; unit price prints as —).
-- Supplier address and supplier credit terms on the PO.
+- Discounts and per-unit prices: quotes are one whole-job price; unit price prints as —.
+- Supplier address and supplier credit terms on the material PO.
 - Invoice credit days on the contract until Admin sets them (UC9).
 
 ## Legal review
@@ -61,9 +67,14 @@ system, so none were invented). The UI states this next to the print button.
 
 ## Verification
 
-Native tests (documents domain and render tests, password rules), TypeScript,
-ESLint, source audit, DESIGN sync, production build. Browser walk against the
-local API: password validation, wrong current password, success, other session
-revoked, old password rejected; quotation, PO and contract rendered from demo
-data with Thai text. Not verified: the actual browser print dialog / PDF output
-and multi-page breaks on paper (the preview pane could not open a print dialog).
+Native tests (documents domain, render tests for all four documents, Thai
+amount words, password rules), TypeScript, ESLint, source audit, DESIGN sync,
+production build. Headless Chromium against the local API and demo data: Admin
+saved shop details; a company customer saved billing details and wrote a PO;
+PDFs of the customer PO (one page), quotation (one page) and contract (two
+pages, page numbers correct) were generated and checked; Staff saw the
+customer's billing details on the contract. The first headless run printed the
+PO with no text because the font had not loaded, which led to the explicit font
+load. Not verified: a physical printer, the Staff quote editor's new fields in
+the browser (covered by types and the backend tests), and phone widths for the
+new settings forms.

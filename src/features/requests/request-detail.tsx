@@ -10,8 +10,7 @@ import { Button, Collapsible, ErrorText, LoadError, NextAction, Skeleton, Status
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import { latestQuote } from "../customer/customer-domain";
 import { useCollection } from "../customer/customer-hooks";
-import { QuotationDocument } from "../documents/business-documents";
-import { PrintDocument } from "../documents/document-print";
+import { QuotationPrint } from "../documents/document-parties";
 import { AcceptedStage } from "./request-evidence";
 import { QuoteForm, QuoteSummary, RefuseRequest } from "./request-quote";
 import { CANCELLING_REJECTION, REQUEST_STEPS, isClosed, rejectionCount } from "./request-stage-domain";
@@ -42,9 +41,7 @@ export function RequestDetail({ api, account, id, now, backHref, onChanged }: { 
         <div><dt>จำนวน</dt><dd>{data.qty} ชิ้น</dd></div>
         {rejections > 0 && <div><dt>ลูกค้าปฏิเสธใบเสนอราคา</dt><dd>{rejections} ครั้ง{data.status !== "canceled" && rejections < CANCELLING_REJECTION ? ` · ครั้งที่ ${CANCELLING_REJECTION} จะยกเลิกคำขอ` : ""}</dd></div>}
       </dl>
-      {latest && latest.status !== "draft" && <div className={layout.actions}><PrintDocument ready={Boolean(decisions.data?.complete && !decisions.loading && !decisions.error)} footer={`ใบเสนอราคา #${latest.quotation_no} ฉบับที่ ${latest.version}`} label="พิมพ์ใบเสนอราคา / บันทึกเป็น PDF" hint={decisions.error ? "โหลดประวัติการตอบรับไม่สำเร็จ" : "กำลังโหลดเงื่อนไขที่บันทึก…"} button={(props) => <Button {...props} />}>
-        <QuotationDocument request={data} quote={latest} terms={decisions.data?.items.find((item) => item.quotation_id === latest.id && item.outcome === "accept")?.terms} />
-      </PrintDocument></div>}
+      {latest && latest.status !== "draft" && <div className={layout.actions}><QuotationPrint api={api} request={data} quote={latest} terms={decisions.data?.items.find((item) => item.quotation_id === latest.id && item.outcome === "accept")?.terms} ready={Boolean(decisions.data?.complete && !decisions.loading && !decisions.error)} label="พิมพ์ใบเสนอราคา / บันทึกเป็น PDF" hint={decisions.error ? "โหลดประวัติการตอบรับไม่สำเร็จ" : "กำลังโหลดเงื่อนไขที่บันทึก…"} button={(props) => <Button {...props} />} /></div>}
       <RequestFiles api={api} id={id} />
       {quotes.error && !quotes.data && <LoadError title="โหลดใบเสนอราคาไม่สำเร็จ" onRetry={quotes.reload} />}
       {quotes.loading && !quotes.data && <Skeleton label="กำลังโหลดใบเสนอราคา…" rows={2} />}

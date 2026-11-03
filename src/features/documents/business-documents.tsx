@@ -1,52 +1,71 @@
 import type { ReactNode } from "react";
-import type { Customer, Fulfillment, JobRequest, Quotation, Terms } from "../../lib/api/backend-api";
+import type { Fulfillment, JobRequest, Quotation, Terms } from "../../lib/api/backend-api";
 import type { Invoice } from "../delivery/delivery-domain";
 import type { SupplierOrder } from "../procurement/procurement-domain";
 import { orderTabOf } from "../procurement/procurement-domain";
 import { bahtTH, quantityTH } from "../../components/staff-ui/staff-format";
 import { ORDER_STATE } from "../../components/staff-ui/staff-labels";
-import { QUOTE_LABELS } from "../customer/customer-domain";
 import { quotePreview } from "../customer/customer-request-domain";
-import { jobRef, longDateTH, SHOP } from "./documents-domain";
+import { bahtText, jobRef, longDateTH, shopParty, type Party, type ShopParty } from "./documents-domain";
 import styles from "./documents.module.css";
 
 // Printed documents show only explicit, customer-safe fields. Never spread a
 // quotation DTO here: staff DTOs can carry internal_costs. Missing facts print
 // as dotted fill-in lines, never as guessed values.
-const Fill = ({ value, width }: { value?: ReactNode; width?: string }) => value ? <>{value}</> : <span className={styles.blank} style={width ? { minWidth: width } : undefined} />;
-const qtyTH = (value: string | number) => new Intl.NumberFormat("th-TH").format(BigInt(value));
-const customerCode = (id: string) => id.slice(0, 8).toUpperCase();
+export const Fill = ({ value, width }: { value?: ReactNode; width?: string }) => value ? <>{value}</> : <span className={styles.blank} style={width ? { minWidth: width } : undefined} />;
+export const qtyTH = (value: string | number) => new Intl.NumberFormat("th-TH").format(BigInt(value));
 const typeTH = (type?: string) => type === "company" ? "นิติบุคคล (บริษัท)" : type === "individual" ? "บุคคลธรรมดา" : undefined;
+// Supplier orders are not tied to the shop profile request; confirmed landing facts only.
+const LANDING_SHOP = shopParty();
 
-function Letterhead({ title, english, meta }: { title: string; english: string; meta: [string, ReactNode][] }) {
+function Letterhead({ shop, title, english, meta }: { shop: ShopParty; title: string; english: string; meta: [string, ReactNode][] }) {
   return <header className={styles.letterhead}>
-    <div><p className={styles.shopName}><Fill value={SHOP.name} width="70mm" /></p>
-      <p className={styles.muted}>ที่อยู่ <Fill value={SHOP.address} width="80mm" /></p>
-      <p className={styles.muted}>โทรศัพท์ <Fill value={SHOP.phone} width="35mm" />{SHOP.email && <> · อีเมล {SHOP.email}</>}</p></div>
+    <div><p className={styles.shopName}><Fill value={shop.name} width="70mm" /></p>
+      <p className={styles.muted}>ที่อยู่ <Fill value={shop.address} width="80mm" /></p>
+      <p className={styles.muted}>โทรศัพท์ <Fill value={shop.phone} width="35mm" />{shop.email && <> · อีเมล {shop.email}</>}{shop.taxId && <> · เลขประจำตัวผู้เสียภาษี {shop.taxId}</>}</p></div>
     <div className={styles.docTitle}><h1>{title}</h1><p>{english}</p>
       <dl className={styles.meta}>{meta.map(([label, value]) => <Row key={label} label={label} value={value} />)}</dl></div>
   </header>;
 }
-const Row = ({ label, value }: { label: string; value: ReactNode }) => <><dt>{label}</dt><dd>{value}</dd></>;
-function Signature({ role, name }: { role: string; name?: string }) {
+const Row = ({ label, value }: { label: ReactNode; value: ReactNode }) => <><dt>{label}</dt><dd>{value}</dd></>;
+export function Signature({ role, name }: { role: ReactNode; name?: string }) {
   return <div className={styles.signature}><span className={styles.signRow}>ลงชื่อ<span className={styles.signLine} /></span><span>( <Fill value={name} width="50mm" /> )</span><span>{role}</span><span>วันที่ <span className={styles.blank} style={{ minWidth: "35mm" }} /></span></div>;
 }
 
-export function QuotationDocument({ request, quote, customer, terms }: { request: JobRequest; quote: Quotation; customer?: Customer; terms?: Terms }) {
-  const type = terms?.customer_type ?? customer?.customer_type;
+/** Quotation layout: title block, customer details, one whole-job line, totals without VAT, payment channel and shop footer. */
+export function QuotationDocument({ request, quote, terms, shop, customer, customerType }: { request: JobRequest; quote: Quotation; terms?: Terms; shop: ShopParty; customer: Party; customerType?: string }) {
+  const type = terms?.customer_type ?? customerType;
   const preview = !terms && type ? quotePreview(quote.final_price, type) : undefined;
-  return <article className={styles.sheet} aria-label={`ใบเสนอราคา #${quote.quotation_no}`}>
-    <Letterhead title="ใบเสนอราคา" english="QUOTATION" meta={[["เลขที่", `#${quote.quotation_no}`], ["ฉบับที่", String(quote.version)], ["วันที่", <Fill key="date" value={longDateTH(quote.sent_at)} width="30mm" />], ["สถานะ", QUOTE_LABELS[quote.status] ?? quote.status], ["คำขอผลิต", `#${request.no_request}`]]} />
-    <div className={styles.parties}>
-      <section className={styles.party}><h2>ลูกค้า (Customer)</h2><p><strong><Fill value={customer?.name} width="60mm" /></strong></p><p>ประเภท <Fill value={typeTH(type)} width="30mm" /> · รหัสลูกค้า {customerCode(request.customer_id)}</p><p>ที่อยู่ <span className={styles.blank} style={{ minWidth: "65mm" }} /></p><p>โทรศัพท์ <span className={styles.blank} /></p></section>
-      <section className={styles.party}><h2>รายละเอียดคำขอ</h2><p>วันที่ส่งคำขอ {longDateTH(request.created_at) ?? "—"}</p><p>วันที่ลูกค้าต้องการ {longDateTH(request.deadline) ?? "ไม่ได้ระบุ"}</p><p className={styles.muted}>วันที่ลูกค้าต้องการไม่ใช่กำหนดส่งที่ร้านยืนยัน</p></section>
-    </div>
-    <table className={styles.items}><thead><tr><th scope="col">ลำดับ</th><th scope="col">รายการและข้อกำหนด</th><th scope="col" data-numeric>จำนวน</th><th scope="col">หน่วย</th><th scope="col" data-numeric>ราคาต่อหน่วย</th><th scope="col" data-numeric>จำนวนเงิน</th></tr></thead>
-      <tbody><tr><td>1</td><td><p className={styles.preserve}>{request.description}</p><p className={styles.muted}>วัตถุดิบ: {request.material_spec || "ไม่ระบุ"}</p></td><td data-numeric>{qtyTH(request.qty)}</td><td>ชิ้น</td><td data-numeric>—</td><td data-numeric>{bahtTH(quote.final_price)}</td></tr></tbody></table>
-    <dl className={styles.totals}><dt>รวมเป็นเงิน</dt><dd>{bahtTH(quote.final_price)}</dd><dt className={styles.grand}>ยอดรวมทั้งสิ้น</dt><dd className={styles.grand}>{bahtTH(quote.final_price)}</dd></dl>
-    <h2>เงื่อนไข</h2>
+  const words = bahtText(quote.final_price);
+  return <article className={`${styles.sheet} ${styles.quote}`} aria-label={`ใบเสนอราคา #${quote.quotation_no}`}>
+    <header className={styles.quoteHead}>
+      <div><p className={styles.shopName}><Fill value={shop.name} width="70mm" /></p>
+        <p className={`${styles.muted} ${styles.preserve}`}>ที่อยู่ <Fill value={shop.address} width="70mm" /></p>
+        <p className={styles.muted}>โทรศัพท์ <Fill value={shop.phone} width="35mm" />{shop.email && <> · {shop.email}</>}</p>
+        <p className={styles.muted}>เลขประจำตัวผู้เสียภาษี <Fill value={shop.taxId} width="40mm" /></p></div>
+      <div className={styles.quoteTitle}><h1>ใบเสนอราคา</h1><p className={styles.english}>Quotation</p><p>เลขที่ใบเสนอราคา : #{quote.quotation_no} ฉบับที่ {quote.version}</p></div>
+    </header>
+    <section aria-label="ข้อมูลลูกค้า">
+      <h2 className={styles.accent}>ข้อมูลลูกค้า</h2>
+      <dl className={styles.colon}>
+        <Row label="วันที่" value={<Fill value={longDateTH(quote.sent_at)} width="40mm" />} />
+        {quote.valid_until && <Row label="ยืนราคาถึง" value={longDateTH(quote.valid_until)} />}
+        <Row label="ชื่อลูกค้า" value={<><Fill value={customer.name} width="70mm" />{type && <> · {typeTH(type)}</>}</>} />
+        <Row label="เลขประจำตัวผู้เสียภาษี" value={<Fill value={customer.taxId} width="45mm" />} />
+        <Row label="ที่อยู่" value={<span className={styles.preserve}><Fill value={customer.address} width="80mm" /></span>} />
+        <Row label="เบอร์ติดต่อ" value={<Fill value={customer.phone} width="40mm" />} />
+        {customer.email && <Row label="อีเมล" value={customer.email} />}
+        <Row label="อ้างอิงคำขอ" value={`#${request.no_request}${request.deadline ? ` · ลูกค้าต้องการ ${longDateTH(request.deadline)} (ไม่ใช่กำหนดส่งที่ร้านยืนยัน)` : ""}`} />
+      </dl>
+    </section>
+    <table className={`${styles.items} ${styles.open}`}><thead><tr><th scope="col">ลำดับ</th><th scope="col">รายละเอียดงาน</th><th scope="col" data-numeric>จำนวน</th><th scope="col" data-numeric>ราคา/หน่วย</th><th scope="col" data-numeric>ราคารวม</th></tr></thead>
+      <tbody><tr><td>1</td><td><p className={styles.preserve}>{request.description}</p><p className={styles.muted}>วัตถุดิบ: {request.material_spec || "ไม่ระบุ"}</p></td><td data-numeric>{qtyTH(request.qty)} ชิ้น</td><td data-numeric>—</td><td data-numeric>{bahtTH(quote.final_price)}</td></tr></tbody></table>
+    <dl className={styles.totals}><dt>ราคารวม</dt><dd>{bahtTH(quote.final_price)}</dd><dt className={styles.grand}>ราคารวมทั้งหมด</dt><dd className={styles.grand}>{bahtTH(quote.final_price)}</dd></dl>
+    {words && <p className={styles.words}>({words})</p>}
+    <h2 className={styles.accent}>หมายเหตุและเงื่อนไข</h2>
     <ol className={styles.terms}>
-      <li>ราคาที่เสนอเป็นราคารวมทั้งงานสำหรับจำนวนข้างต้น ไม่ได้กำหนดราคาต่อหน่วย และไม่ได้คิดภาษีมูลค่าเพิ่ม (VAT)</li>
+      {quote.notes && <li className={styles.preserve}>{quote.notes}</li>}
+      <li>ราคาเป็นราคารวมทั้งงานสำหรับจำนวนข้างต้น ไม่ได้กำหนดราคาต่อหน่วย และไม่ได้คิดภาษีมูลค่าเพิ่ม (VAT)</li>
       {terms ? <>
         <li>ตอบรับในระบบเมื่อ {longDateTH(terms.accepted_at)} · {terms.deposit_required ? `มัดจำไม่น้อยกว่า ${bahtTH(terms.deposit_amount)} ยอดคงเหลือหลังมัดจำขั้นต่ำ ${bahtTH(terms.balance_after_deposit)}` : "ไม่ต้องวางมัดจำ"}{terms.po_required ? " · ต้องส่งใบสั่งซื้อ (PO)" : ""}</li>
         <li>ส่งหลักฐาน {[terms.deposit_required && "มัดจำ", terms.po_required && "PO"].filter(Boolean).join(" และ ")} ภายใน {longDateTH(terms.documents_due_at)} (14 วันหลังตอบรับ) หากไม่ครบตามกำหนด คำขอจะถูกยกเลิก</li>
@@ -56,17 +75,21 @@ export function QuotationDocument({ request, quote, customer, terms }: { request
       </>}
       <li>ร้านเริ่มผลิตเมื่อหลักฐานที่กำหนดผ่านการตรวจครบ ยอดคงเหลือชำระตามใบแจ้งหนี้ที่ร้านออก</li>
     </ol>
-    <div className={styles.signatures}><Signature role="ผู้เสนอราคา (ร้าน)" /><Signature role="ผู้อนุมัติ / ตอบรับใบเสนอราคา (ลูกค้า)" name={customer?.name} /></div>
+    <div className={styles.payRow}>
+      <section><h2 className={styles.accent}>ช่องทางการชำระเงิน</h2>
+        <dl className={styles.colon}><Row label="ชื่อบัญชี" value={<Fill value={shop.bankAccountName} width="50mm" />} /><Row label="เลขที่บัญชี" value={<Fill value={shop.bankAccountNo} width="40mm" />} /><Row label="ธนาคาร" value={<Fill value={shop.bankName} width="50mm" />} /></dl></section>
+      <div><Signature role="ผู้เสนอราคา" /><p className={styles.thanks}>ขอบคุณ / Thank You</p></div>
+    </div>
   </article>;
 }
 
 export function PurchaseOrderDocument({ order }: { order: SupplierOrder }) {
   const lines = order.lines ?? []; const jobs = order.job_ids ?? []; const tab = orderTabOf(order);
-  return <article className={styles.sheet} aria-label={`ใบสั่งซื้อ ${order.order_no}`}>
-    <Letterhead title="ใบสั่งซื้อ" english="PURCHASE ORDER" meta={[["เลขที่", order.order_no], ["วันที่", longDateTH(order.created_at) ?? "—"], ["สถานะ", tab ? ORDER_STATE[tab][0] : order.status]]} />
+  return <article className={styles.sheet} aria-label={`ใบสั่งซื้อวัสดุ ${order.order_no}`}>
+    <Letterhead shop={LANDING_SHOP} title="ใบสั่งซื้อวัสดุ" english="MATERIAL PURCHASE ORDER" meta={[["เลขที่", order.order_no], ["วันที่", longDateTH(order.created_at) ?? "—"], ["สถานะ", tab ? ORDER_STATE[tab][0] : order.status]]} />
     <div className={styles.parties}>
       <section className={styles.party}><h2>ผู้ขาย (Supplier)</h2><p><strong>{order.supplier.name}</strong></p><p>โทรศัพท์ <Fill value={order.supplier.phone} /></p><p>อีเมล <Fill value={order.supplier.email} /></p><p>ที่อยู่ <span className={styles.blank} style={{ minWidth: "65mm" }} /></p></section>
-      <section className={styles.party}><h2>การส่งมอบและอ้างอิง</h2><p>กำหนดรับของ <Fill value={longDateTH(order.expected_at)} width="35mm" /></p><p>สถานที่ส่งของ <Fill value={SHOP.address} width="50mm" /></p><p>อ้างอิงงาน {jobs.length ? jobs.map(jobRef).join(", ") : "สั่งเติมสต๊อกทั่วไป ไม่ผูกกับงาน"}</p></section>
+      <section className={styles.party}><h2>การส่งมอบและอ้างอิง</h2><p>กำหนดรับของ <Fill value={longDateTH(order.expected_at)} width="35mm" /></p><p>สถานที่ส่งของ <Fill value={LANDING_SHOP.address} width="50mm" /></p><p>อ้างอิงงาน {jobs.length ? jobs.map(jobRef).join(", ") : "สั่งเติมสต๊อกทั่วไป ไม่ผูกกับงาน"}</p></section>
     </div>
     <table className={styles.items}><thead><tr><th scope="col">ลำดับ</th><th scope="col">รายการวัตถุดิบ</th><th scope="col" data-numeric>จำนวน</th><th scope="col">หน่วย</th><th scope="col" data-numeric>ราคาต่อหน่วย (บาท)</th><th scope="col" data-numeric>จำนวนเงิน</th></tr></thead>
       <tbody>{lines.map((line, index) => <tr key={line.material_id}><td>{index + 1}</td><td>{line.material_name}</td><td data-numeric>{quantityTH(line.quantity)}</td><td>{line.unit_name}</td><td data-numeric>{quantityTH(line.unit_cost)}</td><td data-numeric>{bahtTH(line.total_amount)}</td></tr>)}</tbody></table>
@@ -84,13 +107,13 @@ export function PurchaseOrderDocument({ order }: { order: SupplierOrder }) {
 type Job = NonNullable<Fulfillment["job"]>;
 // Formal Thai hire-of-work contract assembled only from recorded data and
 // confirmed business rules. Wording needs legal review before real use.
-export function JobContractDocument({ request, quote, terms, job, customer, invoice, creditDays }: { request: JobRequest; quote: Quotation; terms: Terms; job: Job; customer?: Customer; invoice?: Invoice; creditDays?: number }) {
+export function JobContractDocument({ request, quote, terms, job, shop, customer, invoice, creditDays }: { request: JobRequest; quote: Quotation; terms: Terms; job: Job; shop: ShopParty; customer: Party; invoice?: Invoice; creditDays?: number }) {
   const company = terms.customer_type === "company"; const ref = `JOB-${jobRef(job.id)}`;
   return <article className={styles.sheet} aria-label={`สัญญาจ้างทำของ ${ref}`}>
-    <Letterhead title="สัญญาจ้างทำของ" english="JOB CONTRACT" meta={[["เลขที่สัญญา", ref], ["ใบเสนอราคา", `#${quote.quotation_no} ฉบับที่ ${quote.version}`], ["คำขอผลิต", `#${request.no_request}`], ["วันที่เปิดงาน", longDateTH(job.created_at) ?? "—"]]} />
+    <Letterhead shop={shop} title="สัญญาจ้างทำของ" english="JOB CONTRACT" meta={[["เลขที่สัญญา", ref], ["ใบเสนอราคา", `#${quote.quotation_no} ฉบับที่ ${quote.version}`], ["คำขอผลิต", `#${request.no_request}`], ["วันที่เปิดงาน", longDateTH(job.created_at) ?? "—"]]} />
     <div className={styles.contractTitle}><h1>สัญญาจ้างผลิตชิ้นงานกลึงตามสั่ง</h1><p>ทำที่ <span className={styles.blank} /> วันที่ <span className={styles.blank} style={{ minWidth: "35mm" }} /></p></div>
-    <p className={styles.indent} style={{ marginTop: "4mm" }}>สัญญาฉบับนี้ทำขึ้นระหว่าง <strong><Fill value={SHOP.name} width="50mm" /></strong> สำนักงานตั้งอยู่เลขที่ <Fill value={SHOP.address} width="70mm" /> โทรศัพท์ <Fill value={SHOP.phone} width="30mm" /> เลขประจำตัวผู้เสียภาษี <span className={styles.blank} /> ซึ่งต่อไปในสัญญานี้เรียกว่า “ผู้รับจ้าง” ฝ่ายหนึ่ง กับ</p>
-    <p className={styles.indent}><strong><Fill value={customer?.name} width="60mm" /></strong> ({typeTH(terms.customer_type)}) {company ? <>โดย <span className={styles.blank} /> ผู้มีอำนาจลงนามผูกพันนิติบุคคล สำนักงานตั้งอยู่เลขที่ <span className={styles.blank} style={{ minWidth: "70mm" }} /> เลขทะเบียนนิติบุคคล/เลขประจำตัวผู้เสียภาษี <span className={styles.blank} /></> : <>เลขประจำตัวประชาชน <span className={styles.blank} /> อยู่บ้านเลขที่ <span className={styles.blank} style={{ minWidth: "70mm" }} /></>} โทรศัพท์ <span className={styles.blank} style={{ minWidth: "30mm" }} /> ซึ่งต่อไปในสัญญานี้เรียกว่า “ผู้ว่าจ้าง” อีกฝ่ายหนึ่ง</p>
+    <p className={styles.indent} style={{ marginTop: "4mm" }}>สัญญาฉบับนี้ทำขึ้นระหว่าง <strong><Fill value={shop.name} width="50mm" /></strong> สำนักงานตั้งอยู่เลขที่ <Fill value={shop.address} width="70mm" /> โทรศัพท์ <Fill value={shop.phone} width="30mm" /> เลขประจำตัวผู้เสียภาษี <Fill value={shop.taxId} /> ซึ่งต่อไปในสัญญานี้เรียกว่า “ผู้รับจ้าง” ฝ่ายหนึ่ง กับ</p>
+    <p className={styles.indent}><strong><Fill value={customer.name} width="60mm" /></strong> ({typeTH(terms.customer_type)}) {company ? <>โดย <span className={styles.blank} /> ผู้มีอำนาจลงนามผูกพันนิติบุคคล สำนักงานตั้งอยู่เลขที่ <Fill value={customer.address} width="70mm" /> เลขทะเบียนนิติบุคคล/เลขประจำตัวผู้เสียภาษี <Fill value={customer.taxId} /></> : <>เลขประจำตัวประชาชน/เลขประจำตัวผู้เสียภาษี <Fill value={customer.taxId} /> อยู่บ้านเลขที่ <Fill value={customer.address} width="70mm" /></>} โทรศัพท์ <Fill value={customer.phone} width="30mm" /> ซึ่งต่อไปในสัญญานี้เรียกว่า “ผู้ว่าจ้าง” อีกฝ่ายหนึ่ง</p>
     <p className={styles.indent}>คู่สัญญาทั้งสองฝ่ายได้ตกลงกันโดยมีข้อความดังต่อไปนี้</p>
     <ol className={styles.clauses}>
       <li><h2>ขอบเขตของงาน</h2><p className={styles.indent}>ผู้ว่าจ้างตกลงจ้างและผู้รับจ้างตกลงรับจ้างผลิตชิ้นงานตามรายละเอียดด้านล่าง ตามใบเสนอราคาเลขที่ #{quote.quotation_no} ฉบับที่ {quote.version} ซึ่งผู้ว่าจ้างได้ตอบรับเมื่อวันที่ {longDateTH(terms.accepted_at)} และให้ถือว่าใบเสนอราคาดังกล่าวเป็นส่วนหนึ่งของสัญญานี้</p>
@@ -112,7 +135,7 @@ export function JobContractDocument({ request, quote, terms, job, customer, invo
     </ol>
     <p className={styles.indent} style={{ marginTop: "5mm" }}>สัญญานี้ทำขึ้นเป็นสองฉบับมีข้อความถูกต้องตรงกัน คู่สัญญาได้อ่านและเข้าใจข้อความในสัญญานี้โดยละเอียดแล้ว จึงได้ลงลายมือชื่อไว้เป็นสำคัญต่อหน้าพยาน และต่างยึดถือไว้ฝ่ายละหนึ่งฉบับ</p>
     <div className={styles.signatures}>
-      <Signature role="ผู้ว่าจ้าง" name={company ? undefined : customer?.name} /><Signature role="ผู้รับจ้าง" />
+      <Signature role="ผู้ว่าจ้าง" name={company ? undefined : customer.name} /><Signature role="ผู้รับจ้าง" />
       <Signature role="พยาน" /><Signature role="พยาน" />
     </div>
   </article>;

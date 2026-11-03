@@ -29,7 +29,8 @@ export function PrintDocument({ ready, footer, hint, label = "พิมพ์ / 
     if (!printing) return;
     let canceled = false; let frame = 0;
     const finish = () => setPrinting(false); window.addEventListener("afterprint", finish);
-    void document.fonts.ready.then(() => { if (!canceled) frame = requestAnimationFrame(() => { if (!canceled) window.print(); }); });
+    // fonts.ready can settle before the portal's text has even requested Sarabun, so load each weight explicitly.
+    void Promise.all(["400", "600", "700"].map((weight) => document.fonts.load(`${weight} 16px ${sarabun.style.fontFamily}`, "กA"))).then(() => document.fonts.ready).then(() => { if (!canceled) frame = requestAnimationFrame(() => { if (!canceled) window.print(); }); });
     return () => { canceled = true; cancelAnimationFrame(frame); window.removeEventListener("afterprint", finish); };
   }, [printing]);
   const font = sarabun.style.fontFamily;

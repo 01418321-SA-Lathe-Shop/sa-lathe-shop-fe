@@ -13,8 +13,7 @@ import { CustomerDepositDetail } from "./customer-deposits";
 import { CustomerWriteRetry } from "./customer-write";
 import { DocumentList } from "./customer-documents";
 import { DocumentDetailNavigation } from "./customer-document-navigation";
-import { QuotationDocument } from "../documents/business-documents";
-import { PrintDocument } from "../documents/document-print";
+import { QuotationPrint } from "../documents/document-parties";
 import documentStyles from "./customer-documents.module.css";
 
 export function CustomerDocumentList({ api, mode }: { api: BackendApi; mode: "quotes" | "deposit" }) {
@@ -60,7 +59,7 @@ function QuotationDetail({ api, request, quote, quotes, latest, reload }: { api:
   return <><DocumentDetailNavigation blocked={write.frozen} />
     <header className={documentStyles.detailHead}>
       <div><div className={documentStyles.detailTitle}><h1 tabIndex={-1}>ใบเสนอราคา #{quote.quotation_no}</h1><span className={documentStyles.revision}>ฉบับที่ {quote.version}</span><Badge value={quote.status} labels={QUOTE_LABELS} /></div><p>{request.description} · คำขอ #{request.no_request}</p></div>
-      <span className={documentStyles.fileAction}><PrintDocument ready={printReady} footer={`ใบเสนอราคา #${quote.quotation_no} ฉบับที่ ${quote.version}`} hint="โหลดผู้สั่งและเงื่อนไขที่บันทึกให้ครบก่อนพิมพ์"><QuotationDocument request={request} quote={quote} customer={profile} terms={terms} /></PrintDocument></span>
+      <span className={documentStyles.fileAction}><QuotationPrint api={api} request={request} quote={quote} terms={terms} ready={printReady} hint="โหลดผู้สั่งและเงื่อนไขที่บันทึกให้ครบก่อนพิมพ์" /></span>
     </header>
     {notice && <p role="status" className="cust-alert success">{notice}</p>}
     <ResourceFeedback {...profiles} loading={false} />

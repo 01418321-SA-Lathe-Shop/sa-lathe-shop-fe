@@ -7,11 +7,21 @@ test("documents never print placeholder shop facts", async () => {
   assert.equal(confirmed("  "), undefined);
   assert.equal(confirmed(" Bangkok Machine Shop "), "Bangkok Machine Shop");
   assert.equal(jobRef("3f2a9c1e-0000-4000-8000-000000000000"), "3F2A9C1E");
-  const all = missingContractInfo({});
-  assert(all.includes("ชื่อผู้ว่าจ้าง") && all.includes("กำหนดส่งมอบที่ร้านยืนยัน") && all.includes("ระยะเวลาเครดิตของใบแจ้งหนี้"));
-  const known = missingContractInfo({ customerName: "บริษัท ตัวอย่าง จำกัด", creditDays: 0 });
-  assert(!known.includes("ชื่อผู้ว่าจ้าง") && !known.includes("ระยะเวลาเครดิตของใบแจ้งหนี้"));
+  const all = missingContractInfo({ shop: {}, customer: {} });
+  assert(["ชื่อผู้ว่าจ้าง", "ที่อยู่ผู้ว่าจ้าง", "เลขประจำตัวผู้เสียภาษีของร้าน", "กำหนดส่งมอบที่ร้านยืนยัน", "ระยะเวลาเครดิตของใบแจ้งหนี้"].every((item) => all.includes(item)));
+  const known = missingContractInfo({ shop: { address: "a", phone: "p", taxId: "t" }, customer: { name: "บริษัท ตัวอย่าง จำกัด", address: "a", phone: "p", taxId: "t" }, creditDays: 0 });
+  assert.deepEqual(known, ["กำหนดส่งมอบที่ร้านยืนยัน", "สถานที่ส่งมอบ"]);
   assert(known.includes("กำหนดส่งมอบที่ร้านยืนยัน"), "requested dates are never a confirmed delivery date");
+});
+
+test("shop details come from the saved profile; landing facts fill only empty fields", async () => {
+  const { shopParty, customerParty } = await import("../../../src/features/documents/documents-domain.ts");
+  const empty = { name: "", address: "", tax_id: "", phone: "", email: "", bank_name: "", bank_account_name: "", bank_account_no: "" };
+  assert.equal(shopParty({ ...empty, name: " ร้านจริง " }).name, "ร้านจริง");
+  assert.equal(shopParty(empty).name, "Bangkok Machine Shop");
+  assert.equal(shopParty(empty).address, undefined, "landing placeholders never print");
+  assert.equal(shopParty(empty).taxId, undefined);
+  assert.deepEqual(customerParty({ name: "ก", address: "", tax_id: " 1 ", phone: "", email: "" }), { name: "ก", address: undefined, taxId: "1", phone: undefined, email: undefined });
 });
 
 test("printed dates use the long Thai form in Bangkok time", async () => {

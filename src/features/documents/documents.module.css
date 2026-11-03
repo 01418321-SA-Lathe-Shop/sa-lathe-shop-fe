@@ -60,3 +60,42 @@
 .signature { display: grid; gap: 2mm; text-align: center; font-size: 10.5pt; }
 .signRow { display: flex; align-items: flex-end; gap: 2mm; }
 .signLine { flex: 1; height: 10mm; border-bottom: 0.75pt dotted #333; }
+
+/* Quotation: green accent, open table rules and colon-aligned facts. */
+
+.quote h2.accent, .quote .quoteTitle h1, .quote .thanks { color: #2f6b3a; }
+.quote { line-height: 1.55; }
+.quote h2 { margin: 3.5mm 0 1mm; }
+.quoteHead { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8mm; align-items: end; padding-bottom: 3mm; border-bottom: 1pt solid #2f6b3a; }
+.quoteTitle { text-align: right; }
+.quoteTitle h1 { font-size: 26pt; font-weight: 700; line-height: 1.1; }
+.quoteTitle .english { color: #2f6b3a; font-size: 12pt; font-weight: 600; }
+.colon { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .5mm 3mm; }
+.colon dt { font-weight: 600; }
+.colon dt::after { content: " :"; }
+.colon dd { margin: 0; }
+.open th, .open td { border-width: 0 0 .5pt; border-color: #999; }
+.open thead th { background: none; border-bottom: 1pt solid #2f6b3a; color: #2f6b3a; }
+.words { margin-top: 1mm; text-align: right; font-weight: 600; }
+.payRow { display: grid; grid-template-columns: minmax(0, 1fr) 70mm; gap: 8mm; align-items: end; margin-top: 4mm; padding-top: 3mm; border-top: 1pt solid #2f6b3a; break-inside: avoid; }
+.payRow h2 { margin-top: 0; }
+.thanks { margin-top: 2mm; text-align: center; font-size: 12pt; font-weight: 700; }
+
+/* Customer PO: bilingual labels, ruled table and grand total in words. */
+.en { color: #666; font-weight: 400; }
+.poHead h1 { font-size: 20pt; font-weight: 700; line-height: 1.2; }
+.poHead p { font-size: 15pt; }
+.poHead .en { font-size: 10pt; }
+.poTop { display: grid; grid-template-columns: minmax(0, 1fr) 62mm; gap: 6mm; margin-top: 4mm; }
+.poParty, .poMeta { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: .5mm 4mm; font-size: 10pt; }
+.poParty { padding: 3mm 0; border-bottom: .75pt solid #999; }
+.poParty dt, .poMeta dt { font-weight: 600; }
+.poMeta { align-content: start; }
+.poItems { margin-top: 4mm; }
+.poItems th { line-height: 1.3; }
+.poBottom { display: grid; grid-template-columns: minmax(0, 1fr) 85mm; gap: 6mm; margin-top: 3mm; break-inside: avoid; }
+.poBottom h2 { margin: 0 0 1mm; font-size: 10.5pt; }
+.poTotal { display: grid; grid-template-columns: minmax(0, 1fr) max-content; gap: 2mm; align-items: center; padding: 2mm 2.5mm; border-top: 1pt solid #111; border-bottom: 2.5pt double #111; }
+.poTotal dt { font-weight: 600; }
+.poTotal dd { font-size: 13pt; font-weight: 700; font-variant-numeric: tabular-nums; }
+.poWords { display: flex; justify-content: space-between; gap: 4mm; margin-top: 2mm; padding: 2mm 3mm; background: #e4e4e4; break-inside: avoid; }

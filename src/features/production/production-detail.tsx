@@ -45,7 +45,7 @@ export function ProductionDetail({ api, account, id, request, requestLoading, no
         <div><dt>ผลิตเสร็จ</dt><dd>{job.completed_at ? dateTimeTH(job.completed_at) : "ยังไม่เสร็จ"}</dd></div>
         <div><dt>เวลาทำงานรวม</dt><dd>{minutesTH(job.labor_minutes)}</dd></div>
       </dl>
-      <section className={layout.section} aria-label="เอกสารงาน"><h3>เอกสาร</h3><div className={layout.actions}><JobContractPrint api={api} requestId={job.request_id} jobId={job.job_id} customerView={false} button={(props) => <Button {...props} />} /></div></section>
+      <section className={layout.section} aria-label="เอกสารงาน"><h3>เอกสาร</h3><div className={layout.actions}><JobContractPrint api={api} requestId={job.request_id} jobId={job.job_id} button={(props) => <Button {...props} />} /></div></section>
       {job.status === "queued" && <PlanStep api={api} job={job} canWrite={worker && settled} onSaved={saved} />}
       {job.status === "in_progress" && <><Steps steps={STEPS} current={2} />{worker ? settled && <WorkPanel api={api} job={job} onSaved={saved} /> : <p className={layout.muted}>พนักงานกำลังบันทึกงานนี้ Admin ดูความคืบหน้าและต้นทุนได้ด้านล่าง</p>}</>}
       {job.status === "completed" && <><Steps steps={STEPS} current={STEPS.length} /><NextAction title="ผลิตเสร็จแล้ว"><p>วัตถุดิบที่จองแต่ไม่ได้ใช้ถูกคืนแล้ว ขั้นต่อไปคือออกใบแจ้งหนี้และส่งมอบ</p><Link className={layout.linkButton} href={deliveryHref}>{worker ? "ไปที่ส่งมอบและใบแจ้งหนี้" : "ไปที่ส่งมอบและรับชำระ"} <Icon name="arrow" size={16} /></Link></NextAction></>}
