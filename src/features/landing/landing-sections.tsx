@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { depositRules, faqs, gallery, materials, orderFacts, reasons, services, shop, steps } from "./landing-content";
+import { depositRules, faqs, gallery, orderFacts, reasons, services, shop, steps } from "./landing-content";
 import { ServiceIcon } from "./landing-icons";
 import { MapFacade } from "./landing-map";
 
@@ -25,19 +25,6 @@ export function Services() {
         <h3>{service.title}</h3><p>{service.text}</p>
       </li>)}
     </ul>
-  </section>;
-}
-
-export function Materials() {
-  return <section className="landing-section landing-materials" id="materials" aria-labelledby="materials-title">
-    <Heading id="materials-title" eyebrow="วัสดุ" title="วัสดุที่เรารับงาน" text="บอกวัสดุที่ต้องการมาในคำขอได้เลย ถ้ายังไม่แน่ใจ ให้เราช่วยแนะนำตามลักษณะการใช้งานก็ได้" />
-    <div className="landing-table-wrap" data-reveal style={stagger(1)}>
-      <table className="landing-table">
-        <caption className="cinematic-sr-only">กลุ่มวัสดุที่รับงาน</caption>
-        <thead><tr><th scope="col">กลุ่มวัสดุ</th><th scope="col">ตัวอย่างเกรด</th><th scope="col">หมายเหตุ</th></tr></thead>
-        <tbody>{materials.map(m => <tr key={m.group}><th scope="row">{m.group}</th><td>{m.examples}</td><td>{m.note}</td></tr>)}</tbody>
-      </table>
-    </div>
   </section>;
 }
 

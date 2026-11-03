@@ -6,7 +6,7 @@ import { Logo } from "../../components/appearance/icons";
 import { Hero } from "./landing-hero";
 import { sectionLinks } from "./landing-nav";
 import { LandingMotion } from "./landing-motion";
-import { Contact, Faq, FaqJsonLd, Gallery, Materials, Process, Reasons, Services } from "./landing-sections";
+import { Contact, Faq, FaqJsonLd, Gallery, Process, Reasons, Services } from "./landing-sections";
 import { shop } from "./landing-content";
 import styles from "./landing.module.css";
 
@@ -23,7 +23,6 @@ export default function LandingPage() {
     </header>
     <Hero />
     <Services />
-    <Materials />
     <Gallery />
     <Reasons />
     <Process />

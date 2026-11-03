@@ -5,7 +5,6 @@ import { ThemeToggle } from "../../components/appearance/appearance";
 /** In-page section anchors shared by the hero navigation and the sticky bar. */
 export const sectionLinks = [
   { href: "#services", label: "บริการ" },
-  { href: "#materials", label: "วัสดุ" },
   { href: "#process", label: "ขั้นตอน" },
   { href: "#faq", label: "คำถาม" },
   { href: "#contact", label: "ติดต่อ" },

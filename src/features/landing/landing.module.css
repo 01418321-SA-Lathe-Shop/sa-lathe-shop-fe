@@ -187,9 +187,6 @@
 :where(.scope) :global(.landing-services) li:hover :global(.landing-service-icon) { background: #ff923f; color: #160e08; }
 :where(.scope) :global(.landing-services) p { margin: .75rem 0 0; color: var(--muted); font-size: .875rem; line-height: 1.7; }
 
-/* 2. Materials: heading beside the full-width materials table. */
-:where(.scope) :global(.landing-materials) { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 6%; align-items: start; }
-:where(.scope) :global(.landing-materials) :global(.landing-heading) { margin-bottom: 0; }
 :where(.scope) :global(.landing-table-wrap) { overflow-x: auto; }
 :where(.scope) :global(.landing-table) { width: 100%; border-collapse: collapse; font-size: .875rem; }
 :where(.scope) :global(.landing-table) th, :where(.scope) :global(.landing-table) td { padding: 1rem .75rem; border-bottom: 1px solid var(--soft-line); text-align: left; vertical-align: top; }
@@ -300,7 +297,7 @@
   :global(.cinematic-page):where(.scope) :global(.landing-section) h2 { font-size: clamp(2rem, 8.5vw, 2.5rem); }
   :where(.scope) :global(.landing-heading) { margin-bottom: 2.5rem; }
   :where(.scope) :global(.landing-services) { grid-template-columns: 1fr; }
-  :where(.scope) :global(.landing-materials), :where(.scope) :global(.landing-why), :where(.scope) :global(.landing-faq), :where(.scope) :global(.landing-contact) { grid-template-columns: 1fr; gap: 2.5rem; }
+  :where(.scope) :global(.landing-why), :where(.scope) :global(.landing-faq), :where(.scope) :global(.landing-contact) { grid-template-columns: 1fr; gap: 2.5rem; }
   :where(.scope) :global(.landing-terms), :where(.scope) :global(.landing-facts) dl { grid-template-columns: 1fr; }
   :where(.scope) :global(.landing-rules), :where(.scope) :global(.landing-facts) { padding: 1.5rem; }
   :where(.scope) :global(.landing-why-statement), :where(.scope) :global(.landing-faq) :global(.landing-heading) { position: static; }

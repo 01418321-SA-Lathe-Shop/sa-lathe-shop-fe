@@ -27,21 +27,13 @@ export const services: { icon: IconName; title: string; text: string }[] = [
   { icon: "batch", title: "งานจำนวนน้อยถึงงานล็อต", text: "สั่งไม่กี่ชิ้นหรือทำเป็นล็อตก็ได้ ผลิตตามจำนวนในใบเสนอราคา" },
 ];
 
-export const materials = [
-  { group: "เหล็กกล้าคาร์บอน", examples: "[เช่น S45C, SS400]", note: "[รอยืนยันเกรด]" },
-  { group: "สแตนเลส", examples: "[เช่น SUS304, SUS316]", note: "[รอยืนยันเกรด]" },
-  { group: "อะลูมิเนียม", examples: "[เช่น 6061, 7075]", note: "[รอยืนยันเกรด]" },
-  { group: "ทองเหลือง / ทองแดง", examples: "[ระบุเกรด]", note: "[รอยืนยันเกรด]" },
-  { group: "พลาสติกวิศวกรรม", examples: "[เช่น POM, ไนลอน]", note: "[รอยืนยันเกรด]" },
-];
-
 /** Add `image` (a path under /public) once real photos exist; tiles show a neutral placeholder until then. */
 export const gallery: { title: string; detail: string; image?: string; alt?: string }[] = [
-  { title: "[ชื่อชิ้นงาน 1]", detail: "[วัสดุ · จำนวน]" },
-  { title: "[ชื่อชิ้นงาน 2]", detail: "[วัสดุ · จำนวน]" },
-  { title: "[ชื่อชิ้นงาน 3]", detail: "[วัสดุ · จำนวน]" },
-  { title: "[ชื่อชิ้นงาน 4]", detail: "[วัสดุ · จำนวน]" },
-  { title: "[ชื่อชิ้นงาน 5]", detail: "[วัสดุ · จำนวน]" },
+  { title: "ชิ้นงานกลึงเป็นล็อต", detail: "งานกลึงเหล็ก · ผลิตจำนวนมาก", image: "/work/work-1.webp", alt: "ชิ้นงานเหล็กกลึงขั้นบันไดจำนวนมากวางเรียงบนพื้น" },
+  { title: "แม่พิมพ์ล้อพร้อมช่องเจาะ", detail: "งานกัด เจาะ · สแตนเลส", image: "/work/work-2.webp", alt: "แม่พิมพ์ทรงกลมมีช่องวงรีและรูเจาะเรียงรอบรูกลาง" },
+  { title: "ชุดแม่พิมพ์พร้อมหูจับ", detail: "งานกลึง เชื่อม · สแตนเลส", image: "/work/work-3.webp", alt: "ชุดแม่พิมพ์ทรงกลมสองชิ้นที่มีหูจับสแตนเลสเชื่อมติด" },
+  { title: "แม่พิมพ์ชิ้นงานยาว", detail: "งานกัด เชื่อม · เหล็ก", image: "/work/work-4.webp", alt: "แม่พิมพ์ทรงยาวพร้อมฝาประกบ เดือยนำ และหูจับ" },
+  { title: "ปลอกหัวแบนชุบสี", detail: "งานกลึง · เหล็กชุบ", image: "/work/work-5.webp", alt: "ปลอกหัวแบนชุบสีทองจำนวนมากอยู่ในถุง" },
 ];
 
 export const reasons = [
