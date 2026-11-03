@@ -9,3 +9,9 @@ test("login/register cannot natively submit credentials into the URL before hydr
   assert.match(source, /useSyncExternalStore\(noSubscribe, \(\) => true, \(\) => false\)/);
   assert.match(source, /<fieldset disabled=\{action\.busy \|\| !hydrated\}/);
 });
+
+test("registration requires an address unless joining a company by invitation", () => {
+  assert.match(source, /const joining = type === "company" && companyMode === "join";/);
+  assert.match(source, /\.\.\.\(joining \? \{\} : \{ address: text\(data, "address"\) \}\)/);
+  assert.match(source, /<textarea name="address" required maxLength=\{500\}/);
+});

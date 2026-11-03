@@ -28,9 +28,11 @@
 :where(.scope) :global(.login-field) { margin-top: 1.0625rem; display: flex; flex-direction: column; gap: 0.5rem; color: #929a93; font-size: 0.6875rem; }
 :where(.scope) :global(.login-field) > div { height: 3.5rem; padding: 0 1rem; display: flex; align-items: center; gap: 0.75rem; border: 0.0625rem solid #303532; border-radius: 0.75rem; background: #111412; color: #6f7771; }
 :where(.scope) :global(.login-field) > div:focus-within { border-color: #a55d28; box-shadow: 0 0 0 0.1875rem rgba(255,155,69,.07); }
-:where(.scope) :global(.login-field) input { width: 100%; height: 100%; border: 0; outline: 0; background: transparent; color: #d8ddd9; font: inherit; font-size: 0.8125rem; }
-:where(.scope) :global(.login-field) :is(input, select):focus,
-:where(.scope) :global(.login-field) :is(input, select):focus-visible { outline: none; }
+:where(.scope) :global(.login-field) :is(input, textarea) { width: 100%; height: 100%; border: 0; outline: 0; background: transparent; color: #d8ddd9; font: inherit; font-size: 0.8125rem; }
+:where(.scope) :global(.login-field) :is(input, select, textarea):focus,
+:where(.scope) :global(.login-field) :is(input, select, textarea):focus-visible { outline: none; }
+:where(.scope) :global(.login-field) > div:has(textarea) { height: auto; padding: 0.75rem 1rem; }
+:where(.scope) :global(.login-field) textarea { resize: vertical; line-height: 1.5; }
 :where(.scope) :global(.login-submit) { width: 100%; height: 3.5rem; padding: 0 1.125rem; display: flex; align-items: center; justify-content: center; gap: 0.6875rem; border: 0.0625rem solid #ffc184; border-radius: 0.8125rem; background: var(--lime); color: #21150c; font-size: 0.8125rem; font-weight: 700; cursor: pointer; }
 :where(.scope) :global(.login-register-link) { width:100%; margin-top:1.0625rem; border:0; background:transparent; color:#747c75; font-size: 0.625rem; cursor:pointer }:where(.scope) :global(.login-register-link) strong { margin-left:0.25rem;color:var(--lime);font-weight:650 }
 
@@ -56,5 +58,5 @@
 :global([data-theme="light"]) :where(.scope) :global(.login-back), :global([data-theme="light"]) :where(.scope) :global(.login-showcase-copy) p, :global([data-theme="light"]) :where(.scope) :global(.login-card)>p { color: #667066; }
 :global([data-theme="light"]) :where(.scope) :global(.login-field) { color: #4f5a50; }
 :global([data-theme="light"]) :where(.scope) :global(.login-field)>div { border-color: #d2d8ce; background: #fff; color: #717b72; }
-:global([data-theme="light"]) :where(.scope) :global(.login-field) input { color: #1b241c; }
-:global([data-theme="light"]) :where(.scope) :global(.login-field) input::placeholder { color: #9aa29a; }
+:global([data-theme="light"]) :where(.scope) :global(.login-field) :is(input, textarea) { color: #1b241c; }
+:global([data-theme="light"]) :where(.scope) :global(.login-field) :is(input, textarea)::placeholder { color: #9aa29a; }

@@ -31,6 +31,7 @@
 .state[data-active] { color: var(--s-green); }
 .panel .note { margin: 0; padding-top: 14px; border-top: 1px solid var(--s-line); color: var(--s-muted); font-size: .875rem; }
 .note a { color: var(--s-accent); }
+.preLine { white-space: pre-line; }
 
 .choice { min-width: 0; margin: 0; padding: 0; border: 0; }
 .choice legend { margin-bottom: 8px; padding: 0; font-size: .875rem; font-weight: 600; }

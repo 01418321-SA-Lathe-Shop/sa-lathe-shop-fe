@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import type { Account, BackendApi, Customer } from "../../lib/api/backend-api";
+import type { Account, BackendApi, Customer, CustomerAddress } from "../../lib/api/backend-api";
 import { useCommand, useResource } from "../../hooks/backend-hooks";
 import { customerHref, dateTH } from "./customer-domain";
 import { ActiveState, Facts, SettingsPanel } from "../settings/settings-ui";
@@ -21,10 +21,23 @@ export function CustomerAccount({ api, account }: { api: BackendApi; account: Ac
       {profiles.data?.items?.map((item) => <div key={item.id} className={styles.note}><Facts rows={[[item.customer_type === "company" ? "ชื่อบริษัท" : "ชื่อลูกค้า", item.name], ["ประเภท", item.customer_type === "company" ? "บริษัท" : "บุคคลทั่วไป"], ["สิทธิ์ของคุณ", item.is_owner ? item.customer_type === "company" ? "เจ้าของบริษัท" : "เจ้าของบัญชี" : "สมาชิกบริษัท"], ["รหัสลูกค้า", item.id.slice(0, 8).toUpperCase()]]} />{item.customer_type === "company" && item.is_owner && <p className={styles.inviteLink}><Link href={customerHref("memberships", { view: "invite", company: item.id })}>สร้างคำเชิญส่วนตัว →</Link></p>}</div>)}
       {profiles.data && !profiles.data.items?.length && <p className="cust-alert">ยังไม่พบบัญชีผู้สั่งที่ใช้งานได้</p>}
     </SettingsPanel>
-    <SettingsPanel title="ช่องทางติดต่อและที่อยู่" description="ระบบยังไม่เก็บข้อมูลเหล่านี้สำหรับบัญชีลูกค้า จึงยังแก้ไขที่นี่ไม่ได้"><Facts rows={[["อีเมล", "ยังไม่มีในระบบ"], ["โทรศัพท์", "ยังไม่มีในระบบ"], ["ที่อยู่ออกเอกสาร", "ยังไม่มีในระบบ"], ["ที่อยู่จัดส่ง", "ยังไม่มีในระบบ"]]} /></SettingsPanel>
+    {profiles.data?.items?.map((item) => <CustomerAddresses key={item.id} api={api} customer={item} />)}
   </div></>;
 }
 
+function CustomerAddresses({ api, customer }: { api: BackendApi; customer: Customer }) {
+  const addresses = useResource<{ items: CustomerAddress[] }>(api, `/customers/${customer.id}/addresses`); const action = useCommand();
+  return <SettingsPanel title={`ที่อยู่ · ${customer.name}`} description={customer.is_owner ? "ที่อยู่แรกมาจากตอนสมัครบัญชี เพิ่มที่อยู่อื่นได้ที่นี่" : "เฉพาะเจ้าของบัญชีเพิ่มที่อยู่ได้"}>
+    <ResourceFeedback {...addresses} />
+    {addresses.data?.items.map((item, index) => <p key={item.id} className={`${styles.note} ${styles.preLine}`}>{index + 1}. {item.address}</p>)}
+    {addresses.data && !addresses.data.items.length && <p className={styles.note}>ยังไม่มีที่อยู่</p>}
+    {customer.is_owner && <form className={styles.form} onSubmit={(event) => { event.preventDefault(); const form = event.currentTarget; const address = String(new FormData(form).get("address") ?? "").trim(); void action.run(async (signal) => { await api.call(`/customers/${customer.id}/addresses`, "POST", { address }, signal); form.reset(); addresses.reload(); }, "เพิ่มที่อยู่แล้ว"); }}>
+      <label className={styles.field}><span>เพิ่มที่อยู่</span><textarea name="address" rows={3} required maxLength={500} disabled={action.busy} /></label>
+      <div><button type="submit" className={styles.primary} disabled={action.busy}>{action.busy ? "กำลังบันทึก…" : "เพิ่มที่อยู่"}</button></div>
+    </form>}
+    <ActionFeedback {...action} />
+  </SettingsPanel>;
+}
 function InviteCompany({ api, company }: { api: BackendApi; company: Customer }) {
   const action = useCommand(); const [invitation, setInvitation] = useState(""); const [attempted, setAttempted] = useState(false); const [copied, setCopied] = useState(false);
   return <><PageTitle title="เชิญสมาชิกเข้าบริษัท" description={company.name} back="/customer/memberships" /><section className="cust-narrow cust-document"><h2>คำเชิญส่วนตัว</h2><p>คำเชิญใช้ได้ 1 ครั้ง และหมดอายุภายใน 24 ชั่วโมง ส่งให้ผู้รับเป็นการส่วนตัวเท่านั้น</p>{invitation ? <><div className="cust-secret"><strong>แสดงครั้งนี้เท่านั้น</strong><output>{invitation}</output></div><p className="cust-muted">โปรดคัดลอกก่อนออกจากหน้านี้ ระบบไม่เก็บรหัสคำเชิญไว้ในเบราว์เซอร์</p><button className="cust-primary" onClick={() => void action.run(async () => { await navigator.clipboard.writeText(invitation); setCopied(true); }, "คัดลอกคำเชิญแล้ว")}>คัดลอกคำเชิญ</button>{copied && <p role="status">คัดลอกแล้ว ส่งให้ผู้รับเป็นการส่วนตัว</p>}<button className="cust-link" onClick={() => setInvitation("")}>ซ่อนคำเชิญ</button></> : attempted ? <p className="cust-alert">รหัสถูกซ่อนหรือยังยืนยันผลสร้างไม่ได้ กลับไปตรวจสมาชิกภาพก่อนเริ่มสร้างคำเชิญใหม่ รหัสที่สร้างแล้วไม่ได้ถูกยกเลิกด้วยการออกจากหน้านี้</p> : <button className="cust-primary" disabled={action.busy} onClick={() => void action.run(async (signal) => { setAttempted(true); const result = await api.call<{ invitation: string }>(`/customers/${company.id}/invitations`, "POST", undefined, signal); setInvitation(result.invitation); }, "สร้างคำเชิญแล้ว")}>สร้างคำเชิญ</button>}<ActionFeedback {...action} /><Link className="cust-link" href="/customer/memberships">กลับบัญชีและบริษัท →</Link></section></>;

@@ -476,7 +476,9 @@ Implemented from the Claude Design boards (Customer payments, Customer account, 
 
 **ใบแจ้งหนี้และการชำระเงิน (`/customer/payments`).** Four summary cells: ยอดค้างชำระรวม, ชำระอนุมัติแล้ว (invoices only, deposits excluded), เกินกำหนดชำระ, หลักฐานรอตรวจ. Status pills with counts (`?status=`) plus ประวัติการชำระ (`?view=history`). One 14px-radius panel holds a local search box and a table; the whole row opens its detail through a stretched first-cell link. Invoices show number, request, job reference, total, paid with a 6px bar, balance, due date with countdown and status. History shows one row per approved deposit and per invoice payment: reference (first 8 characters of the payment id), job, amount, paid date, method, evidence and status. Invoice payments open the existing invoice detail (`?job=`); deposits open `/customer/deposit-po?request=`, because the job read gives a deposit no date, method or file. At 760px and below each row becomes a labelled two-column card. The detail adds the job reference, the accepted quotation link and each payment's reference. Not taken from the board: Record payment, reminders, export, aging, per-customer view and PromptPay/cheque methods. Partial and final payment types are not shown: the API has no payment type, only invoice status.
 
-**บัญชีและบริษัท (`/customer/memberships`).** Panels for บัญชีผู้ใช้ (name, username, status, created date), ลูกค้าและบริษัท (name, type, your rights, customer ID, private invitation for owners; join by invitation) and ช่องทางติดต่อและที่อยู่. The API stores no customer email, phone or address, so those read ยังไม่มีในระบบ, with no edit controls.
+**บัญชีและบริษัท (`/customer/memberships`).** Panels for บัญชีผู้ใช้ (name, username, status, created date), ลูกค้าและบริษัท (name, type, your rights, customer ID, private invitation for owners; join by invitation) and one ที่อยู่ · {customer name} panel per customer (2026-11-03): numbered addresses, oldest first, line breaks kept (`.preLine`); owners get a 3-row เพิ่มที่อยู่ textarea (max 500) and primary button, members see that only the owner adds addresses. Addresses cannot be edited or removed yet. The old ช่องทางติดต่อและที่อยู่ placeholder panel is removed.
+
+**Registration address (2026-11-03).** `/register` keeps the ประเภทลูกค้า select (บุคคลทั่วไป / บริษัท). For a new individual or company it adds a required ที่อยู่ `login-field` textarea (3 rows, max 500, auto height with 0.75rem/1rem padding, vertical resize); the address becomes the customer's first address and its billing address. Joining a company by invitation shows the help line ใช้ที่อยู่ของบริษัทที่คุณเข้าร่วม instead and sends no address.
 
 **ตั้งค่า (`/customer?view=settings`, `/staff/settings`, `/admin/settings`).** One `SettingsPage` in `src/features/settings` for all roles, with underline tabs บัญชีของฉัน, การตั้งค่าส่วนตัว, ความปลอดภัย and, for Admin only, ระบบ. Everything is read-only except display size (browser only) and sign-out, which has a confirmation dialog. ระบบ links to จัดการพนักงาน and shows which pages each fixed role can open, from the route guard's map. The Staff/Admin sidebar item replaces the old ตั้งค่า dialog there; the landing page keeps the dialog. Theme stays on the navbar toggle. `--s-*` tokens resolve to the Customer or Staff tokens, so one stylesheet serves both shells.
 
@@ -964,6 +966,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-03 | Registration requires an address for a new individual or company customer (textarea in the login-field style; hidden with a help line when joining by invitation). บัญชีและบริษัท replaces the placeholder contact panel with per-customer address lists and an owner-only เพิ่มที่อยู่ form, using backend `GET`/`POST /customers/{id}/addresses` | Native tests, type check, lint, DESIGN sync; backend UC1 integration on real PostgreSQL/S3 |
 | 2026-11-03 | Printed documents: all text black, Thank You removed from the quotation, unsaved shop/customer/supplier rows hidden, signature dates filled from the record, 14 mm signature lines, material PO letterhead from the saved shop profile | Native tests (new quotation rule test), TypeScript, lint, headless Chromium PDFs of quotation, customer PO, material PO and contract |
 | 2026-11-03 | Printed sheets get 2 mm top padding so Thai tone marks on the first line (ใบสั่งซื้อ title) are not clipped at the page top; contract drops the extra brackets around the customer type | Headless Chromium PDFs of quotation, customer PO and contract re-rendered and checked |
 | 2026-11-03 | Quotation reprinted after the owner's sample (green title, customer block, Thai amount in words, payment channel, no VAT); new customer-written bilingual PO on มัดจำและ PO; supplier PO retitled ใบสั่งซื้อวัสดุ; shop details (Admin ระบบ) and customer billing (บัญชีของฉัน) forms feed all documents; quote editor gains valid-until and note | Native tests (baht words, documents, settings), TypeScript, lint, source audit, production build, headless browser against the local API: Admin shop save, Customer billing and PO save, PDFs of quotation, customer PO and contract |
@@ -1340,9 +1343,11 @@ src/features/auth/auth.module.css
 :where(.scope) :global(.login-field) { margin-top: 1.0625rem; display: flex; flex-direction: column; gap: 0.5rem; color: #929a93; font-size: 0.6875rem; }
 :where(.scope) :global(.login-field) > div { height: 3.5rem; padding: 0 1rem; display: flex; align-items: center; gap: 0.75rem; border: 0.0625rem solid #303532; border-radius: 0.75rem; background: #111412; color: #6f7771; }
 :where(.scope) :global(.login-field) > div:focus-within { border-color: #a55d28; box-shadow: 0 0 0 0.1875rem rgba(255,155,69,.07); }
-:where(.scope) :global(.login-field) input { width: 100%; height: 100%; border: 0; outline: 0; background: transparent; color: #d8ddd9; font: inherit; font-size: 0.8125rem; }
-:where(.scope) :global(.login-field) :is(input, select):focus,
-:where(.scope) :global(.login-field) :is(input, select):focus-visible { outline: none; }
+:where(.scope) :global(.login-field) :is(input, textarea) { width: 100%; height: 100%; border: 0; outline: 0; background: transparent; color: #d8ddd9; font: inherit; font-size: 0.8125rem; }
+:where(.scope) :global(.login-field) :is(input, select, textarea):focus,
+:where(.scope) :global(.login-field) :is(input, select, textarea):focus-visible { outline: none; }
+:where(.scope) :global(.login-field) > div:has(textarea) { height: auto; padding: 0.75rem 1rem; }
+:where(.scope) :global(.login-field) textarea { resize: vertical; line-height: 1.5; }
 :where(.scope) :global(.login-submit) { width: 100%; height: 3.5rem; padding: 0 1.125rem; display: flex; align-items: center; justify-content: center; gap: 0.6875rem; border: 0.0625rem solid #ffc184; border-radius: 0.8125rem; background: var(--lime); color: #21150c; font-size: 0.8125rem; font-weight: 700; cursor: pointer; }
 :where(.scope) :global(.login-register-link) { width:100%; margin-top:1.0625rem; border:0; background:transparent; color:#747c75; font-size: 0.625rem; cursor:pointer }:where(.scope) :global(.login-register-link) strong { margin-left:0.25rem;color:var(--lime);font-weight:650 }
 
@@ -1368,8 +1373,8 @@ src/features/auth/auth.module.css
 :global([data-theme="light"]) :where(.scope) :global(.login-back), :global([data-theme="light"]) :where(.scope) :global(.login-showcase-copy) p, :global([data-theme="light"]) :where(.scope) :global(.login-card)>p { color: #667066; }
 :global([data-theme="light"]) :where(.scope) :global(.login-field) { color: #4f5a50; }
 :global([data-theme="light"]) :where(.scope) :global(.login-field)>div { border-color: #d2d8ce; background: #fff; color: #717b72; }
-:global([data-theme="light"]) :where(.scope) :global(.login-field) input { color: #1b241c; }
-:global([data-theme="light"]) :where(.scope) :global(.login-field) input::placeholder { color: #9aa29a; }
+:global([data-theme="light"]) :where(.scope) :global(.login-field) :is(input, textarea) { color: #1b241c; }
+:global([data-theme="light"]) :where(.scope) :global(.login-field) :is(input, textarea)::placeholder { color: #9aa29a; }
 ```
 
 src/features/workspace/workspace.module.css
