@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Noto_Sans_Thai } from "next/font/google";
-import { useEffect, useId, useRef, useSyncExternalStore } from "react";
+import { Fragment, useEffect, useId, useRef, useSyncExternalStore } from "react";
 import type { ApiSession } from "../auth/api-session";
 import { Icon, Logo } from "../../components/appearance/icons";
 import { ThemeToggle } from "../../components/appearance/appearance";
@@ -14,36 +14,10 @@ import { NotificationBell } from "./customer-notifications";
 import { CustomerContent } from "./customer-content";
 import { bindCustomerMenu } from "./customer-menu";
 import { DocumentNavigationProvider } from "./customer-document-navigation";
+import { CUSTOMER_NAV, type CustomerNavItem } from "./customer-navigation";
 import styles from "./customer.module.css";
 
 const thai = Noto_Sans_Thai({ subsets: ["thai", "latin"], display: "swap", variable: "--font-customer-thai" });
-
-type NavItem = {
-  href: string;
-  label: string;
-  icon: "grid" | "file" | "machine" | "clock" | "layers" | "wallet" | "inbox" | "sun";
-};
-
-const workspaceItems: NavItem[] = [
-  { href: "/customer", label: "ภาพรวม", icon: "grid" },
-];
-
-const orderItems: NavItem[] = [
-  { href: "/customer/requests", label: "คำขอผลิต", icon: "file" },
-  { href: "/customer/jobs", label: "งานผลิต", icon: "machine" },
-  { href: "/customer/jobs?view=history", label: "ประวัติ", icon: "clock" },
-];
-
-const documentItems: NavItem[] = [
-  { href: "/customer/quotations", label: "ใบเสนอราคา", icon: "layers" },
-  { href: "/customer/deposit-po", label: "มัดจำและ PO", icon: "wallet" },
-  { href: "/customer/payments", label: "ใบแจ้งหนี้และการชำระเงิน", icon: "wallet" },
-];
-
-const accountItems: NavItem[] = [
-  { href: "/customer/memberships", label: "บัญชีและบริษัท", icon: "inbox" },
-  { href: "/customer?view=settings", label: "ตั้งค่า", icon: "sun" },
-];
 
 export default function CustomerShell({ session, leave }: { session: ApiSession; leave: () => void }) {
   const pathname = usePathname();
@@ -71,7 +45,7 @@ export default function CustomerShell({ session, leave }: { session: ApiSession;
     return pathname === baseHref;
   }
 
-  function renderSidebarLinks(items: NavItem[]) {
+  function renderSidebarLinks(items: CustomerNavItem[]) {
     return items.map((item) => {
       const active = isItemActive(item.href);
       return (
@@ -88,7 +62,7 @@ export default function CustomerShell({ session, leave }: { session: ApiSession;
     });
   }
 
-  function renderMobileLinks(items: NavItem[]) {
+  function renderMobileLinks(items: CustomerNavItem[]) {
     return items.map((item) => {
       const active = isItemActive(item.href);
       return (
@@ -121,17 +95,12 @@ export default function CustomerShell({ session, leave }: { session: ApiSession;
             <strong>พื้นที่ลูกค้า</strong>
           </div>
           <nav className="cust-sidebar-nav" aria-label="เมนูหลัก">
-            <span className="cust-sidebar-label">WORKSPACE</span>
-            {renderSidebarLinks(workspaceItems)}
-
-            <span className="cust-sidebar-label">งานของฉัน</span>
-            {renderSidebarLinks(orderItems)}
-
-            <span className="cust-sidebar-label">เอกสารและการชำระเงิน</span>
-            {renderSidebarLinks(documentItems)}
-
-            <span className="cust-sidebar-label">บัญชี</span>
-            {renderSidebarLinks(accountItems)}
+            {CUSTOMER_NAV.map((group) => (
+              <Fragment key={group.label}>
+                <span className="cust-sidebar-label">{group.label}</span>
+                {renderSidebarLinks(group.items)}
+              </Fragment>
+            ))}
             <DemoAccountSwitch />
           </nav>
         </div>
@@ -202,17 +171,12 @@ export default function CustomerShell({ session, leave }: { session: ApiSession;
               </div>
             </div>
             <nav aria-label="เมนูมือถือ">
-              <span className="cust-sidebar-label">WORKSPACE</span>
-              {renderMobileLinks(workspaceItems)}
-
-              <span className="cust-sidebar-label">งานของฉัน</span>
-              {renderMobileLinks(orderItems)}
-
-              <span className="cust-sidebar-label">เอกสารและการชำระเงิน</span>
-              {renderMobileLinks(documentItems)}
-
-              <span className="cust-sidebar-label">บัญชี</span>
-              {renderMobileLinks(accountItems)}
+              {CUSTOMER_NAV.map((group) => (
+                <Fragment key={group.label}>
+                  <span className="cust-sidebar-label">{group.label}</span>
+                  {renderMobileLinks(group.items)}
+                </Fragment>
+              ))}
             </nav>
           </div>
           <div className="cust-mobile-actions">

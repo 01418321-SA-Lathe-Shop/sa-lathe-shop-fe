@@ -61,7 +61,7 @@ function LiveLogin({ base, notice, initialRegister, onLogin, localTestEnabled, o
         await api.call("/auth/register", "POST", { username: text(data, "username"), password, name: text(data, "username"), customer_type: type, ...(type === "company" ? companyMode === "new" ? { company_name: text(data, "company_name") } : { invitation: text(data, "invitation") } : {}), ...(joining ? {} : { address: text(data, "address") }) }, signal);
         api.close(); setRegister(false); router.replace("/login");
       } else { await onLogin(text(data, "username"), password); }
-    }, register ? "Account created. Sign in with your username and password." : "");
+    }, register ? "สร้างบัญชีแล้ว เข้าสู่ระบบด้วยชื่อผู้ใช้และรหัสผ่านของคุณ" : "");
   }
   return <main className={`login-page ${styles.scope}`}>
     <section className="login-showcase"><Logo onClick={() => router.push("/")}/><div className="login-showcase-copy"><span className="hero-kicker"><i className="live-dot"/> LATHE SHOP CONTROL</span><h1>{register ? <>เริ่มต้นงานใหม่<br/>ให้เป็นระบบ</> : <>ทุกงานสำคัญ<br/>อยู่ในที่เดียว</>}</h1><p>จัดการงานผลิต ติดตามความคืบหน้า และตรวจสอบเอกสารได้จากบัญชีของคุณ</p></div><div className="login-machine" aria-hidden="true"><div className="machine-orbit orbit-one"/><div className="machine-orbit orbit-two"/><div className="machine-core"><span/><i/></div></div><div className="login-showcase-footer"><span>LATHE SHOP CONTROL</span><small>Bangkok · Thailand</small></div></section>

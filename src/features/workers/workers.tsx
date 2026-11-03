@@ -3,7 +3,8 @@
 import { useState, type MouseEvent } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Icon } from "../../components/appearance/icons";
-import type { BackendApi, Worker } from "../../lib/api/backend-api";
+import type { Account, BackendApi, Worker } from "../../lib/api/backend-api";
+import { LiveAdmins } from "./admins";
 import { Button, Drawer, EmptyState, LoadError, SearchForm, Skeleton, StatusTabs, Toast, ToneBadge, TruncatedNotice } from "../../components/staff-ui/staff-ui";
 import { useCollection } from "../customer/customer-hooks";
 import { initials, matchWorker } from "./workers-domain";
@@ -17,7 +18,7 @@ const closeMenu = (event: MouseEvent<HTMLElement>) => event.currentTarget.closes
 
 // จัดการพนักงาน (Admin): Staff accounts only. Nothing is deleted and nobody can be
 // promoted to Admin; contacts are optional on old accounts until someone fills them in.
-export function LiveWorkers({ api }: { api: BackendApi }) {
+export function LiveWorkers({ api, account }: { api: BackendApi; account: Account }) {
   const workers = useCollection<Worker>(api, "/admin/workers");
   const [q, setQ] = useState(""); const [panel, setPanel] = useState<Panel>(null);
   const [toast, setToast] = useState(""); const clearToast = () => setToast("");
@@ -70,5 +71,6 @@ export function LiveWorkers({ api }: { api: BackendApi }) {
       {panel?.kind === "password" && <PasswordForm key={panel.worker.id} api={api} worker={panel.worker} onSaved={() => saved(`เปลี่ยนรหัสผ่าน ${panel.worker.name} แล้ว ต้องเข้าสู่ระบบใหม่ทุกเครื่อง`)} />}
     </Drawer>
     <Toast message={toast} onDone={clearToast} />
+    {account.is_super_admin && <LiveAdmins api={api} />}
   </section>;
 }

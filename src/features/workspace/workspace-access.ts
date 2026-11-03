@@ -9,14 +9,7 @@ export type Workspace = { id: Exclude<WorkspaceId, "overview">; useCase: string;
 export const API_ROLES: Record<ApiRole, Role> = { customer: "Customer", worker: "Worker", admin: "Admin" };
 
 const DESCRIPTIONS: Record<Role, Partial<Record<Exclude<WorkspaceId, "overview">, [string, string]>>> = {
-  Customer: {
-    requests: ["UC1", "Send a manufacturing request and private drawings."],
-    quotations: ["UC3", "Accept or reject quotations sent by the shop."],
-    "deposit-po": ["UC4", "Submit the deposit receipt or company PO for an accepted quotation."],
-    "delivery-payment": ["UC9", "Inspect deliveries, follow invoices and submit payment proof."],
-    inbox: ["Inbox", "Notifications about your requests."],
-    memberships: ["Account", "Company memberships and private invitations."],
-  },
+  Customer: {}, // Customer's Thai menu lives in customer/customer-navigation.ts.
   Worker: {
     quotations: ["UC1–UC4", "ประเมินราคา ส่งใบเสนอราคา และตรวจหลักฐานมัดจำ/PO"],
     materials: ["UC5", "ดูยอดวัตถุดิบที่พร้อมใช้ ที่จองไว้ และประวัติการเคลื่อนไหว"],
