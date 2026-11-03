@@ -4,14 +4,14 @@ import { useState, type FormEvent } from "react";
 import type { BackendApi } from "../../lib/api/backend-api";
 import { useCommand, useResource } from "../../hooks/backend-hooks";
 import { dateTimeTH, quantityTH } from "../../components/staff-ui/staff-format";
-import { ConfirmDialog, EmptyState, ErrorText, Field, LoadError, Skeleton, ToneBadge } from "../../components/staff-ui/staff-ui";
+import { ConfirmDialog, Drawer, EmptyState, ErrorText, Field, LoadError, Skeleton, ToneBadge } from "../../components/staff-ui/staff-ui";
 import { inventoryDecimal, type InventoryMaterial, type UnitConversion } from "./inventory-domain";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./inventory.module.css";
 
 type Unit = { id: string; name: string };
 
-// Admin per-material conversions. A factor is never edited: past records keep it, so correcting one means deactivating it and adding another.
+// Admin per-material conversions (UC10). Supports adding, updating factor in-place (Q10.5), and deactivating.
 export function ConversionsView({ api, materials }: { api: BackendApi; materials: InventoryMaterial[] | undefined }) {
   const [chosen, setChosen] = useState("");
   const material = materials?.find((item) => item.id === chosen) ?? materials?.[0];
@@ -29,7 +29,10 @@ export function ConversionsView({ api, materials }: { api: BackendApi; materials
 function MaterialConversions({ api, material }: { api: BackendApi; material: InventoryMaterial }) {
   const conversions = useResource<{ items: UnitConversion[] | null }>(api, `/materials/${material.id}/conversions`);
   const units = useResource<{ items: Unit[] | null }>(api, "/units");
-  const command = useCommand(); const [unitId, setUnitId] = useState(""); const [factor, setFactor] = useState(""); const [problem, setProblem] = useState(""); const [closing, setClosing] = useState<UnitConversion | null>(null);
+  const command = useCommand(); const [unitId, setUnitId] = useState(""); const [factor, setFactor] = useState(""); const [problem, setProblem] = useState("");
+  const [closing, setClosing] = useState<UnitConversion | null>(null);
+  const [editing, setEditing] = useState<UnitConversion | null>(null);
+  const [editFactor, setEditFactor] = useState(""); const [editProblem, setEditProblem] = useState("");
   const items = conversions.data?.items ?? [];
   const taken = new Set(items.filter((item) => item.is_active).map((item) => item.unit_id));
   const choices = (units.data?.items ?? []).filter((unit) => unit.id !== material.unit_id && !taken.has(unit.id));
@@ -39,6 +42,16 @@ function MaterialConversions({ api, material }: { api: BackendApi; material: Inv
     if (!unitName) { setProblem("เลือกหน่วยที่ต้องการแปลง"); return; }
     try { value = inventoryDecimal(factor.trim(), true); } catch { setProblem("ตัวคูณต้องมากกว่า 0 ทศนิยมไม่เกิน 6 ตำแหน่ง"); return; }
     setProblem(""); void command.run(async (signal) => { await api.call(`/materials/${material.id}/conversions`, "POST", { unit_id: unitId, factor: value }, signal); setUnitId(""); setFactor(""); conversions.reload(); }, "");
+  }
+  function saveEdit(event: FormEvent) {
+    event.preventDefault(); if (!editing) return;
+    let value: string;
+    try { value = inventoryDecimal(editFactor.trim(), true); } catch { setEditProblem("ตัวคูณต้องมากกว่า 0 ทศนิยมไม่เกิน 6 ตำแหน่ง"); return; }
+    setEditProblem("");
+    void command.run(async (signal) => {
+      await api.call(`/materials/${material.id}/conversions/${editing.id}`, "PATCH", { factor: value }, signal);
+      setEditing(null); conversions.reload();
+    }, "");
   }
   return <>
     <section className={styles.detailCard} aria-labelledby="conversion-add"><h3 id="conversion-add">เพิ่มการแปลงหน่วย</h3>
@@ -50,7 +63,7 @@ function MaterialConversions({ api, material }: { api: BackendApi; material: Inv
         {problem && <p role="alert" className={styles.formError}>{problem}</p>}
       </form>
       <ErrorText error={command.error} />
-      <p className={layout.muted}>ไม่มีหน่วยที่ต้องการ เพิ่มได้ที่ข้อมูลหลัก สต๊อกยังเก็บเป็นหน่วยหลักเสมอ ตัวคูณแก้ไขไม่ได้ ต้องปิดใช้งานแล้วเพิ่มใหม่</p>
+      <p className={layout.muted}>ไม่มีหน่วยที่ต้องการ เพิ่มได้ที่ข้อมูลหลัก สต๊อกยังเก็บเป็นหน่วยหลักเสมอ แก้ไขตัวคูณหรือปิดใช้งานได้</p>
     </section>
     <section className={styles.panel} aria-label="รายการการแปลงหน่วย">
       {conversions.loading && !conversions.data && <div className={styles.note}><Skeleton label="กำลังโหลดการแปลงหน่วย…" /></div>}
@@ -65,11 +78,25 @@ function MaterialConversions({ api, material }: { api: BackendApi; material: Inv
           <td data-label="สถานะ">{item.is_active ? <ToneBadge tone="done">ใช้งานอยู่</ToneBadge> : <ToneBadge tone="quiet">ปิดใช้งาน</ToneBadge>}</td>
           <td className={styles.menuCell}>{item.is_active && <details className={layout.menu}>
             <summary aria-label={`ตัวเลือกสำหรับ ${item.unit_name}`} title="ตัวเลือก"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8" /><circle cx="12" cy="12" r="1.8" /><circle cx="19" cy="12" r="1.8" /></svg></summary>
-            <div><button type="button" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); setClosing(item); }}>ปิดใช้งาน</button></div>
+            <div>
+              <button type="button" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); setEditing(item); setEditFactor(item.factor); setEditProblem(""); }}>แก้ไขตัวคูณ</button>
+              <button type="button" onClick={(event) => { event.currentTarget.closest("details")?.removeAttribute("open"); setClosing(item); }}>ปิดใช้งาน</button>
+            </div>
           </details>}</td>
         </tr>)}</tbody>
       </table>}
     </section>
+    <Drawer open={Boolean(editing)} title={`แก้ไขตัวคูณหน่วย ${editing?.unit_name ?? ""}`} onClose={() => setEditing(null)}>
+      {editing && <form className={layout.form} onSubmit={saveEdit}>
+        <fieldset disabled={command.busy}>
+          <Field label={`1 ${editing.unit_name} เท่ากับกี่ ${material.unit_name}`} error={editProblem || undefined}>
+            <input inputMode="decimal" autoComplete="off" value={editFactor} onChange={(event) => setEditFactor(event.target.value)} />
+          </Field>
+        </fieldset>
+        <div className={layout.submitBar} data-sticky><span>บันทึกตัวคูณใหม่</span><button type="submit" className={layout.submit} disabled={command.busy}>บันทึก</button></div>
+        <ErrorText error={command.error} />
+      </form>}
+    </Drawer>
     <ConfirmDialog open={Boolean(closing)} title={`ปิดใช้งานหน่วย ${closing?.unit_name ?? ""}?`} confirmLabel="ปิดใช้งาน" danger onClose={() => setClosing(null)} onConfirm={() => { const target = closing; setClosing(null); if (target) void command.run(async (signal) => { await api.call(`/materials/${material.id}/conversions/${target.id}/deactivate`, "POST", {}, signal); conversions.reload(); }, ""); }}>
       <p>หลังปิดใช้งานจะกรอกจำนวนด้วยหน่วยนี้ไม่ได้ รายการเดิมยังใช้ตัวคูณที่บันทึกไว้</p>
     </ConfirmDialog>

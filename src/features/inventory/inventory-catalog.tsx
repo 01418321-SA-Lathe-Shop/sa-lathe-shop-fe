@@ -10,11 +10,10 @@ import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./inventory.module.css";
 
 type Unit = { id: string; name: string };
-type Editing = { kind: "new" } | { kind: "edit"; material: InventoryMaterial } | null;
+type Editing = { kind: "new" } | { kind: "edit"; material: InventoryMaterial } | { kind: "unit"; unit: Unit } | null;
 
-// Admin master data (UC5): units and materials. Names are unique ignoring case,
-// a material's unit never changes, and nothing is deleted. Creation has no retry
-// key, so after an unclear failure Admin reloads before trying again.
+// Admin master data (UC5 / UC10): units and materials. Names are unique ignoring case,
+// a material's unit never changes, and nothing is deleted.
 export function CatalogView({ api, materials, onSaved }: { api: BackendApi; materials: InventoryMaterial[] | undefined; onSaved: (message: string) => void }) {
   const units = useResource<{ items: Unit[] | null }>(api, "/units");
   const [editing, setEditing] = useState<Editing>(null);
@@ -26,7 +25,10 @@ export function CatalogView({ api, materials, onSaved }: { api: BackendApi; mate
       <div className={layout.detailHeader}><h2>หน่วย</h2></div>
       {units.loading && !units.data && <Skeleton label="กำลังโหลดหน่วย…" rows={1} />}
       {units.error && !units.data && <LoadError title="โหลดหน่วยไม่สำเร็จ" onRetry={units.reload} />}
-      {units.data && (unitList.length ? <ul className={styles.unitList}>{unitList.map((unit) => <li key={unit.id}>{unit.name}</li>)}</ul> : <p className={layout.muted}>ยังไม่มีหน่วย เพิ่มหน่วยก่อนเพิ่มวัตถุดิบ</p>)}
+      {units.data && (unitList.length ? <ul className={styles.unitList}>{unitList.map((unit) => <li key={unit.id}>
+        <span>{unit.name}</span>
+        <Button variant="text" onClick={() => setEditing({ kind: "unit", unit })}>แก้ไข<span className={layout.visuallyHidden}> {unit.name}</span></Button>
+      </li>)}</ul> : <p className={layout.muted}>ยังไม่มีหน่วย เพิ่มหน่วยก่อนเพิ่มวัตถุดิบ</p>)}
       <UnitForm api={api} onSaved={() => saved("เพิ่มหน่วยแล้ว")} />
     </section>
     <section className={layout.detailCard} aria-label="วัตถุดิบ">
@@ -39,9 +41,10 @@ export function CatalogView({ api, materials, onSaved }: { api: BackendApi; mate
         <Button onClick={() => setEditing({ kind: "edit", material })}>แก้ไข<span className={layout.visuallyHidden}> {material.name}</span></Button>
       </li>)}</ul>}
     </section>
-    <Drawer open={editing !== null} title={editing?.kind === "edit" ? `แก้ไข ${editing.material.name}` : "เพิ่มวัตถุดิบ"} onClose={() => setEditing(null)}>
+    <Drawer open={editing !== null} title={editing?.kind === "edit" ? `แก้ไข ${editing.material.name}` : editing?.kind === "unit" ? `แก้ไขหน่วย ${editing.unit.name}` : "เพิ่มวัตถุดิบ"} onClose={() => setEditing(null)}>
       {editing?.kind === "new" && <NewMaterialForm api={api} units={unitList} onSaved={() => saved("เพิ่มวัตถุดิบแล้ว สต๊อกเริ่มที่ 0")} />}
       {editing?.kind === "edit" && <EditMaterialForm key={String(editing.material.version)} api={api} material={editing.material} onSaved={() => saved("บันทึกวัตถุดิบแล้ว")} />}
+      {editing?.kind === "unit" && <EditUnitForm key={editing.unit.id} api={api} unit={editing.unit} onSaved={() => saved("แก้ไขชื่อหน่วยแล้ว")} />}
     </Drawer>
   </div>;
 }
@@ -57,6 +60,22 @@ function UnitForm({ api, onSaved }: { api: BackendApi; onSaved: () => void }) {
   }}>
     <Field label="ชื่อหน่วยใหม่ (เช่น ชิ้น กก. ม.)" error={error || undefined}><input value={name} maxLength={50} disabled={command.busy} onChange={(event) => setName(event.target.value)} /></Field>
     <Button type="submit" disabled={command.busy || !name.trim()}>เพิ่มหน่วย</Button>
+    {command.error && <><ErrorText error={command.error} /><p className={layout.muted}>{UNCLEAR}</p></>}
+  </form>;
+}
+
+function EditUnitForm({ api, unit, onSaved }: { api: BackendApi; unit: Unit; onSaved: () => void }) {
+  const command = useCommand(); const [error, setError] = useState("");
+  return <form className={layout.form} onSubmit={(event) => {
+    event.preventDefault(); const data = new FormData(event.currentTarget); let name: string;
+    try { name = catalogName(String(data.get("name") ?? ""), 50); } catch { setError("กรอกชื่อหน่วย ไม่เกิน 50 ตัวอักษร ไม่ขึ้นบรรทัดใหม่"); return; }
+    setError(""); void command.run(async (signal) => { await api.call(`/units/${unit.id}`, "PATCH", { name }, signal); onSaved(); }, "");
+  }}>
+    <fieldset disabled={command.busy}>
+      <Field label="ชื่อหน่วย" hint="ชื่อต้องไม่ซ้ำกับหน่วยอื่น (ไม่สนตัวพิมพ์เล็กใหญ่)"><input name="name" required maxLength={50} defaultValue={unit.name} /></Field>
+    </fieldset>
+    {error && <p className={layout.problem} role="alert">{error}</p>}
+    <div className={layout.submitBar} data-sticky><span>บันทึกแล้วชื่อหน่วยจะอัปเดตทันที</span><button type="submit" className={layout.submit} disabled={command.busy}>บันทึก</button></div>
     {command.error && <><ErrorText error={command.error} /><p className={layout.muted}>{UNCLEAR}</p></>}
   </form>;
 }
