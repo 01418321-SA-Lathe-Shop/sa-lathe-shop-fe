@@ -35,7 +35,7 @@ export function PrintDocument({ ready, footer, hint, label = "พิมพ์ / 
   }, [printing]);
   const font = sarabun.style.fontFamily;
   // @page lives in the portal so it applies only to these documents. Margin boxes carry page numbers.
-  const page = `@page{size:A4;margin:16mm 15mm 18mm;@bottom-left{content:${JSON.stringify(footer)};font:8.5pt ${font};color:#555}@bottom-right{content:"หน้า " counter(page) " / " counter(pages);font:8.5pt ${font};color:#555}}`;
+  const page = `@page{size:A4;margin:16mm 15mm 18mm;@bottom-left{content:${JSON.stringify(footer)};font:8.5pt ${font};color:#000}@bottom-right{content:"หน้า " counter(page) " / " counter(pages);font:8.5pt ${font};color:#000}}`;
   return <>{button({ disabled: !ready || printing || requested, onClick: () => setPrinting(true), children: label })}
     {!ready && hint && <small>{hint}</small>}
     {printing && createPortal(<div className={`${styles.printRoot} ${sarabun.className}`} lang="th"><style>{page}</style>{children}</div>, document.body)}

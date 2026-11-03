@@ -50,7 +50,7 @@ test("Settings isolate native radio groups in retained App Router trees", () => 
 test("printed documents use fixed dark ink on white, isolated from the workspace theme", () => {
   const source = readFileSync(new URL("../../../src/features/documents/documents.module.css", import.meta.url), "utf8");
   const body = source.match(/\.sheet \{([^}]+)\}/)[1];
-  assert.match(body, /color: #111/); assert.match(body, /background: #fff/);
+  assert.match(body, /color: #000/); assert.match(body, /background: #fff/);
   assert.match(source, /color-scheme: light/);
   assert.doesNotMatch(source, /var\(--/);
   assert(ratio(rgb("#555555"), rgb("#ffffff")) >= 4.5);

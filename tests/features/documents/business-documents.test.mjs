@@ -40,10 +40,16 @@ test("accepted quotation prints the saved terms, not a recalculation from the cu
   assert.doesNotMatch(result, /บุคคลธรรมดา|50%/); clean(result);
 });
 
+test("quotation hides unsaved details, dates the signature from the record and has no closing message", () => {
+  const result = text(mod.exports.QuotationDocument({ request, quote, shop: { name: "ร้านทดสอบ" }, customer: { name: "ผู้สั่ง" }, customerType: "individual" }));
+  assert.doesNotMatch(result, /ที่อยู่|เลขประจำตัวผู้เสียภาษี|เบอร์ติดต่อ|ช่องทางการชำระเงิน|Thank You|ขอบคุณ/);
+  assert.equal(result.match(/20 ตุลาคม 2569/g)?.length, 2, "header date and signature date"); clean(result);
+});
+
 test("purchase order lists every line with exact quantities, unit costs and totals", () => {
   const order = { id: "o1", order_no: "PO-0001", supplier: { name: "ร้านเหล็กดี", email: "", phone: "021234567" }, job_ids: ["3f2a9c1e-0000-4000-8000-000000000000"], status: "ordered", supplier_response: "pending", total_amount: "1250.50", created_at: "2026-11-01T03:00:00Z",
     lines: [{ material_id: "m1", material_name: "เหล็กเพลา S45C", unit_id: "u1", unit_name: "เส้น", quantity: "12.500000", unit_cost: "100.040000", total_amount: "1250.50" }] };
-  const result = text(mod.exports.PurchaseOrderDocument({ order }));
+  const result = text(mod.exports.PurchaseOrderDocument({ order, shop }));
   for (const value of ["MATERIAL PURCHASE ORDER", "ใบสั่งซื้อวัสดุ", "PO-0001", "ร้านเหล็กดี", "021234567", "เหล็กเพลา S45C", "12.5", "เส้น", "100.04", "1,250.50 บาท", "3F2A9C1E", "รอผู้ขายตอบ"]) assert(result.includes(value), value);
   clean(result);
 });

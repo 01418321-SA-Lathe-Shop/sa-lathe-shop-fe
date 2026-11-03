@@ -6,7 +6,7 @@ import { orderTabOf } from "../procurement/procurement-domain";
 import { bahtTH, quantityTH } from "../../components/staff-ui/staff-format";
 import { ORDER_STATE } from "../../components/staff-ui/staff-labels";
 import { quotePreview } from "../customer/customer-request-domain";
-import { bahtText, jobRef, longDateTH, shopParty, type Party, type ShopParty } from "./documents-domain";
+import { bahtText, jobRef, longDateTH, type Party, type ShopParty } from "./documents-domain";
 import styles from "./documents.module.css";
 
 // Printed documents show only explicit, customer-safe fields. Never spread a
@@ -15,21 +15,22 @@ import styles from "./documents.module.css";
 export const Fill = ({ value, width }: { value?: ReactNode; width?: string }) => value ? <>{value}</> : <span className={styles.blank} style={width ? { minWidth: width } : undefined} />;
 export const qtyTH = (value: string | number) => new Intl.NumberFormat("th-TH").format(BigInt(value));
 const typeTH = (type?: string) => type === "company" ? "นิติบุคคล (บริษัท)" : type === "individual" ? "บุคคลธรรมดา" : undefined;
-// Supplier orders are not tied to the shop profile request; confirmed landing facts only.
-const LANDING_SHOP = shopParty();
 
 function Letterhead({ shop, title, english, meta }: { shop: ShopParty; title: string; english: string; meta: [string, ReactNode][] }) {
   return <header className={styles.letterhead}>
     <div><p className={styles.shopName}><Fill value={shop.name} width="70mm" /></p>
-      <p className={styles.muted}>ที่อยู่ <Fill value={shop.address} width="80mm" /></p>
-      <p className={styles.muted}>โทรศัพท์ <Fill value={shop.phone} width="35mm" />{shop.email && <> · อีเมล {shop.email}</>}{shop.taxId && <> · เลขประจำตัวผู้เสียภาษี {shop.taxId}</>}</p></div>
+      {shop.address && <p className={`${styles.muted} ${styles.preserve}`}>ที่อยู่ {shop.address}</p>}
+      <Joined className={styles.muted} parts={[shop.phone && `โทรศัพท์ ${shop.phone}`, shop.email && `อีเมล ${shop.email}`, shop.taxId && `เลขประจำตัวผู้เสียภาษี ${shop.taxId}`]} /></div>
     <div className={styles.docTitle}><h1>{title}</h1><p>{english}</p>
       <dl className={styles.meta}>{meta.map(([label, value]) => <Row key={label} label={label} value={value} />)}</dl></div>
   </header>;
 }
 const Row = ({ label, value }: { label: ReactNode; value: ReactNode }) => <><dt>{label}</dt><dd>{value}</dd></>;
-export function Signature({ role, name }: { role: ReactNode; name?: string }) {
-  return <div className={styles.signature}><span className={styles.signRow}>ลงชื่อ<span className={styles.signLine} /></span><span>( <Fill value={name} width="50mm" /> )</span><span>{role}</span><span>วันที่ <span className={styles.blank} style={{ minWidth: "35mm" }} /></span></div>;
+// Saved-detail rows are hidden when empty (owner decision 2026-11-03); contract party clauses keep fill-in lines.
+const Saved = ({ label, value }: { label: ReactNode; value?: string }) => value ? <Row label={label} value={value} /> : null;
+const Joined = ({ className, parts }: { className?: string; parts: (string | false | undefined)[] }) => { const text = parts.filter(Boolean).join(" · "); return text ? <p className={className}>{text}</p> : null; };
+export function Signature({ role, name, date }: { role: ReactNode; name?: string; date?: string }) {
+  return <div className={styles.signature}><span className={styles.signRow}>ลงชื่อ<span className={styles.signLine} /></span><span>( <Fill value={name} width="50mm" /> )</span><span>{role}</span><span>วันที่ <Fill value={longDateTH(date)} width="35mm" /></span></div>;
 }
 
 /** Quotation layout: title block, customer details, one whole-job line, totals without VAT, payment channel and shop footer. */
@@ -39,22 +40,22 @@ export function QuotationDocument({ request, quote, terms, shop, customer, custo
   const words = bahtText(quote.final_price);
   return <article className={`${styles.sheet} ${styles.quote}`} aria-label={`ใบเสนอราคา #${quote.quotation_no}`}>
     <header className={styles.quoteHead}>
-      <div><p className={styles.shopName}><Fill value={shop.name} width="70mm" /></p>
-        <p className={`${styles.muted} ${styles.preserve}`}>ที่อยู่ <Fill value={shop.address} width="70mm" /></p>
-        <p className={styles.muted}>โทรศัพท์ <Fill value={shop.phone} width="35mm" />{shop.email && <> · {shop.email}</>}</p>
-        <p className={styles.muted}>เลขประจำตัวผู้เสียภาษี <Fill value={shop.taxId} width="40mm" /></p></div>
+      <div><p className={styles.shopName}>{shop.name}</p>
+        {shop.address && <p className={`${styles.muted} ${styles.preserve}`}>ที่อยู่ {shop.address}</p>}
+        <Joined className={styles.muted} parts={[shop.phone && `โทรศัพท์ ${shop.phone}`, shop.email]} />
+        {shop.taxId && <p className={styles.muted}>เลขประจำตัวผู้เสียภาษี {shop.taxId}</p>}</div>
       <div className={styles.quoteTitle}><h1>ใบเสนอราคา</h1><p className={styles.english}>Quotation</p><p>เลขที่ใบเสนอราคา : #{quote.quotation_no} ฉบับที่ {quote.version}</p></div>
     </header>
     <section aria-label="ข้อมูลลูกค้า">
-      <h2 className={styles.accent}>ข้อมูลลูกค้า</h2>
+      <h2>ข้อมูลลูกค้า</h2>
       <dl className={styles.colon}>
         <Row label="วันที่" value={<Fill value={longDateTH(quote.sent_at)} width="40mm" />} />
         {quote.valid_until && <Row label="ยืนราคาถึง" value={longDateTH(quote.valid_until)} />}
         <Row label="ชื่อลูกค้า" value={<><Fill value={customer.name} width="70mm" />{type && <> · {typeTH(type)}</>}</>} />
-        <Row label="เลขประจำตัวผู้เสียภาษี" value={<Fill value={customer.taxId} width="45mm" />} />
-        <Row label="ที่อยู่" value={<span className={styles.preserve}><Fill value={customer.address} width="80mm" /></span>} />
-        <Row label="เบอร์ติดต่อ" value={<Fill value={customer.phone} width="40mm" />} />
-        {customer.email && <Row label="อีเมล" value={customer.email} />}
+        <Saved label="เลขประจำตัวผู้เสียภาษี" value={customer.taxId} />
+        {customer.address && <Row label="ที่อยู่" value={<span className={styles.preserve}>{customer.address}</span>} />}
+        <Saved label="เบอร์ติดต่อ" value={customer.phone} />
+        <Saved label="อีเมล" value={customer.email} />
         <Row label="อ้างอิงคำขอ" value={`#${request.no_request}${request.deadline ? ` · ลูกค้าต้องการ ${longDateTH(request.deadline)} (ไม่ใช่กำหนดส่งที่ร้านยืนยัน)` : ""}`} />
       </dl>
     </section>
@@ -62,7 +63,7 @@ export function QuotationDocument({ request, quote, terms, shop, customer, custo
       <tbody><tr><td>1</td><td><p className={styles.preserve}>{request.description}</p><p className={styles.muted}>วัตถุดิบ: {request.material_spec || "ไม่ระบุ"}</p></td><td data-numeric>{qtyTH(request.qty)} ชิ้น</td><td data-numeric>—</td><td data-numeric>{bahtTH(quote.final_price)}</td></tr></tbody></table>
     <dl className={styles.totals}><dt>ราคารวม</dt><dd>{bahtTH(quote.final_price)}</dd><dt className={styles.grand}>ราคารวมทั้งหมด</dt><dd className={styles.grand}>{bahtTH(quote.final_price)}</dd></dl>
     {words && <p className={styles.words}>({words})</p>}
-    <h2 className={styles.accent}>หมายเหตุและเงื่อนไข</h2>
+    <h2>หมายเหตุและเงื่อนไข</h2>
     <ol className={styles.terms}>
       {quote.notes && <li className={styles.preserve}>{quote.notes}</li>}
       <li>ราคาเป็นราคารวมทั้งงานสำหรับจำนวนข้างต้น ไม่ได้กำหนดราคาต่อหน่วย และไม่ได้คิดภาษีมูลค่าเพิ่ม (VAT)</li>
@@ -76,20 +77,20 @@ export function QuotationDocument({ request, quote, terms, shop, customer, custo
       <li>ร้านเริ่มผลิตเมื่อหลักฐานที่กำหนดผ่านการตรวจครบ ยอดคงเหลือชำระตามใบแจ้งหนี้ที่ร้านออก</li>
     </ol>
     <div className={styles.payRow}>
-      <section><h2 className={styles.accent}>ช่องทางการชำระเงิน</h2>
-        <dl className={styles.colon}><Row label="ชื่อบัญชี" value={<Fill value={shop.bankAccountName} width="50mm" />} /><Row label="เลขที่บัญชี" value={<Fill value={shop.bankAccountNo} width="40mm" />} /><Row label="ธนาคาร" value={<Fill value={shop.bankName} width="50mm" />} /></dl></section>
-      <div><Signature role="ผู้เสนอราคา" /><p className={styles.thanks}>ขอบคุณ / Thank You</p></div>
+      <section>{(shop.bankAccountName || shop.bankAccountNo || shop.bankName) && <><h2>ช่องทางการชำระเงิน</h2>
+        <dl className={styles.colon}><Saved label="ชื่อบัญชี" value={shop.bankAccountName} /><Saved label="เลขที่บัญชี" value={shop.bankAccountNo} /><Saved label="ธนาคาร" value={shop.bankName} /></dl></>}</section>
+      <Signature role="ผู้เสนอราคา" date={quote.sent_at} />
     </div>
   </article>;
 }
 
-export function PurchaseOrderDocument({ order }: { order: SupplierOrder }) {
+export function PurchaseOrderDocument({ order, shop }: { order: SupplierOrder; shop: ShopParty }) {
   const lines = order.lines ?? []; const jobs = order.job_ids ?? []; const tab = orderTabOf(order);
   return <article className={styles.sheet} aria-label={`ใบสั่งซื้อวัสดุ ${order.order_no}`}>
-    <Letterhead shop={LANDING_SHOP} title="ใบสั่งซื้อวัสดุ" english="MATERIAL PURCHASE ORDER" meta={[["เลขที่", order.order_no], ["วันที่", longDateTH(order.created_at) ?? "—"], ["สถานะ", tab ? ORDER_STATE[tab][0] : order.status]]} />
+    <Letterhead shop={shop} title="ใบสั่งซื้อวัสดุ" english="MATERIAL PURCHASE ORDER" meta={[["เลขที่", order.order_no], ["วันที่", longDateTH(order.created_at) ?? "—"], ["สถานะ", tab ? ORDER_STATE[tab][0] : order.status]]} />
     <div className={styles.parties}>
-      <section className={styles.party}><h2>ผู้ขาย (Supplier)</h2><p><strong>{order.supplier.name}</strong></p><p>โทรศัพท์ <Fill value={order.supplier.phone} /></p><p>อีเมล <Fill value={order.supplier.email} /></p><p>ที่อยู่ <span className={styles.blank} style={{ minWidth: "65mm" }} /></p></section>
-      <section className={styles.party}><h2>การส่งมอบและอ้างอิง</h2><p>กำหนดรับของ <Fill value={longDateTH(order.expected_at)} width="35mm" /></p><p>สถานที่ส่งของ <Fill value={LANDING_SHOP.address} width="50mm" /></p><p>อ้างอิงงาน {jobs.length ? jobs.map(jobRef).join(", ") : "สั่งเติมสต๊อกทั่วไป ไม่ผูกกับงาน"}</p></section>
+      <section className={styles.party}><h2>ผู้ขาย (Supplier)</h2><p><strong>{order.supplier.name}</strong></p>{order.supplier.phone && <p>โทรศัพท์ {order.supplier.phone}</p>}{order.supplier.email && <p>อีเมล {order.supplier.email}</p>}<p>ที่อยู่ <span className={styles.blank} style={{ minWidth: "65mm" }} /></p></section>
+      <section className={styles.party}><h2>การส่งมอบและอ้างอิง</h2><p>กำหนดรับของ <Fill value={longDateTH(order.expected_at)} width="35mm" /></p><p>สถานที่ส่งของ <Fill value={shop.address} width="50mm" /></p><p>อ้างอิงงาน {jobs.length ? jobs.map(jobRef).join(", ") : "สั่งเติมสต๊อกทั่วไป ไม่ผูกกับงาน"}</p></section>
     </div>
     <table className={styles.items}><thead><tr><th scope="col">ลำดับ</th><th scope="col">รายการวัตถุดิบ</th><th scope="col" data-numeric>จำนวน</th><th scope="col">หน่วย</th><th scope="col" data-numeric>ราคาต่อหน่วย (บาท)</th><th scope="col" data-numeric>จำนวนเงิน</th></tr></thead>
       <tbody>{lines.map((line, index) => <tr key={line.material_id}><td>{index + 1}</td><td>{line.material_name}</td><td data-numeric>{quantityTH(line.quantity)}</td><td>{line.unit_name}</td><td data-numeric>{quantityTH(line.unit_cost)}</td><td data-numeric>{bahtTH(line.total_amount)}</td></tr>)}</tbody></table>
@@ -100,7 +101,7 @@ export function PurchaseOrderDocument({ order }: { order: SupplierOrder }) {
       <li>รับของได้หลายครั้งจนครบจำนวน แต่ไม่รับเกินจำนวนที่สั่ง ของชำรุดให้เปลี่ยนเป็นของดีเท่านั้น</li>
       <li>ระยะเวลาเครดิตและการชำระเงินแก่ผู้ขาย: <span className={styles.blank} /></li>
     </ol>
-    <div className={styles.signatures}><Signature role="ผู้มีอำนาจอนุมัติการสั่งซื้อ" /><Signature role="ผู้ขาย (ยืนยันรับคำสั่งซื้อ)" /></div>
+    <div className={styles.signatures}><Signature role="ผู้มีอำนาจอนุมัติการสั่งซื้อ" date={order.created_at} /><Signature role="ผู้ขาย (ยืนยันรับคำสั่งซื้อ)" /></div>
   </article>;
 }
 

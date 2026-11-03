@@ -8,9 +8,9 @@ const Bi = ({ th, en }: { th: string; en: string }) => <>{th} / <span className=
 function PartyBlock({ role, party }: { role: [string, string]; party: Party }) {
   return <dl className={styles.poParty}>
     <dt><Bi th={role[0]} en={role[1]} /></dt><dd><strong><Fill value={party.name} width="70mm" /></strong></dd>
-    <dt><Bi th="ที่อยู่" en="Address" /></dt><dd className={styles.preserve}><Fill value={party.address} width="80mm" /></dd>
-    <dt><Bi th="เลขผู้เสียภาษี" en="Tax ID" /></dt><dd><Fill value={party.taxId} width="40mm" /></dd>
-    <dt><Bi th="โทร" en="Tel" /></dt><dd><Fill value={party.phone} width="35mm" />{party.email && <> · E: {party.email}</>}</dd>
+    {party.address && <><dt><Bi th="ที่อยู่" en="Address" /></dt><dd className={styles.preserve}>{party.address}</dd></>}
+    {party.taxId && <><dt><Bi th="เลขผู้เสียภาษี" en="Tax ID" /></dt><dd>{party.taxId}</dd></>}
+    {(party.phone || party.email) && <><dt><Bi th="โทร" en="Tel" /></dt><dd>{[party.phone, party.email && `E: ${party.email}`].filter(Boolean).join(" · ")}</dd></>}
   </dl>;
 }
 
@@ -41,6 +41,6 @@ export function CustomerPurchaseOrderDocument({ po, request, quote, terms, shop,
       <dl className={styles.poTotal}><dt><Bi th="จำนวนเงินรวมทั้งสิ้น (บาท)" en="Grand Total" /></dt><dd>{bahtTH(terms.final_price)}</dd></dl>
     </div>
     {words && <p className={styles.poWords}><span>จำนวนเงินรวมทั้งสิ้น</span><strong>{words}</strong></p>}
-    <div className={styles.signatures}><Signature role={<Bi th="อนุมัติโดย" en="Approved by" />} name={customer.name} /><Signature role={<Bi th="ผู้ขายยอมรับ" en="Accepted by" />} /></div>
+    <div className={styles.signatures}><Signature role={<Bi th="อนุมัติโดย" en="Approved by" />} name={customer.name} date={po.issued_on} /><Signature role={<Bi th="ผู้ขายยอมรับ" en="Accepted by" />} /></div>
   </article>;
 }

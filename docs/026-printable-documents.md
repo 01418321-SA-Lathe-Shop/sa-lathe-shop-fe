@@ -44,9 +44,18 @@ customer billing details by the customer owner in Settings → บัญชี�
 and uploads it through the existing PO evidence form, and staff review that
 upload as before. No document adds VAT.
 
-## Missing information (printed as dotted fill-in lines, never guessed)
+## Missing information (never guessed)
 
-- Any shop or customer detail not yet saved in the settings forms (the landing page's confirmed shop name is used until Admin saves one).
+Owner decision 2026-11-03: shop, customer and supplier details that were never
+saved are hidden (the landing page's confirmed shop name is used until Admin
+saves one). Facts the system does not store keep dotted lines to write in by
+hand, as do the contract's party clauses. Staff sign with a pen; signature
+dates come from the record (quotation sent date, material order date, customer
+PO issue date) where one exists, and names are written by hand. All document
+text is black.
+
+Not stored, printed as fill-in lines:
+
 - Shop logo: no upload exists, so the letterhead is text only.
 - Company signatory name on the contract.
 - Confirmed delivery date and place: `job.due_at` is copied from the customer's requested date, so it is not printed as a commitment.

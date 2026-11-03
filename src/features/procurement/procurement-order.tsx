@@ -3,14 +3,15 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "../../components/appearance/icons";
-import type { BackendApi } from "../../lib/api/backend-api";
-import { useRetryableWrite } from "../../hooks/backend-hooks";
+import type { BackendApi, ShopProfile } from "../../lib/api/backend-api";
+import { useResource, useRetryableWrite } from "../../hooks/backend-hooks";
 import { bahtTH, dateTimeTH, quantityTH } from "../../components/staff-ui/staff-format";
 import { ORDER_EVENT, ORDER_STATE } from "../../components/staff-ui/staff-labels";
 import { Button, Collapsible, ConfirmDialog, ErrorText, Field, NextAction, RetryPanel, StatusBadge } from "../../components/staff-ui/staff-ui";
 import { allowedActions, orderActionPayload, orderTabOf, type OrderAction, type SupplierOrder } from "./procurement-domain";
 import { RelatedJobs } from "./procurement-jobs";
 import { PurchaseOrderDocument } from "../documents/business-documents";
+import { shopParty } from "../documents/documents-domain";
 import { PrintDocument } from "../documents/document-print";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./procurement.module.css";
@@ -27,6 +28,7 @@ export function OrderDetail({ api, order, backHref, receivingHref, onChanged }: 
   const tab = orderTabOf(order); const actions = allowedActions(order);
   const [action, setAction] = useState<OrderAction | null>(null); const [dialog, setDialog] = useState(false);
   const [reason, setReason] = useState(""); const [reasonError, setReasonError] = useState("");
+  const shop = useResource<ShopProfile>(api, "/shop-profile");
   const write = useRetryableWrite(api, () => onChanged(action ? ACTION[action].done : ""));
   const lines = order.lines ?? []; const events = order.events ?? []; const jobs = order.job_ids ?? [];
   const ended = [...events].reverse().find((event) => event.action === "reject" || event.action === "cancel");
@@ -47,7 +49,7 @@ export function OrderDetail({ api, order, backHref, receivingHref, onChanged }: 
       <div><dt>คาดว่าจะได้รับ</dt><dd>{order.expected_at ? dateTimeTH(order.expected_at) : "ไม่ได้ระบุ"}</dd></div>
       <div><dt>ยอดรวม (ไม่มี VAT)</dt><dd>{bahtTH(order.total_amount)}</dd></div>
     </dl>
-    <div className={layout.actions}><PrintDocument ready footer={`ใบสั่งซื้อ ${order.order_no}`} label="พิมพ์ใบสั่งซื้อ / บันทึกเป็น PDF" button={(props) => <Button {...props} />}><PurchaseOrderDocument order={order} /></PrintDocument></div>
+    <div className={layout.actions}><PrintDocument ready={Boolean(shop.data) && !shop.loading} hint={shop.error ?? "กำลังโหลดข้อมูลร้าน…"} footer={`ใบสั่งซื้อวัสดุ ${order.order_no}`} label="พิมพ์ใบสั่งซื้อ / บันทึกเป็น PDF" button={(props) => <Button {...props} />}><PurchaseOrderDocument order={order} shop={shopParty(shop.data)} /></PrintDocument></div>
     {tab === "pending" && <NextAction title="ผู้ขายตอบว่าอย่างไร?"><p>ติดต่อผู้ขายทางโทรศัพท์ LINE หรืออีเมล แล้วบันทึกคำตอบที่นี่</p>{buttons(actions)}</NextAction>}
     {(tab === "accepted" || tab === "partial") && <NextAction title={tab === "accepted" ? "รอรับของจากผู้ขาย" : "รับของแล้วบางส่วน"}>
       <p>เมื่อของมาถึง ให้บันทึกการรับที่หน้ารับเข้าวัตถุดิบ สต๊อกจะเพิ่มเมื่อบันทึกรับของเท่านั้น</p>
