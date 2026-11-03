@@ -30,6 +30,7 @@ export function QuoteForm({ api, request, draft, revision, onSaved }: { api: Bac
   const [material, setMaterial] = useState(draft?.internal_costs?.material_cost ?? "");
   const [labor, setLabor] = useState(draft?.internal_costs?.labor_cost ?? "");
   const [price, setPrice] = useState(draft?.final_price ?? "");
+  const [validUntil, setValidUntil] = useState(draft?.valid_until ?? ""); const [notes, setNotes] = useState(draft?.notes ?? "");
   const [saved, setSaved] = useState<Quotation | undefined>(draft); // latest server copy, kept across a failed send
   const [estimate, setEstimate] = useState<{ key: string; value?: Estimate; failed?: boolean }>({ key: "" });
   const [confirming, setConfirming] = useState(false); const [problem, setProblem] = useState("");
@@ -48,16 +49,17 @@ export function QuoteForm({ api, request, draft, revision, onSaved }: { api: Bac
   const current = costsValid && estimate.key === key ? estimate : undefined;
   const minimum = current?.value?.minimum_price;
   const check = priceCheck(price, minimum);
-  const dirty = !saved || !same(material, saved.internal_costs?.material_cost) || !same(labor, saved.internal_costs?.labor_cost) || !same(price, saved.final_price);
+  const dirty = !saved || !same(material, saved.internal_costs?.material_cost) || !same(labor, saved.internal_costs?.labor_cost) || !same(price, saved.final_price) || validUntil !== (saved.valid_until ?? "") || notes.trim() !== (saved.notes ?? "");
 
   function invalid(): string {
     if (!costsValid) return `กรอกค่าวัตถุดิบและค่าแรงเป็น${MONEY_HINT}`;
     if (check === "invalid") return `กรอกราคาเสนอเป็น${MONEY_HINT}`;
     if (check === "below") return `ราคาเสนอต่ำกว่าราคาขั้นต่ำ ${bahtTH(minimum)}`;
+    if ([...notes.trim()].length > 2000) return "หมายเหตุยาวได้ไม่เกิน 2,000 ตัวอักษร";
     return "";
   }
   async function save(signal: AbortSignal): Promise<Quotation> {
-    const input = { material_cost: moneyInput(material.trim()), labor_cost: moneyInput(labor.trim()), final_price: moneyInput(price.trim()) };
+    const input = { material_cost: moneyInput(material.trim()), labor_cost: moneyInput(labor.trim()), final_price: moneyInput(price.trim()), valid_until: validUntil || null, notes: notes.trim() };
     const result = saved ? await api.call<Quotation>(`/quotations/${saved.id}`, "PATCH", { ...input, expected_lock_version: BigInt(saved.lock_version) }, signal)
       : await api.call<Quotation>(`/requests/${request.id}/quotations`, "POST", input, signal);
     if (!result?.id || result.lock_version === undefined) throw new Error("บันทึกร่างแล้วแต่ยังไม่ได้รับข้อมูลล่าสุด โหลดข้อมูลล่าสุดก่อนส่ง");
@@ -95,6 +97,8 @@ export function QuoteForm({ api, request, draft, revision, onSaved }: { api: Bac
         </div>
         <p className={styles.minimum} role="status">{!costsValid ? `กรอกต้นทุนทั้งสองช่องเพื่อดูราคาขั้นต่ำ (ต้นทุน + 60%)` : current?.value ? <>ต้นทุนรวม {bahtTH(current.value.total_cost)} · <strong>ราคาขั้นต่ำ {bahtTH(minimum)}</strong></> : current?.failed ? "คำนวณราคาขั้นต่ำไม่สำเร็จ ระบบจะตรวจอีกครั้งตอนบันทึก" : "กำลังคำนวณราคาขั้นต่ำ…"}</p>
         <Field label="ราคาเสนอลูกค้า (บาท, ไม่มี VAT)" error={price && check === "below" ? `ต่ำกว่าราคาขั้นต่ำ ${bahtTH(minimum)}` : price && check === "invalid" ? MONEY_HINT : undefined} hint={check === "ok" ? "✓ ไม่ต่ำกว่าราคาขั้นต่ำ" : undefined}><input inputMode="decimal" autoComplete="off" value={price} aria-invalid={price && (check === "below" || check === "invalid") ? true : undefined} onChange={(event) => setPrice(event.target.value)} /></Field>
+        <Field label="ยืนราคาถึงวันที่ (ไม่บังคับ)" hint="พิมพ์ลงในใบเสนอราคา"><input type="date" value={validUntil} onChange={(event) => setValidUntil(event.target.value)} /></Field>
+        <Field label="หมายเหตุในใบเสนอราคา (ไม่บังคับ)" hint="ลูกค้าเห็นข้อความนี้"><textarea rows={3} maxLength={2000} value={notes} onChange={(event) => setNotes(event.target.value)} /></Field>
       </fieldset>
       {problem && <p className={layout.problem} role="alert">{problem}</p>}
       <ErrorText error={action.error} />

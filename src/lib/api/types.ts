@@ -6,7 +6,11 @@ export type Login = { access_token: string; token_type: "Bearer"; expires_at: st
 export type Customer = { id: string; customer_type: "individual" | "company"; name: string; is_owner: boolean };
 export type JobRequest = { id: string; no_request: Integer; customer_id: string; description: string; qty: Integer; material_spec: string; deadline?: string; status: string; created_at: string };
 export type Estimate = { material_cost: string; labor_cost: string; total_cost: string; minimum_price: string };
-export type Quotation = { id: string; request_id: string; quotation_no: Integer; version: Integer; lock_version: Integer; status: string; final_price: string; internal_costs?: Estimate; sent_at?: string };
+export type Quotation = { id: string; request_id: string; quotation_no: Integer; version: Integer; lock_version: Integer; status: string; final_price: string; internal_costs?: Estimate; sent_at?: string; valid_until?: string; notes?: string };
+// Printed-document details; "" means not provided.
+export type ShopProfile = { name: string; address: string; tax_id: string; phone: string; email: string; bank_name: string; bank_account_name: string; bank_account_no: string; lock_version: Integer; updated_at: string };
+export type CustomerBilling = { customer_id: string; name: string; customer_type: "individual" | "company"; address: string; tax_id: string; phone: string; email: string; lock_version: Integer };
+export type CustomerPo = { quotation_id: string; po_no: string; issued_on: string; remarks: string; lock_version: Integer; updated_at: string };
 export type Terms = { customer_type: string; final_price: string; deposit_required: boolean; po_required: boolean; deposit_amount: string; balance_after_deposit: string; accepted_at: string; documents_due_at: string };
 export type Decision = { quotation_id: string; request_id: string; actor_id: string; outcome: "accept" | "reject"; reason?: string; expected_lock_version: Integer; decided_at: string; rejection_count: number; request_status: string; terms?: Terms };
 export type Attachment = { id: string; file_name: string; byte_size: number; content_type: string; state: string };

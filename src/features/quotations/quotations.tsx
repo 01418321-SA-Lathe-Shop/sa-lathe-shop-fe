@@ -28,7 +28,7 @@ export function LiveQuotations({ api, account, request, onChanged, only = "all" 
         setEstimate(await api.call<Estimate>("/quotations/estimate", "POST", costs, signal)); return;
       }
       const input = { ...costs, final_price: moneyInput(text(data, "final_price")) };
-      if (editing) await api.call(`/quotations/${editing.id}`, "PATCH", { ...input, expected_lock_version: BigInt(editing.lock_version) }, signal);
+      if (editing) await api.call(`/quotations/${editing.id}`, "PATCH", { ...input, valid_until: editing.valid_until ?? null, notes: editing.notes ?? "", expected_lock_version: BigInt(editing.lock_version) }, signal);
       else await api.call(`/requests/${request.id}/quotations`, "POST", input, signal);
       changed();
     }, "Server confirmed the estimate or saved draft.");
