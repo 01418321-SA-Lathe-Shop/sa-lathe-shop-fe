@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import type { BackendApi, Worker } from "../../lib/api/backend-api";
 import { useCommand, useResource } from "../../hooks/backend-hooks";
 import { Button, ConfirmDialog, ErrorText, Field, LoadError, Skeleton } from "../../components/staff-ui/staff-ui";
-import { draftOf, usernameChanged, workerErrors, workerPasswordError, workerPayload, type WorkerDraft } from "./workers-domain";
+import { draftOf, todayBangkokISO, usernameChanged, workerErrors, workerPasswordError, workerPayload, type WorkerDraft } from "./workers-domain";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./workers.module.css";
 
@@ -27,7 +27,7 @@ export function EditWorker({ api, id, onSaved }: { api: BackendApi; id: string; 
 // Plain POST/PATCH without retry keys, so an unclear failure means reload first.
 export function WorkerForm({ api, worker, onSaved, onStatus }: { api: BackendApi; worker?: Worker; onSaved: () => void; onStatus?: (message: string) => void }) {
   const command = useCommand(); const status = useCommand();
-  const [draft, setDraft] = useState<WorkerDraft>(() => draftOf(worker)); const [shown, setShown] = useState(false);
+  const [draft, setDraft] = useState<WorkerDraft>(() => worker ? draftOf(worker) : { ...draftOf(undefined), hired_at: todayBangkokISO() }); const [shown, setShown] = useState(false);
   const [passwordError, setPasswordError] = useState(""); const [confirm, setConfirm] = useState<"username" | "status" | null>(null);
   const password = useRef<HTMLInputElement>(null); const again = useRef<HTMLInputElement>(null);
   const errors = workerErrors(draft); const show = (key: keyof WorkerDraft) => (shown && errors[key]) || undefined;
@@ -50,13 +50,14 @@ export function WorkerForm({ api, worker, onSaved, onStatus }: { api: BackendApi
       <Field label="ชื่อผู้ใช้ (ใช้เข้าสู่ระบบ)" hint={worker ? "เปลี่ยนแล้วพนักงานจะถูกออกจากระบบทุกเครื่อง" : "ระบบเก็บเป็นตัวพิมพ์เล็ก"} error={show("username")}><input value={draft.username} maxLength={64} autoComplete="off" autoCapitalize="none" onChange={set("username")} /></Field>
       <Field label="รหัสพนักงาน" hint="ระบบเก็บเป็นตัวพิมพ์ใหญ่" error={show("employee_no")}><input value={draft.employee_no} maxLength={30} autoComplete="off" onChange={set("employee_no")} /></Field>
       <Field label="ตำแหน่ง (ไม่บังคับ)" error={show("position")}><input value={draft.position} maxLength={100} onChange={set("position")} /></Field>
+      {!worker && <Field label="วันที่เริ่มงาน (ไม่เกินวันนี้)" error={show("hired_at")}><input type="date" max={todayBangkokISO()} value={draft.hired_at ?? ""} onChange={set("hired_at")} /></Field>}
     </fieldset>
     <fieldset className={styles.section} disabled={busy}>
       <legend>ติดต่อ</legend>
       {worker && (!worker.email || !worker.phone) && <p className={layout.warning}>บัญชีเก่านี้ยังไม่มีข้อมูลติดต่อ ต้องกรอกทั้งอีเมลและเบอร์โทรจึงบันทึกได้</p>}
       <Field label="อีเมล" error={show("email")}><input value={draft.email} inputMode="email" autoComplete="off" onChange={set("email")} /></Field>
       <Field label="เบอร์โทร" hint="7–15 หลัก ขึ้นต้นด้วย + ได้" error={show("phone")}><input value={draft.phone} inputMode="tel" maxLength={64} autoComplete="off" onChange={set("phone")} /></Field>
-      <p className={layout.muted}>อีเมลและเบอร์โทรซ้ำกับคนอื่นได้ ไม่ได้ใช้เข้าสู่ระบบ และระบบไม่ได้ยืนยันความเป็นเจ้าของ</p>
+      <p className={layout.muted}>หากเบอร์โทรหรืออีเมลตรงกับบุคคลที่มีอยู่ในระบบ ระบบจะเชื่อมโยงข้อมูลบุคคลและตรวจสอบไม่ให้มีบทบาทพนักงานซ้ำ</p>
     </fieldset>
     {!worker && <fieldset className={styles.section} disabled={busy}>
       <legend>รหัสผ่านเริ่มต้น</legend>
@@ -65,7 +66,7 @@ export function WorkerForm({ api, worker, onSaved, onStatus }: { api: BackendApi
       <p className={layout.muted}>ช่องรหัสผ่านจะถูกล้างทุกครั้งที่กดบันทึก แจ้งรหัสผ่านให้พนักงานด้วยตนเอง</p>
     </fieldset>}
     <div className={layout.submitBar} data-sticky><span>{worker ? "ใช้ปุ่มเปลี่ยนรหัสผ่านในรายการเพื่อเปลี่ยนรหัสผ่าน" : "บทบาท: พนักงาน (เพิ่มเป็นแอดมินไม่ได้)"}</span><button type="button" className={layout.submit} disabled={busy} onClick={save}>{worker ? "บันทึก" : "เพิ่มพนักงาน"}</button></div>
-    {command.error && <><ErrorText error={command.error} /><p className={layout.muted}>{worker ? "ชื่อผู้ใช้อาจซ้ำ หรือการเชื่อมต่อขัดข้อง ปิดแผงนี้ กดอัปเดตข้อมูล แล้วลองอีกครั้ง" : "ชื่อผู้ใช้อาจซ้ำ ถ้าไม่แน่ใจว่าสร้างแล้วหรือยัง ให้กดอัปเดตข้อมูลและตรวจรายการก่อนเพิ่มอีกครั้ง"}</p></>}
+    {command.error && <><ErrorText error={command.error} /><p className={layout.muted}>{worker ? "ชื่อผู้ใช้อาจซ้ำ หรือการเชื่อมต่อขัดข้อง ปิดแผงนี้ กดอัปเดตข้อมูล แล้วลองอีกครั้ง" : "ชื่อผู้ใช้อาจซ้ำ หรือบุคคลนี้มีบทบาทพนักงานอยู่แล้ว กรุณาตรวจรายการก่อนเพิ่มอีกครั้ง"}</p></>}
     {worker && <section className={styles.section} aria-label="สถานะบัญชี">
       <h3>สถานะบัญชี</h3>
       <p className={layout.muted}>{worker.is_active ? "ใช้งานอยู่ ปิดใช้งานแล้วพนักงานจะถูกออกจากระบบทุกเครื่อง บัญชีไม่ถูกลบ" : "ปิดใช้งานอยู่ เปิดใช้งานแล้วพนักงานต้องเข้าสู่ระบบใหม่"}</p>
