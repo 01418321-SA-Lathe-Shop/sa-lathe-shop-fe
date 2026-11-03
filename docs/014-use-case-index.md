@@ -1,6 +1,6 @@
 # Frontend Use Case Documentation Index
 
-These numbered documents summarize the frontend-facing responsibilities for the implemented UC1–UC9 flows. Each detail page links back to the product guide and current backend contract. The original report contains additional proposed UCs 10–12; they are documented separately as source material and must not be mistaken for new frontend/API scope.
+These numbered documents summarize the frontend-facing responsibilities for the implemented UC1–UC9 flows. Alignment with `Use_Case_Description_UC1-UC12.md` was recorded on 2026-11-03. Each detail page links back to the product guide and current backend contract. The original report contains additional proposed UCs 10–12; they are documented separately as source material and must not be mistaken for new frontend/API scope.
 
 | File | Use case | Primary UI role(s) | Backend contract |
 | --- | --- | --- | --- |
@@ -13,7 +13,7 @@ These numbered documents summarize the frontend-facing responsibilities for the 
 | [021-USECASE07.md](021-USECASE07.md) | Material receiving, claims, supplier settlement | Admin and Worker; financial actions Admin-only | `docs/007-UC7.md` |
 | [022-USECASE08.md](022-USECASE08.md) | Production execution and actual usage | Worker; Admin monitors/costs | `docs/008-UC8.md` |
 | [023-USECASE09.md](023-USECASE09.md) | Delivery, invoices, customer inspection, payment | Customer, Worker, Admin with distinct permissions | `docs/009-UC9.md` |
-| [024-USECASE10-12.md](024-USECASE10-12.md) | Additional use cases appearing in the source report | Mixed / not all supported as described | `docs/000-auth.md`, `docs/005-UC5.md` |
+| [024-USECASE10-12.md](024-USECASE10-12.md) | Additional use cases UC10–UC12 from `Use_Case_Description_UC1-UC12.md` | Admin (UC10, UC11); UC12 not approved | Backend `docs/022-UC10.md`, `docs/023-UC11.md`, `docs/024-UC12.md`, `docs/025-uc-spec-alignment.md` |
 
 ## How to use this catalog
 
@@ -24,4 +24,4 @@ These numbered documents summarize the frontend-facing responsibilities for the 
 
 ## Status of the supplied source report
 
-The report's UC1–UC9 sequence is traceable to the current numbered backend contracts. UC10–UC12 were added to the academic report's reviewed CRUD analysis; their scope differs from the current product. See `024-USECASE10-12.md` before planning any extension.
+The report's UC1–UC9 sequence is traceable to the current numbered backend contracts. Each page from 015 to 023 now ends with a "Use-case description alignment (2026-11-03)" section that lists where the description adds steps or conflicts with a confirmed rule. The confirmed rule wins; the conflicts are listed in backend `docs/025-uc-spec-alignment.md`. UC10–UC12 were added to the academic report's reviewed CRUD analysis; their scope differs from the current product. See `024-USECASE10-12.md` before planning any extension.
