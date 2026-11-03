@@ -91,7 +91,9 @@ real-backend demo-account picker approved by the owner. With the explicit public
 UI flag enabled and a loopback API base, its summary is "บัญชีทดสอบ Local · เข้าสู่ระบบทันที".
 Until hydration the login/register fieldset is disabled and the form uses
 `method="post"` (2026-11-03), so an early Enter or click can never put a
-password into the URL. Each button clears the password and calls `/auth/local-test/login` with username
+password into the URL. Status, password-rule, registration-success and session
+notices on these pages are Thai (2026-11-03): กำลังดำเนินการ…, the 12-character /
+128-byte rule, สร้างบัญชีแล้ว…, and expiry/sign-out notices. Each button clears the password and calls `/auth/local-test/login` with username
 only, then confirms `/auth/me` and navigates by server role. Without that opt-in,
 selection only fills username and clears/focuses password for normal sign-in.
 The panel explains privileged local-only access; no passwords or roles are sent
@@ -966,6 +968,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-03 | `/login` and `/register` messages translated to Thai: busy status, password-rule error (rule unchanged: ≥12 characters, ≤128 UTF-8 bytes), registration success and session expiry/sign-out notices | Native tests (Thai copy and unchanged rule asserted) |
 | 2026-11-03 | Customer sidebar and mobile menu render one `CUSTOMER_NAV` definition (`customer-navigation.ts`); labels, icons, hrefs and grouping unchanged. Unused English Customer workspace descriptions removed from `workspace-access.ts` | Native tests (new route/menu test covering all ten Customer routes), TypeScript, DESIGN sync |
 | 2026-11-03 | Registration requires an address for a new individual or company customer (textarea in the login-field style; hidden with a help line when joining by invitation). บัญชีและบริษัท replaces the placeholder contact panel with per-customer address lists and an owner-only เพิ่มที่อยู่ form, using backend `GET`/`POST /customers/{id}/addresses` | Native tests, type check, lint, DESIGN sync; backend UC1 integration on real PostgreSQL/S3 |
 | 2026-11-03 | Printed documents: all text black, Thank You removed from the quotation, unsaved shop/customer/supplier rows hidden, signature dates filled from the record, 14 mm signature lines, material PO letterhead from the saved shop profile | Native tests (new quotation rule test), TypeScript, lint, headless Chromium PDFs of quotation, customer PO, material PO and contract |

@@ -15,3 +15,13 @@ test("registration requires an address unless joining a company by invitation", 
   assert.match(source, /\.\.\.\(joining \? \{\} : \{ address: text\(data, "address"\) \}\)/);
   assert.match(source, /<textarea name="address" required maxLength=\{500\}/);
 });
+
+test("login and registration messages are Thai and the password rule is unchanged", () => {
+  const ui = readFileSync(new URL("../../../src/components/ui/backend-ui.tsx", import.meta.url), "utf8");
+  const session = readFileSync(new URL("../../../src/features/auth/api-session.tsx", import.meta.url), "utf8");
+  assert.match(source, /"สร้างบัญชีแล้ว เข้าสู่ระบบด้วยชื่อผู้ใช้และรหัสผ่านของคุณ"/);
+  assert.match(ui, /<p role="status">กำลังดำเนินการ…<\/p>/);
+  assert.match(ui, /if \(\[\.\.\.password\]\.length < 12 \|\| new TextEncoder\(\)\.encode\(password\)\.length > 128\) return "รหัสผ่านต้องมีอย่างน้อย 12 ตัวอักษร/);
+  assert.doesNotMatch(source + session, /Account created|Session expired|Signed out|could not be confirmed|account changed/);
+  assert.doesNotMatch(ui, /Working…|Password needs/);
+});

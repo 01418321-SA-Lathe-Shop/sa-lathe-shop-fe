@@ -71,7 +71,7 @@ test("failed login closes its client and does not retry with sample accounts", a
 test("sign out still calls the backend logout for the active session", async () => {
   const { context, calls } = sessionHarness();
   await context.signIn("test-customer", "test-only-password");
-  assert.match(await context.signOut(), /Server session revoked/);
+  assert.match(await context.signOut(), /เซสชันบนเซิร์ฟเวอร์ถูกยกเลิก/);
   assert.deepEqual(calls.at(-1), ["logout"]);
 });
 
@@ -128,9 +128,9 @@ test("uncertain old-session logout clears local state instead of silently adopti
   const h = sessionHarness(false, true, "http://localhost:8080");
   await h.context.signInLocalTest("pim.admin");
   h.instances[0].logout = async () => { throw new Error("lost logout response"); };
-  await assert.rejects(h.context.signInLocalTest("somchai"), /logout could not be confirmed/);
+  await assert.rejects(h.context.signInLocalTest("somchai"), /ยืนยันการออกจากระบบของบัญชีเดิมไม่ได้/);
   assert.equal(h.state().session, null);
-  assert.match(h.state().notice, /may remain valid until expiry/);
+  assert.match(h.state().notice, /อาจยังใช้ได้จนกว่าจะหมดอายุ/);
   assert.deepEqual(h.calls.slice(-2), [["logout"], ["close"]]);
 });
 
@@ -142,6 +142,6 @@ test("sign-out during a pending replacement prevents the candidate from restorin
   h.instances[1].call = () => new Promise((resolve) => { release = resolve; });
   await new Promise((resolve) => setImmediate(resolve));
   await h.context.signOut(); release(h.account);
-  await assert.rejects(pending, /active account changed/);
+  await assert.rejects(pending, /บัญชีที่ใช้งานอยู่เปลี่ยนไปแล้ว/);
   assert.equal(h.state().session, null);
 });

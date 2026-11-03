@@ -30,7 +30,7 @@ export function ApiSessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => () => active.current?.close(), []);
   useEffect(() => {
     if (!session) return;
-    const expire = () => { session.api.close(); active.current = null; setSession(null); setNotice("Session expired. Please sign in again."); };
+    const expire = () => { session.api.close(); active.current = null; setSession(null); setNotice("เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง"); };
     const timer = window.setTimeout(expire, Math.max(0, Date.parse(session.expiresAt) - Date.now()));
     return () => window.clearTimeout(timer);
   }, [session]);
@@ -38,22 +38,22 @@ export function ApiSessionProvider({ children }: { children: ReactNode }) {
   const openSession = useCallback(async (authenticate: (api: BackendApi) => Promise<Login>, localTest = false) => {
     const previous = active.current;
     let authenticated = false;
-    const api = new BackendApi(LIVE_BASE, () => { if (active.current === api) { active.current = null; setSession(null); setNotice("Session expired or revoked. Please sign in again."); } });
+    const api = new BackendApi(LIVE_BASE, () => { if (active.current === api) { active.current = null; setSession(null); setNotice("เซสชันหมดอายุหรือถูกยกเลิก กรุณาเข้าสู่ระบบอีกครั้ง"); } });
     try {
       const login = await authenticate(api);
       authenticated = true;
       const account = await api.call<Account>("/auth/me");
-      if (active.current !== previous) throw new Error("The active account changed. Please try again.");
+      if (active.current !== previous) throw new Error("บัญชีที่ใช้งานอยู่เปลี่ยนไปแล้ว กรุณาลองอีกครั้ง");
       if (previous && localTest) {
         try { await previous.logout(); }
         catch {
           if (active.current === previous) {
             active.current = null; setSession(null);
-            setNotice("Signed out locally. Previous account logout could not be confirmed; its server session may remain valid until expiry.");
+            setNotice("ออกจากระบบในเบราว์เซอร์นี้แล้ว แต่ยืนยันการออกจากระบบของบัญชีเดิมไม่ได้ เซสชันบนเซิร์ฟเวอร์อาจยังใช้ได้จนกว่าจะหมดอายุ");
           }
-          throw new Error("Previous account logout could not be confirmed. Please sign in again.");
+          throw new Error("ยืนยันการออกจากระบบของบัญชีเดิมไม่ได้ กรุณาเข้าสู่ระบบอีกครั้ง");
         }
-        if (active.current !== previous) throw new Error("The active account changed. Please sign in again.");
+        if (active.current !== previous) throw new Error("บัญชีที่ใช้งานอยู่เปลี่ยนไปแล้ว กรุณาเข้าสู่ระบบอีกครั้ง");
       } else previous?.close();
       active.current = api;
       const next: ApiSession = { api, account, expiresAt: login.expires_at, ...(localTest ? { localTest: true as const } : {}) };
@@ -77,9 +77,9 @@ export function ApiSessionProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     const current = active.current; active.current = null; setSession(null);
     if (!current) return "";
-    let message = "Signed out. Server session revoked.";
+    let message = "ออกจากระบบแล้ว เซสชันบนเซิร์ฟเวอร์ถูกยกเลิก";
     try { await current.logout(); }
-    catch { message = "Signed out locally. Server logout could not be confirmed; the remote session may remain valid until expiry."; }
+    catch { message = "ออกจากระบบในเบราว์เซอร์นี้แล้ว แต่ยืนยันการออกจากระบบกับเซิร์ฟเวอร์ไม่ได้ เซสชันบนเซิร์ฟเวอร์อาจยังใช้ได้จนกว่าจะหมดอายุ"; }
     setNotice(message); return message;
   }, []);
 
