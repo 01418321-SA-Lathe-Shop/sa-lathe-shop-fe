@@ -1,3 +1,15 @@
+## Fill-in documents: quotation, customer PO, contract data — 2026-11-03
+
+- Handoff: `docs/026-printable-documents.md`. Backend `32305d9`, `6f3a5a3`, `1ea2611` add migration 000017 (shop profile, customer billing, quotation note/valid-until, customer PO) and its endpoints (backend `docs/020-printed-documents.md`).
+  - Admin ระบบ: shop details; Customer บัญชีของฉัน: billing details (owner edits).
+  - Quotation reprinted after the owner's sample, no VAT, amount in Thai words; Worker adds note and valid-until.
+  - Customer writes, prints and signs their own bilingual PO on มัดจำและ PO, then uploads it as before.
+  - Contract prints both parties' saved details; supplier PO retitled ใบสั่งซื้อวัสดุ.
+- Checks: 213 native tests, type check, lint, source audit, DESIGN sync, production build; backend `go test ./...`.
+- Headless Chromium against the local API: shop save, billing save, PO save; PDFs of quotation, customer PO and contract checked.
+- Local demo DB migrated to 17 (with prior 15/16); test values removed afterwards.
+- Not exercised: a physical printer, the quote editor's new fields in the browser, phone widths. Pending: shop logo upload, legal review of contract wording, Admin quotation authoring (backend still Worker-only).
+
 ## Password change and printable documents — 2026-11-03
 
 - Handoff: `docs/026-printable-documents.md`. Backend `7cf805a` adds `POST /auth/password` (no migration).
