@@ -514,7 +514,7 @@ One module, `src/features/documents`, prints three documents through the browser
 
 **Settings forms.** Admin ระบบ tab: ข้อมูลร้านบนเอกสาร (name, address, tax ID, phone, email, bank, account name, account number). Customer บัญชีของฉัน tab: one ข้อมูลออกเอกสาร panel per customer profile (address, tax ID, phone, email); only the owner can edit, members see it read-only. Both save the whole record with its lock version; a 409 reloads with a message. Forms use the settings panel field style, with textareas for addresses.
 
-**Known limitations.** No shop logo upload (attachments belong to requests). No confirmed delivery date or place; no discounts or per-unit prices. Fonts are loaded explicitly before printing because `document.fonts.ready` can settle before the portal requests Sarabun. Headless Chromium PDFs were checked; a physical printer was not.
+**Known limitations.** No shop logo upload (attachments belong to requests). No confirmed delivery date or place; no discounts or per-unit prices. Sheets have 2 mm top padding because Chromium clips Thai tone marks that rise above the first line at the page top. Fonts are loaded explicitly before printing because `document.fonts.ready` can settle before the portal requests Sarabun. Headless Chromium PDFs were checked; a physical printer was not.
 
 ## Admin requests (2026-10-30)
 
@@ -964,6 +964,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-03 | Printed sheets get 2 mm top padding so Thai tone marks on the first line (ใบสั่งซื้อ title) are not clipped at the page top; contract drops the extra brackets around the customer type | Headless Chromium PDFs of quotation, customer PO and contract re-rendered and checked |
 | 2026-11-03 | Quotation reprinted after the owner's sample (green title, customer block, Thai amount in words, payment channel, no VAT); new customer-written bilingual PO on มัดจำและ PO; supplier PO retitled ใบสั่งซื้อวัสดุ; shop details (Admin ระบบ) and customer billing (บัญชีของฉัน) forms feed all documents; quote editor gains valid-until and note | Native tests (baht words, documents, settings), TypeScript, lint, source audit, production build, headless browser against the local API: Admin shop save, Customer billing and PO save, PDFs of quotation, customer PO and contract |
 | 2026-11-03 | Login/register fields stay disabled until hydration and the form is `method="post"`, preventing a pre-hydration native GET that put the password in the URL | Native test, TypeScript, lint, server-HTML and browser check |
 | 2026-11-03 | Printable A4 Quotation, supplier Purchase Order and Thai job contract in `src/features/documents`; replaces the customer-only quotation print and its `.paper` styles | Native tests, TypeScript, lint, source audit, production build, browser render against local demo data (Customer, Staff, Admin) |

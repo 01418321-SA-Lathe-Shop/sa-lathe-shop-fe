@@ -6,7 +6,8 @@
   .printRoot { display: block !important; }
 }
 
-.sheet { color: #111; background: #fff; font-size: 11pt; line-height: 1.65; letter-spacing: 0; overflow-wrap: anywhere; word-break: normal; line-break: auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+/* padding-top: Thai tone marks rise past the line box and Chromium clips them at the page top. */
+.sheet { color: #111; background: #fff; font-size: 11pt; line-height: 1.65; padding-top: 2mm; letter-spacing: 0; overflow-wrap: anywhere; word-break: normal; line-break: auto; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 /* :where keeps the reset weaker than the component rules below. */
 .sheet :where(h1, h2, h3, p, dl, dd, ol) { margin: 0; }
 .sheet h2 { margin: 6mm 0 2mm; font-size: 12pt; font-weight: 700; break-after: avoid; }
