@@ -6,7 +6,7 @@ import { useState } from "react";
 import type { Account, BackendApi, Customer } from "../../lib/api/backend-api";
 import { useCommand, useResource } from "../../hooks/backend-hooks";
 import { customerHref, dateTH } from "./customer-domain";
-import { ActiveState, Facts, SettingsPanel } from "../settings/settings-page";
+import { ActiveState, Facts, SettingsPanel } from "../settings/settings-ui";
 import styles from "../settings/settings.module.css";
 import { ActionFeedback, Empty, Field, PageTitle, ResourceFeedback } from "./customer-ui";
 

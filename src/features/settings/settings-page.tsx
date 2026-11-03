@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useId, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useId, useRef, useState, type FormEvent } from "react";
 import { ApiError, type BackendApi } from "../../lib/api/backend-api";
 import { useCommand } from "../../hooks/backend-hooks";
 import { useAppearance } from "../../components/appearance/appearance";
@@ -10,21 +10,13 @@ import { useApiSession } from "../auth/api-session";
 import { dateTH } from "../customer/customer-domain";
 import { ROLES } from "../workspace/workspace-access";
 import { passwordErrors, roleAccessRows, settingsTabs, type PasswordDraft, type SettingsTab } from "./settings-domain";
+import { BillingDetails, ShopDetails } from "./document-details";
+import { ActiveState, Facts, SettingsPanel } from "./settings-ui";
 import styles from "./settings.module.css";
 
 export const ROLE_NAMES = { customer: "ลูกค้า", worker: "พนักงาน", admin: "ผู้ดูแลระบบ" } as const;
 const ROLE_HEADINGS = { Customer: "ลูกค้า", Worker: "พนักงาน", Admin: "ผู้ดูแล" } as const;
 const ROOTS = { customer: "/customer", worker: "/staff", admin: "/admin" } as const;
-
-export function SettingsPanel({ title, description, action, children }: { title: string; description?: string; action?: ReactNode; children: ReactNode }) {
-  return <section className={styles.panel}><div className={styles.panelHead}><div><h2>{title}</h2>{description && <p>{description}</p>}</div>{action}</div>{children}</section>;
-}
-export function Facts({ rows }: { rows: [string, ReactNode][] }) {
-  return <dl className={styles.facts}>{rows.map(([label, value]) => <div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl>;
-}
-export function ActiveState({ active }: { active: boolean }) {
-  return <span className={styles.state} data-active={active || undefined}>{active ? "ใช้งานอยู่" : "ปิดใช้งาน"}</span>;
-}
 
 export function SettingsPage() {
   const { session } = useApiSession(); const [tab, setTab] = useState<SettingsTab>("account");
@@ -34,13 +26,14 @@ export function SettingsPage() {
     <nav className={styles.tabs} aria-label="หมวดการตั้งค่า">{settingsTabs(account.role).map((item) => <button key={item.id} type="button" aria-current={tab === item.id ? "true" : undefined} onClick={() => setTab(item.id)}>{item.label}</button>)}</nav>
     {tab === "account" && <SettingsPanel title="บัญชีของฉัน" description="ข้อมูลที่ระบบใช้ยืนยันตัวตนของคุณ">
       <Facts rows={[["ชื่อ", account.name], ["ชื่อผู้ใช้", account.username], ["บทบาท", ROLE_NAMES[account.role]], ["สถานะ", <ActiveState key="state" active={account.is_active} />], ["สร้างบัญชีเมื่อ", dateTH(account.created_at)]]} />
-      {account.role === "customer" ? <p className={styles.note}>ระบบยังไม่มีคำสั่งแก้ไขโปรไฟล์ลูกค้า <Link href="/customer/memberships">ดูบัญชีและบริษัท</Link></p>
+      {account.role === "customer" ? <p className={styles.note}>ชื่อและประเภทลูกค้าแก้จากหน้านี้ไม่ได้ <Link href="/customer/memberships">ดูบัญชีและบริษัท</Link></p>
         : account.role === "worker" ? <p className={styles.note}>ผู้ดูแลระบบเป็นผู้แก้ไขชื่อ ช่องทางติดต่อ และรหัสผ่านของบัญชีพนักงาน</p>
           : <p className={styles.note}>ระบบยังไม่มีคำสั่งแก้ไขบัญชีผู้ดูแลระบบด้วยตนเอง</p>}
     </SettingsPanel>}
+    {tab === "account" && account.role === "customer" && <BillingDetails api={session.api} />}
     {tab === "preferences" && <Preferences inbox={`${ROOTS[account.role]}/inbox`} />}
     {tab === "security" && <Security />}
-    {tab === "system" && account.role === "admin" && <System />}
+    {tab === "system" && account.role === "admin" && <System api={session.api} />}
   </div>;
 }
 
@@ -107,10 +100,11 @@ function ChangePassword({ api, username }: { api: BackendApi; username: string }
   </form>;
 }
 
-function System() {
+function System({ api }: { api: BackendApi }) {
   return <>
+    <ShopDetails api={api} />
     <SettingsPanel title="บัญชีพนักงาน" description="สร้างบัญชี แก้ช่องทางติดต่อ เปลี่ยนรหัสผ่าน และปิดใช้งานพนักงาน" action={<Link className={styles.secondary} href="/admin/workers">จัดการพนักงาน</Link>}>
-      <p className={styles.note}>ระบบยังไม่มีการตั้งค่าระดับร้าน เช่น ข้อมูลร้าน เครดิตเริ่มต้น หรือการเตือนชำระเงิน</p>
+      <p className={styles.note}>ระบบยังไม่มีการตั้งค่าเครดิตเริ่มต้นหรือการเตือนชำระเงิน</p>
     </SettingsPanel>
     <SettingsPanel title="บทบาทและการเข้าถึง" description="บทบาทกำหนดโดยระบบ เปลี่ยนจากหน้านี้ไม่ได้">
       <div className={styles.tableWrap}><table className={styles.table}><thead><tr><th scope="col">หน้า</th>{ROLES.map((role) => <th scope="col" key={role}>{ROLE_HEADINGS[role]}</th>)}</tr></thead>
