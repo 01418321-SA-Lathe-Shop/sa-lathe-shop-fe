@@ -178,7 +178,7 @@ Sources: `docs/02-frontend.md`, the UC docs, the code and live screenshots as `a
 | การแจ้งเตือน `/…/inbox` | ✓ | ✓ |
 
 - Redirect-only URLs: `/staff/requests`, `/staff/orders`, `/staff/delivery`, `/staff/payments`, `/staff/debtors`.
-- Pages that do not exist: customers page, separate suppliers page (suppliers sit inside สั่งซื้อวัตถุดิบ), role management, settings (only a theme toggle), reports (the Overview chart is the only reporting). Admin cannot create other Admins (UC12 not supported).
+- Pages that do not exist: customers page, separate suppliers page (suppliers sit inside สั่งซื้อวัตถุดิบ), role management, settings (only a theme toggle), reports (the Overview chart is the only reporting). Admin cannot create other Admins (UC12 not supported at the time; superseded 2026-11-03: the Super Admin manages Admins on `/admin/workers`).
 
 ### Problems on every page
 
