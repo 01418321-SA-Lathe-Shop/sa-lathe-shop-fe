@@ -22,6 +22,10 @@
 :where(.scope) :global(.login-panel) { min-height: 100vh; padding: 2.375rem 8vw; display: flex; flex-direction: column; justify-content: center; background: #0d0f0e; }
 :where(.scope) :global(.login-back) { position: absolute; top: 2.375rem; padding: 0; border: 0; background: transparent; color: #717972; font-size: 0.6875rem; cursor: pointer; }
 :where(.scope) :global(.login-back):hover { color: var(--text); }
+:where(.scope) :global(.register-step) { display: contents; border: 0; }
+:where(.scope) :global(.register-step[hidden]) { display: none; }
+:where(.scope) :global(.register-back) { justify-self: start; margin-top: 1rem; padding: 0; border: 0; background: transparent; color: var(--muted); font-size: 0.75rem; cursor: pointer; }
+:where(.scope) :global(.register-back):hover { color: var(--text); }
 :where(.scope) :global(.login-card) { width: min(31.25rem,100%); margin: 0 auto; }
 :where(.scope) :global(.login-card) h2 { margin: 0.6875rem 0 0.5rem; font-size: clamp(2.625rem,4vw,3.875rem); line-height: 1; letter-spacing: -.055em; }
 :where(.scope) :global(.login-card) > p { margin: 0 0 1.9375rem; color: #747c75; font-size: 0.8125rem; }
