@@ -24,3 +24,10 @@ Record the Customer's accept/reject decision on the latest sent quotation and pr
 ## Contract references
 
 Frontend: `docs/02-frontend.md`. Backend repo (`SA-Lathe-Shop-BE`): `docs/003-UC3.md`.
+
+## Use-case description alignment (2026-11-03)
+
+Source: `Use_Case_Description_UC1-UC12.md`. The backend contract (`docs/003-UC3.md`) takes precedence; conflicts are recorded in backend `docs/025-uc-spec-alignment.md`.
+
+- The source description cancels the request on the 5th rejection. The confirmed rule and the backend cancel on the 6th: rejections 1 to 5 allow a revision, and the sixth cancels. Show the rejection count and the revision state exactly as the API returns them.
+- The terms shown after acceptance come from the stored acceptance snapshot. Do not recompute them in the browser from customer type and price.

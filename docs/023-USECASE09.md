@@ -25,3 +25,11 @@ Installments are supported with exact allocation and no overpayment. Staff never
 ## Contract references
 
 Frontend: `docs/02-frontend.md` and `docs/real-api-only.md`. Backend repo (`SA-Lathe-Shop-BE`): `docs/009-UC9.md`.
+
+## Use-case description alignment (2026-11-03)
+
+Source: `Use_Case_Description_UC1-UC12.md`. The backend contract (`docs/009-UC9.md`) takes precedence; conflicts are recorded in backend `docs/025-uc-spec-alignment.md`.
+
+- Delivery is `self` or `third_party` with a receiver name. The source description's `pickup` option and `shipping_cost` field are not part of the contract; do not show them.
+- The customer submits bank payment evidence and Admin reviews it. The source description has the Technician record the payment; do not show a Worker payment-entry form.
+- Invoice status (`unpaid`, `partial`, `paid`) is derived from payment allocations on the server; display it as returned.

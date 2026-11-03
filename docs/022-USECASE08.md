@@ -23,3 +23,12 @@ Starting a job does not automatically consume its plan. Completion releases unus
 ## Contract references
 
 Frontend: `docs/02-frontend.md` and `docs/real-api-only.md`. Backend repo (`SA-Lathe-Shop-BE`): `docs/008-UC8.md`.
+
+## Use-case description alignment (2026-11-03)
+
+Source: `Use_Case_Description_UC1-UC12.md`. The backend contract (`docs/008-UC8.md`) takes precedence; conflicts are recorded in backend `docs/025-uc-spec-alignment.md`.
+
+- Actual labor cost is entered by Admin only; Workers log minutes. The source description has the Technician enter cost.
+- The completion photo is optional. Do not block completion when no photo is attached.
+- Time is recorded in whole minutes.
+- Start is available only when the job is queued with a fully reserved plan.

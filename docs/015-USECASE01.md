@@ -26,3 +26,11 @@ Capture a made-to-order request and its supporting files, then let authorized sh
 ## Contract references
 
 Frontend: `docs/02-frontend.md` and `docs/real-api-only.md`. Backend repo (`SA-Lathe-Shop-BE`): `docs/001-UC1.md` and `docs/000-auth.md`.
+
+## Use-case description alignment (2026-11-03)
+
+Source: `Use_Case_Description_UC1-UC12.md`. The backend contract (`docs/001-UC1.md`) takes precedence; conflicts are recorded in backend `docs/025-uc-spec-alignment.md`.
+
+- Sign-up for a new customer requires one address line (backend migration 000018, `address`, 1–500 characters). The source description's split fields (line 1, line 2, district, province, postal code) are not part of the contract; do not build them until the owner confirms.
+- The source description checks duplicate phone or email at sign-up. The backend does not, because contacts are non-unique by decision. Do not show a client-side duplicate error for contacts.
+- Verify the registration form collects the address before testing real sign-up; this alignment did not check the current form.

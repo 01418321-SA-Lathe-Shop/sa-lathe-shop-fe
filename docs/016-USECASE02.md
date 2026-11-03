@@ -24,3 +24,12 @@ The minimum price is based on a 60% markup over material plus labor cost for the
 ## Contract references
 
 Frontend: `docs/02-frontend.md` and `docs/real-api-only.md`. Backend repo (`SA-Lathe-Shop-BE`): `docs/002-UC2.md`.
+
+## Use-case description alignment (2026-11-03)
+
+Source: `Use_Case_Description_UC1-UC12.md`. The backend contract (`docs/002-UC2.md`) takes precedence; conflicts are recorded in backend `docs/025-uc-spec-alignment.md`.
+
+- Worker refusal is offered only for `pending` requests. The source description also allows refusing `ongoing` requests; the backend does not.
+- "Send back for more drawing details" has no backend endpoint. Do not show it.
+- Estimated time and estimated job cost are not in the API. Do not show them.
+- The quotation price is the confirmed minimum of (material + labor) × 1.60 for the whole request, rounded upward to a satang. Do not treat the source description's `final_price` input as the pricing rule.

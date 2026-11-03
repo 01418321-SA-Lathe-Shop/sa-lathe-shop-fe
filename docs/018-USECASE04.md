@@ -27,3 +27,12 @@ Collect the required customer-issued PO and/or deposit evidence, allow staff rev
 ## Contract references
 
 Frontend: `docs/02-frontend.md` and `docs/real-api-only.md`. Backend repo (`SA-Lathe-Shop-BE`): `docs/004-UC4.md`.
+
+## Use-case description alignment (2026-11-03)
+
+Source: `Use_Case_Description_UC1-UC12.md`. The backend contract (`docs/004-UC4.md`) takes precedence; conflicts are recorded in backend `docs/025-uc-spec-alignment.md`.
+
+- The deposit amount may be any value from the rounded 50% minimum through the full price. The source description requires an exact match; do not enforce exact equality in the UI.
+- Every evidence submission waits for Admin or Worker review. Do not show automatic approval.
+- There is no "hold" status. Missing evidence past 14 days shows the server's expired state.
+- The job view has no estimated cost or estimated time fields. Do not show them.

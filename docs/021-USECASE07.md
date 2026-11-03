@@ -24,3 +24,11 @@ Damaged quantities are handled by replacement, not refund or write-off. Supplier
 ## Contract references
 
 Frontend: `docs/02-frontend.md` and `docs/real-api-only.md`. Backend repo (`SA-Lathe-Shop-BE`): `docs/007-UC7.md`.
+
+## Use-case description alignment (2026-11-03)
+
+Source: `Use_Case_Description_UC1-UC12.md`. The backend contract (`docs/007-UC7.md`) takes precedence; conflicts are recorded in backend `docs/025-uc-spec-alignment.md`.
+
+- Supplier payment is not recorded at receipt. Admin sets credit days on the order (no default) and records one full cash or bank settlement after full good receipt. Do not show a pay-at-receipt action.
+- Damaged units are not written off. They stay outstanding until good replacements arrive. Do not show a write-off option.
+- The source description's notification that tells waiting jobs to start (Q7.7) is not implemented. Do not show it.

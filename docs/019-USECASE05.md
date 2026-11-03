@@ -24,3 +24,10 @@ Keep quantities/unit cost as exact decimal strings with six-place precision. Do 
 ## Contract references
 
 Frontend: `docs/02-frontend.md` and `docs/real-api-only.md`. Backend repo (`SA-Lathe-Shop-BE`): `docs/005-UC5.md`.
+
+## Use-case description alignment (2026-11-03)
+
+Source: `Use_Case_Description_UC1-UC12.md`. The backend contract (`docs/005-UC5.md`) takes precedence; conflicts are recorded in backend `docs/025-uc-spec-alignment.md`.
+
+- When a material is short, the backend allocates what is available and returns the remaining shortage. The source description reserves the full requirement. Show the allocated and short quantities exactly as the API returns them.
+- The active reservation state is derived from the reserved quantity; there is no separate status field to display.
