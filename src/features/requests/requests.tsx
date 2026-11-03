@@ -85,7 +85,7 @@ function RequestFiles({ api, id, canUpload }: { api: BackendApi; id: string; can
     {canUpload && <form aria-busy={action.busy} onSubmit={(event) => { event.preventDefault(); if (!file) return; void action.run(async (signal) => {
       try { await api.upload(id, file, signal); setFailed(false); setFile(null); resource.reload(); }
       catch (error) { if (!signal.aborted) setFailed(true); throw error; }
-    }, "File validated and saved by the server."); }}><Field label="Document or image (100 MB maximum)"><input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png" disabled={action.busy} aria-describedby={`upload-help-${id}`} onChange={(event) => { setFile(event.target.files?.[0] ?? null); setFailed(false); }} /></Field><p id={`upload-help-${id}`}>PDF, DOC/DOCX, XLS/XLSX, TXT, JPEG/PNG. Each attempt creates a fresh intent. Upload is not saved until server validation succeeds.</p><button type="submit" disabled={action.busy || !file}>{failed ? "Upload again" : "Upload file"}</button></form>}<Feedback {...action} />
+    }, "File validated and saved by the server."); }}><Field label="Document or image (100 MB (100,000,000 bytes) maximum)"><input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png" disabled={action.busy} aria-describedby={`upload-help-${id}`} onChange={(event) => { setFile(event.target.files?.[0] ?? null); setFailed(false); }} /></Field><p id={`upload-help-${id}`}>PDF, DOC/DOCX, XLS/XLSX, TXT, JPEG/PNG. Each attempt creates a fresh intent. Upload is not saved until server validation succeeds.</p><button type="submit" disabled={action.busy || !file}>{failed ? "Upload again" : "Upload file"}</button></form>}<Feedback {...action} />
   </section>;
 }
 

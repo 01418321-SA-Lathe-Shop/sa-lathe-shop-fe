@@ -79,7 +79,7 @@ function SubmitEvidence({ api, requestId, quotationId, state, kind, onSaved, onC
     <fieldset disabled={action.busy || Boolean(attempt)} className="live-fields">
       {kind === "deposit" && <><Field label="Declared deposit amount (THB)"><input name="amount" required inputMode="decimal" defaultValue={state.terms.deposit_amount} /></Field><p>One deposit from {displayMoney(state.terms.deposit_amount)} through {displayMoney(state.terms.final_price)}. No aggregation of smaller deposits. A full deposit is allowed; zero-price quotations use zero confirmation.</p><Field label="Declared payment time (Asia/Bangkok)"><input name="paid_at" type="datetime-local" required /></Field></>}
       <Field label={kind === "deposit" ? "New deposit receipt file" : "New company PO file"}><input type="file" required accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png" onChange={(event) => setFile(event.target.files?.[0] ?? null)} /></Field>
-      <p>Documents/images only, maximum 100 MB. Each fresh upload uses a new intent. Both finalization and evidence submission must finish before the deadline.</p>
+      <p>Documents/images only, maximum 100 MB (100,000,000 bytes). Each fresh upload uses a new intent. Both finalization and evidence submission must finish before the deadline.</p>
       <button type="submit" className="button-primary" disabled={!file}>{action.error && !attempt ? "Upload again & submit" : "Upload & submit"} {kind === "deposit" ? "deposit" : "PO"}</button>
     </fieldset>
     {action.busy && <p role="status">{stage}</p>}

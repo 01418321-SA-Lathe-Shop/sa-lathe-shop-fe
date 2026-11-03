@@ -95,7 +95,7 @@ function TimeForm({ api, job, onSaved }: { api: BackendApi; job: ProductionState
 function PhotoForm({ api, job, onSaved }: { api: BackendApi; job: ProductionState; onSaved: (message: string) => void }) {
   const command = useCommand(); const [file, setFile] = useState<File | null>(null); const [failed, setFailed] = useState(false);
   return <div className={layout.form}>
-    <p className={layout.muted}>รูปงานเป็นไฟล์ส่วนตัว JPEG หรือ PNG ไม่เกิน 100 MB (ไม่บังคับ)</p>
+    <p className={layout.muted}>รูปงานเป็นไฟล์ส่วนตัว JPEG หรือ PNG ไม่เกิน 100 MB (100,000,000 bytes) (ไม่บังคับ)</p>
     <Field label="เลือกรูปงาน"><input type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" disabled={command.busy} onChange={(event) => { setFile(event.target.files?.[0] ?? null); setFailed(false); }} /></Field>
     <div className={layout.submitBar}><span>{file ? file.name : "ยังไม่ได้เลือกรูป"}</span><button type="button" className={layout.submit} disabled={command.busy || !file} onClick={() => { if (!file) return; void command.run(async (signal) => {
       try { await api.privateUpload(`/production/jobs/${job.job_id}/photos/uploads`, (photoId) => `/job-photos/${photoId}/complete`, file, signal, (type) => type.startsWith("image/")); setFailed(false); setFile(null); onSaved("แนบรูปงานแล้ว"); }

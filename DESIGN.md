@@ -301,7 +301,7 @@ The detail (`?order=`) contains, in order:
 - Admin-only จ่ายผู้ขาย section:
   - Total without VAT, credit days, due time and payment status.
   - Credit days are set once, through a confirmation.
-  - Settlement records an outside payment, once: bank transfer needs an uploaded private proof; cash proof is optional. The proof upload is a new upload on every attempt, shows “อัปโหลดอีกครั้ง” after a failure, and blocks files over 100 MB.
+  - Settlement records an outside payment, once: bank transfer needs an uploaded private proof; cash proof is optional. The proof upload is a new upload on every attempt, shows “อัปโหลดอีกครั้ง” after a failure, and blocks files over 100 MB (100,000,000 bytes).
   - Once paid, the section shows the payment and a proof download.
 - Staff see a note that prices, credit days and payment are handled by Admin.
 
@@ -968,6 +968,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-03 | Every upload hint, too-large message and landing FAQ now reads “100 MB (100,000,000 bytes)”, the exact limit the frontend check and backend `MaxBytes` enforce; validation unchanged | Native tests, grep of `src` for remaining bare “100 MB” |
 | 2026-11-03 | `/login` and `/register` messages translated to Thai: busy status, password-rule error (rule unchanged: ≥12 characters, ≤128 UTF-8 bytes), registration success and session expiry/sign-out notices | Native tests (Thai copy and unchanged rule asserted) |
 | 2026-11-03 | Customer sidebar and mobile menu render one `CUSTOMER_NAV` definition (`customer-navigation.ts`); labels, icons, hrefs and grouping unchanged. Unused English Customer workspace descriptions removed from `workspace-access.ts` | Native tests (new route/menu test covering all ten Customer routes), TypeScript, DESIGN sync |
 | 2026-11-03 | Registration requires an address for a new individual or company customer (textarea in the login-field style; hidden with a help line when joining by invitation). บัญชีและบริษัท replaces the placeholder contact panel with per-customer address lists and an owner-only เพิ่มที่อยู่ form, using backend `GET`/`POST /customers/{id}/addresses` | Native tests, type check, lint, DESIGN sync; backend UC1 integration on real PostgreSQL/S3 |

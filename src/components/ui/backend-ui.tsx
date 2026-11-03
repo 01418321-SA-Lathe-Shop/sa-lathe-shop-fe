@@ -28,7 +28,7 @@ export function PrivateUpload({ api, label, intentPath, completePath, images = f
   if (ready) return <div className="attachment-row" role="status"><span>Ready: {ready.file_name} · {ready.byte_size} bytes</span><button type="button" onClick={() => { onReady(null); setFile(null); }}>Choose another file</button></div>;
   return <div className="live-fields" aria-busy={command.busy}>
     <Field label={label}><input type="file" accept={accept} disabled={command.busy} onChange={(event) => { setFile(event.target.files?.[0] ?? null); setFailed(false); }} /></Field>
-    <p>{images ? "JPEG or PNG" : "PDF, DOC/DOCX, XLS/XLSX, TXT, JPEG/PNG"}, 100 MB maximum. The file stays private.</p>
+    <p>{images ? "JPEG or PNG" : "PDF, DOC/DOCX, XLS/XLSX, TXT, JPEG/PNG"}, 100 MB (100,000,000 bytes) maximum. The file stays private.</p>
     <button type="button" disabled={command.busy || !file} onClick={() => { if (!file) return; void command.run(async (signal) => {
       try { onReady(await api.privateUpload<ReadyFile>(intentPath, completePath, file, signal, images ? (type) => type.startsWith("image/") : undefined)); setFailed(false); }
       catch (error) { if (!signal.aborted) setFailed(true); throw error; }
