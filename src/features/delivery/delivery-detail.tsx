@@ -13,6 +13,12 @@ import { PaymentCards } from "./delivery-payments";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./delivery.module.css";
 
+const METHOD_TEXT: Record<string, string> = {
+  self: "ร้านส่งเอง",
+  third_party: "ผู้ให้บริการขนส่ง",
+  pickup: "ลูกค้ารับที่ร้าน",
+};
+
 // UC9 job detail: balance first, then the one step this role can take now.
 // Forms render only from settled data and are keyed by version.
 export function DeliveryDetail({ api, admin, id, label, backHref, onChanged }: { api: BackendApi; admin: boolean; id: string; label: string; backHref: string; onChanged: (message: string) => void }) {
@@ -26,6 +32,7 @@ export function DeliveryDetail({ api, admin, id, label, backHref, onChanged }: {
   const actions = settled ? availableActions(state, admin ? "admin" : "worker") : [];
   const invoice = state.invoice; const deliveries = state.deliveries ?? []; const last = deliveries.at(-1);
   const closed = state.request_status === "completed"; const key = String(state.version);
+  const canIssueInvoice = settled && !closed && state.request_status === "ongoing" && state.job_status === "completed" && !invoice;
   return <article className={layout.detailCard} aria-label={`ส่งมอบ ${label}`}>
     <Link href={backHref} scroll={false} className={layout.back}><Icon name="arrow" size={16} />กลับไปรายการ</Link>
     <div className={layout.detailHeader}>
@@ -45,14 +52,13 @@ export function DeliveryDetail({ api, admin, id, label, backHref, onChanged }: {
         <div><span className={styles.heroLabel}>ยอดที่จะออกใบแจ้งหนี้</span><strong className={styles.heroAmount}>{bahtTH(state.opening_balance)}</strong></div>
         <dl className={layout.facts}>
           <div><dt>มัดจำที่อนุมัติแล้ว</dt><dd>{bahtTH(state.deposit)}</dd></div>
-          <div><dt>เครดิต</dt><dd>{state.credit_days === undefined ? "ยังไม่ตั้ง" : `${state.credit_days} วัน`}</dd></div>
+          <div><dt>เครดิต</dt><dd>{state.credit_days === undefined ? "ยังไม่ตั้ง (ออกใบแจ้งหนี้ทันที = 0 วัน)" : `${state.credit_days} วัน`}</dd></div>
         </dl>
       </>}
     </section>
     {closed && <p className={layout.muted}>ปิดงานแล้ว: ลูกค้ารับงานและชำระครบ</p>}
-    {actions.includes("terms") && <NextAction title="ตั้งเครดิตใบแจ้งหนี้"><TermsForm key={`terms:${key}`} api={api} state={state} onSaved={saved} /></NextAction>}
-    {actions.includes("invoice") && <NextAction title="ออกใบแจ้งหนี้"><InvoiceForm key={`invoice:${key}`} api={api} state={state} onSaved={saved} /></NextAction>}
-    {!admin && !closed && state.job_status === "completed" && !invoice && state.credit_days === undefined && <NextAction title="รอแอดมินตั้งเครดิต"><p className={layout.muted}>ออกใบแจ้งหนี้ได้หลังแอดมินตั้งเครดิตให้งานนี้</p></NextAction>}
+    {actions.includes("terms") && <NextAction title="ตั้งเครดิตใบแจ้งหนี้ (ไม่บังคับหากออกทันที)"><TermsForm key={`terms:${key}`} api={api} state={state} onSaved={saved} /></NextAction>}
+    {(actions.includes("invoice") || canIssueInvoice) && <NextAction title="ออกใบแจ้งหนี้"><InvoiceForm key={`invoice:${key}`} api={api} state={state} onSaved={saved} /></NextAction>}
     {actions.includes("ship") && <NextAction title={last?.status === "returned" ? "ส่งงานที่แก้ไขแล้ว" : "บันทึกส่งมอบ"}><ShipForm key={`ship:${key}`} api={api} state={state} onSaved={saved} /></NextAction>}
     {!closed && last?.status === "shipping" && <NextAction title="รอลูกค้าตรวจรับ"><p className={layout.muted}>ลูกค้าตรวจรับในระบบ ถ้าส่งคืน งานเดิมจะเปิดกลับมาแก้ไขฟรีที่หน้างานผลิต</p></NextAction>}
     {!closed && state.job_status !== "completed" && <p className={layout.muted}>{state.cycle > 1 ? "งานกลับไปแก้ไขที่หน้างานผลิต" : "งานยังผลิตไม่เสร็จ"} ส่งมอบได้หลังปิดงานผลิต</p>}
@@ -66,7 +72,7 @@ export function DeliveryDetail({ api, admin, id, label, backHref, onChanged }: {
       <h3>การส่งมอบ</h3>
       {deliveries.length ? <ol className={layout.timeline}>{deliveries.map((delivery) => <li key={delivery.id}>
         <strong>รอบ {delivery.cycle} · <StatusBadge map={SHIPMENT_STATE} value={delivery.status} /></strong>
-        <span>{delivery.method === "self" ? "ร้านส่งเอง / ลูกค้ารับเอง" : "ผู้ให้บริการขนส่ง"} · ผู้รับ {delivery.receiver_name} · ส่งเมื่อ {dateTimeTH(delivery.shipped_at)}</span>
+        <span>{METHOD_TEXT[delivery.method] ?? delivery.method} · ผู้รับ {delivery.receiver_name}{delivery.shipping_cost && delivery.shipping_cost !== "0.00" ? ` · ค่าจัดส่ง ${bahtTH(delivery.shipping_cost)}` : ""} · ส่งเมื่อ {dateTimeTH(delivery.shipped_at)}</span>
         {delivery.decided_at && <span>ลูกค้าตอบเมื่อ {dateTimeTH(delivery.decided_at)}{delivery.reason ? ` · ${delivery.reason}` : ""}</span>}
       </li>)}</ol> : <p className={layout.muted}>ยังไม่ได้ส่งมอบ</p>}
     </section>

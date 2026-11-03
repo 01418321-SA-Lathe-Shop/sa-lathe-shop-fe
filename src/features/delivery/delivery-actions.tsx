@@ -17,13 +17,19 @@ const Outcome = ({ write, onSaved }: { write: ReturnType<typeof useRetryableWrit
   write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />;
 const check = (build: () => unknown, setError: (message: string) => void) => { try { build(); setError(""); return true; } catch (problem) { setError((problem as Error).message); return false; } };
 
+const METHOD_LABEL: Record<string, string> = {
+  self: "ร้านส่งเอง",
+  third_party: "ผู้ให้บริการขนส่ง",
+  pickup: "ลูกค้ารับที่ร้าน (Pickup)",
+};
+
 // Each form is a div with button clicks: ConfirmDialog carries its own form.
 export function TermsForm({ api, state, onSaved }: Props) {
   const [days, setDays] = useState(""); const [error, setError] = useState(""); const [confirming, setConfirming] = useState(false);
   const write = useRetryableWrite(api, () => onSaved("ตั้งเครดิตแล้ว ออกใบแจ้งหนี้ได้"));
   const build = () => ({ ...command(state), credit_days: creditDays(days) });
   return <div className={layout.form}>
-    <fieldset disabled={write.frozen}><Field label="เครดิต (วัน)" hint="0 = ครบกำหนดทันทีที่ออกใบแจ้งหนี้ ไม่มีค่าเริ่มต้น" error={error || undefined}><input inputMode="numeric" autoComplete="off" value={days} aria-invalid={Boolean(error) || undefined} onChange={(event) => { setDays(event.target.value); setError(""); }} /></Field></fieldset>
+    <fieldset disabled={write.frozen}><Field label="เครดิต (วัน · ไม่บังคับหากออกใบแจ้งหนี้ทันที)" hint="0 = ครบกำหนดทันทีที่ออกใบแจ้งหนี้" error={error || undefined}><input inputMode="numeric" autoComplete="off" value={days} aria-invalid={Boolean(error) || undefined} onChange={(event) => { setDays(event.target.value); setError(""); }} /></Field></fieldset>
     <div className={layout.actions}><button type="button" className={layout.submit} disabled={write.frozen || !days.trim()} onClick={() => { if (check(build, setError)) setConfirming(true); }}>ตั้งเครดิต</button></div>
     <Outcome write={write} onSaved={onSaved} />
     <ConfirmDialog open={confirming} title="ตั้งเครดิตใบแจ้งหนี้?" confirmLabel="ยืนยันตั้งเครดิต" checks={["ตกลงเครดิตกับลูกค้าแล้ว"]} onClose={() => setConfirming(false)} onConfirm={() => { setConfirming(false); write.submit(`/fulfillment/jobs/${state.job_id}/credit-terms`, "PUT", build, ""); }}>
@@ -35,31 +41,41 @@ export function TermsForm({ api, state, onSaved }: Props) {
 export function InvoiceForm({ api, state, onSaved }: Props) {
   const [confirming, setConfirming] = useState(false);
   const write = useRetryableWrite(api, () => onSaved("ออกใบแจ้งหนี้แล้ว บันทึกส่งมอบได้"));
+  const effectiveDays = state.credit_days ?? 0;
   return <div className={layout.form}>
-    <p className={layout.muted}>ยอดใบแจ้งหนี้คือยอดหลังหักมัดจำ {bahtTH(state.opening_balance)} (ไม่มี VAT ไม่มีค่าส่ง) ครบกำหนด {state.credit_days} วันหลังออก</p>
+    <p className={layout.muted}>ยอดใบแจ้งหนี้คือยอดหลังหักมัดจำ {bahtTH(state.opening_balance)} (ไม่มี VAT) ครบกำหนด {effectiveDays} วันหลังออก{state.credit_days === undefined ? " (ค่าเริ่มต้น 0 วัน)" : ""}</p>
     <div className={layout.actions}><button type="button" className={layout.submit} disabled={write.frozen} onClick={() => setConfirming(true)}>ออกใบแจ้งหนี้</button></div>
     <Outcome write={write} onSaved={onSaved} />
     <ConfirmDialog open={confirming} title="ออกใบแจ้งหนี้?" confirmLabel="ยืนยันออกใบแจ้งหนี้" checks={["ตรวจยอดและเครดิตแล้ว"]} onClose={() => setConfirming(false)} onConfirm={() => { setConfirming(false); write.submit(`/fulfillment/jobs/${state.job_id}/invoice`, "POST", () => command(state), ""); }}>
-      <p>ยอด {bahtTH(state.opening_balance)} · เครดิต {state.credit_days} วัน</p><p>ใบแจ้งหนี้มีใบเดียวต่องาน ออกแล้วแก้ยอด เครดิต และวันที่ไม่ได้</p>
+      <p>ยอด {bahtTH(state.opening_balance)} · เครดิต {effectiveDays} วัน</p><p>ใบแจ้งหนี้มีใบเดียวต่องาน ออกแล้วแก้ยอด เครดิต และวันที่ไม่ได้</p>
     </ConfirmDialog>
   </div>;
 }
 
 export function ShipForm({ api, state, onSaved }: Props) {
-  const [method, setMethod] = useState<"self" | "third_party">("self"); const [receiver, setReceiver] = useState("");
+  const [method, setMethod] = useState<"self" | "third_party" | "pickup">("self");
+  const [receiver, setReceiver] = useState("");
+  const [shippingCost, setShippingCost] = useState("0.00");
   const [error, setError] = useState(""); const [confirming, setConfirming] = useState(false);
   const write = useRetryableWrite(api, () => onSaved("บันทึกส่งมอบแล้ว ลูกค้าจะได้รับแจ้งให้ตรวจรับ"));
-  const build = () => shipPayload(command(state), method, receiver);
+  const build = () => shipPayload(command(state), method, receiver, shippingCost);
   return <div className={layout.form}>
     <fieldset disabled={write.frozen}>
-      <Field label="วิธีส่ง"><select value={method} onChange={(event) => setMethod(event.target.value as "self" | "third_party")}><option value="self">ร้านส่งเอง / ลูกค้ารับเอง</option><option value="third_party">ผู้ให้บริการขนส่ง</option></select></Field>
+      <Field label="วิธีส่ง (UC9 Q9.1)">
+        <select value={method} onChange={(event) => setMethod(event.target.value as "self" | "third_party" | "pickup")}>
+          <option value="self">ร้านส่งเอง (self)</option>
+          <option value="third_party">ผู้ให้บริการขนส่ง (third_party)</option>
+          <option value="pickup">ลูกค้ารับที่ร้าน (pickup)</option>
+        </select>
+      </Field>
       <Field label="ชื่อผู้รับ" error={error || undefined}><input maxLength={200} autoComplete="off" value={receiver} aria-invalid={Boolean(error) || undefined} onChange={(event) => { setReceiver(event.target.value); setError(""); }} /></Field>
+      <Field label="ค่าจัดส่ง (บาท · UC9 Q9.1)" hint="0.00 หากไม่มีค่าจัดส่ง"><input inputMode="decimal" autoComplete="off" value={shippingCost} onChange={(event) => { setShippingCost(event.target.value); setError(""); }} /></Field>
     </fieldset>
-    <p className={layout.muted}>ส่งทั้งงานในครั้งเดียว ไม่มีเลขพัสดุหรือค่าส่งในระบบ การบันทึกส่งไม่ใช่การที่ลูกค้ารับงาน</p>
+    <p className={layout.muted}>ส่งทั้งงานในครั้งเดียว การบันทึกส่งไม่ใช่การที่ลูกค้ารับงาน</p>
     <div className={layout.actions}><button type="button" className={layout.submit} disabled={write.frozen || !receiver.trim()} onClick={() => { if (check(build, setError)) setConfirming(true); }}>บันทึกส่งมอบ</button></div>
     <Outcome write={write} onSaved={onSaved} />
     <ConfirmDialog open={confirming} title="บันทึกส่งมอบ?" confirmLabel="ยืนยันส่งมอบ" checks={["ส่งงานครบทั้งงานแล้ว"]} onClose={() => setConfirming(false)} onConfirm={() => { setConfirming(false); write.submit(`/fulfillment/jobs/${state.job_id}/deliveries`, "POST", build, ""); }}>
-      <p>{method === "self" ? "ร้านส่งเอง / ลูกค้ารับเอง" : "ผู้ให้บริการขนส่ง"} · ผู้รับ {receiver.trim()}</p><p>ลูกค้าจะตรวจรับหรือส่งคืนเพื่อแก้ไขฟรีในระบบ</p>
+      <p>{METHOD_LABEL[method] ?? method} · ผู้รับ {receiver.trim()}{shippingCost.trim() ? ` · ค่าจัดส่ง ${bahtTH(shippingCost.trim())}` : ""}</p><p>ลูกค้าจะตรวจรับหรือส่งคืนเพื่อแก้ไขฟรีในระบบ</p>
     </ConfirmDialog>
   </div>;
 }

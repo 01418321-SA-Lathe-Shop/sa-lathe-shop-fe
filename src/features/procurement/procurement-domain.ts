@@ -9,6 +9,8 @@ export type OrderEvent = { id: string; actor_id: string; action: string; reason:
 export type SupplierOrder = { id: string; order_no: string; supplier: Supplier; job_ids: string[] | null; lines: OrderLine[] | null; total_amount: string; status: string; supplier_response: string; version: number | string; expected_at?: string; created_at: string; created_by: string; events: OrderEvent[] | null };
 export type DraftLine = { material_id: string; name: string; unit_name: string; quantity: string; unit_cost: string };
 export type OrderAction = "accept" | "reject" | "cancel";
+export type ShortageItem = { material_id: string; material_name: string; unit_id: string; unit_name: string; total_needed: string; current_stock: string; shortage_qty: string; job_ids: string[] | null };
+export type SupplierRecommendation = { supplier: Supplier; material_id: string; last_unit_cost: string };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -64,7 +66,7 @@ type OrderState = Pick<SupplierOrder, "status" | "supplier_response">;
 // shortcut: an unknown status/response pair belongs to no tab, revisit if UC6/UC7 add states.
 export function orderTabOf(order: OrderState): OrderTab | null {
   if (order.status === "cancelled") return "cancelled";
-  if (order.status === "received") return "received";
+  if (order.status === "received" || order.status === "damaged") return "received";
   if (order.status === "partially_received") return "partial";
   if (order.status !== "ordered") return null;
   return order.supplier_response === "pending" ? "pending" : order.supplier_response === "accepted" ? "accepted" : null;

@@ -8,7 +8,7 @@ import { useResource, useRetryableWrite } from "../../hooks/backend-hooks";
 import { bahtTH, dateTimeTH, quantityTH } from "../../components/staff-ui/staff-format";
 import { ORDER_EVENT, ORDER_STATE } from "../../components/staff-ui/staff-labels";
 import { Button, Collapsible, ConfirmDialog, ErrorText, Field, NextAction, RetryPanel, StatusBadge } from "../../components/staff-ui/staff-ui";
-import { allowedActions, orderActionPayload, orderTabOf, type OrderAction, type SupplierOrder } from "./procurement-domain";
+import { allowedActions, orderActionPayload, orderTabOf, type OrderAction, type SupplierOrder, type SupplierRecommendation } from "./procurement-domain";
 import { RelatedJobs } from "./procurement-jobs";
 import { PurchaseOrderDocument } from "../documents/business-documents";
 import { shopParty } from "../documents/documents-domain";
@@ -22,7 +22,7 @@ const ACTION: Record<OrderAction, { title: string; confirm: string; done: string
   cancel: { title: "ยกเลิกใบสั่งซื้อนี้?", confirm: "ยกเลิกใบสั่งซื้อ", done: "ยกเลิกใบสั่งซื้อแล้ว", text: "ยกเลิกได้เฉพาะก่อนรับของ ใบสั่งซื้อยังเก็บไว้ในประวัติ" },
 };
 
-// UC6 order detail (Admin). Placed orders are immutable; the only commands are
+// UC6 order detail (Staff/Admin). Placed orders are immutable; the only commands are
 // the supplier's response and cancellation, each with a frozen retry key.
 export function OrderDetail({ api, order, backHref, receivingHref, onChanged }: { api: BackendApi; order: SupplierOrder; backHref: string; receivingHref: string; onChanged: (message: string) => void }) {
   const tab = orderTabOf(order); const actions = allowedActions(order);
@@ -31,6 +31,12 @@ export function OrderDetail({ api, order, backHref, receivingHref, onChanged }: 
   const shop = useResource<ShopProfile>(api, "/shop-profile");
   const write = useRetryableWrite(api, () => onChanged(action ? ACTION[action].done : ""));
   const lines = order.lines ?? []; const events = order.events ?? []; const jobs = order.job_ids ?? [];
+  const matIds = lines.map((l) => l.material_id).join(",");
+  const altSuppliers = useResource<{ items: SupplierRecommendation[] | null }>(
+    api,
+    order.supplier_response === "rejected" && matIds ? `/suppliers/recommendations?material_ids=${encodeURIComponent(matIds)}&exclude_supplier_id=${encodeURIComponent(order.supplier.id)}` : null,
+  );
+  const altList = altSuppliers.data?.items ?? [];
   const ended = [...events].reverse().find((event) => event.action === "reject" || event.action === "cancel");
   const open = (next: OrderAction) => { setAction(next); setReason(""); setReasonError(""); setDialog(true); };
   const buttons = (keys: OrderAction[]) => <div className={layout.actions}>
@@ -57,6 +63,13 @@ export function OrderDetail({ api, order, backHref, receivingHref, onChanged }: 
     </NextAction>}
     {tab === "received" && <p className={layout.muted}>รับของครบตามใบสั่งซื้อแล้ว</p>}
     {tab === "cancelled" && <p className={layout.problem}>{order.supplier_response === "rejected" ? "ผู้ขายปฏิเสธ" : "ยกเลิกแล้ว"}{ended?.reason ? `: ${ended.reason}` : ""}</p>}
+    {order.supplier_response === "rejected" && <section className={layout.section} aria-label="ผู้ขายสำรองแนะนำ">
+      <h3>ผู้ขายสำรองแนะนำ (UC6 Q6.E2)</h3>
+      {altList.length > 0 ? <ul className={styles.lines}>{altList.map((rec) => <li key={`${rec.supplier.id}:${rec.material_id}`}>
+        <span><strong>{rec.supplier.name}</strong><small>{[rec.supplier.phone, rec.supplier.email].filter(Boolean).join(" · ")}</small></span>
+        <strong>ราคาซื้อล่าสุด {quantityTH(rec.last_unit_cost)} บาท</strong>
+      </li>)}</ul> : <p className={layout.muted}>ไม่พบประวัติผู้ขายรายอื่นสำหรับวัตถุดิบนี้ สามารถเลือกผู้ขายรายอื่นได้เมื่อสร้างใบสั่งซื้อใหม่</p>}
+    </section>}
     {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onChanged(""); }} /> : <ErrorText error={write.error} />}
     <section className={layout.section} aria-label="รายการวัตถุดิบ">
       <h3>วัตถุดิบ {lines.length} รายการ</h3>

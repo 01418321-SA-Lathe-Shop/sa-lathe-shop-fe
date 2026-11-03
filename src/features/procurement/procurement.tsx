@@ -5,19 +5,20 @@ import { Suspense, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "../../components/appearance/icons";
 import type { BackendApi } from "../../lib/api/backend-api";
-import { bahtTH, dateTH } from "../../components/staff-ui/staff-format";
+import { useResource } from "../../hooks/backend-hooks";
+import { bahtTH, dateTH, quantityTH } from "../../components/staff-ui/staff-format";
 import { ORDER_STATE } from "../../components/staff-ui/staff-labels";
-import { Button, Drawer, EmptyState, LoadError, SearchForm, Skeleton, StatusBadge, StatusTabs, Toast, TruncatedNotice } from "../../components/staff-ui/staff-ui";
+import { Button, Collapsible, Drawer, EmptyState, LoadError, SearchForm, Skeleton, StatusBadge, StatusTabs, Toast, TruncatedNotice } from "../../components/staff-ui/staff-ui";
 import { useCollection } from "../customer/customer-hooks";
-import { defaultOrderTab, matchOrder, ORDER_TABS, orderCounts, orderTab, orderTabOf, type OrderTab, type SupplierOrder } from "./procurement-domain";
+import { defaultOrderTab, matchOrder, ORDER_TABS, orderCounts, orderTab, orderTabOf, type OrderTab, type ShortageItem, type SupplierOrder } from "./procurement-domain";
 import { NewOrderForm } from "./procurement-new";
 import { OrderDetail } from "./procurement-order";
 import { SupplierView } from "./procurement-suppliers";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./procurement.module.css";
 
-// UC6 สั่งซื้อวัตถุดิบ is Admin-only: supplier orders by status (ใบสั่งซื้อ) and
-// the supplier list (?view=suppliers, same route). No Supplier login exists.
+// UC6 สั่งซื้อวัตถุดิบ (Staff/Technician & Admin): supplier orders by status (ใบสั่งซื้อ),
+// material shortage summary (Q6.1), and the supplier list (?view=suppliers).
 const EMPTY: Record<OrderTab, [string, string]> = {
   pending: ["ไม่มีใบสั่งซื้อที่รอผู้ขายตอบ", "สร้างใบสั่งซื้อใหม่ได้จากปุ่มสั่งซื้อวัตถุดิบ"],
   accepted: ["ไม่มีใบสั่งซื้อที่รอรับของ", "ใบสั่งซื้อที่ผู้ขายรับแล้วจะอยู่ที่นี่จนกว่าจะรับของ"],
@@ -37,6 +38,8 @@ function ProcurementWorkspace({ api }: { api: BackendApi }) {
   const cardView = params.get("layout") !== "list" && params.get("view") !== "list";
   const q = params.get("q") ?? ""; const selected = params.get("order") ?? "";
   const orders = useCollection<SupplierOrder>(api, "/material-orders");
+  const shortages = useResource<{ items: ShortageItem[] | null }>(api, "/material-orders/shortages");
+  const shortageList = shortages.data?.items ?? [];
   const items = orders.data?.items ?? []; const matched = items.filter((order) => matchOrder(order, q));
   const counts = orderCounts(matched); const tab = orderTab(params.get("tab")) ?? defaultOrderTab(counts);
   const rows = matched.filter((order) => orderTabOf(order) === tab);
@@ -48,7 +51,7 @@ function ProcurementWorkspace({ api }: { api: BackendApi }) {
     for (const [key, value] of Object.entries(changes)) if (value) next.set(key, value); else next.delete(key);
     const query = next.toString(); return query ? `${pathname}?${query}` : pathname;
   };
-  const saved = (message: string) => { if (message) setToast(message); orders.reload(); };
+  const saved = (message: string) => { if (message) setToast(message); orders.reload(); shortages.reload(); };
   const listLoading = orders.loading && !orders.data;
   return <section className={layout.page}>
     <nav className={layout.views} aria-label="มุมมอง">
@@ -56,6 +59,13 @@ function ProcurementWorkspace({ api }: { api: BackendApi }) {
       <Link href={href({ view: "suppliers", tab: undefined, order: undefined, q: undefined })} scroll={false} aria-current={view === "suppliers" ? "page" : undefined}>ผู้ขาย</Link>
     </nav>
     {view === "suppliers" ? <SupplierView api={api} onSaved={setToast} /> : <>
+      {shortageList.length > 0 && <Collapsible title={`วัสดุที่ขาดแคลนตามแผนการผลิต (${shortageList.length} รายการ · UC6 Q6.1)`}>
+        <ul className={styles.lines}>{shortageList.map((item) => <li key={item.material_id}>
+          <span><strong>{item.material_name}</strong><small>ต้องใช้รวม {quantityTH(item.total_needed)} {item.unit_name} · คงเหลือ {quantityTH(item.current_stock)} {item.unit_name}</small></span>
+          <strong>ขาด {quantityTH(item.shortage_qty)} {item.unit_name}</strong>
+        </li>)}</ul>
+        <div className={layout.actions}><Button variant="primary" onClick={() => setCreating(true)}>สร้างใบสั่งซื้อจากรายการที่ขาด</Button></div>
+      </Collapsible>}
       <div className={layout.toolbar}>
         <div className={styles.toolbarHead}>
           <StatusTabs label="สถานะใบสั่งซื้อ" tabs={ORDER_TABS.map((key) => ({ key, label: ORDER_STATE[key][0], count: counts[key], attention: key === "pending" }))} current={tab} href={(key) => href({ tab: key, order: undefined })} loading={listLoading} unavailable={Boolean(orders.error && !orders.data)} />
@@ -66,7 +76,7 @@ function ProcurementWorkspace({ api }: { api: BackendApi }) {
         </div>
         <div className={layout.toolbarEnd}>
           <SearchForm label="ค้นหาใบสั่งซื้อ" placeholder="เลขใบสั่งซื้อหรือชื่อผู้ขาย" value={q} onSearch={(value) => router.replace(href({ q: value || undefined, order: undefined }), { scroll: false })} />
-          <Button onClick={orders.reload} disabled={orders.loading}>อัปเดตข้อมูล</Button>
+          <Button onClick={() => { orders.reload(); shortages.reload(); }} disabled={orders.loading}>อัปเดตข้อมูล</Button>
           <Button variant="primary" onClick={() => setCreating(true)}>สั่งซื้อวัตถุดิบ</Button>
         </div>
       </div>
@@ -107,7 +117,7 @@ function ProcurementWorkspace({ api }: { api: BackendApi }) {
           : <div className={layout.placeholder}><EmptyState title="ไม่พบใบสั่งซื้อนี้">เปิดใบสั่งซื้อเพื่อบันทึกคำตอบผู้ขายหรือดูรายการวัตถุดิบ</EmptyState></div>}
       </OrderModal>}
       <Drawer open={creating} title="สั่งซื้อวัตถุดิบ" onClose={() => { if (!locked) setCreating(false); }}>
-        {creating && <NewOrderForm api={api} onLock={setLocked} onPlaced={() => { setLocked(false); setCreating(false); saved("สั่งซื้อแล้ว รอผู้ขายตอบ"); router.replace(href({ tab: "pending", order: undefined, q: undefined }), { scroll: false }); }} />}
+        {creating && <NewOrderForm api={api} shortages={shortageList} onLock={setLocked} onPlaced={() => { setLocked(false); setCreating(false); saved("สั่งซื้อแล้ว รอผู้ขายตอบ"); router.replace(href({ tab: "pending", order: undefined, q: undefined }), { scroll: false }); }} />}
       </Drawer>
     </>}
     <Toast message={toast} onDone={clearToast} />
@@ -134,32 +144,15 @@ function OrderCard({ order, tab, selected, href, grid = false, row = false }: { 
 
   if (grid) {
     return <Link id={`order-card-${order.id}`} href={href} scroll={false} className={styles.gridCard} aria-current={selected ? "true" : undefined}>
-      <div className={styles.cardHeader}>
-        <div>
-          <span className={styles.metaLabel}>ใบสั่งซื้อ</span>
-          <strong>#{order.order_no}</strong>
-        </div>
-      </div>
+      <div className={styles.cardHeader}><div><span className={styles.metaLabel}>ใบสั่งซื้อ</span><strong>#{order.order_no}</strong></div></div>
       <h3 className={styles.cardTitle}>{order.supplier.name}</h3>
-      <div className={styles.cardStatus}>
-        <StatusBadge map={ORDER_STATE} value={tab} />
-      </div>
+      <div className={styles.cardStatus}><StatusBadge map={ORDER_STATE} value={tab} /></div>
       <dl className={styles.essentials}>
-        <div>
-          <dt>ยอดรวม</dt>
-          <dd>{bahtTH(order.total_amount)}</dd>
-        </div>
-        <div>
-          <dt><Icon name="layers" size={14} /> วัตถุดิบ</dt>
-          <dd>{lines} รายการ</dd>
-        </div>
+        <div><dt>ยอดรวม</dt><dd>{bahtTH(order.total_amount)}</dd></div>
+        <div><dt><Icon name="layers" size={14} /> วัตถุดิบ</dt><dd>{lines} รายการ</dd></div>
       </dl>
-      <div className={styles.cardStep}>
-        <span>{dateLabel}</span>
-      </div>
-      <footer className={styles.cardFooter}>
-        <span className={styles.openHint}>{NEXT[tab]} <Icon name="arrow" size={14} /></span>
-      </footer>
+      <div className={styles.cardStep}><span>{dateLabel}</span></div>
+      <footer className={styles.cardFooter}><span className={styles.openHint}>{NEXT[tab]} <Icon name="arrow" size={14} /></span></footer>
     </Link>;
   }
 
@@ -169,12 +162,8 @@ function OrderCard({ order, tab, selected, href, grid = false, row = false }: { 
       <span className={layout.cardTitle}>{order.supplier.name}</span>
       <span className={layout.cardMeta}>{bahtTH(order.total_amount)}{row ? ` · วัตถุดิบ ${lines} รายการ` : ""}</span>
     </div>
-    {row && <div className={styles.rowStatus}>
-      <StatusBadge map={ORDER_STATE} value={tab} />
-    </div>}
-    <div className={row ? styles.rowMeta : undefined}>
-      {row && <span className={layout.cardMeta}>{dateLabel}</span>}
-    </div>
+    {row && <div className={styles.rowStatus}><StatusBadge map={ORDER_STATE} value={tab} /></div>}
+    <div className={row ? styles.rowMeta : undefined}>{row && <span className={layout.cardMeta}>{dateLabel}</span>}</div>
     {row && <span className={layout.cardNext} data-quiet={tab === "pending" ? undefined : ""}>{NEXT[tab]} <Icon name="arrow" size={14} /></span>}
   </Link>;
 }

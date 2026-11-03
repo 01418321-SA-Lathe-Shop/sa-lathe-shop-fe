@@ -13,6 +13,7 @@ const DESCRIPTIONS: Record<Role, Partial<Record<Exclude<WorkspaceId, "overview">
   Worker: {
     quotations: ["UC1–UC4", "ประเมินราคา ส่งใบเสนอราคา และตรวจหลักฐานมัดจำ/PO"],
     materials: ["UC5", "ดูยอดวัตถุดิบที่พร้อมใช้ ที่จองไว้ และประวัติการเคลื่อนไหว"],
+    orders: ["UC6", "ผู้ขาย สรุปวัตถุดิบที่ต้องสั่งซื้อ และใบสั่งซื้อวัตถุดิบ"],
     receiving: ["UC7", "รับของตามใบสั่งซื้อที่ผู้ขายรับแล้ว และบันทึกของเสียหาย"],
     production: ["UC8", "เริ่มงาน บันทึกวัตถุดิบที่ใช้ เวลาทำงาน และรูปงาน"],
     "delivery-payment": ["UC9", "ออกใบแจ้งหนี้และบันทึกการส่งมอบ"],
@@ -34,7 +35,7 @@ const DESCRIPTIONS: Record<Role, Partial<Record<Exclude<WorkspaceId, "overview">
 
 export const ROLE_WORKSPACES: Record<Role, Exclude<WorkspaceId, "overview">[]> = {
   Customer: ["requests", "quotations", "deposit-po", "delivery-payment", "inbox", "memberships"],
-  Worker: ["quotations", "materials", "receiving", "production", "delivery-payment", "inbox", "settings"],
+  Worker: ["quotations", "materials", "orders", "receiving", "production", "delivery-payment", "inbox", "settings"],
   Admin: ["requests", "workers", "materials", "orders", "receiving", "production", "delivery-payment", "inbox", "settings"],
 };
 
@@ -44,7 +45,8 @@ export type NavGroup = { label: string; items: Exclude<WorkspaceId, "overview">[
 export const NAV_GROUPS: Record<"Worker" | "Admin", NavGroup[]> = {
   Worker: [
     { label: "งานขาย", items: ["quotations"] },
-    { label: "การผลิต", items: ["production", "materials", "receiving"] },
+    { label: "การผลิต", items: ["production", "materials"] },
+    { label: "จัดซื้อ", items: ["orders", "receiving"] },
     { label: "ส่งมอบและการเงิน", items: ["delivery-payment"] },
     { label: "บัญชี", items: ["settings"] },
   ],

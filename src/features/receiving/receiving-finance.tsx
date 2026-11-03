@@ -12,27 +12,30 @@ import layout from "../../components/staff-ui/staff-layout.module.css";
 
 const METHOD = { bank: "โอนผ่านธนาคาร", cash: "เงินสด" } as const;
 
-// UC7 supplier payment (Admin only): credit days are set once, counted from full
-// good receipt; one full settlement records an outside payment, it moves no money.
+// UC7 supplier payment (Admin only): supports optional credit days or immediate settlement (M-05).
 export function FinanceSection({ api, state, onSaved }: { api: BackendApi; state: ReceivingState; onSaved: (message: string) => void }) {
   const finance = state.finance!; const settlement = finance.settlement;
   const download = useCommand();
-  const status = settlement ? <ToneBadge tone="done">จ่ายแล้ว</ToneBadge> : finance.payment_status === "pending" ? <ToneBadge tone="action">รอจ่ายผู้ขาย</ToneBadge> : <ToneBadge tone="waiting">{state.full_received_at ? "รอตั้งเครดิต" : "รอรับของครบ"}</ToneBadge>;
+  const canSettle = !settlement && finance.payment_status !== "paid" && (state.status === "received" || state.status === "damaged");
+  const status = settlement || finance.payment_status === "paid" ? <ToneBadge tone="done">จ่ายแล้ว</ToneBadge>
+    : finance.payment_status === "partial" ? <ToneBadge tone="progress">จ่ายบางส่วน</ToneBadge>
+    : finance.payment_status === "pending" ? <ToneBadge tone="action">รอจ่ายผู้ขาย</ToneBadge>
+    : <ToneBadge tone="waiting">{state.status === "received" || state.status === "damaged" ? "รอจ่ายผู้ขาย" : "รอรับของครบ"}</ToneBadge>;
   return <section className={layout.section} aria-label="จ่ายผู้ขาย">
     <h3>จ่ายผู้ขาย (แอดมิน)</h3>
     <dl className={layout.facts}>
       <div><dt>ยอดรวม (ไม่มี VAT)</dt><dd>{bahtTH(finance.total_amount)}</dd></div>
-      <div><dt>เครดิต</dt><dd>{finance.credit_days === null ? "ยังไม่ตั้ง" : finance.credit_days === 0 ? "จ่ายทันที (0 วัน)" : `${finance.credit_days} วัน`}</dd></div>
-      <div><dt>ครบกำหนดจ่าย</dt><dd>{finance.payment_due_at ? dateTimeTH(finance.payment_due_at) : "หลังรับครบและตั้งเครดิต"}</dd></div>
+      <div><dt>เครดิต</dt><dd>{finance.credit_days === null ? "ยังไม่ตั้ง (จ่ายทันทีได้)" : finance.credit_days === 0 ? "จ่ายทันที (0 วัน)" : `${finance.credit_days} วัน`}</dd></div>
+      <div><dt>ครบกำหนดจ่าย</dt><dd>{finance.payment_due_at ? dateTimeTH(finance.payment_due_at) : "ไม่ระบุ"}</dd></div>
       <div><dt>สถานะ</dt><dd>{status}</dd></div>
     </dl>
-    {finance.credit_days === null && <CreditForm api={api} state={state} onSaved={onSaved} />}
+    {finance.credit_days === null && !settlement && <CreditForm api={api} state={state} onSaved={onSaved} />}
     {settlement ? <div className={layout.form}>
       <p className={layout.muted}>จ่าย {bahtTH(settlement.amount)} แบบ{METHOD[settlement.method]} เมื่อ {dateTimeTH(settlement.paid_at)}</p>
       {settlement.evidence_id && <div className={layout.actions}><Button disabled={download.busy} onClick={() => void download.run((signal) => api.download(`/order-evidence/${settlement.evidence_id}/download`, undefined, signal), "")}>ดาวน์โหลดหลักฐานการจ่าย</Button></div>}
       <ErrorText error={download.error} />
-    </div> : finance.payment_status === "pending" && state.full_received_at ? <SettleForm api={api} state={state} onSaved={onSaved} />
-      : <p className={layout.muted}>บันทึกการจ่ายได้หลังรับของดีครบและตั้งเครดิตแล้ว</p>}
+    </div> : canSettle ? <SettleForm api={api} state={state} onSaved={onSaved} />
+      : <p className={layout.muted}>บันทึกการจ่ายได้หลังรับของครบตามใบสั่งซื้อ</p>}
   </section>;
 }
 
@@ -41,7 +44,7 @@ function CreditForm({ api, state, onSaved }: { api: BackendApi; state: Receiving
   const write = useRetryableWrite(api, () => onSaved("ตั้งเครดิตผู้ขายแล้ว แก้ไขภายหลังไม่ได้"));
   return <div className={layout.form}>
     <fieldset disabled={write.frozen}>
-      <Field label="เครดิตที่ตกลงกับผู้ขาย (วัน)" hint="0 = จ่ายทันที ไม่มีค่าเริ่มต้น นับจากวันที่รับของดีครบ" error={error || undefined}><input inputMode="numeric" autoComplete="off" value={days} aria-invalid={Boolean(error) || undefined} onChange={(event) => { setDays(event.target.value); setError(""); }} /></Field>
+      <Field label="เครดิตที่ตกลงกับผู้ขาย (วัน · ไม่บังคับหากจ่ายทันที)" hint="0 = จ่ายทันที นับจากวันที่รับของครบ" error={error || undefined}><input inputMode="numeric" autoComplete="off" value={days} aria-invalid={Boolean(error) || undefined} onChange={(event) => { setDays(event.target.value); setError(""); }} /></Field>
     </fieldset>
     <div className={layout.actions}><button type="button" className={layout.submit} disabled={write.frozen || !days.trim()} onClick={() => { try { creditDays(days); setConfirming(true); } catch (problem) { setError((problem as Error).message); } }}>ตั้งเครดิต</button></div>
     {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />}
@@ -57,7 +60,7 @@ function SettleForm({ api, state, onSaved }: { api: BackendApi; state: Receiving
   const [method, setMethod] = useState<"bank" | "cash">("bank"); const [paidAt, setPaidAt] = useState("");
   const [proof, setProof] = useState<ReadyFile | null>(null); const [error, setError] = useState(""); const [confirming, setConfirming] = useState(false);
   const write = useRetryableWrite(api, () => onSaved("บันทึกการจ่ายผู้ขายแล้ว (บันทึกการจ่ายนอกระบบ ไม่ได้โอนเงิน)"));
-  const build = () => settlementPayload({ key: crypto.randomUUID(), version: state.version, method, paidAt, evidenceId: proof?.id, fullReceivedAt: state.full_received_at! }, Date.now());
+  const build = () => settlementPayload({ key: crypto.randomUUID(), version: state.version, method, paidAt, evidenceId: proof?.id, fullReceivedAt: state.full_received_at }, Date.now());
   return <div className={layout.form}>
     <fieldset disabled={write.frozen}>
       <Field label="วิธีจ่าย"><select value={method} onChange={(event) => { setMethod(event.target.value as "bank" | "cash"); setError(""); }}><option value="bank">โอนผ่านธนาคาร (ต้องแนบหลักฐาน)</option><option value="cash">เงินสด (แนบหลักฐานหรือไม่ก็ได้)</option></select></Field>
