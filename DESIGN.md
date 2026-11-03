@@ -968,6 +968,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-03 | Removed the unreachable English Customer workspace (Customer cases in `ConnectedWorkspace`, `requests.tsx`, `quotations.tsx`, `fulfillment.tsx`, `memberships.tsx`) and the unused `Field`/`Paging`/`Status`/`RetryNote`/`PrivateUpload` helpers in `backend-ui.tsx`; Customers always render `CustomerShell`, so no visible change | Source audit (no unreachable files), native tests, TypeScript, lint |
 | 2026-11-03 | Every upload hint, too-large message and landing FAQ now reads “100 MB (100,000,000 bytes)”, the exact limit the frontend check and backend `MaxBytes` enforce; validation unchanged | Native tests, grep of `src` for remaining bare “100 MB” |
 | 2026-11-03 | `/login` and `/register` messages translated to Thai: busy status, password-rule error (rule unchanged: ≥12 characters, ≤128 UTF-8 bytes), registration success and session expiry/sign-out notices | Native tests (Thai copy and unchanged rule asserted) |
 | 2026-11-03 | Customer sidebar and mobile menu render one `CUSTOMER_NAV` definition (`customer-navigation.ts`); labels, icons, hrefs and grouping unchanged. Unused English Customer workspace descriptions removed from `workspace-access.ts` | Native tests (new route/menu test covering all ten Customer routes), TypeScript, DESIGN sync |
