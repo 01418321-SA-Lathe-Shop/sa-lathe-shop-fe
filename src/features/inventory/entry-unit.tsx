@@ -22,10 +22,10 @@ export function EntryUnit({ api, materialId, baseUnit, unitId, quantity, disable
   const typed = quantity.trim();
   const base = selected && typed ? convertToBase(typed, selected.factor) : null;
   const problem = selected && typed && !base ? "จำนวนนี้แปลงแล้วเกินทศนิยม 6 ตำแหน่ง" : undefined;
-  return <Field label="หน่วยที่กรอก" hint={base ? `= ${quantityTH(base)} ${baseUnit}` : undefined} error={problem}>
+  return <Field label="หน่วยที่กรอก" hint={base ? `= ${quantityTH(base)} ${baseUnit} (หน่วยหลักที่บันทึกในสต๊อก)` : undefined} error={problem}>
     <select value={unitId ?? ""} disabled={disabled} onChange={(event) => onChange(options.find((item) => item.unit_id === event.target.value) ?? null)}>
       <option value="">{baseUnit} (หน่วยหลัก)</option>
-      {options.map((item) => <option key={item.id} value={item.unit_id}>{item.unit_name} (1 = {quantityTH(item.factor)} {baseUnit})</option>)}
+      {options.map((item) => <option key={item.id} value={item.unit_id}>{item.unit_name} (1 {item.unit_name} = {quantityTH(item.factor)} {baseUnit})</option>)}
     </select>
   </Field>;
 }
