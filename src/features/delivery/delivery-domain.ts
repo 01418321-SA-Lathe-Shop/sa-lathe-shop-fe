@@ -3,7 +3,7 @@ import { moneyInput } from "../../lib/api/backend-api.ts";
 import { bangkokInstant } from "../fulfillment/fulfillment-domain.ts";
 
 export type Invoice = { id: string; number: string; amount: string; paid: string; balance: string; status: "unpaid" | "partial" | "paid"; credit_days: number; issued_at: string; due_at: string };
-export type Shipment = { id: string; cycle: number; method: "self" | "third_party"; receiver_name: string; status: "shipping" | "delivered" | "returned"; shipped_at: string; decided_at?: string; decided_by?: string; reason: string };
+export type Shipment = { id: string; cycle: number; method: "self" | "third_party" | "pickup"; receiver_name: string; shipping_cost?: string; status: "shipping" | "delivered" | "returned"; shipped_at: string; decided_at?: string; decided_by?: string; reason: string };
 export type Payment = { id: string; submitted_by: string; method: "bank" | "cash"; amount: string; paid_at: string; status: "pending" | "approved" | "rejected"; evidence_id?: string; reason: string; reviewed_by?: string };
 export type ReworkCycle = { cycle: number; started_at: string; completed_at: string; reopened_at: string; delivery_id: string };
 export type FulfillmentJob = { job_id: string; request_id: string; job_status: string; request_status: string; version: number | string; cycle: number; credit_days?: number; opening_balance: string; deposit: string; invoice?: Invoice; deliveries: Shipment[] | null; payments?: Payment[] | null; events: { id: string; action: string; version: number | string; actor_id: string; created_at: string }[] | null; rework_history: ReworkCycle[] | null };
@@ -29,11 +29,16 @@ export function availableActions(state: FulfillmentJob, role: Role): DeliveryAct
   return actions;
 }
 
-export function shipPayload(command: Command, method: string, receiver: string) {
+export function shipPayload(command: Command, method: string, receiver: string, shippingCost?: string) {
   const name = receiver.trim();
-  if (method !== "self" && method !== "third_party") throw new Error("เลือกวิธีส่ง: ร้านส่งเอง/ลูกค้ารับเอง หรือผู้ให้บริการขนส่ง");
+  if (method !== "self" && method !== "third_party" && method !== "pickup") throw new Error("เลือกวิธีส่ง: ร้านส่งเอง, ผู้ให้บริการขนส่ง หรือลูกค้ารับที่ร้าน");
   if (!name || [...name].length > 200 || /[\0\r\n]/.test(name)) throw new Error("กรอกชื่อผู้รับ ไม่เกิน 200 ตัวอักษร");
-  return { ...command, method, receiver_name: name };
+  const costTrimmed = shippingCost?.trim() ?? "";
+  let normalizedCost: string | undefined;
+  if (costTrimmed !== "") {
+    try { normalizedCost = moneyInput(costTrimmed); } catch { throw new Error("ค่าจัดส่งต้องเป็นจำนวนเงินบาท 0 ขึ้นไป ทศนิยมไม่เกิน 2 ตำแหน่ง"); }
+  }
+  return { ...command, method, receiver_name: name, ...(normalizedCost !== undefined ? { shipping_cost: normalizedCost } : {}) };
 }
 
 export function inspectPayload(command: Command, outcome: "accept" | "return", reason: string) {

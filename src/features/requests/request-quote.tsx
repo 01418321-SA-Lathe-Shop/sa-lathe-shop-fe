@@ -31,11 +31,12 @@ export function QuoteForm({ api, request, draft, revision, onSaved }: { api: Bac
   const [labor, setLabor] = useState(draft?.internal_costs?.labor_cost ?? "");
   const [price, setPrice] = useState(draft?.final_price ?? "");
   const [validUntil, setValidUntil] = useState(draft?.valid_until ?? ""); const [notes, setNotes] = useState(draft?.notes ?? "");
-  const [saved, setSaved] = useState<Quotation | undefined>(draft); // latest server copy, kept across a failed send
+  const [saved, setSaved] = useState<Quotation | undefined>(draft);
   const [estimate, setEstimate] = useState<{ key: string; value?: Estimate; failed?: boolean }>({ key: "" });
   const [confirming, setConfirming] = useState(false); const [problem, setProblem] = useState("");
   const action = useCommand();
-  const costsValid = satang(material) !== null && satang(labor) !== null;
+  const matSatang = satang(material); const labSatang = satang(labor);
+  const costsValid = matSatang !== null && labSatang !== null && matSatang > BigInt(0) && labSatang > BigInt(0);
   const key = `${material.trim()}|${labor.trim()}`;
   useEffect(() => {
     if (!costsValid) return;
@@ -51,22 +52,34 @@ export function QuoteForm({ api, request, draft, revision, onSaved }: { api: Bac
   const check = priceCheck(price, minimum);
   const dirty = !saved || !same(material, saved.internal_costs?.material_cost) || !same(labor, saved.internal_costs?.labor_cost) || !same(price, saved.final_price) || validUntil !== (saved.valid_until ?? "") || notes.trim() !== (saved.notes ?? "");
 
-  function invalid(): string {
-    if (!costsValid) return `กรอกค่าวัตถุดิบและค่าแรงเป็น${MONEY_HINT}`;
-    if (check === "invalid") return `กรอกราคาเสนอเป็น${MONEY_HINT}`;
-    if (check === "below") return `ราคาเสนอต่ำกว่าราคาขั้นต่ำ ${bahtTH(minimum)}`;
+  function invalid(forSend: boolean): string {
+    if (forSend) {
+      if (!costsValid) return `กรอกค่าวัตถุดิบและค่าแรงมากกว่า 0 บาท (${MONEY_HINT})`;
+      if (check === "invalid") return `กรอกราคาเสนอเป็น${MONEY_HINT}`;
+      if (check === "below") return `ราคาเสนอต่ำกว่าราคาขั้นต่ำ ${bahtTH(minimum)}`;
+    } else {
+      if (material.trim() && satang(material) === null) return `กรอกค่าวัตถุดิบเป็น${MONEY_HINT}`;
+      if (labor.trim() && satang(labor) === null) return `กรอกค่าแรงเป็น${MONEY_HINT}`;
+      if (price.trim() && satang(price) === null) return `กรอกราคาเสนอเป็น${MONEY_HINT}`;
+    }
     if ([...notes.trim()].length > 2000) return "หมายเหตุยาวได้ไม่เกิน 2,000 ตัวอักษร";
     return "";
   }
   async function save(signal: AbortSignal): Promise<Quotation> {
-    const input = { material_cost: moneyInput(material.trim()), labor_cost: moneyInput(labor.trim()), final_price: moneyInput(price.trim()), valid_until: validUntil || null, notes: notes.trim() };
+    const input = {
+      material_cost: moneyInput(material.trim() || "0.00"),
+      labor_cost: moneyInput(labor.trim() || "0.00"),
+      final_price: moneyInput(price.trim() || "0.00"),
+      valid_until: validUntil || null,
+      notes: notes.trim(),
+    };
     const result = saved ? await api.call<Quotation>(`/quotations/${saved.id}`, "PATCH", { ...input, expected_lock_version: BigInt(saved.lock_version) }, signal)
       : await api.call<Quotation>(`/requests/${request.id}/quotations`, "POST", input, signal);
     if (!result?.id || result.lock_version === undefined) throw new Error("บันทึกร่างแล้วแต่ยังไม่ได้รับข้อมูลล่าสุด โหลดข้อมูลล่าสุดก่อนส่ง");
     setSaved(result); return result;
   }
   function saveDraft() {
-    const reason = invalid(); setProblem(reason); if (reason) return;
+    const reason = invalid(false); setProblem(reason); if (reason) return;
     void action.run(async (signal) => {
       try { await save(signal); } catch (error) { throw conflictAware(error); }
       onSaved("บันทึกร่างแล้ว");
@@ -87,15 +100,15 @@ export function QuoteForm({ api, request, draft, revision, onSaved }: { api: Bac
     }, "");
   }
   return <NextAction title={revision ? "ทำใบเสนอราคาฉบับใหม่" : draft ? "ตรวจร่างและส่งใบเสนอราคา" : "ทำใบเสนอราคา"}>
-    {revision && <p className={layout.muted}>ลูกค้าปฏิเสธฉบับก่อน ดูเหตุผลได้ที่ประวัติด้านล่าง ฉบับใหม่จะเริ่มจากร่าง</p>}
-    <form className={layout.form} onSubmit={(event) => { event.preventDefault(); const reason = invalid(); setProblem(reason); if (!reason) setConfirming(true); }}>
+    {revision && <p className={layout.muted}>ลูกค้าปฏิเสธฉบับก่อน ดูเหตุผลได้ที่ประวัติด้านล่าง ฉบับใหม่เริ่มจากร่างอัตโนมัติ</p>}
+    <form className={layout.form} onSubmit={(event) => { event.preventDefault(); const reason = invalid(true); setProblem(reason); if (!reason) setConfirming(true); }}>
       <fieldset disabled={action.busy}>
         <legend className={layout.visuallyHidden}>ราคารวมทั้งคำขอ</legend>
         <div className={styles.moneyGrid}>
-          <Field label="ค่าวัตถุดิบรวม (บาท)" hint="รวมทั้งคำขอ ไม่ใช่ราคาต่อชิ้น"><input inputMode="decimal" autoComplete="off" value={material} onChange={(event) => setMaterial(event.target.value)} /></Field>
-          <Field label="ค่าแรงรวม (บาท)"><input inputMode="decimal" autoComplete="off" value={labor} onChange={(event) => setLabor(event.target.value)} /></Field>
+          <Field label="ค่าวัตถุดิบรวม (บาท)" hint="ต้องมากกว่า 0 บาท เมื่อส่งใบเสนอราคา"><input inputMode="decimal" autoComplete="off" value={material} onChange={(event) => setMaterial(event.target.value)} /></Field>
+          <Field label="ค่าแรงรวม (บาท)" hint="ต้องมากกว่า 0 บาท เมื่อส่งใบเสนอราคา"><input inputMode="decimal" autoComplete="off" value={labor} onChange={(event) => setLabor(event.target.value)} /></Field>
         </div>
-        <p className={styles.minimum} role="status">{!costsValid ? `กรอกต้นทุนทั้งสองช่องเพื่อดูราคาขั้นต่ำ (ต้นทุน + 60%)` : current?.value ? <>ต้นทุนรวม {bahtTH(current.value.total_cost)} · <strong>ราคาขั้นต่ำ {bahtTH(minimum)}</strong></> : current?.failed ? "คำนวณราคาขั้นต่ำไม่สำเร็จ ระบบจะตรวจอีกครั้งตอนบันทึก" : "กำลังคำนวณราคาขั้นต่ำ…"}</p>
+        <p className={styles.minimum} role="status">{!costsValid ? `กรอกต้นทุนทั้งสองช่อง (> 0) เพื่อดูราคาขั้นต่ำ (ต้นทุน + 60%)` : current?.value ? <>ต้นทุนรวม {bahtTH(current.value.total_cost)} · <strong>ราคาขั้นต่ำ {bahtTH(minimum)}</strong></> : current?.failed ? "คำนวณราคาขั้นต่ำไม่สำเร็จ ระบบจะตรวจอีกครั้งตอนบันทึก" : "กำลังคำนวณราคาขั้นต่ำ…"}</p>
         <Field label="ราคาเสนอลูกค้า (บาท, ไม่มี VAT)" error={price && check === "below" ? `ต่ำกว่าราคาขั้นต่ำ ${bahtTH(minimum)}` : price && check === "invalid" ? MONEY_HINT : undefined} hint={check === "ok" ? "✓ ไม่ต่ำกว่าราคาขั้นต่ำ" : undefined}><input inputMode="decimal" autoComplete="off" value={price} aria-invalid={price && (check === "below" || check === "invalid") ? true : undefined} onChange={(event) => setPrice(event.target.value)} /></Field>
         <Field label="ยืนราคาถึงวันที่ (ไม่บังคับ)" hint="พิมพ์ลงในใบเสนอราคา"><input type="date" value={validUntil} onChange={(event) => setValidUntil(event.target.value)} /></Field>
         <Field label="หมายเหตุในใบเสนอราคา (ไม่บังคับ)" hint="ลูกค้าเห็นข้อความนี้"><textarea rows={3} maxLength={2000} value={notes} onChange={(event) => setNotes(event.target.value)} /></Field>
@@ -113,6 +126,31 @@ export function QuoteForm({ api, request, draft, revision, onSaved }: { api: Bac
   </NextAction>;
 }
 
+export function RequestMoreInfo({ api, id, onSaved }: { api: BackendApi; id: string; onSaved: (message: string) => void }) {
+  const [message, setMessage] = useState(""); const [problem, setProblem] = useState("");
+  const action = useCommand();
+  const trimmed = message.trim();
+  return <Collapsible title="ข้อมูลไม่ครบ? ขอข้อมูลเพิ่มเติมจากลูกค้า (UC2 Alt-Step 5)">
+    <form className={layout.form} onSubmit={(event) => {
+      event.preventDefault();
+      if (!trimmed || [...trimmed].length > 2000) { setProblem("กรอกรายละเอียดที่ต้องการสอบถาม 1–2,000 ตัวอักษร"); return; }
+      setProblem("");
+      void action.run(async (signal) => {
+        await api.call(`/requests/${id}/request-info`, "POST", { message: trimmed }, signal);
+        setMessage("");
+        onSaved("บันทึกการขอข้อมูลเพิ่มเติมแล้ว · สถานะคำขอยังคงรอประเมิน");
+      }, "");
+    }}>
+      <fieldset disabled={action.busy}>
+        <legend className={layout.visuallyHidden}>ขอข้อมูลเพิ่มเติม</legend>
+        <Field label="รายละเอียดที่ต้องการให้ลูกค้าแจ้งเพิ่มเติม" error={problem || undefined}><textarea rows={2} maxLength={2000} value={message} onChange={(event) => setMessage(event.target.value)} /></Field>
+      </fieldset>
+      <ErrorText error={action.error} />
+      <div className={layout.actions}><Button type="submit" disabled={action.busy}>ส่งคำขอข้อมูลเพิ่มเติม</Button></div>
+    </form>
+  </Collapsible>;
+}
+
 export function RefuseRequest({ api, id, onSaved }: { api: BackendApi; id: string; onSaved: (message: string) => void }) {
   const [reason, setReason] = useState(""); const [confirming, setConfirming] = useState(false); const [problem, setProblem] = useState("");
   const action = useCommand();
@@ -127,7 +165,7 @@ export function RefuseRequest({ api, id, onSaved }: { api: BackendApi; id: strin
       <div className={layout.actions}><Button type="submit" variant="danger" disabled={action.busy}>ปฏิเสธคำขอ</Button></div>
     </form>
     <ConfirmDialog open={confirming} danger title="ปฏิเสธคำขอ?" confirmLabel="ปฏิเสธคำขอ" onClose={() => setConfirming(false)} onConfirm={() => { setConfirming(false); void action.run(async (signal) => { await api.call(`/requests/${id}/reject`, "POST", { reason: trimmed }, signal); onSaved("ปฏิเสธคำขอแล้ว · ลูกค้าจะเห็นเหตุผล"); }, ""); }}>
-      <p>คำขอจะถูกยกเลิก การปฏิเสธนี้ไม่นับเป็นการปฏิเสธใบเสนอราคาของลูกค้า</p>
+      <p>คำขอจะถูกยกเลิกและใบเสนอราคาที่ร่าง/ส่งค้างอยู่จะถูกปฏิเสธ การปฏิเสธนี้ไม่นับเป็นการปฏิเสธใบเสนอราคาของลูกค้า</p>
     </ConfirmDialog>
   </Collapsible>;
 }

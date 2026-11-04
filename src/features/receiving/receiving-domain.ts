@@ -8,7 +8,7 @@ export type ReceiptLine = { material_id: string; good: string; damaged: string; 
 export type Receipt = { id: string; actor_id: string; note: string; created_at: string; lines: ReceiptLine[] | null };
 export type Claim = { id: string; receipt_id: string; material_id: string; quantity: string; replaced: string; status: "pending_claim" | "claimed" | "resolved"; claimed_by?: string; claimed_at?: string; note: string };
 export type Settlement = { actor_id: string; amount: string; method: "bank" | "cash"; paid_at: string; evidence_id?: string };
-export type Finance = { total_amount: string; credit_days: number | null; payment_due_at?: string; payment_status: "unpaid" | "pending" | "paid"; settlement?: Settlement };
+export type Finance = { total_amount: string; credit_days: number | null; payment_due_at?: string; payment_status: "unpaid" | "pending" | "partial" | "paid"; settlement?: Settlement };
 export type ReceivingState = ReceivingSummary & { lines: ReceivingLine[] | null; receipts: Receipt[] | null; claims: Claim[] | null; finance?: Finance };
 export type DraftReceipt = { material_id: string; good: string; damaged: string; replacement_claim_id?: string };
 
@@ -24,7 +24,7 @@ export function claimOwed(claim: Pick<Claim, "quantity" | "replaced">): string {
 // Blank rows are skipped; each sent row needs a positive good+damaged total.
 // Replacement rows cannot exceed what the claim still owes. The server checks
 // cumulative original deliveries against the ordered quantity.
-export function receiptPayload(input: { key: string; version: number | string; note: string; lines: DraftReceipt[]; claims: Claim[] }) {
+export function receiptPayload(input: { key: string; version: number | string; note: string; lines: DraftReceipt[]; claims: Claim[]; paymentStatus?: string }) {
   const note = input.note.trim();
   if ([...note].length > 2000 || note.includes("\0")) throw new Error("หมายเหตุยาวได้ไม่เกิน 2,000 ตัวอักษร");
   const lines = input.lines.filter((line) => !(blank(line.good) && blank(line.damaged))).map((line) => {
@@ -39,7 +39,7 @@ export function receiptPayload(input: { key: string; version: number | string; n
   });
   if (!lines.length) throw new Error("กรอกจำนวนที่รับอย่างน้อย 1 รายการ");
   if (lines.length > 100) throw new Error("รับได้ไม่เกิน 100 รายการต่อครั้ง");
-  return { idempotency_key: input.key, expected_version: input.version, note, lines };
+  return { idempotency_key: input.key, expected_version: input.version, note, lines, ...(input.paymentStatus ? { payment_status: input.paymentStatus } : {}) };
 }
 
 export function claimNote(value: string): string {
@@ -53,10 +53,10 @@ export function creditDays(value: string): number {
   return Number(value);
 }
 
-export function settlementPayload(input: { key: string; version: number | string; method: "bank" | "cash"; paidAt: string; evidenceId?: string; fullReceivedAt: string }, now: number) {
+export function settlementPayload(input: { key: string; version: number | string; method: "bank" | "cash"; paidAt: string; evidenceId?: string; fullReceivedAt?: string }, now: number) {
   const paid_at = bangkokInstant(input.paidAt);
   if (Date.parse(paid_at) > now) throw new Error("เวลาที่จ่ายต้องไม่เป็นเวลาในอนาคต");
-  if (Date.parse(paid_at) < Date.parse(input.fullReceivedAt)) throw new Error("เวลาที่จ่ายต้องไม่ก่อนเวลาที่รับของครบ");
+  if (input.fullReceivedAt && Date.parse(paid_at) < Date.parse(input.fullReceivedAt)) throw new Error("เวลาที่จ่ายต้องไม่ก่อนเวลาที่รับของครบ");
   if (input.method === "bank" && !input.evidenceId) throw new Error("โอนผ่านธนาคารต้องแนบหลักฐานการโอนที่อัปโหลดแล้ว");
   return { idempotency_key: input.key, expected_version: input.version, method: input.method, paid_at, ...(input.evidenceId ? { evidence_id: input.evidenceId } : {}) };
 }
@@ -65,18 +65,18 @@ export function settlementPayload(input: { key: string; version: number | string
 // มีของเสียหาย and the Admin-only ค้างจ่ายผู้ขาย need the order detail.
 export const RECEIVING_TABS = ["waiting", "partial", "received", "damaged", "unpaid"] as const;
 export type ReceivingTab = typeof RECEIVING_TABS[number];
-const STATUS_TAB: Record<string, ReceivingTab> = { ordered: "waiting", partially_received: "partial", received: "received" };
+const STATUS_TAB: Record<string, ReceivingTab> = { ordered: "waiting", partially_received: "partial", received: "received", damaged: "damaged" };
 
 export function receivingTab(value: string | null, admin: boolean): ReceivingTab | null {
   return (RECEIVING_TABS as readonly string[]).includes(value ?? "") && (admin || value !== "unpaid") ? value as ReceivingTab : null;
 }
 export const statusTab = (summary: Pick<ReceivingSummary, "status">): ReceivingTab | null => STATUS_TAB[summary.status] ?? null;
 export const hasOpenClaim = (state?: ReceivingState) => Boolean(state?.claims?.some((claim) => claim.status !== "resolved"));
-// Fully received and not yet settled (credit days may still be unset).
-export const owesSupplier = (state?: ReceivingState) => Boolean(state?.finance && state.status === "received" && state.finance.payment_status !== "paid");
+// Fully received (or damaged) and not yet settled (credit days may still be unset).
+export const owesSupplier = (state?: ReceivingState) => Boolean(state?.finance && (state.status === "received" || state.status === "damaged") && state.finance.payment_status !== "paid");
 
 export function inReceivingTab(tab: ReceivingTab, summary: ReceivingSummary, state?: ReceivingState): boolean {
-  if (tab === "damaged") return hasOpenClaim(state);
+  if (tab === "damaged") return summary.status === "damaged" || hasOpenClaim(state);
   if (tab === "unpaid") return owesSupplier(state);
   return statusTab(summary) === tab;
 }

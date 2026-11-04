@@ -25,13 +25,15 @@ function draftRows(state: ReceivingState): Row[] {
 
 export function ReceiptForm({ api, state, onSaved }: { api: BackendApi; state: ReceivingState; onSaved: () => void }) {
   const [rows, setRows] = useState<Row[]>(() => draftRows(state));
-  const [note, setNote] = useState(""); const [confirming, setConfirming] = useState(false); const [error, setError] = useState("");
+  const [note, setNote] = useState("");
+  const [paymentStatus, setPaymentStatus] = useState<"" | "unpaid" | "partial" | "paid">("");
+  const [confirming, setConfirming] = useState(false); const [error, setError] = useState("");
   const write = useRetryableWrite(api, onSaved);
   const errors = rows.map((row) => receiptRowError(row, row.remaining));
   const filled = rows.filter((row) => row.good.trim() || row.damaged.trim()).length;
   const edit = (index: number, change: Partial<Row>) => { setError(""); setRows((current) => current.map((row, i) => i === index ? { ...row, ...change } : row)); };
   const fill = (row: Row): Row => ({ ...row, good: plainQuantity(row.remaining), damaged: "" });
-  const build = () => receiptPayload({ key: crypto.randomUUID(), version: state.version, note, lines: rows, claims: state.claims ?? [] });
+  const build = () => receiptPayload({ key: crypto.randomUUID(), version: state.version, note, lines: rows, claims: state.claims ?? [], ...(paymentStatus ? { paymentStatus } : {}) });
   if (!rows.length) return <p className={layout.muted}>ไม่มีของที่รอรับตอนนี้ ของเสียหายที่ยังไม่ได้แจ้งผู้ขายต้องบันทึกการแจ้งก่อนจึงรับของแทนได้</p>;
   // A div, not a form: ConfirmDialog carries its own form.
   return <div className={layout.form}>
@@ -44,6 +46,14 @@ export function ReceiptForm({ api, state, onSaved }: { api: BackendApi; state: R
         <Field label={`เสียหาย (${row.unit})`}><input inputMode="decimal" autoComplete="off" value={row.damaged} onChange={(event) => edit(index, { damaged: event.target.value })} /></Field>
         <Button variant="text" onClick={() => edit(index, fill(row))}>รับครบตามที่เหลือ<span className={layout.visuallyHidden}> {row.name}</span></Button>
       </li>)}</ul>
+      <Field label="สถานะการชำระเงินผู้ขาย (UC7 Q7.6 · ไม่บังคับ)">
+        <select value={paymentStatus} onChange={(event) => setPaymentStatus(event.target.value as "" | "unpaid" | "partial" | "paid")}>
+          <option value="">ไม่เปลี่ยนสถานะการชำระเงิน</option>
+          <option value="unpaid">ยังไม่จ่าย (unpaid)</option>
+          <option value="partial">จ่ายบางส่วน (partial)</option>
+          <option value="paid">จ่ายครบแล้ว (paid)</option>
+        </select>
+      </Field>
       <Field label="หมายเหตุ (ไม่บังคับ)"><textarea value={note} maxLength={2000} onChange={(event) => setNote(event.target.value)} /></Field>
     </fieldset>
     <div className={layout.submitBar}>

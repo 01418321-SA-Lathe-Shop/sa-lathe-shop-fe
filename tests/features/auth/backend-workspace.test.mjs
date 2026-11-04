@@ -16,6 +16,14 @@ test("registration requires an address unless joining a company by invitation", 
   assert.match(source, /<textarea name="address" required maxLength=\{500\}/);
 });
 
+test("registration asks for the address on a second step", () => {
+  assert.match(source, /if \(register && !joining && !addressStep\) \{/);
+  assert.match(source, /input\.setCustomValidity\(passwordError\(input\.value\) \?\? ""\)/);
+  assert.match(source, /<div className="register-step" hidden=\{addressStep\}>/);
+  assert.match(source, /<fieldset className="register-step" hidden=\{!addressStep\} disabled=\{!addressStep\}>/);
+  assert.match(source, /"ถัดไป"/);
+});
+
 test("login and registration messages are Thai and the password rule is unchanged", () => {
   const ui = readFileSync(new URL("../../../src/components/ui/backend-ui.tsx", import.meta.url), "utf8");
   const session = readFileSync(new URL("../../../src/features/auth/api-session.tsx", import.meta.url), "utf8");

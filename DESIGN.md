@@ -79,7 +79,7 @@ components:
 
 # Lathe Shop Control — Design specification
 
-อัปเดตล่าสุด: 2026-11-03 · สถานะ: login และ workspace ใช้ real API เท่านั้น; ปุ่ม Local test เชื่อม password-free endpoint เมื่อเปิด config เฉพาะ local; browser login จริงผ่านครบ 6 บัญชี ไม่ใช่การรับรอง workflow ทั้งหมด
+อัปเดตล่าสุด: 2026-11-04 · สถานะ: login และ workspace ใช้ real API เท่านั้น; ปุ่ม Local test เชื่อม password-free endpoint เมื่อเปิด config เฉพาะ local; browser login จริงผ่านครบ 6 บัญชี ไม่ใช่การรับรอง workflow ทั้งหมด
 
 เอกสารนี้ใช้ส่งต่องานให้ designer และ developer เพื่อสร้าง UI ให้ตรงกับระบบปัจจุบัน อ่านคู่กับ `docs/02-frontend.md` ซึ่งเป็นแหล่งอ้างอิง Business Flow และ permission การตรวจ frontend ด้วย unit tests ไม่ใช่หลักฐานว่า real Backend หรือ UC1–UC9 ทำงานครบ
 
@@ -482,7 +482,7 @@ Implemented from the Claude Design boards (Customer payments, Customer account, 
 
 **บัญชีและบริษัท (`/customer/memberships`).** Panels for บัญชีผู้ใช้ (name, username, status, created date), ลูกค้าและบริษัท (name, type, your rights, customer ID, private invitation for owners; join by invitation) and one ที่อยู่ · {customer name} panel per customer (2026-11-03): numbered addresses, oldest first, line breaks kept (`.preLine`); owners get a 3-row เพิ่มที่อยู่ textarea (max 500) and primary button, members see that only the owner adds addresses. Addresses cannot be edited or removed yet. The old ช่องทางติดต่อและที่อยู่ placeholder panel is removed.
 
-**Registration address (2026-11-03).** `/register` keeps the ประเภทลูกค้า select (บุคคลทั่วไป / บริษัท). For a new individual or company it adds a required ที่อยู่ `login-field` textarea (3 rows, max 500, auto height with 0.75rem/1rem padding, vertical resize); the address becomes the customer's first address and its billing address. Joining a company by invitation shows the help line ใช้ที่อยู่ของบริษัทที่คุณเข้าร่วม instead and sends no address.
+**Registration address (2026-11-03).** `/register` keeps the ประเภทลูกค้า select (บุคคลทั่วไป / บริษัท). For a new individual or company it adds a required ที่อยู่ `login-field` textarea (3 rows, max 500, auto height with 0.75rem/1rem padding, vertical resize); the address becomes the customer's first address and its billing address. Joining a company by invitation shows the help line ใช้ที่อยู่ของบริษัทที่คุณเข้าร่วม instead and sends no address. **Two steps (2026-11-04):** for a new individual or company, step 1 (ข้อมูลบัญชี: name, phone, email, username, password, type, company fields) ends with a ถัดไป button that checks native validation and the password rule; step 2 (ที่อยู่) shows the address fields, a muted ← ย้อนกลับไปแก้ข้อมูลบัญชี text button and สมัครบัญชี. A muted ขั้นที่ 1/2 จาก 2 line sits above the fields. Both steps stay in one form (`.register-step`, `display: contents`; the hidden address step is a disabled fieldset), so one request sends everything. Submitting clears the password and returns to step 1, so a failed sign-up re-enters the password while the address is kept. Joining by invitation stays one step.
 
 **ตั้งค่า (`/customer?view=settings`, `/staff/settings`, `/admin/settings`).** One `SettingsPage` in `src/features/settings` for all roles, with underline tabs บัญชีของฉัน, การตั้งค่าส่วนตัว, ความปลอดภัย and, for Admin only, ระบบ. Everything is read-only except display size (browser only) and sign-out, which has a confirmation dialog. ระบบ links to จัดการพนักงาน and shows which pages each fixed role can open, from the route guard's map. The Staff/Admin sidebar item replaces the old ตั้งค่า dialog there; the landing page keeps the dialog. Theme stays on the navbar toggle. `--s-*` tokens resolve to the Customer or Staff tokens, so one stylesheet serves both shells.
 
@@ -970,6 +970,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-04 | Registration splits into two steps: account details, then address (joining by invitation stays one step) | Native tests, type check, lint, DESIGN sync |
 | 2026-11-03 | UC12: จัดการพนักงาน adds a Super-Admin-only ผู้ดูแลระบบ (Admin) panel listing Admins with level and status, a เพิ่มผู้ดูแลระบบ drawer (name, username, contacts, initial password) and confirm-guarded activate/deactivate for regular Admins, using backend `/admin/admins` | Type check, lint, native tests (UC12 source test new), source audit, DESIGN sync; backend integration on real PostgreSQL/S3 |
 | 2026-11-03 | Removed the unreachable English Customer workspace (Customer cases in `ConnectedWorkspace`, `requests.tsx`, `quotations.tsx`, `fulfillment.tsx`, `memberships.tsx`) and the unused `Field`/`Paging`/`Status`/`RetryNote`/`PrivateUpload` helpers in `backend-ui.tsx`; Customers always render `CustomerShell`, so no visible change | Source audit (no unreachable files), native tests, TypeScript, lint |
 | 2026-11-03 | Every upload hint, too-large message and landing FAQ now reads “100 MB (100,000,000 bytes)”, the exact limit the frontend check and backend `MaxBytes` enforce; validation unchanged | Native tests, grep of `src` for remaining bare “100 MB” |
@@ -1346,6 +1347,10 @@ src/features/auth/auth.module.css
 :where(.scope) :global(.login-panel) { min-height: 100vh; padding: 2.375rem 8vw; display: flex; flex-direction: column; justify-content: center; background: #0d0f0e; }
 :where(.scope) :global(.login-back) { position: absolute; top: 2.375rem; padding: 0; border: 0; background: transparent; color: #717972; font-size: 0.6875rem; cursor: pointer; }
 :where(.scope) :global(.login-back):hover { color: var(--text); }
+:where(.scope) :global(.register-step) { display: contents; border: 0; }
+:where(.scope) :global(.register-step[hidden]) { display: none; }
+:where(.scope) :global(.register-back) { justify-self: start; margin-top: 1rem; padding: 0; border: 0; background: transparent; color: var(--muted); font-size: 0.75rem; cursor: pointer; }
+:where(.scope) :global(.register-back):hover { color: var(--text); }
 :where(.scope) :global(.login-card) { width: min(31.25rem,100%); margin: 0 auto; }
 :where(.scope) :global(.login-card) h2 { margin: 0.6875rem 0 0.5rem; font-size: clamp(2.625rem,4vw,3.875rem); line-height: 1; letter-spacing: -.055em; }
 :where(.scope) :global(.login-card) > p { margin: 0 0 1.9375rem; color: #747c75; font-size: 0.8125rem; }

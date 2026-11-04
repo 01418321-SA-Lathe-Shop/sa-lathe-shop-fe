@@ -28,6 +28,7 @@ export function ReceivingDetail({ api, admin, id, backHref, onChanged }: { api: 
   </article>;
   const status = statusTab(state); const claims = state.claims ?? []; const receipts = state.receipts ?? [];
   const pending = claims.filter((claim) => claim.status === "pending_claim");
+  const fullyDone = state.status === "received" && !hasOpenClaim(state);
   return <article className={layout.detailCard} aria-label={`รับของ ${state.order_no}`}>
     <Link href={backHref} scroll={false} className={layout.back}><Icon name="arrow" size={16} />กลับไปรายการ</Link>
     <div className={layout.detailHeader}>
@@ -41,7 +42,7 @@ export function ReceivingDetail({ api, admin, id, backHref, onChanged }: { api: 
     </dl>
     {pending.length > 0 && <p className={layout.warning}>มีของเสียหาย {pending.length} รายการที่ยังไม่ได้แจ้งผู้ขาย บันทึกการแจ้งที่หัวข้อของเสียหายด้านล่าง แล้วจึงรับของแทนได้</p>}
     {resource.error && <ErrorText error={resource.error} />}
-    {state.status === "received" ? <p className={layout.muted}>รับของดีครบตามใบสั่งซื้อแล้ว{admin ? " ตั้งเครดิตและบันทึกการจ่ายผู้ขายได้ที่หัวข้อจ่ายผู้ขาย" : ""}</p>
+    {fullyDone ? <p className={layout.muted}>รับของครบตามใบสั่งซื้อแล้ว{admin ? " ตั้งเครดิตและบันทึกการจ่ายผู้ขายได้ที่หัวข้อจ่ายผู้ขาย" : ""}</p>
       : settled && <NextAction title="บันทึกของที่มาถึง"><ReceiptForm key={`receipt:${state.version}`} api={api} state={state} onSaved={() => saved("บันทึกรับของแล้ว ของดีเข้าสต๊อกแล้ว ตรวจการจองของงานอีกครั้ง")} /></NextAction>}
     <section className={layout.section} aria-label="วัตถุดิบในใบสั่งซื้อ">
       <h3>วัตถุดิบ {state.lines?.length ?? 0} รายการ</h3>
