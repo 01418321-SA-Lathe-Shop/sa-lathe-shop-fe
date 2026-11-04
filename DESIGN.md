@@ -480,9 +480,9 @@ Implemented from the Claude Design boards (Customer payments, Customer account, 
 
 **ใบแจ้งหนี้และการชำระเงิน (`/customer/payments`).** Four summary cells: ยอดค้างชำระรวม, ชำระอนุมัติแล้ว (invoices only, deposits excluded), เกินกำหนดชำระ, หลักฐานรอตรวจ. Status pills with counts (`?status=`) plus ประวัติการชำระ (`?view=history`). One 14px-radius panel holds a local search box and a table; the whole row opens its detail through a stretched first-cell link. Invoices show number, request, job reference, total, paid with a 6px bar, balance, due date with countdown and status. History shows one row per approved deposit and per invoice payment: reference (first 8 characters of the payment id), job, amount, paid date, method, evidence and status. Invoice payments open the existing invoice detail (`?job=`); deposits open `/customer/deposit-po?request=`, because the job read gives a deposit no date, method or file. At 760px and below each row becomes a labelled two-column card. The detail adds the job reference, the accepted quotation link and each payment's reference. Not taken from the board: Record payment, reminders, export, aging, per-customer view and PromptPay/cheque methods. Partial and final payment types are not shown: the API has no payment type, only invoice status.
 
-**บัญชีและบริษัท (`/customer/memberships`).** Panels for บัญชีผู้ใช้ (name, username, status, created date), ลูกค้าและบริษัท (name, type, your rights, customer ID, private invitation for owners; join by invitation) and one ที่อยู่ · {customer name} panel per customer (2026-11-03): numbered addresses, oldest first, line breaks kept (`.preLine`); owners get a 3-row เพิ่มที่อยู่ textarea (max 500) and primary button, members see that only the owner adds addresses. Addresses cannot be edited or removed yet. The old ช่องทางติดต่อและที่อยู่ placeholder panel is removed.
+**บัญชีและบริษัท (`/customer/memberships`).** Panels for บัญชีผู้ใช้ (name, username, status, created date), ลูกค้าและบริษัท (name, type, your rights, customer ID, private invitation for owners; join by invitation) and one ที่อยู่ · {customer name} panel per customer (2026-11-03): numbered addresses, oldest first, line breaks kept (`.preLine`); owners get a 3-row เพิ่มที่อยู่ textarea (max 500) and primary button, members see that only the owner adds addresses. Addresses cannot be edited or removed yet. The old ช่องทางติดต่อและที่อยู่ placeholder panel is removed. **Contact name (2026-11-04):** each address card starts with a bold line ผู้รับ: {contact_name} (or ยังไม่ระบุชื่อผู้รับ for legacy rows) and (ที่อยู่หลัก), then the address. The owner form now starts with a required ชื่อผู้รับ / ผู้ติดต่อ field (max 200, placeholder เช่น คุณวิภา (ฝ่ายรับสินค้า)) above the structured address fields; it is separate from the customer's registered name, so each address can name a different recipient. Owners get a secondary แก้ไข button per address that loads it into the same form (note line กำลังแก้ไข…, buttons บันทึกการแก้ไข and ยกเลิกการแก้ไข), saved with `PUT /customers/{id}/addresses/{address_id}`; this supersedes “cannot be edited” above. Addresses still cannot be removed. No document picks a saved address yet, so quotations, POs, jobs and delivery documents are unchanged (billing address and delivery receiver_name).
 
-**Registration address (2026-11-03).** `/register` keeps the ประเภทลูกค้า select (บุคคลทั่วไป / บริษัท). For a new individual or company it adds a required ที่อยู่ `login-field` textarea (3 rows, max 500, auto height with 0.75rem/1rem padding, vertical resize); the address becomes the customer's first address and its billing address. Joining a company by invitation shows the help line ใช้ที่อยู่ของบริษัทที่คุณเข้าร่วม instead and sends no address. **Two steps (2026-11-04):** for a new individual or company, step 1 (ข้อมูลบัญชี: name, phone, email, username, password, type, company fields) ends with a ถัดไป button that checks native validation and the password rule; step 2 (ที่อยู่) shows the address fields, a muted ← ย้อนกลับไปแก้ข้อมูลบัญชี text button and สมัครบัญชี. A muted ขั้นที่ 1/2 จาก 2 line sits above the fields. Both steps stay in one form (`.register-step`, `display: contents`; the hidden address step is a disabled fieldset), so one request sends everything. Submitting clears the password and returns to step 1, so a failed sign-up re-enters the password while the address is kept. Joining by invitation stays one step.
+**Registration address (2026-11-03).** `/register` keeps the ประเภทลูกค้า select (บุคคลทั่วไป / บริษัท). For a new individual or company it adds a required ที่อยู่ `login-field` textarea (3 rows, max 500, auto height with 0.75rem/1rem padding, vertical resize); the address becomes the customer's first address and its billing address. Joining a company by invitation shows the help line ใช้ที่อยู่ของบริษัทที่คุณเข้าร่วม instead and sends no address. **Two steps (2026-11-04):** for a new individual or company, step 1 (ข้อมูลบัญชี: name, phone, email, username, password, type, company fields) ends with a ถัดไป button that checks native validation and the password rule; step 2 (ที่อยู่) shows the address fields, a muted ← ย้อนกลับไปแก้ข้อมูลบัญชี text button and สมัครบัญชี. A muted ขั้นที่ 1/2 จาก 2 line sits above the fields. Step 2 starts with a required ชื่อผู้รับ / ผู้ติดต่อ field (max 200) sent as `contact_name` with the first address (2026-11-04). Both steps stay in one form (`.register-step`, `display: contents`; the hidden address step is a disabled fieldset), so one request sends everything. Submitting clears the password and returns to step 1, so a failed sign-up re-enters the password while the address is kept. Joining by invitation stays one step.
 
 **ตั้งค่า (`/customer?view=settings`, `/staff/settings`, `/admin/settings`).** One `SettingsPage` in `src/features/settings` for all roles, with underline tabs บัญชีของฉัน, การตั้งค่าส่วนตัว, ความปลอดภัย and, for Admin only, ระบบ. Everything is read-only except display size (browser only) and sign-out, which has a confirmation dialog. ระบบ links to จัดการพนักงาน and shows which pages each fixed role can open, from the route guard's map. The Staff/Admin sidebar item replaces the old ตั้งค่า dialog there; the landing page keeps the dialog. Theme stays on the navbar toggle. `--s-*` tokens resolve to the Customer or Staff tokens, so one stylesheet serves both shells.
 
@@ -970,6 +970,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-04 | Address contact name (ชื่อผู้รับ / ผู้ติดต่อ) on registration step 2 and บัญชีและบริษัท, with owner address edit | Type check, lint, native tests, DESIGN sync; no browser run against a real API |
 | 2026-11-04 | Registration splits into two steps: account details, then address (joining by invitation stays one step) | Native tests, type check, lint, DESIGN sync |
 | 2026-11-03 | UC12: จัดการพนักงาน adds a Super-Admin-only ผู้ดูแลระบบ (Admin) panel listing Admins with level and status, a เพิ่มผู้ดูแลระบบ drawer (name, username, contacts, initial password) and confirm-guarded activate/deactivate for regular Admins, using backend `/admin/admins` | Type check, lint, native tests (UC12 source test new), source audit, DESIGN sync; backend integration on real PostgreSQL/S3 |
 | 2026-11-03 | Removed the unreachable English Customer workspace (Customer cases in `ConnectedWorkspace`, `requests.tsx`, `quotations.tsx`, `fulfillment.tsx`, `memberships.tsx`) and the unused `Field`/`Paging`/`Status`/`RetryNote`/`PrivateUpload` helpers in `backend-ui.tsx`; Customers always render `CustomerShell`, so no visible change | Source audit (no unreachable files), native tests, TypeScript, lint |
@@ -2005,9 +2006,6 @@ src/features/workspace/workspace.module.css
 :where(.scope) :global(.landing-services) li:hover :global(.landing-service-icon) { background: #ff923f; color: #160e08; }
 :where(.scope) :global(.landing-services) p { margin: .75rem 0 0; color: var(--muted); font-size: .875rem; line-height: 1.7; }
 
-/* 2. Materials: heading beside the full-width materials table. */
-:where(.scope) :global(.landing-materials) { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 6%; align-items: start; }
-:where(.scope) :global(.landing-materials) :global(.landing-heading) { margin-bottom: 0; }
 :where(.scope) :global(.landing-table-wrap) { overflow-x: auto; }
 :where(.scope) :global(.landing-table) { width: 100%; border-collapse: collapse; font-size: .875rem; }
 :where(.scope) :global(.landing-table) th, :where(.scope) :global(.landing-table) td { padding: 1rem .75rem; border-bottom: 1px solid var(--soft-line); text-align: left; vertical-align: top; }
@@ -2118,7 +2116,7 @@ src/features/workspace/workspace.module.css
   :global(.cinematic-page):where(.scope) :global(.landing-section) h2 { font-size: clamp(2rem, 8.5vw, 2.5rem); }
   :where(.scope) :global(.landing-heading) { margin-bottom: 2.5rem; }
   :where(.scope) :global(.landing-services) { grid-template-columns: 1fr; }
-  :where(.scope) :global(.landing-materials), :where(.scope) :global(.landing-why), :where(.scope) :global(.landing-faq), :where(.scope) :global(.landing-contact) { grid-template-columns: 1fr; gap: 2.5rem; }
+  :where(.scope) :global(.landing-why), :where(.scope) :global(.landing-faq), :where(.scope) :global(.landing-contact) { grid-template-columns: 1fr; gap: 2.5rem; }
   :where(.scope) :global(.landing-terms), :where(.scope) :global(.landing-facts) dl { grid-template-columns: 1fr; }
   :where(.scope) :global(.landing-rules), :where(.scope) :global(.landing-facts) { padding: 1.5rem; }
   :where(.scope) :global(.landing-why-statement), :where(.scope) :global(.landing-faq) :global(.landing-heading) { position: static; }
@@ -4135,7 +4133,7 @@ import { Logo } from "../../components/appearance/icons";
 import { Hero } from "./landing-hero";
 import { sectionLinks } from "./landing-nav";
 import { LandingMotion } from "./landing-motion";
-import { Contact, Faq, FaqJsonLd, Gallery, Materials, Process, Reasons, Services } from "./landing-sections";
+import { Contact, Faq, FaqJsonLd, Gallery, Process, Reasons, Services } from "./landing-sections";
 import { shop } from "./landing-content";
 import styles from "./landing.module.css";
 
@@ -4152,7 +4150,6 @@ export default function LandingPage() {
     </header>
     <Hero />
     <Services />
-    <Materials />
     <Gallery />
     <Reasons />
     <Process />

@@ -9,7 +9,7 @@ export type Estimate = { material_cost: string; labor_cost: string; total_cost: 
 export type Quotation = { id: string; request_id: string; quotation_no: Integer; version: Integer; lock_version: Integer; status: string; final_price: string; internal_costs?: Estimate; sent_at?: string; valid_until?: string; notes?: string };
 // Printed-document details; "" means not provided.
 export type ShopProfile = { name: string; address: string; tax_id: string; phone: string; email: string; bank_name: string; bank_account_name: string; bank_account_no: string; lock_version: Integer; updated_at: string };
-export type CustomerAddress = { id: string; address: string; address_line1?: string; address_line2?: string; district?: string; province?: string; postal_code?: string; is_default?: boolean; created_at: string };
+export type CustomerAddress = { id: string; contact_name?: string; address: string; address_line1?: string; address_line2?: string; district?: string; province?: string; postal_code?: string; is_default?: boolean; created_at: string };
 export type CustomerBilling = { customer_id: string; name: string; customer_type: "individual" | "company"; address: string; tax_id: string; phone: string; email: string; lock_version: Integer };
 export type CustomerPo = { quotation_id: string; po_no: string; issued_on: string; remarks: string; lock_version: Integer; updated_at: string };
 export type Terms = { customer_type: string; final_price: string; deposit_required: boolean; po_required: boolean; deposit_amount: string; balance_after_deposit: string; accepted_at: string; documents_due_at: string };

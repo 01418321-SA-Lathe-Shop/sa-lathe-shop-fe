@@ -12,7 +12,8 @@ test("login/register cannot natively submit credentials into the URL before hydr
 
 test("registration requires an address unless joining a company by invitation", () => {
   assert.match(source, /const joining = type === "company" && companyMode === "join";/);
-  assert.match(source, /\.\.\.\(joining \? \{\} : \{ address: text\(data, "address"\) \}\)/);
+  assert.match(source, /\.\.\.\(joining \? \{\} : \{ address: text\(data, "address"\), contact_name: text\(data, "contact_name"\) \}\)/);
+  assert.match(source, /<input name="contact_name" required maxLength=\{200\}/);
   assert.match(source, /<textarea name="address" required maxLength=\{500\}/);
 });
 
