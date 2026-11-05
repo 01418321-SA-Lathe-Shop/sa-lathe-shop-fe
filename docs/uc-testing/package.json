@@ -1,0 +1,10 @@
+{
+  "name": "uc-testing",
+  "private": true,
+  "type": "module",
+  "description": "Isolated Playwright harness for UC1-UC12 evidence; not an application dependency.",
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "docx": "9.15.2"
+  }
+}

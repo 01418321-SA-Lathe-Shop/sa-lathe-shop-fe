@@ -1,0 +1,276 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>คู่มือทดสอบ UC1–UC12 (Copy)</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a shop "job traveler" — one card per use case, each step a tickable row, sticky UC index on top */
+:root {
+  --bg: #f3f5f7; --surface: #ffffff; --fg: #1b232c; --muted: #5b6774; --line: #d8dee5;
+  --accent: #1f5f8b; --accent-soft: #e2edf5; --ok: #2c7a4b; --warn: #a15c07; --warn-soft: #fbf0df;
+  --sans: "IBM Plex Sans Thai", "Noto Sans Thai", Tahoma, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #12171c; --surface: #1a2128; --fg: #e4e9ee; --muted: #9aa6b2; --line: #2c3640;
+  --accent: #7db6dd; --accent-soft: #1d3446; --ok: #6cc391; --warn: #e3a857; --warn-soft: #3a2b16; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #12171c; --surface: #1a2128; --fg: #e4e9ee; --muted: #9aa6b2; --line: #2c3640;
+  --accent: #7db6dd; --accent-soft: #1d3446; --ok: #6cc391; --warn: #e3a857; --warn-soft: #3a2b16; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 15px/1.7 var(--sans); }
+.wrap { max-width: 920px; margin: 0 auto; padding-block: 32px 64px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 24px; }
+h1 { font-size: 1.9rem; line-height: 1.3; margin: 0; text-wrap: balance; }
+h2 { font-size: 1.25rem; margin: 0; text-wrap: balance; }
+h3 { font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+code, .mono { font-family: var(--mono); font-size: .86em; background: var(--accent-soft); color: var(--accent); padding: 1px 6px; border-radius: 4px; overflow-wrap: anywhere; }
+.lead { color: var(--muted); }
+header { display: grid; gap: 10px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 16px; color: var(--muted); font-size: .88rem; }
+nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 10px; border-bottom: 1px solid var(--line); display: flex; gap: 6px; overflow-x: auto; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+nav a { flex: none; font: 500 .82rem var(--mono); text-decoration: none; color: var(--fg); border: 1px solid var(--line); background: var(--surface); padding: 4px 10px; border-radius: 999px; }
+nav a.done { border-color: var(--ok); color: var(--ok); }
+nav a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.progress { font: 500 .82rem var(--mono); color: var(--muted); align-self: center; margin-left: auto; flex: none; padding-left: 8px; }
+section.box { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 14px; min-width: 0; }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: .78rem; color: var(--muted); font-weight: 600; letter-spacing: .04em; }
+ol.setup { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
+.uc-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.uc-no { font: 500 .95rem var(--mono); color: var(--surface); background: var(--accent); padding: 2px 9px; border-radius: 5px; }
+.roles { display: flex; flex-wrap: wrap; gap: 6px; }
+.role { font-size: .78rem; border: 1px solid var(--line); padding: 1px 9px; border-radius: 999px; color: var(--muted); }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; counter-reset: s; }
+.steps li { counter-increment: s; display: grid; grid-template-columns: 22px 1.8em minmax(0,1fr); gap: 8px; align-items: start; padding: 8px 6px; border-radius: 6px; }
+.steps li:hover { background: var(--accent-soft); }
+.steps li::before { content: counter(s) "."; grid-column: 2; grid-row: 1; font: 500 .85rem var(--mono); color: var(--muted); padding-top: 2px; }
+.steps input { grid-column: 1; grid-row: 1; width: 18px; height: 18px; margin: 4px 0 0; accent-color: var(--ok); }
+.steps label { grid-column: 3; grid-row: 1; cursor: pointer; }
+.steps li.checked label { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line); }
+.expect { display: block; color: var(--ok); font-size: .88rem; }
+.expect::before { content: "ผลที่คาดหวัง: "; font-weight: 600; }
+.neg { display: grid; gap: 6px; background: var(--warn-soft); border-radius: 8px; padding: 12px 14px; }
+.neg h3 { color: var(--warn); }
+.neg ul { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; font-size: .92rem; }
+.note { font-size: .85rem; color: var(--muted); }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; }
+button { font: 500 .85rem var(--sans); border: 1px solid var(--line); background: var(--surface); color: var(--fg); padding: 6px 14px; border-radius: 6px; cursor: pointer; }
+@media (max-width: 520px) { h1 { font-size: 1.5rem; } section.box { padding: 16px; } }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>คู่มือทดสอบระบบตาม Use Case (UC1–UC12)</h1>
+    <p class="lead">ระบบสั่งผลิตงานกลึงตามสั่ง (Machine Shop Custom Manufacturing) — ทดสอบตามลำดับ UC1 → UC12 เพราะข้อมูลของแต่ละขั้นต่อยอดจากขั้นก่อนหน้า ติ๊กช่องเมื่อผ่านแต่ละขั้น (ระบบจำไว้ในเบราว์เซอร์นี้เท่านั้น)</p>
+    <div class="meta"><span>ฉบับวันที่ 4 พ.ย. 2569</span><span>เวลาแสดงเป็น Asia/Bangkok · เงินเป็นบาท ไม่รวม VAT</span></div>
+  </header>
+
+  <nav id="nav" aria-label="สารบัญ Use Case"><a href="#setup">เตรียมระบบ</a></nav>
+
+  <section class="box" id="setup">
+    <h2>เตรียมระบบก่อนทดสอบ</h2>
+    <ol class="setup">
+      <li>รัน Backend (Go) ที่ <code>http://localhost:8080</code> บนฐานข้อมูลทดสอบที่ seed บัญชีตัวอย่างแล้ว และตั้ง <code>LOCAL_TEST_ACCOUNT_ENABLE=true</code> (ผู้ดูแลระบบ backend เป็นผู้เตรียม)</li>
+      <li>ฝั่ง Frontend ใส่ <code>NEXT_PUBLIC_API_BASE_URL=http://localhost:8080</code> และ <code>NEXT_PUBLIC_LOCAL_TEST_LOGIN_ENABLED=true</code> ใน <code>.env.development.local</code> แล้วรัน <code>npm run dev</code></li>
+      <li>เปิด <code>http://localhost:3000/login</code> จะเห็นปุ่มบัญชีทดสอบ 6 บัญชี กดเพื่อเข้าสู่ระบบได้โดยไม่ต้องใส่รหัสผ่าน</li>
+      <li>ระหว่างทดสอบ ใช้เมนู <b>สลับบัญชีทดสอบ</b> ในแถบด้านข้างเพื่อเปลี่ยนบทบาทโดยไม่ต้องออกจากระบบ</li>
+      <li>ถ้าทดสอบบนเซิร์ฟเวอร์ที่ deploy แล้ว (Vercel + Railway) จะไม่มีปุ่มเข้าแบบไม่ใช้รหัสผ่าน ให้เข้าสู่ระบบด้วยชื่อผู้ใช้และรหัสผ่านที่ผู้ดูแลแจกให้</li>
+    </ol>
+    <h3>บัญชีทดสอบ</h3>
+    <div class="tablewrap"><table>
+      <thead><tr><th>ชื่อผู้ใช้</th><th>บทบาท</th><th>หน้าแรก</th><th>ใช้ทดสอบ</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">somchai</span></td><td>ลูกค้าบุคคลทั่วไป</td><td><code>/customer</code></td><td>UC1, UC3, UC4, UC9</td></tr>
+        <tr><td><span class="mono">nida.company</span></td><td>ลูกค้าบริษัท · เจ้าของ</td><td><code>/customer</code></td><td>UC1, UC3, UC4, UC9 แบบบริษัท</td></tr>
+        <tr><td><span class="mono">ploy.company</span></td><td>ลูกค้าบริษัท · สมาชิก</td><td><code>/customer</code></td><td>สิทธิ์สมาชิกบริษัท (UC3, UC9)</td></tr>
+        <tr><td><span class="mono">anan.staff</span></td><td>พนักงาน (Worker)</td><td><code>/staff</code></td><td>UC2, UC4, UC5, UC7, UC8, UC9</td></tr>
+        <tr><td><span class="mono">kittipong.staff</span></td><td>พนักงาน (Worker)</td><td><code>/staff</code></td><td>ทดสอบแก้ไขพร้อมกัน / ตรวจสิทธิ์</td></tr>
+        <tr><td><span class="mono">pim.admin</span></td><td>Admin</td><td><code>/admin</code></td><td>UC4–UC7, UC9–UC12</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">UC12 ต้องใช้บัญชี Super Admin (Admin คนแรกของระบบ) — ถ้า <span class="mono">pim.admin</span> ไม่เห็นแผง “ผู้ดูแลระบบ” ในหน้า <code>/admin/workers</code> ให้ขอบัญชี Super Admin จากผู้ดูแล backend</p>
+    <div class="tools"><button type="button" id="reset">ล้างเครื่องหมายทั้งหมด</button></div>
+  </section>
+
+  <div id="ucs" style="display:grid;gap:24px"></div>
+</div>
+
+<script>
+const UCS = [
+ { id: "uc1", no: "UC1", title: "ลงทะเบียนลูกค้า สมาชิกบริษัท และส่งคำขอผลิต", roles: ["ลูกค้า", "Worker/Admin (ดู)"],
+   steps: [
+    ["เปิด <code>/register</code> เลือกประเภท “บุคคลทั่วไป” กรอกชื่อผู้ใช้ ชื่อ ที่อยู่ และรหัสผ่านอย่างน้อย 12 ตัวอักษร แล้วสมัคร", "สมัครสำเร็จและเข้าสู่ระบบลูกค้าได้"],
+    ["สมัครอีกบัญชีแบบ “บริษัท → สร้างบริษัทใหม่” ใส่ชื่อบริษัทและเลขผู้เสียภาษี 13 หลัก (ไม่บังคับ)", "ได้บัญชีเจ้าของบริษัท เห็นข้อมูลบริษัทใน <code>/customer/memberships</code>"],
+    ["(ถ้ามีคำเชิญ) สมัครแบบ “บริษัท → เข้าร่วมด้วยคำเชิญ” ใส่คำเชิญส่วนตัว", "ไม่ต้องกรอกที่อยู่ ใช้ที่อยู่ของบริษัทที่เข้าร่วม"],
+    ["เข้าสู่ระบบเป็น <span class='mono'>somchai</span> ไปที่ <code>/customer/requests</code> แล้วเริ่มสร้างคำขอผลิตใหม่", "แสดงฟอร์มคำขอ"],
+    ["กรอกรายละเอียดงาน จำนวน (จำนวนเต็มบวก) สเปกวัสดุ (ไม่บังคับ) และวันที่ต้องการ (ไม่บังคับ ต้องเป็นวันในอนาคต)", "ฟอร์มผ่านการตรวจสอบ"],
+    ["แนบไฟล์แบบ/รูปภาพขนาดไม่เกิน 100 MB", "ไฟล์แสดงสถานะ “พร้อม” (เป็นการตรวจไฟล์ทางเทคนิค ไม่ใช่การอนุมัติ)"],
+    ["ส่งคำขอ", "คำขอปรากฏในรายการพร้อมสถานะจากเซิร์ฟเวอร์"],
+    ["สลับเป็น <span class='mono'>anan.staff</span> เปิด <code>/staff/requests</code>", "เห็นคำขอที่เพิ่งสร้างและเปิดไฟล์แนบได้"]
+   ],
+   neg: ["จำนวน 0 หรือติดลบ → ระบบไม่ยอมให้ส่ง", "วันที่ต้องการเป็นวันในอดีต → แสดงข้อผิดพลาด", "ไฟล์เกิน 100 MB หรือนามสกุลไม่อนุญาต → อัปโหลดไม่ผ่าน และมีปุ่ม “Upload again” (อัปโหลดใหม่ ไม่ใช่ลองซ้ำอัตโนมัติ)", "รหัสผ่านสั้นกว่า 12 ตัวอักษร → สมัครไม่ได้", "ปิด backend แล้วโหลดหน้า → ต้องแสดงข้อผิดพลาด ห้ามแสดงข้อมูลตัวอย่างแทน"] },
+
+ { id: "uc2", no: "UC2", title: "ตรวจคำขอและจัดทำใบเสนอราคา", roles: ["Worker", "Admin (ดูอย่างเดียว)", "ลูกค้า (ดูใบที่ส่งแล้ว)"],
+   steps: [
+    ["เข้าเป็น <span class='mono'>anan.staff</span> เปิด <code>/staff/quotations</code> เลือกคำขอจาก UC1", "เห็นรายละเอียดคำขอและไฟล์แนบ"],
+    ["สร้างใบเสนอราคาฉบับร่าง ใส่ต้นทุนวัสดุและค่าแรง แล้วบันทึกร่าง", "ร่างถูกบันทึก ราคาขั้นต่ำ = (วัสดุ + ค่าแรง) × 1.6 ของทั้งจำนวน ปัดขึ้นเป็นสตางค์"],
+    ["ลองตั้งราคาต่ำกว่าราคาขั้นต่ำ 60%", "ระบบไม่ยอมรับ"],
+    ["(ทางเลือก) ขอข้อมูลเพิ่มเติมจากลูกค้า", "คำขอเปลี่ยนสถานะเป็นรอข้อมูล ลูกค้าเห็นข้อความ"],
+    ["ส่งใบเสนอราคาให้ลูกค้า", "สถานะเป็นส่งแล้ว ราคาแสดงเป็นบาท ไม่บวก VAT"],
+    ["สลับเป็น <span class='mono'>pim.admin</span> เปิด <code>/admin/requests</code>", "เห็นคิวและต้นทุน แต่ไม่มีปุ่มแก้ไข/ส่งใบเสนอราคา"],
+    ["สลับเป็น <span class='mono'>somchai</span> เปิด <code>/customer/quotations</code>", "เห็นใบเสนอราคาที่ส่งแล้ว แต่ไม่เห็นต้นทุนวัสดุ/ค่าแรงภายใน"]
+   ],
+   neg: ["ปฏิเสธคำขอโดยไม่ใส่เหตุผล → ระบบไม่ยอม", "เปิดร่างเดียวกันสองแท็บ (anan และ kittipong) บันทึกทั้งคู่ → แท็บที่สองต้องแจ้งข้อมูลขัดแย้งและให้โหลดใหม่ ไม่เขียนทับ"] },
+
+ { id: "uc3", no: "UC3", title: "ลูกค้าตอบรับหรือปฏิเสธใบเสนอราคา", roles: ["ลูกค้า / สมาชิกบริษัท"],
+   steps: [
+    ["เข้าเป็น <span class='mono'>somchai</span> เปิด <code>/customer/quotations</code> เลือกใบเสนอราคาล่าสุด", "เห็นปุ่มตอบรับ/ปฏิเสธ"],
+    ["กดปฏิเสธ แล้วให้ Worker ส่งฉบับแก้ไขใหม่ ทำซ้ำจนครบ 5 ครั้ง", "ทุกครั้งยังขอแก้ไขได้ ประวัติการตัดสินใจแสดงครบ"],
+    ["ปฏิเสธครั้งที่ 6", "คำขอถูกยกเลิก"],
+    ["สร้างคำขอใหม่ (ทำ UC1–UC2 ซ้ำ) แล้วกดตอบรับ", "แสดงเงื่อนไขที่บันทึกถาวร (มัดจำ/PO และกำหนดส่ง 14 วัน)"],
+    ["ทดสอบแบบบริษัท: <span class='mono'>nida.company</span> สร้างคำขอ แล้วให้ <span class='mono'>ploy.company</span> (สมาชิก) เป็นผู้ตอบรับ", "สมาชิกที่ยัง active ตัดสินใจแทนบริษัทได้"]
+   ],
+   neg: ["หลังตอบรับแล้ว ปุ่มตอบรับ/ปฏิเสธต้องหายไป", "ถ้าเครือข่ายขาดตอนกดยืนยัน → ระบบโหลดสถานะปัจจุบันก่อน ไม่ส่งการตัดสินใจซ้ำเอง"] },
+
+ { id: "uc4", no: "UC4", title: "ส่งหลักฐาน PO/มัดจำ และเปิดงานผลิต", roles: ["ลูกค้า", "Worker", "Admin"],
+   steps: [
+    ["เข้าเป็นลูกค้าที่ตอบรับใบเสนอราคาแล้ว เปิด <code>/customer/deposit-po</code>", "เห็นรายการหลักฐานที่ต้องส่งและวันครบกำหนด (ตอบรับ + 14 วัน)"],
+    ["อัปโหลดไฟล์หลักฐาน (มัดจำหรือ PO ตามเงื่อนไข) แล้วกดส่ง", "สถานะเป็น “รอตรวจ” — การอัปโหลดสำเร็จยังไม่ใช่การอนุมัติ"],
+    ["สลับเป็น <span class='mono'>anan.staff</span> หรือ <span class='mono'>pim.admin</span> เปิด <code>/admin/requests?stage=review</code> (Admin) หรือหน้าคำขอของพนักงาน", "เห็นหลักฐานรอตรวจ"],
+    ["กด “ไม่อนุมัติ” พร้อมเหตุผล", "ลูกค้าเห็นสถานะไม่อนุมัติ และต้องอัปโหลดไฟล์ใหม่ (ไม่ใช้ไฟล์เดิม)"],
+    ["ลูกค้าอัปโหลดใหม่ → พนักงานอนุมัติจนครบทุกรายการที่ต้องใช้", "ระบบสร้างงานผลิต 1 งาน สถานะรอคิว (queued)"],
+    ["ลูกค้าเปิด <code>/customer/jobs</code>", "เห็นงานที่เพิ่งเปิด"]
+   ],
+   neg: ["ส่งหลักฐานหลังเลยกำหนด 14 วัน → ระบบไม่รับ ลูกค้าขยายเวลาเองไม่ได้", "อนุมัติซ้ำ → ต้องไม่เกิดงานผลิตงานที่สอง"] },
+
+ { id: "uc5", no: "UC5", title: "วัตถุดิบ สต๊อก แผนวัตถุดิบ และการจอง", roles: ["Admin", "Worker"],
+   steps: [
+    ["เข้าเป็น <span class='mono'>pim.admin</span> เปิด <code>/admin/materials</code> เพิ่มหน่วยและวัตถุดิบใหม่", "วัตถุดิบปรากฏในแคตตาล็อก"],
+    ["รับเข้าสต๊อก: ใส่จำนวน ราคาต่อหน่วย และเหตุผล", "ยอดคงเหลือเพิ่มขึ้นตรงตามทศนิยม (สูงสุด 6 ตำแหน่ง)"],
+    ["ปรับยอดตามการนับ (กรอกยอดจริงแบบตัวเลขสุทธิ) พร้อมเหตุผล", "ยอดคงเหลือเท่ากับค่าที่กรอก"],
+    ["สลับเป็น <span class='mono'>anan.staff</span> เปิด <code>/staff/materials</code> ค้นหาวัตถุดิบ", "เห็นยอดคงเหลือ/จองแล้ว/พร้อมใช้/ขาด แต่ไม่เห็นต้นทุนเฉลี่ย"],
+    ["เปิด <code>/staff/production</code> เลือกงาน queued จาก UC4 แก้แผนวัตถุดิบแล้วบันทึก", "บันทึกแผนและจองของ ถ้าของไม่พอจะแสดงจำนวนที่ขาด"],
+    ["กดตรวจการจองใหม่ (re-check) หลัง Admin รับของเพิ่ม", "การจองอัปเดตเมื่อกดเท่านั้น ของใหม่ไม่เติมเข้าแผนเอง"]
+   ],
+   neg: ["ปรับยอดให้ต่ำกว่ายอดที่จองไว้ → ระบบไม่ยอม", "รับเข้าสต๊อกให้วัตถุดิบที่ปิดใช้งาน → ระบบไม่ยอม", "ลูกค้าพิมพ์ URL <code>/staff/materials</code> → เข้าไม่ได้", "Admin เปิดแผนวัตถุดิบ → ดูได้อย่างเดียว"] },
+
+ { id: "uc6", no: "UC6", title: "สั่งซื้อวัตถุดิบจาก Supplier", roles: ["Admin เท่านั้น"],
+   steps: [
+    ["เข้าเป็น <span class='mono'>pim.admin</span> เปิด <code>/admin/orders</code> เพิ่ม/เลือก Supplier", "ข้อมูล Supplier ถูกบันทึก"],
+    ["สร้างคำสั่งซื้อ: เลือกวัตถุดิบ ใส่จำนวนและราคา (อ้างอิงงานผลิตได้ถ้าต้องการ)", "คำสั่งซื้อถูกสร้างและแก้ไขรายการไม่ได้"],
+    ["บันทึกผล Supplier ตอบรับ", "สถานะเป็นตอบรับ และมีลิงก์ไปหน้ารับเข้า"],
+    ["สร้างอีกใบแล้วบันทึกว่า Supplier ปฏิเสธ", "สถานะเป็นปฏิเสธ ไม่สามารถรับของได้"],
+    ["ตรวจหน้าวัตถุดิบ", "ยอดสต๊อกและการจองยังไม่เปลี่ยน"]
+   ],
+   neg: ["เข้าเป็น <span class='mono'>anan.staff</span> → ต้องไม่มีปุ่มสร้างหรือจัดการคำสั่งซื้อ", "Supplier ไม่มีบัญชีเข้าใช้ระบบ"] },
+
+ { id: "uc7", no: "UC7", title: "รับวัตถุดิบ เคลมของเสีย และชำระเงิน Supplier", roles: ["Admin", "Worker"],
+   steps: [
+    ["เข้าเป็น <span class='mono'>anan.staff</span> เปิด <code>/staff/receiving</code> เลือกคำสั่งซื้อที่ตอบรับแล้ว", "เห็นจำนวนที่ยังค้างรับ แต่ไม่เห็นราคา/เครดิต"],
+    ["รับของบางส่วน: ใส่จำนวนดีและจำนวนเสีย", "สต๊อกเพิ่มเฉพาะของดี ของเสียไม่นับเป็นของใช้ได้"],
+    ["เปิดเคลมของเสียเพื่อขอเปลี่ยน แล้วรับของทดแทน", "สถานะเคลมแสดงแยก (เปลี่ยนของเท่านั้น ไม่มีคืนเงิน)"],
+    ["รับของดีจนครบ", "คำสั่งซื้อรับครบ"],
+    ["สลับเป็น <span class='mono'>pim.admin</span> เปิด <code>/admin/receiving</code> ใส่จำนวนวันเครดิตของคำสั่งซื้อนี้", "ไม่มีค่าเริ่มต้น ต้องกรอกเอง"],
+    ["บันทึกการชำระเต็มจำนวนแบบโอนธนาคารพร้อมแนบหลักฐาน", "สถานะชำระแล้ว (เงินสดแนบหลักฐานหรือไม่ก็ได้)"]
+   ],
+   neg: ["รับของเกินจำนวนค้างรับ → ระบบไม่ยอม", "ชำระแบบโอนโดยไม่แนบหลักฐาน → ระบบไม่ยอม", "Worker ต้องไม่เห็นปุ่มชำระเงินหรือข้อมูลการเงิน"] },
+
+ { id: "uc8", no: "UC8", title: "ดำเนินการผลิตและบันทึกการใช้จริง", roles: ["Worker", "Admin (ติดตาม/ต้นทุน)"],
+   steps: [
+    ["เข้าเป็น <span class='mono'>anan.staff</span> เปิด <code>/staff/production</code> เลือกงานที่แผนจองครบแล้ว", "ปุ่มเริ่มงานกดได้"],
+    ["กดเริ่มงาน", "สถานะเป็นกำลังผลิต วัตถุดิบยังไม่ถูกตัดสต๊อก"],
+    ["บันทึกการใช้วัตถุดิบทีละครั้ง", "ตัดจากของที่งานนี้จองไว้ก่อน แล้วจึงใช้ของว่าง"],
+    ["บันทึกเวลาแรงงานเป็นนาที (จำนวนเต็ม) และแนบรูป (ไม่บังคับ)", "บันทึกสำเร็จ"],
+    ["กดเสร็จงาน", "การจองที่เหลือถูกปล่อยคืน โดยไม่เพิ่มของจริงในสต๊อก"],
+    ["สลับเป็น <span class='mono'>pim.admin</span> เปิด <code>/admin/production</code> ใส่/แก้ค่าแรงจริง", "Admin เห็นต้นทุน Worker ไม่เห็น"]
+   ],
+   neg: ["งานที่แผนว่างหรือจองไม่ครบ → ปุ่มเริ่มงานกดไม่ได้", "ใช้วัตถุดิบเกินแผนจนต้องดึงของที่งานอื่นจองไว้ → ระบบไม่ยอม"] },
+
+ { id: "uc9", no: "UC9", title: "ส่งมอบ ใบแจ้งหนี้ ตรวจรับ และชำระเงิน", roles: ["ลูกค้า", "Worker", "Admin"],
+   steps: [
+    ["เข้าเป็น <span class='mono'>pim.admin</span> ตั้งเงื่อนไขใบแจ้งหนี้ แล้วให้ Worker/Admin ออกใบแจ้งหนี้ของงานที่เสร็จ", "ใบแจ้งหนี้แสดงยอดเป็นบาท"],
+    ["บันทึกการส่งมอบ (ส่งเอง หรือผ่านบุคคลที่สาม) พร้อมชื่อผู้รับ ที่ <code>/staff/delivery</code>", "สถานะส่งมอบแล้ว"],
+    ["เข้าเป็นลูกค้า เปิด <code>/customer/delivery-payment</code> กด “ส่งคืน” พร้อมเหตุผล", "งานกลับไปแก้ไขฟรีในงานเดิม ใบแจ้งหนี้ไม่เปลี่ยน"],
+    ["พนักงานส่งมอบใหม่ → ลูกค้ากดตอบรับ", "การส่งมอบล่าสุดถูกตอบรับ"],
+    ["ลูกค้าแจ้งโอนบางส่วน (ผ่อนชำระ) พร้อมแนบหลักฐาน ที่ <code>/customer/payments</code>", "สถานะรอตรวจ"],
+    ["Admin ตรวจที่ <code>/admin/delivery-payment</code>: ไม่อนุมัติหนึ่งครั้ง แล้วอนุมัติครั้งถัดไป", "ยอดค้างลดลงตามจำนวนที่อนุมัติ"],
+    ["Admin บันทึกรับเงินสดส่วนที่เหลือ", "ยอดค้างเป็น 0 และงานปิดเมื่อส่งมอบตอบรับแล้วและจ่ายครบ"]
+   ],
+   neg: ["แจ้งโอนเกินยอดค้าง → ระบบไม่ยอม (ห้ามจ่ายเกิน)", "Worker ต้องไม่เห็นหลักฐาน/ข้อมูลการชำระของลูกค้า และไม่มีปุ่มรับเงินสด", "หลังตอบรับแล้ว ไม่มีปุ่มส่งคืน"] },
+
+ { id: "uc10", no: "UC10", title: "จัดการหน่วยและอัตราแปลงหน่วย", roles: ["Admin"],
+   steps: [
+    ["เข้าเป็น <span class='mono'>pim.admin</span> เปิด <code>/admin/materials</code> แก้ชื่อหน่วย", "ชื่อหน่วยใหม่แสดงทุกที่ที่ใช้"],
+    ["เพิ่มหน่วยย่อยให้วัตถุดิบหนึ่งรายการพร้อมอัตราแปลง (เช่น 1 เส้น = 6 เมตร) แล้วแก้อัตราแปลง", "อัตราแปลงใหม่ถูกบันทึก"],
+    ["ไปหน้าแผนวัตถุดิบ/บันทึกการใช้ (UC5, UC8) เลือกหน่วยย่อย", "ระบบแปลงเป็นหน่วยหลักตามอัตราที่ตั้ง"],
+    ["ไปหน้าสั่งซื้อและรับเข้า (UC6, UC7)", "ใช้ได้เฉพาะหน่วยหลักเท่านั้น"]
+   ],
+   neg: ["อัตราแปลงเป็น 0 หรือติดลบ → ระบบไม่ยอม", "Worker ต้องแก้หน่วยไม่ได้"] },
+
+ { id: "uc11", no: "UC11", title: "ลงทะเบียนและแก้ไขพนักงาน (Worker)", roles: ["Admin"],
+   steps: [
+    ["เข้าเป็น <span class='mono'>pim.admin</span> เปิด <code>/admin/workers</code> สร้างพนักงานใหม่ ใส่ชื่อ ชื่อผู้ใช้ ข้อมูลติดต่อ วันที่เริ่มงาน และรหัสผ่านเริ่มต้น", "พนักงานปรากฏในรายการ"],
+    ["แก้ไขข้อมูลติดต่อของพนักงาน", "ข้อมูลใหม่ถูกบันทึก"],
+    ["ออกจากระบบ แล้วเข้าด้วยบัญชีพนักงานใหม่ที่ <code>/login</code>", "เข้าสู่ <code>/staff</code> ได้ และเห็นเฉพาะเมนูของพนักงาน"]
+   ],
+   neg: ["สร้างโดยไม่ใส่ข้อมูลติดต่อ → ระบบไม่ยอม", "ชื่อผู้ใช้ซ้ำ → แสดงข้อผิดพลาด", "Worker เปิด <code>/admin/workers</code> → เข้าไม่ได้"] },
+
+ { id: "uc12", no: "UC12", title: "Super Admin เพิ่มและจัดการ Admin", roles: ["Super Admin"],
+   steps: [
+    ["เข้าเป็น Super Admin เปิด <code>/admin/workers</code>", "เห็นแผง “ผู้ดูแลระบบ” พร้อมรายชื่อ Admin"],
+    ["สร้าง Admin ใหม่: ชื่อ ชื่อผู้ใช้ อีเมล เบอร์โทร และรหัสผ่านเริ่มต้น", "Admin ใหม่ปรากฏในรายการ (เป็น Admin ปกติ)"],
+    ["เข้าด้วยบัญชี Admin ใหม่", "เข้า <code>/admin</code> ได้ แต่ไม่เห็นแผง “ผู้ดูแลระบบ”"],
+    ["กลับเป็น Super Admin กดปิดใช้งาน Admin ใหม่", "Admin นั้นเข้าสู่ระบบไม่ได้"],
+    ["กดเปิดใช้งานอีกครั้ง", "Admin นั้นเข้าสู่ระบบได้ตามปกติ"]
+   ],
+   neg: ["ต้องไม่มีปุ่มเลื่อนขั้นเป็น Super Admin", "ต้องปิดใช้งาน Super Admin ไม่ได้", "Admin ปกติเปิด URL แผงผู้ดูแลระบบ → ไม่เห็น/ทำรายการไม่ได้"] }
+];
+
+const KEY = "uc-test-guide-v1";
+let ticks = {};
+try { ticks = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { ticks = {}; }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(ticks)); } catch (e) {} };
+
+const nav = document.getElementById("nav"), root = document.getElementById("ucs");
+const total = UCS.reduce((n, u) => n + u.steps.length, 0);
+const progress = document.createElement("span"); progress.className = "progress";
+
+root.innerHTML = UCS.map(u => `
+  <section class="box" id="${u.id}">
+    <div class="uc-head"><span class="uc-no">${u.no}</span><h2>${u.title}</h2></div>
+    <div class="roles">${u.roles.map(r => `<span class="role">${r}</span>`).join("")}</div>
+    <h3>ขั้นตอน</h3>
+    <ol class="steps">${u.steps.map(([s, e], i) => {
+      const id = `${u.id}-${i}`;
+      return `<li${ticks[id] ? ' class="checked"' : ""}><input type="checkbox" id="${id}"${ticks[id] ? " checked" : ""}><label for="${id}">${s}<span class="expect">${e}</span></label></li>`;
+    }).join("")}</ol>
+    <div class="neg"><h3>กรณีผิดพลาดที่ต้องลอง</h3><ul>${u.neg.map(n => `<li>${n}</li>`).join("")}</ul></div>
+  </section>`).join("");
+
+nav.insertAdjacentHTML("beforeend", UCS.map(u => `<a href="#${u.id}" data-uc="${u.id}">${u.no}</a>`).join(""));
+nav.append(progress);
+
+function refresh() {
+  let done = 0;
+  for (const u of UCS) {
+    const n = u.steps.filter((_, i) => ticks[`${u.id}-${i}`]).length; done += n;
+    nav.querySelector(`[data-uc="${u.id}"]`).classList.toggle("done", n === u.steps.length);
+  }
+  progress.textContent = `${done}/${total} ขั้น`;
+}
+root.addEventListener("change", e => {
+  if (e.target.type !== "checkbox") return;
+  ticks[e.target.id] = e.target.checked; if (!e.target.checked) delete ticks[e.target.id];
+  e.target.closest("li").classList.toggle("checked", e.target.checked); save(); refresh();
+});
+document.getElementById("reset").addEventListener("click", () => {
+  ticks = {}; save(); root.querySelectorAll("input[type=checkbox]").forEach(c => { c.checked = false; c.closest("li").classList.remove("checked"); }); refresh();
+});
+refresh();
+</script>
+
+</body></html>
