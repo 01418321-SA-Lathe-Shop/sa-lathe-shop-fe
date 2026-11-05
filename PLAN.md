@@ -320,3 +320,11 @@ Owner authorized merging the saved orange design with the functional develop wor
 - [x] Check doc references, filename convention, whitespace, and changed-file scope. No application code or dependencies changed.
 
 Decision: current backend UC/API contracts and owner-confirmed rules take precedence over historical report details. Existing filenames remain stable; all new documentation uses a zero-padded three-digit prefix plus a descriptive title.
+
+## UC1–UC12 local browser test (2026-11-05)
+
+- [x] Run the owner's UC test guide with Playwright against local FE `develop` (40c2e4a) and BE `feat/uc-audit-alignment` (db8e61c); tooling stays isolated in `docs/uc-testing/`.
+- [x] Record 191 screenshots and 101 guide steps: 93 pass, 7 fail, 1 skipped (UC4-N01, owner decision). See `docs/uc-testing/UC-test-report.docx`.
+- [ ] Open: registration fails (FE sends no `name` and an unknown `contact_name`); more-info request fails (FE `message`, BE `note`); renamed units stay old on open orders; the test guide and the Use Case document disagree on Worker procurement and supplier payment status.
+
+No application code changed. Screenshots are not committed.
