@@ -343,3 +343,17 @@ No application code changed. Screenshots are not committed.
 - [x] Implement and check in a browser with a stubbed API (light/dark, 1440–375px).
 - [x] Run the generated filter SQL against real PostgreSQL with `SQL_CONSOLE_ENABLE=true`: 472 of 510 attribute/operator combinations on 5 tables passed; the other 38 were `uuid` `=`/`≠` given a non-UUID test value, which returns a database error by design.
 - [x] Add 10 status-count shortcuts (owner-agreed: counts only, 9 core documents plus Supplier payment, row above the SQL, only statuses that have documents).
+
+## UC testing fixes and persistent sessions (2026-11-06)
+
+- [x] UC2: Worker send-back sent `message` instead of `note` (HTTP 400) — fixed; customer correction form (`PATCH /requests/{id}`); wizard shows field-level errors.
+- [x] UC6: Worker creates/submits material orders and records supplier responses; supplier edits stay Admin-only.
+- [x] UC7: good/defective receipt errors shown under the field holding the bad value.
+- [x] UC8: customer reference images and job photos shown as thumbnails on the job page.
+- [x] UC9: shipping fee removed end to end (migration 000027); Worker has every staff delivery/payment action.
+- [x] UC10: `.inlineForm` fields top-aligned with equal widths.
+- [x] Sessions persist across reload/reopen via the API's HttpOnly cookie; registration signs in; logout/expiry/role guards checked.
+- [ ] Re-run the owner's Playwright UC guide (`docs/uc-testing`): the guide still expects Worker to be blocked from UC6 and has no shipping-fee-free UC9 steps; update those expectations first.
+- [ ] Hosted Vercel + Railway needs `AUTH_COOKIE_SAMESITE=none` (third-party cookie) or a same-site API proxy for persistence; not verified.
+
+Verification: `tsc`, ESLint on changed files, 243 native tests, `next build`; real local API/DB (migrated to 27) in the in-app browser. Backend DB integration tests were updated but not run (need a dedicated database).
