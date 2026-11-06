@@ -75,7 +75,7 @@ function AdminForm({ api, onSaved }: { api: BackendApi; onSaved: () => void }) {
     </fieldset>
     <fieldset className={styles.section} disabled={command.busy}>
       <legend>รหัสผ่านเริ่มต้น</legend>
-      <Field label="รหัสผ่าน" hint="อย่างน้อย 12 ตัวอักษร ไม่เกิน 128 ไบต์ เว้นวรรคนับด้วย" error={passwordError || undefined}><input ref={password} type="password" autoComplete="new-password" /></Field>
+      <Field label="รหัสผ่าน" hint="อย่างน้อย 12 ตัวอักษร ไม่เกิน 128 ตัวอักษร เว้นวรรคนับด้วย" error={passwordError || undefined}><input ref={password} type="password" autoComplete="new-password" /></Field>
       <Field label="ยืนยันรหัสผ่าน"><input ref={again} type="password" autoComplete="new-password" /></Field>
       <p className={layout.muted}>ช่องรหัสผ่านจะถูกล้างทุกครั้งที่กดบันทึก แจ้งรหัสผ่านให้ผู้ดูแลระบบด้วยตนเอง</p>
     </fieldset>

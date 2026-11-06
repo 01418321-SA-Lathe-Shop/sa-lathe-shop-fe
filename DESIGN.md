@@ -93,7 +93,7 @@ Until hydration the login/register fieldset is disabled and the form uses
 `method="post"` (2026-11-03), so an early Enter or click can never put a
 password into the URL. Status, password-rule, registration-success and session
 notices on these pages are Thai (2026-11-03): กำลังดำเนินการ…, the 12-character /
-128-byte rule, สร้างบัญชีแล้ว…, and expiry/sign-out notices. Each button clears the password and calls `/auth/local-test/login` with username
+12–128-character wording (the check still counts UTF-8 bytes), สร้างบัญชีแล้ว…, and expiry/sign-out notices. Each button clears the password and calls `/auth/local-test/login` with username
 only, then confirms `/auth/me` and navigates by server role. Without that opt-in,
 selection only fills username and clears/focuses password for normal sign-in.
 The panel explains privileged local-only access; no passwords or roles are sent
@@ -223,7 +223,7 @@ Step 7 of the approved Staff/Admin redesign (`/admin/workers`, Admin only; no ne
 - A changed username (compared case-insensitively, since the server stores lowercase) opens a checklist confirmation warning that the person is logged out everywhere.
 - Edit adds a สถานะบัญชี section: ปิดใช้งานบัญชี / เปิดใช้งานบัญชี through a confirmation. Deactivation logs the person out everywhere; reactivation does not restore sessions.
 
-**เปลี่ยนรหัสผ่าน** opens its own small side panel: new password plus confirmation, the same 12-character / 128-byte rule, and a warning that the person is logged out everywhere.
+**เปลี่ยนรหัสผ่าน** opens its own small side panel: new password plus confirmation, the same 12-character / 12–128-character wording (the check still counts UTF-8 bytes), and a warning that the person is logged out everywhere.
 
 **Unchanged rules:** the role is always Staff (no promotion to Admin) and nothing is deleted. Writes are plain POST/PATCH without retry keys, as before, so after an unclear failure the panel tells Admin to refresh and check before trying again.
 

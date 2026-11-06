@@ -12,7 +12,7 @@ export function todayBangkokISO(): string {
 
 // Same rule as the shared passwordError: 12+ characters, at most 128 UTF-8 bytes, spaces kept.
 export function workerPasswordError(password: string, confirmation: string): string {
-  if ([...password].length < 12 || new TextEncoder().encode(password).length > 128) return "รหัสผ่านอย่างน้อย 12 ตัวอักษร และไม่เกิน 128 ไบต์ (เว้นวรรคนับด้วย)";
+  if ([...password].length < 12 || new TextEncoder().encode(password).length > 128) return "รหัสผ่านอย่างน้อย 12 ตัวอักษร และไม่เกิน 128 ตัวอักษร (เว้นวรรคนับด้วย)";
   return password === confirmation ? "" : "รหัสผ่านทั้งสองช่องไม่ตรงกัน";
 }
 

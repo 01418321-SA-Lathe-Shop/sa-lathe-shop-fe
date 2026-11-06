@@ -8,7 +8,7 @@ import { draftOf, todayBangkokISO, usernameChanged, workerErrors, workerPassword
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./workers.module.css";
 
-const PASSWORD_HINT = "อย่างน้อย 12 ตัวอักษร ไม่เกิน 128 ไบต์ เว้นวรรคนับด้วย";
+const PASSWORD_HINT = "อย่างน้อย 12 ตัวอักษร ไม่เกิน 128 ตัวอักษร เว้นวรรคนับด้วย";
 
 // Read the password fields once and clear them immediately, also on failure.
 function takePasswords(first: React.RefObject<HTMLInputElement | null>, second: React.RefObject<HTMLInputElement | null>) {

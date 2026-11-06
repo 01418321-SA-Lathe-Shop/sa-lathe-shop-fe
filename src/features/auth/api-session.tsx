@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { BackendApi, type Account, type Login } from "../../lib/api/backend-api";
+import { ApiError, BackendApi, type Account, type Login } from "../../lib/api/backend-api";
 import { isLocalTestLoginEnabled, localTestLoginError } from "./local-test-login";
 
 // One memory-only session for the whole designed shell. Client navigation keeps
@@ -67,7 +67,14 @@ export function ApiSessionProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const signIn = useCallback((username: string, password: string) => openSession((api) => api.login(username, password)), [openSession]);
+  const signIn = useCallback(async (username: string, password: string) => {
+    try { return await openSession((api) => api.login(username, password)); }
+    catch (error) {
+      // A 401 here means bad credentials, not an expired session.
+      if (error instanceof ApiError && error.status === 401) throw new Error("Wrong username or password.");
+      throw error;
+    }
+  }, [openSession]);
   const signInLocalTest = useCallback(async (username: string) => {
     if (!LOCAL_TEST_ENABLED) throw new Error("Local test login ไม่ได้เปิดใน Frontend นี้ กรุณาใช้ชื่อผู้ใช้และรหัสผ่าน");
     try { return await openSession((api) => api.loginLocalTest(username), true); }

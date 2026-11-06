@@ -22,7 +22,7 @@ export type PasswordDraft = { current: string; next: string; confirm: string };
 export function passwordErrors(username: string, draft: PasswordDraft): Partial<Record<keyof PasswordDraft, string>> {
   const errors: Partial<Record<keyof PasswordDraft, string>> = {};
   if (!draft.current) errors.current = "กรอกรหัสผ่านปัจจุบัน";
-  if ([...draft.next].length < 12 || new TextEncoder().encode(draft.next).length > 128) errors.next = "รหัสผ่านใหม่ต้องมีอย่างน้อย 12 ตัวอักษร และไม่เกิน 128 ไบต์";
+  if ([...draft.next].length < 12 || new TextEncoder().encode(draft.next).length > 128) errors.next = "รหัสผ่านใหม่ต้องมีอย่างน้อย 12 ตัวอักษร และไม่เกิน 128 ตัวอักษร";
   else if (draft.next === draft.current) errors.next = "รหัสผ่านใหม่ต้องไม่ซ้ำกับรหัสผ่านปัจจุบัน";
   else if (username && draft.next.toLowerCase().includes(username.toLowerCase())) errors.next = "รหัสผ่านใหม่ต้องไม่มีชื่อผู้ใช้อยู่ในรหัส";
   if (draft.confirm !== draft.next) errors.confirm = "ยืนยันรหัสผ่านใหม่ไม่ตรงกัน";
