@@ -54,9 +54,16 @@ test("original remaining excludes what open claims still owe", () => {
   for (const [raw, plain] of [["10.000000", "10"], ["5.500000", "5.5"], ["0.000001", "0.000001"], ["0.000000", "0"]]) assert.equal(plainQuantity(raw), plain);
 });
 
-test("receipt row check: blank ok, bad decimals and over-remaining flagged", () => {
-  assert.equal(receiptRowError({ good: "", damaged: "" }, "1.000000"), "");
-  assert.equal(receiptRowError({ good: "0.5", damaged: "0.5" }, "1.000000"), "");
-  assert.match(receiptRowError({ good: "1", damaged: "0.000001" }, "1.000000"), /ไม่เกิน 1$/);
-  assert.match(receiptRowError({ good: "-1", damaged: "" }, "1.000000"), /ทศนิยม/);
+test("receipt row check: each error stays on its own field", () => {
+  const ok = { good: "", damaged: "" };
+  assert.deepEqual(receiptRowError({ good: "", damaged: "" }, "1.000000"), ok);
+  assert.deepEqual(receiptRowError({ good: "0.5", damaged: "0.5" }, "1.000000"), ok);
+  const over = receiptRowError({ good: "1", damaged: "0.000001" }, "1.000000");
+  assert.match(over.good, /ไม่เกิน 1$/); assert.match(over.damaged, /ไม่เกิน 1$/);
+  const badGood = receiptRowError({ good: "-1", damaged: "" }, "1.000000");
+  assert.match(badGood.good, /ติดลบ/); assert.equal(badGood.damaged, "");
+  const badDamaged = receiptRowError({ good: "1", damaged: "-1" }, "5.000000");
+  assert.equal(badDamaged.good, ""); assert.match(badDamaged.damaged, /ติดลบ/);
+  const both = receiptRowError({ good: "-2", damaged: "1.1234567" }, "5.000000");
+  assert.match(both.good, /ติดลบ/); assert.match(both.damaged, /ทศนิยม/);
 });

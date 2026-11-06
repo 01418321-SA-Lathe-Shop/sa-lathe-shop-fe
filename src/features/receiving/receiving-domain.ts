@@ -96,10 +96,20 @@ export function originalRemaining(state: Pick<ReceivingState, "lines" | "claims"
   return six(rest > BigInt(0) ? rest : BigInt(0));
 }
 
-// Inline check for one receipt row before sending; the server re-checks totals.
-export function receiptRowError(row: Pick<DraftReceipt, "good" | "damaged">, remaining: string): string {
-  if (blank(row.good) && blank(row.damaged)) return "";
-  let total: bigint;
-  try { total = units(blank(row.good) ? "0" : row.good.trim()) + units(blank(row.damaged) ? "0" : row.damaged.trim()); } catch { return "ตัวเลข 0 ขึ้นไป ทศนิยมไม่เกิน 6 ตำแหน่ง"; }
-  return total > units(remaining) ? `ดีรวมเสียหายต้องไม่เกิน ${plainQuantity(remaining)}` : "";
+// Inline check for one receipt row before sending; each message belongs to the
+// field holding the bad value. The server re-checks totals.
+export function receiptRowError(row: Pick<DraftReceipt, "good" | "damaged">, remaining: string): { good: string; damaged: string } {
+  const parse = (value: string): bigint | string => {
+    if (blank(value)) return BigInt(0);
+    if (value.trim().startsWith("-")) return "ห้ามติดลบ กรอกตัวเลข 0 ขึ้นไป";
+    try { return units(value.trim()); } catch { return "ตัวเลข 0 ขึ้นไป ทศนิยมไม่เกิน 6 ตำแหน่ง"; }
+  };
+  const good = parse(row.good); const damaged = parse(row.damaged);
+  const errors = { good: typeof good === "string" ? good : "", damaged: typeof damaged === "string" ? damaged : "" };
+  if (typeof good === "bigint" && typeof damaged === "bigint" && good + damaged > units(remaining)) {
+    const over = `ดีรวมเสียหายต้องไม่เกิน ${plainQuantity(remaining)}`;
+    if (!blank(row.good)) errors.good = over;
+    if (!blank(row.damaged)) errors.damaged = over;
+  }
+  return errors;
 }

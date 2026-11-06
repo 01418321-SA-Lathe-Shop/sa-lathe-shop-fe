@@ -42,8 +42,8 @@ export function ReceiptForm({ api, state, onSaved }: { api: BackendApi; state: R
       {rows.length > 1 && <Button onClick={() => { setError(""); setRows((current) => current.map(fill)); }}>รับครบทุกรายการตามที่เหลือ</Button>}
       <ul className={styles.receipt}>{rows.map((row, index) => <li key={`${row.material_id}:${row.replacement_claim_id ?? ""}`}>
         <div><strong>{row.name}{row.replacement_claim_id ? " · ของแทน" : ""}</strong><small>เหลือรับ {quantityTH(row.remaining)} {row.unit}</small></div>
-        <Field label={`ของดี (${row.unit})`} error={errors[index] || undefined}><input inputMode="decimal" autoComplete="off" value={row.good} aria-invalid={Boolean(errors[index]) || undefined} onChange={(event) => edit(index, { good: event.target.value })} /></Field>
-        <Field label={`เสียหาย (${row.unit})`}><input inputMode="decimal" autoComplete="off" value={row.damaged} onChange={(event) => edit(index, { damaged: event.target.value })} /></Field>
+        <Field label={`ของดี (${row.unit})`} error={errors[index].good || undefined}><input inputMode="decimal" autoComplete="off" value={row.good} aria-invalid={Boolean(errors[index].good) || undefined} onChange={(event) => edit(index, { good: event.target.value })} /></Field>
+        <Field label={`เสียหาย (${row.unit})`} error={errors[index].damaged || undefined}><input inputMode="decimal" autoComplete="off" value={row.damaged} aria-invalid={Boolean(errors[index].damaged) || undefined} onChange={(event) => edit(index, { damaged: event.target.value })} /></Field>
         <Button variant="text" onClick={() => edit(index, fill(row))}>รับครบตามที่เหลือ<span className={layout.visuallyHidden}> {row.name}</span></Button>
       </li>)}</ul>
       <Field label="สถานะการชำระเงินผู้ขาย (UC7 Q7.6 · ไม่บังคับ)">
@@ -58,7 +58,7 @@ export function ReceiptForm({ api, state, onSaved }: { api: BackendApi; state: R
     </fieldset>
     <div className={layout.submitBar}>
       <span aria-live="polite">{filled ? `กรอกแล้ว ${filled} รายการ` : "ยังไม่ได้กรอกจำนวน"}</span>
-      <button type="button" className={layout.submit} disabled={write.frozen || !filled || errors.some(Boolean)} onClick={() => { try { build(); setError(""); setConfirming(true); } catch (problem) { setError((problem as Error).message); } }}>บันทึกรับของ</button>
+      <button type="button" className={layout.submit} disabled={write.frozen || !filled || errors.some((e) => e.good || e.damaged)} onClick={() => { try { build(); setError(""); setConfirming(true); } catch (problem) { setError((problem as Error).message); } }}>บันทึกรับของ</button>
     </div>
     {error && <p className={layout.problem} role="alert">{error}</p>}
     {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(); }} /> : <ErrorText error={write.error} />}
