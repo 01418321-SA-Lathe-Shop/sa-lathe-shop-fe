@@ -79,7 +79,7 @@ components:
 
 # Lathe Shop Control — Design specification
 
-อัปเดตล่าสุด: 2026-11-06 · สถานะ: login และ workspace ใช้ real API เท่านั้น; ปุ่ม Local test เชื่อม password-free endpoint เมื่อเปิด config เฉพาะ local; browser login จริงผ่านครบ 6 บัญชี ไม่ใช่การรับรอง workflow ทั้งหมด
+อัปเดตล่าสุด: 2026-11-07 · สถานะ: login และ workspace ใช้ real API เท่านั้น; ปุ่ม Local test เชื่อม password-free endpoint เมื่อเปิด config เฉพาะ local; browser login จริงผ่านครบ 6 บัญชี ไม่ใช่การรับรอง workflow ทั้งหมด
 
 เอกสารนี้ใช้ส่งต่องานให้ designer และ developer เพื่อสร้าง UI ให้ตรงกับระบบปัจจุบัน อ่านคู่กับ `docs/02-frontend.md` ซึ่งเป็นแหล่งอ้างอิง Business Flow และ permission การตรวจ frontend ด้วย unit tests ไม่ใช่หลักฐานว่า real Backend หรือ UC1–UC9 ทำงานครบ
 
@@ -331,7 +331,7 @@ The detail (`?job=`), in order:
 - Staff see a note that payments are handled by Admin.
 - Delivery timeline, rework history, and event history with Thai labels.
 
-Writes keep their frozen idempotent payload and show the RetryPanel after an unclear response. Delivery validation messages are now Thai. The English `RequestLabel` helper was removed.
+Writes keep their frozen idempotent payload and show the RetryPanel only after an unclear response (no response, 408 or 5xx); a clear 4xx shows “บันทึกไม่สำเร็จ” through `WriteOutcome`. Delivery validation messages are now Thai. The English `RequestLabel` helper was removed.
 
 Browser walk (Chrome), real local API with writes intercepted (500):
 - `pim.admin` 1280 Dark: tab counts match the demo data. Credit-days errors and the retry/discard path work (the dialog does not reopen). Reject needs a reason; approve and cash confirmations work; malformed and over-balance cash amounts get Thai errors.
@@ -1033,6 +1033,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-07 | Shared write outcome (`WriteOutcome`, all `useRetryableWrite` staff screens; customer `CustomerWriteRetry`): “ไม่แน่ใจว่าบันทึกสำเร็จหรือไม่” now appears only for no response, 408 or 5xx. A clear 4xx shows the same warning-styled panel titled “บันทึกไม่สำเร็จ” with a Thai reason per status, the request reference and “โหลดข้อมูลล่าสุด”, and releases the form so a corrected submit uses a fresh idempotency key. | `tsc`, ESLint, native tests; headless Chromium against the real API on a disposable database with stubbed 400/403/409/500/network failures on the Worker invoice action |
 | 2026-11-06 | Customer job detail “รูปผลงาน” shows the Worker's ready job photos as private thumbnails (was a fixed placeholder). Worker/Admin invoice without preset credit terms no longer fails | `tsc`, ESLint, native tests; real local API: owner customer 200, other customer 404, no login 401, Worker invoice 200; browser check as somchai |
 | 2026-11-06 | Persistent sessions (HttpOnly cookie resume via `POST /auth/session`, restore gate on protected pages, `/login` forwards resumed sessions, registration signs in); UC2 per-field request errors, staff send-back and customer correction form; UC6 Worker ordering with Admin-only supplier edits; UC7 per-field receipt errors; UC8 customer reference images and job photos as thumbnails on the job page; UC9 shipping fee removed and Worker gets every staff payment action; UC10 top-aligned `.inlineForm` | `tsc`, ESLint on changed files, 243 native tests, Go unit tests; real local API/DB in the in-app browser at 1366 and 375: reload/deep-link/logout/revoked-session, Worker order+accept, receipt field errors, job thumbnails after reload, customer correction and wizard errors, Worker UC9 terms→invoice→ship→review→cash via API |
 | 2026-11-06 | SQL Console status shortcuts: 10 buttons above the SQL summary count documents per status with a `GROUP BY` and run immediately | `tsc`, ESLint, native tests; headless Chromium at 1440/768/375 in light theme against the real API and PostgreSQL: all 10 buttons return 200, and the ใบเสนอราคา and คำของาน counts match `psql` |

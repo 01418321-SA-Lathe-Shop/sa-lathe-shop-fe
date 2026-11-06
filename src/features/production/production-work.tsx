@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { BackendApi } from "../../lib/api/backend-api";
 import { useCommand, useRetryableWrite } from "../../hooks/backend-hooks";
 import { minutesTH, quantityTH } from "../../components/staff-ui/staff-format";
-import { Button, ConfirmDialog, ErrorText, Field, NextAction, RetryPanel } from "../../components/staff-ui/staff-ui";
+import { Button, ConfirmDialog, ErrorText, Field, NextAction, WriteOutcome } from "../../components/staff-ui/staff-ui";
 import { EntryUnit } from "../inventory/entry-unit";
 import { MaterialPicker } from "../inventory/material-picker";
 import { timePayload, usagePayload, type ProductionState, type UsageDraft } from "./production-domain";
@@ -27,7 +27,7 @@ export function WorkPanel({ api, job, onSaved }: { api: BackendApi; job: Product
     <section className={styles.closeJob} aria-label="ปิดงาน">
       <div><h3>ปิดงานเมื่อผลิตเสร็จ</h3><p className={layout.muted}>บันทึกวัตถุดิบและเวลาทำงานให้ครบก่อน หลังปิดงานจะบันทึกเพิ่มไม่ได้</p></div>
       <Button disabled={complete.frozen} onClick={() => setConfirming(true)}>ปิดงาน</Button>
-      {complete.uncertain ? <RetryPanel busy={complete.busy} onRetry={complete.retry} onDiscard={() => { complete.discard(); onSaved(""); }} /> : <ErrorText error={complete.error} />}
+      <WriteOutcome write={complete} onDiscard={() => { complete.discard(); onSaved(""); }} />
     </section>
     <ConfirmDialog open={confirming} title="ปิดงานนี้?" confirmLabel="ปิดงาน" checks={["บันทึกวัตถุดิบที่ใช้ครบแล้ว", "บันทึกเวลาทำงานครบแล้ว"]} onClose={() => setConfirming(false)} onConfirm={() => { setConfirming(false); complete.submit(`/production/jobs/${job.job_id}/complete`, "POST", () => ({ idempotency_key: crypto.randomUUID(), expected_version: job.version }), ""); }}>
       <p>วัตถุดิบที่จองแต่ไม่ได้ใช้จะถูกคืน และจะบันทึกการใช้หรือเวลาเพิ่มไม่ได้อีก</p>
@@ -66,7 +66,7 @@ function UsageForm({ api, job, onSaved }: { api: BackendApi; job: ProductionStat
     {adding ? <MaterialPicker api={api} label="เพิ่มวัตถุดิบนอกแผน" disabled={write.frozen} isAdded={(materialId) => rows.some((row) => row.material_id === materialId)} onAdd={(material) => { setExtra((current) => ({ ...current, [material.id]: `นอกแผน · พร้อมใช้ ${quantityTH(material.qty_available)}` })); setRows((current) => [...current, { material_id: material.id, label: `${material.name} (${material.unit_name})`, quantity: "", base_unit: material.unit_name }]); }} />
       : <Button variant="text" disabled={write.frozen} onClick={() => setAdding(true)}>+ เพิ่มวัตถุดิบนอกแผน</Button>}
     <div className={layout.submitBar}><span>{filled ? `จะบันทึก ${filled} รายการ` : "ยังไม่ได้กรอกจำนวน"}</span><button type="button" className={layout.submit} disabled={write.frozen || !filled} onClick={save}>บันทึกการใช้วัตถุดิบ</button></div>
-    {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />}
+    <WriteOutcome write={write} onDiscard={() => { write.discard(); onSaved(""); }} />
   </div>;
 }
 
@@ -87,7 +87,7 @@ function TimeForm({ api, job, onSaved }: { api: BackendApi; job: ProductionState
       <Field label="หมายเหตุ (ไม่บังคับ)"><input maxLength={2000} value={note} onChange={(event) => setNote(event.target.value)} /></Field>
     </fieldset>
     <div className={layout.submitBar}><span>{valid ? `จะเพิ่ม ${minutesTH(Number(minutes))}` : "ยังไม่ได้กรอกเวลา"}</span><button type="submit" className={layout.submit} disabled={write.frozen || !valid}>บันทึกเวลาทำงาน</button></div>
-    {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />}
+    <WriteOutcome write={write} onDiscard={() => { write.discard(); onSaved(""); }} />
   </form>;
 }
 

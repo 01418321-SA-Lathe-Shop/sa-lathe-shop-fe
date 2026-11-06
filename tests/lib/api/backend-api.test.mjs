@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { BackendApi, ApiError, parseApiJSON, positiveInt64, moneyInput, displayMoney, uploadType } from "../../../src/lib/api/backend-api.ts";
+import { readFileSync } from "node:fs";
+import { BackendApi, ApiError, parseApiJSON, positiveInt64, moneyInput, displayMoney, uploadType, isDefiniteRejection, rejectionMessage } from "../../../src/lib/api/backend-api.ts";
 
 test("preserves unsafe int64 values without changing quoted strings or money", () => {
   assert.deepEqual(parseApiJSON('{"qty":9223372036854775807,"note":"1234567890123456789","price":"1600.01","version":2}'), { qty: "9223372036854775807", note: "1234567890123456789", price: "1600.01", version: 2 });
@@ -76,4 +77,26 @@ test("API requests send only the guarded session cookie, reject redirects, bypas
     assert.throws(() => new BackendApi("https://user:secret@api.test"));
     assert.throws(() => new BackendApi("https://api.test?token=not-allowed"));
   } finally { globalThis.fetch = original; }
+});
+
+test("only a 4xx is a definite rejection; lost responses, 408 and 5xx stay uncertain", () => {
+  for (const status of [400, 401, 403, 404, 409, 422, 429]) assert.equal(isDefiniteRejection(new ApiError(status, "x", "x")), true, String(status));
+  for (const status of [408, 500, 502, 503]) assert.equal(isDefiniteRejection(new ApiError(status, "x", "x")), false, String(status));
+  assert.equal(isDefiniteRejection(new TypeError("Failed to fetch")), false);
+});
+
+test("rejection messages are Thai, specific to the status, and keep the support reference", () => {
+  for (const status of [400, 401, 403, 404, 409, 429]) assert.match(rejectionMessage(new ApiError(status, "x", "english detail")), /[ก-๙]/);
+  assert.match(rejectionMessage(new ApiError(403, "x", "x")), /ไม่มีสิทธิ์/);
+  assert.match(rejectionMessage(new ApiError(409, "x", "x")), /โหลดข้อมูลล่าสุด/);
+  assert.match(rejectionMessage(new ApiError(400, "x", "x", "req-1")), /รหัสอ้างอิง req-1/);
+});
+
+test("every staff write outcome goes through WriteOutcome, which separates rejected from uncertain", () => {
+  const read = (path) => readFileSync(new URL(`../../../src/${path}`, import.meta.url), "utf8");
+  const panel = read("components/staff-ui/staff-ui.tsx");
+  assert.match(panel, /if \(write\.uncertain\) return <RetryPanel/);
+  assert.match(panel, /if \(write\.rejected\) return/);
+  assert.match(read("hooks/backend-hooks.ts"), /if \(!isDefiniteRejection\(error\)\) throw error;\s+setAttempt\(null\); setRejected\(true\);/);
+  for (const file of ["delivery/delivery-actions", "delivery/delivery-payments", "production/production-work", "receiving/receiving-receipt", "procurement/procurement-order"]) assert.doesNotMatch(read(`features/${file}.tsx`), /<RetryPanel/);
 });

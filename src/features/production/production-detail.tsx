@@ -7,7 +7,7 @@ import type { Account, BackendApi, JobRequest } from "../../lib/api/backend-api"
 import { useCommand, useResource, useRetryableWrite } from "../../hooks/backend-hooks";
 import { bahtTH, dateTH, dateTimeTH, minutesTH, quantityTH, requestedDayCountdown } from "../../components/staff-ui/staff-format";
 import { JOB_STATUS } from "../../components/staff-ui/staff-labels";
-import { Button, Collapsible, ConfirmDialog, ErrorText, Field, LoadError, NextAction, RetryPanel, Skeleton, StatusBadge, Steps, ToneBadge } from "../../components/staff-ui/staff-ui";
+import { Button, Collapsible, ConfirmDialog, ErrorText, Field, LoadError, NextAction, WriteOutcome, Skeleton, StatusBadge, Steps, ToneBadge } from "../../components/staff-ui/staff-ui";
 import { EntryUnit, enteredNote } from "../inventory/entry-unit";
 import { planLines, type InventoryPlan, type PlanDraftLine } from "../inventory/inventory-domain";
 import { MaterialPicker } from "../inventory/material-picker";
@@ -87,8 +87,8 @@ function PlanStep({ api, job, canWrite, onSaved }: { api: BackendApi; job: Produ
           <Button disabled={reserve.frozen || start.frozen} onClick={() => setEditing(true)}>แก้ไขแผนวัตถุดิบ</Button>
           {Boolean(plan.data.lines?.length) && <Button disabled={reserve.frozen || start.frozen} onClick={() => reserve.submit(`/jobs/${job.job_id}/materials/reserve`, "POST", () => ({ idempotency_key: crypto.randomUUID(), expected_version: plan.data!.version }), "")}>จองเพิ่มตามแผนเดิม</Button>}
         </div> : <p className={layout.muted}>Admin ดูแผนได้อย่างเดียว พนักงานเป็นผู้บันทึกแผนและเริ่มงาน</p>}
-        {reserve.uncertain ? <RetryPanel busy={reserve.busy} onRetry={reserve.retry} onDiscard={() => { reserve.discard(); plan.reload(); }} /> : <ErrorText error={reserve.error} />}
-        {start.uncertain ? <RetryPanel busy={start.busy} onRetry={start.retry} onDiscard={() => { start.discard(); plan.reload(); onSaved(""); }} /> : <ErrorText error={start.error} />}
+        <WriteOutcome write={reserve} onDiscard={() => { reserve.discard(); plan.reload(); }} />
+        <WriteOutcome write={start} onDiscard={() => { start.discard(); plan.reload(); onSaved(""); }} />
       </>}
       {plan.data && editing && <PlanEditor key={String(plan.data.version)} api={api} job={job} plan={plan.data} names={names} onSaved={() => { setEditing(false); plan.reload(); onSaved("บันทึกแผนและจองวัตถุดิบแล้ว"); }} onCancel={() => setEditing(false)} />}
     </NextAction>
@@ -130,7 +130,7 @@ function PlanEditor({ api, job, plan, names, onSaved, onCancel }: { api: Backend
       <Button variant="primary" disabled={write.frozen} onClick={() => { setProblem(""); if (lines.some((line) => !isPositiveQuantity(line.quantity))) { setProblem("กรอกจำนวนที่ต้องใช้ให้ครบทุกรายการก่อนบันทึก"); return; } if (!lines.length) setConfirmEmpty(true); else send(); }}>บันทึกแผนและจองวัตถุดิบ</Button>
       <Button disabled={write.busy} onClick={onCancel}>ยกเลิก</Button>
     </div>
-    {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onCancel(); }} /> : <ErrorText error={write.error} />}
+    <WriteOutcome write={write} onDiscard={() => { write.discard(); onCancel(); }} />
     <ConfirmDialog open={confirmEmpty} title="บันทึกแผนว่าง?" confirmLabel="บันทึกแผนว่าง" danger onClose={() => setConfirmEmpty(false)} onConfirm={() => { setConfirmEmpty(false); send(); }}>
       <p>วัตถุดิบที่จองไว้ให้งานนี้จะถูกคืนทั้งหมด สต๊อกจริงไม่ถูกตัดหรือลบ</p>
     </ConfirmDialog>
@@ -161,7 +161,7 @@ function AdminCost({ api, job, onSaved }: { api: BackendApi; job: ProductionStat
         <Field label={`ค่าแรงจริงสำหรับเวลาที่บันทึก ${minutesTH(job.labor_minutes)} (บาท)`} hint="กรอกยอดรวมจริง ใส่ 0.00 ได้ ระบบไม่คิดค่าแรงต่อชั่วโมงให้ และเก็บค่าเดิมไว้ในประวัติเมื่อแก้ไข"><input inputMode="decimal" autoComplete="off" required value={amount} onChange={(event) => setAmount(event.target.value)} /></Field>
       </fieldset>
       <div className={layout.actions}><button type="submit" className={layout.submit} disabled={write.frozen}>{(finance?.labor_cost ?? null) === null ? "บันทึกค่าแรง" : "แก้ไขค่าแรง"}</button></div>
-      {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />}
+      <WriteOutcome write={write} onDiscard={() => { write.discard(); onSaved(""); }} />
     </form> : <p className={layout.muted}>บันทึกค่าแรงได้เมื่อเริ่มผลิตแล้ว</p>}
   </section>;
 }

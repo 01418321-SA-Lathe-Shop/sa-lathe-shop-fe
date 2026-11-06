@@ -5,7 +5,7 @@ import type { BackendApi } from "../../lib/api/backend-api";
 import { useCommand, useRetryableWrite } from "../../hooks/backend-hooks";
 import { bahtTH, dateTimeTH } from "../../components/staff-ui/staff-format";
 import { EVIDENCE_STATUS } from "../../components/staff-ui/staff-labels";
-import { Button, ConfirmDialog, ErrorText, Field, RetryPanel, StatusBadge } from "../../components/staff-ui/staff-ui";
+import { Button, ConfirmDialog, ErrorText, Field, WriteOutcome, StatusBadge } from "../../components/staff-ui/staff-ui";
 import { reviewPayload, type FulfillmentJob, type Payment } from "./delivery-domain";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./delivery.module.css";
@@ -34,7 +34,7 @@ function PaymentCard({ api, state, payment, canReview, onSaved }: { api: Backend
       </>}
     </div>
     <ErrorText error={download.error} />
-    {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />}
+    <WriteOutcome write={write} onDiscard={() => { write.discard(); onSaved(""); }} />
     {outcome && <ConfirmDialog open={dialog} title={outcome === "approved" ? "อนุมัติการชำระนี้?" : "หลักฐานนี้ไม่ผ่าน?"} confirmLabel={outcome === "approved" ? "ยืนยันอนุมัติ" : "ยืนยันไม่อนุมัติ"} danger={outcome === "rejected"} checks={["ตรวจหลักฐานกับรายการเดินบัญชีแล้ว"]} onClose={() => setDialog(false)} onConfirm={() => {
       if (outcome === "rejected" && !reason.trim()) { setReasonError("กรอกเหตุผล ลูกค้าจะเห็นข้อความนี้"); return; }
       setDialog(false);

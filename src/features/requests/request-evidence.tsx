@@ -7,7 +7,7 @@ import type { Account, BackendApi, Evidence, Fulfillment, Quotation } from "../.
 import { useCommand, useResource, useRetryableWrite } from "../../hooks/backend-hooks";
 import { bahtTH, dateTH, dateTimeTH, dueDayCountdown } from "../../components/staff-ui/staff-format";
 import { EVIDENCE_STATUS } from "../../components/staff-ui/staff-labels";
-import { Button, Collapsible, ErrorText, Field, LoadError, NextAction, RetryPanel, Skeleton, StatusBadge, Steps, ToneBadge } from "../../components/staff-ui/staff-ui";
+import { Button, Collapsible, ErrorText, Field, LoadError, NextAction, WriteOutcome, Skeleton, StatusBadge, Steps, ToneBadge } from "../../components/staff-ui/staff-ui";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import { reviewReason } from "../fulfillment/fulfillment-domain";
 import { QuoteSummary } from "./request-quote";
@@ -88,7 +88,7 @@ function ReviewForm({ api, item, opensJob, onSaved }: { api: BackendApi; item: E
       {outcome === "rejected" && <Field label="เหตุผลที่ไม่อนุมัติ (ลูกค้าจะเห็น)"><textarea rows={3} maxLength={2000} required value={reason} onChange={(event) => setReason(event.target.value)} /></Field>}
       <label className={styles.check}><input type="checkbox" checked={checked} onChange={(event) => setChecked(event.target.checked)} /> ตรวจไฟล์แล้ว{opensJob && outcome === "approved" ? " · การอนุมัติรายการนี้จะเปิดงานผลิต" : ""}</label>
     </fieldset>
-    {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />}
+    <WriteOutcome write={write} onDiscard={() => { write.discard(); onSaved(""); }} />
     <div className={layout.submitBar} data-sticky=""><span>{outcome === "approved" ? "อนุมัติหลักฐานนี้" : "ส่งกลับให้ลูกค้าแก้ไข"}</span><button type="submit" className={layout.submit} disabled={write.frozen || !checked}>ยืนยันผลการตรวจ</button></div>
   </form>;
 }

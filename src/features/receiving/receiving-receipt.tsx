@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { BackendApi } from "../../lib/api/backend-api";
 import { useRetryableWrite } from "../../hooks/backend-hooks";
 import { quantityTH } from "../../components/staff-ui/staff-format";
-import { Button, ConfirmDialog, ErrorText, Field, RetryPanel } from "../../components/staff-ui/staff-ui";
+import { Button, ConfirmDialog, Field, WriteOutcome } from "../../components/staff-ui/staff-ui";
 import { claimOwed, originalRemaining, plainQuantity, receiptPayload, receiptRowError, type DraftReceipt, type ReceivingState } from "./receiving-domain";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./receiving.module.css";
@@ -61,7 +61,7 @@ export function ReceiptForm({ api, state, onSaved }: { api: BackendApi; state: R
       <button type="button" className={layout.submit} disabled={write.frozen || !filled || errors.some((e) => e.good || e.damaged)} onClick={() => { try { build(); setError(""); setConfirming(true); } catch (problem) { setError((problem as Error).message); } }}>บันทึกรับของ</button>
     </div>
     {error && <p className={layout.problem} role="alert">{error}</p>}
-    {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(); }} /> : <ErrorText error={write.error} />}
+    <WriteOutcome write={write} onDiscard={() => { write.discard(); onSaved(); }} />
     <ConfirmDialog open={confirming} title="บันทึกรับของ?" confirmLabel="ยืนยันรับของ" checks={["นับของที่มาถึงแล้ว ของเสียหายจะไม่เข้าสต๊อก"]} onClose={() => setConfirming(false)} onConfirm={() => {
       setConfirming(false);
       write.submit(`/receiving/orders/${state.order_id}/receipts`, "POST", build, "");

@@ -7,7 +7,7 @@ import type { BackendApi, ShopProfile } from "../../lib/api/backend-api";
 import { useResource, useRetryableWrite } from "../../hooks/backend-hooks";
 import { bahtTH, dateTimeTH, quantityTH } from "../../components/staff-ui/staff-format";
 import { ORDER_EVENT, ORDER_STATE } from "../../components/staff-ui/staff-labels";
-import { Button, Collapsible, ConfirmDialog, ErrorText, Field, NextAction, RetryPanel, StatusBadge } from "../../components/staff-ui/staff-ui";
+import { Button, Collapsible, ConfirmDialog, Field, NextAction, WriteOutcome, StatusBadge } from "../../components/staff-ui/staff-ui";
 import { allowedActions, orderActionPayload, orderTabOf, type OrderAction, type SupplierOrder } from "./procurement-domain";
 import { useSupplierRecommendations } from "./use-supplier-recommendations";
 import { RelatedJobs } from "./procurement-jobs";
@@ -66,7 +66,7 @@ export function OrderDetail({ api, order, backHref, receivingHref, onChanged }: 
         <strong>ราคาซื้อล่าสุด {quantityTH(rec.last_unit_cost)} บาท</strong>
       </li>)}</ul> : <p className={layout.muted}>ไม่พบประวัติผู้ขายรายอื่นสำหรับวัตถุดิบนี้ สามารถเลือกผู้ขายรายอื่นได้เมื่อสร้างใบสั่งซื้อใหม่</p>}
     </section>}
-    {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onChanged(""); }} /> : <ErrorText error={write.error} />}
+    <WriteOutcome write={write} onDiscard={() => { write.discard(); onChanged(""); }} />
     <section className={layout.section} aria-label="รายการวัตถุดิบ">
       <h3>วัตถุดิบ {lines.length} รายการ</h3>
       <ul className={styles.lines}>{lines.map((line) => <li key={line.material_id}>

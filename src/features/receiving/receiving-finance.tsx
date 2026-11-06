@@ -5,7 +5,7 @@ import type { BackendApi } from "../../lib/api/backend-api";
 import { useCommand, useRetryableWrite } from "../../hooks/backend-hooks";
 import type { ReadyFile } from "../../components/ui/backend-ui";
 import { bahtTH, dateTimeTH } from "../../components/staff-ui/staff-format";
-import { Button, ConfirmDialog, ErrorText, Field, RetryPanel, ToneBadge } from "../../components/staff-ui/staff-ui";
+import { Button, ConfirmDialog, ErrorText, Field, WriteOutcome, ToneBadge } from "../../components/staff-ui/staff-ui";
 import { ProofUpload } from "../../components/staff-ui/staff-upload";
 import { creditDays, settlementPayload, type ReceivingState } from "./receiving-domain";
 import layout from "../../components/staff-ui/staff-layout.module.css";
@@ -47,7 +47,7 @@ function CreditForm({ api, state, onSaved }: { api: BackendApi; state: Receiving
       <Field label="เครดิตที่ตกลงกับผู้ขาย (วัน · ไม่บังคับหากจ่ายทันที)" hint="0 = จ่ายทันที นับจากวันที่รับของครบ" error={error || undefined}><input inputMode="numeric" autoComplete="off" value={days} aria-invalid={Boolean(error) || undefined} onChange={(event) => { setDays(event.target.value); setError(""); }} /></Field>
     </fieldset>
     <div className={layout.actions}><button type="button" className={layout.submit} disabled={write.frozen || !days.trim()} onClick={() => { try { creditDays(days); setConfirming(true); } catch (problem) { setError((problem as Error).message); } }}>ตั้งเครดิต</button></div>
-    {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />}
+    <WriteOutcome write={write} onDiscard={() => { write.discard(); onSaved(""); }} />
     <ConfirmDialog open={confirming} title="ตั้งเครดิตผู้ขาย?" confirmLabel="ยืนยันตั้งเครดิต" checks={["ตกลงจำนวนวันกับผู้ขายแล้ว"]} onClose={() => setConfirming(false)} onConfirm={() => {
       setConfirming(false);
       write.submit(`/receiving/orders/${state.order_id}/credit-terms`, "POST", () => ({ idempotency_key: crypto.randomUUID(), expected_version: state.version, credit_days: creditDays(days) }), "");
@@ -69,7 +69,7 @@ function SettleForm({ api, state, onSaved }: { api: BackendApi; state: Receiving
     </fieldset>
     <div className={layout.submitBar}><span>จ่ายเต็มจำนวน {bahtTH(finance.total_amount)} ครั้งเดียว (ไม่มี VAT)</span><button type="button" className={layout.submit} disabled={write.frozen || !paidAt} onClick={() => { try { build(); setConfirming(true); } catch (problem) { setError((problem as Error).message); } }}>บันทึกการจ่าย</button></div>
     {error && <p className={layout.problem} role="alert">{error}</p>}
-    {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />}
+    <WriteOutcome write={write} onDiscard={() => { write.discard(); onSaved(""); }} />
     <ConfirmDialog open={confirming} title="บันทึกการจ่ายผู้ขาย?" confirmLabel="ยืนยันบันทึกการจ่าย" checks={["จ่ายผู้ขายเต็มจำนวนแล้ว"]} onClose={() => setConfirming(false)} onConfirm={() => {
       setConfirming(false);
       write.submit(`/receiving/orders/${state.order_id}/settlement`, "POST", build, "");

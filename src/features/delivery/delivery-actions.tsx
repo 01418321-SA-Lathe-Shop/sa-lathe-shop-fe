@@ -5,7 +5,7 @@ import { moneyInput, type BackendApi } from "../../lib/api/backend-api";
 import { useRetryableWrite } from "../../hooks/backend-hooks";
 import type { ReadyFile } from "../../components/ui/backend-ui";
 import { bahtTH } from "../../components/staff-ui/staff-format";
-import { ConfirmDialog, ErrorText, Field, RetryPanel } from "../../components/staff-ui/staff-ui";
+import { ConfirmDialog, Field, WriteOutcome } from "../../components/staff-ui/staff-ui";
 import { ProofUpload } from "../../components/staff-ui/staff-upload";
 import { creditDays } from "../receiving/receiving-domain";
 import { paymentPayload, shipPayload, type FulfillmentJob } from "./delivery-domain";
@@ -14,7 +14,7 @@ import layout from "../../components/staff-ui/staff-layout.module.css";
 type Props = { api: BackendApi; state: FulfillmentJob; onSaved: (message: string) => void };
 const command = (state: FulfillmentJob) => ({ idempotency_key: crypto.randomUUID(), expected_version: state.version });
 const Outcome = ({ write, onSaved }: { write: ReturnType<typeof useRetryableWrite>; onSaved: (message: string) => void }) =>
-  write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />;
+  <WriteOutcome write={write} onDiscard={() => { write.discard(); onSaved(""); }} />;
 const check = (build: () => unknown, setError: (message: string) => void) => { try { build(); setError(""); return true; } catch (problem) { setError((problem as Error).message); return false; } };
 
 const METHOD_LABEL: Record<string, string> = {

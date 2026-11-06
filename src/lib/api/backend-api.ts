@@ -67,6 +67,20 @@ export function errorMessage(error: unknown): string {
   }
   return error instanceof Error && error.name !== "TypeError" ? error.message : "Cannot reach the API or storage. Check the connection and allowed origins, then retry the read. A failed save may already have reached the server; reload before resubmitting.";
 }
+// A 4xx is the server's clear answer that nothing was saved, so it must not be
+// reported as a lost response. No response, 408 and 5xx stay uncertain.
+export function isDefiniteRejection(error: unknown): error is ApiError {
+  return error instanceof ApiError && error.status >= 400 && error.status < 500 && error.status !== 408;
+}
+export function rejectionMessage(error: ApiError): string {
+  const reason = error.status === 401 ? "เซสชันหมดอายุ กรุณาเข้าสู่ระบบอีกครั้ง"
+    : error.status === 403 ? "บัญชีนี้ไม่มีสิทธิ์ทำรายการนี้"
+    : error.status === 404 ? "ไม่พบรายการนี้ โหลดข้อมูลล่าสุดแล้วตรวจอีกครั้ง"
+    : error.status === 409 ? "ข้อมูลเปลี่ยนไป หรือทำรายการนี้ในสถานะปัจจุบันไม่ได้ โหลดข้อมูลล่าสุดก่อนทำต่อ"
+    : error.status === 429 ? "ส่งคำขอถี่เกินไป รอสักครู่แล้วลองอีกครั้ง"
+    : "ระบบไม่รับข้อมูลนี้ ตรวจข้อมูลแล้วลองอีกครั้ง หรือโหลดข้อมูลล่าสุดก่อนแก้ไข";
+  return error.requestId ? `${reason} (รหัสอ้างอิง ${error.requestId})` : reason;
+}
 const browserTransport: Transport = { fetch: (input, init) => fetch(input, init) };
 
 export class BackendApi {

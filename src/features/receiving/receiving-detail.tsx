@@ -7,7 +7,7 @@ import type { BackendApi } from "../../lib/api/backend-api";
 import { useResource, useRetryableWrite } from "../../hooks/backend-hooks";
 import { dateTimeTH, quantityTH } from "../../components/staff-ui/staff-format";
 import { CLAIM_STATE, RECEIVING_STATE } from "../../components/staff-ui/staff-labels";
-import { Collapsible, ErrorText, Field, LoadError, NextAction, RetryPanel, Skeleton, StatusBadge } from "../../components/staff-ui/staff-ui";
+import { Collapsible, ErrorText, Field, LoadError, NextAction, WriteOutcome, Skeleton, StatusBadge } from "../../components/staff-ui/staff-ui";
 import { claimNote, claimOwed, hasOpenClaim, statusTab, type Claim, type ReceivingState } from "./receiving-domain";
 import { ReceiptForm } from "./receiving-receipt";
 import { FinanceSection } from "./receiving-finance";
@@ -94,7 +94,7 @@ function ClaimCard({ api, state, claim, settled, onSaved }: { api: BackendApi; s
         let text: string; try { text = claimNote(note); } catch (problem) { setNoteError((problem as Error).message); return; }
         setNoteError(""); write.submit(`/receiving/orders/${state.order_id}/claims/${claim.id}/submit`, "POST", () => ({ idempotency_key: crypto.randomUUID(), expected_version: state.version, note: text }), "");
       }}>บันทึกว่าแจ้งผู้ขายแล้ว</button></div>
-      {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />}
+      <WriteOutcome write={write} onDiscard={() => { write.discard(); onSaved(""); }} />
     </div>}
   </li>;
 }

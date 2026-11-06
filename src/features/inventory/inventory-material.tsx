@@ -6,7 +6,7 @@ import type { BackendApi } from "../../lib/api/backend-api";
 import { useRetryableWrite } from "../../hooks/backend-hooks";
 import { dateTimeTH, quantityTH } from "../../components/staff-ui/staff-format";
 import { MOVEMENT_MODE } from "../../components/staff-ui/staff-labels";
-import { Collapsible, ConfirmDialog, ErrorText, Field, LoadError, RetryPanel, Skeleton, StatusBadge, ToneBadge, TruncatedNotice } from "../../components/staff-ui/staff-ui";
+import { Collapsible, ConfirmDialog, Field, LoadError, WriteOutcome, Skeleton, StatusBadge, ToneBadge, TruncatedNotice } from "../../components/staff-ui/staff-ui";
 import { useCollection, useNow } from "../customer/customer-hooks";
 import { consumedTotal, consumptionByMonth, convertToBase, inventoryDecimal, isBelow, stockAfter, stockFields, type InventoryMaterial, type InventoryMovement, type UnitConversion } from "./inventory-domain";
 import { EntryUnit, enteredNote, SupportedUnits } from "./entry-unit";
@@ -115,7 +115,7 @@ function StockForm({ api, material, onSaved }: { api: BackendApi; material: Inve
         <span aria-live="polite">คงเหลือ {quantityTH(material.qty_on_hand)} → {after && !quantityError ? quantityTH(after) : "…"} {unit}</span>
         <button type="submit" className={layout.submit} disabled={write.frozen || !ready}>ปรับสต๊อก</button>
       </div>
-      {write.uncertain ? <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onSaved(""); }} /> : <ErrorText error={write.error} />}
+      <WriteOutcome write={write} onDiscard={() => { write.discard(); onSaved(""); }} />
     </form>
     <details className={layout.note}><summary>เงื่อนไข</summary><p>ปรับได้ไม่เกิน 12 หลัก ทศนิยม 6 ตำแหน่ง ไม่ปัดเศษ · แก้ยอดตามที่นับจะคงต้นทุนเฉลี่ยเดิม และตั้งยอดต่ำกว่าที่จองให้งานไว้ไม่ได้ · การรับของจากผู้ขายให้บันทึกที่หน้ารับเข้าวัตถุดิบ</p></details>
     <ConfirmDialog open={confirming} title={mode === "addition" ? "เพิ่มสต๊อก?" : "แก้ยอดตามที่นับ?"} confirmLabel="ยืนยันปรับสต๊อก" checks={["ตรวจจำนวน หน่วย และเหตุผลแล้ว"]} onClose={() => setConfirming(false)} onConfirm={() => {

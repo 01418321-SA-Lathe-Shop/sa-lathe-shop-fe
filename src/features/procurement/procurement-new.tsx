@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { BackendApi } from "../../lib/api/backend-api";
 import { useRetryableWrite } from "../../hooks/backend-hooks";
 import { bahtTH, quantityTH } from "../../components/staff-ui/staff-format";
-import { Button, ConfirmDialog, ErrorText, Field, LoadError, RetryPanel, Skeleton } from "../../components/staff-ui/staff-ui";
+import { Button, ConfirmDialog, Field, LoadError, WriteOutcome, Skeleton } from "../../components/staff-ui/staff-ui";
 import { useCollection } from "../customer/customer-hooks";
 import { inventoryDecimal } from "../inventory/inventory-domain";
 import { MaterialPicker } from "../inventory/material-picker";
@@ -100,7 +100,8 @@ export function NewOrderForm({ api, shortages = [], onPlaced, onLock }: { api: B
       <span aria-live="polite">ยอดรวมโดยประมาณ {total ? bahtTH(total) : "…"} (ไม่มี VAT)</span>
       <button type="button" className={layout.submit} disabled={write.frozen || !ready} onClick={() => setConfirming(true)}>สั่งซื้อ</button>
     </div>
-    {write.uncertain ? <><RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={() => { write.discard(); onPlaced(); }} /><p className={layout.muted}>ปิดแผงนี้ได้หลังส่งซ้ำหรือโหลดข้อมูลล่าสุด เพื่อไม่ให้เกิดใบสั่งซื้อซ้ำ</p></> : <ErrorText error={write.error} />}
+    <WriteOutcome write={write} onDiscard={() => { write.discard(); onPlaced(); }} />
+    {write.uncertain && <p className={layout.muted}>ปิดแผงนี้ได้หลังส่งซ้ำหรือโหลดข้อมูลล่าสุด เพื่อไม่ให้เกิดใบสั่งซื้อซ้ำ</p>}
     <details className={layout.note}><summary>เงื่อนไข</summary><p>สั่งซื้อแล้วแก้ไขไม่ได้ ถ้าต้องเปลี่ยนให้ยกเลิกแล้วสั่งใหม่ · การสั่งซื้อไม่เปลี่ยนสต๊อก สต๊อกเพิ่มเมื่อรับของเข้าเท่านั้น · ยอดรวมจริงคำนวณโดยระบบ ปัดเศษทีละรายการ ไม่มี VAT</p></details>
     <ConfirmDialog open={confirming} title="สั่งซื้อวัตถุดิบ?" confirmLabel="ยืนยันสั่งซื้อ" checks={["ตรวจผู้ขาย จำนวน และราคาแล้ว"]} onClose={() => setConfirming(false)} onConfirm={() => {
       setConfirming(false);

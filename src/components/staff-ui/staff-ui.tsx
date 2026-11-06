@@ -100,6 +100,15 @@ export function RetryPanel({ busy, onRetry, onDiscard }: { busy: boolean; onRetr
   </div>;
 }
 
+/** Outcome of a useRetryableWrite: unclear response, clear server rejection, or a local error. */
+export function WriteOutcome({ write, onDiscard }: { write: { busy: boolean; uncertain: boolean; rejected: boolean; error: string; retry: () => void }; onDiscard: () => void }) {
+  if (write.uncertain) return <RetryPanel busy={write.busy} onRetry={write.retry} onDiscard={onDiscard} />;
+  if (write.rejected) return <div className={styles.retry} role="alert"><strong>บันทึกไม่สำเร็จ</strong><p>{write.error}</p>
+    <div className={styles.row}><button type="button" className={styles.secondary} disabled={write.busy} onClick={onDiscard}>โหลดข้อมูลล่าสุด</button></div>
+  </div>;
+  return <ErrorText error={write.error} />;
+}
+
 export function ErrorText({ error }: { error?: string }) {
   return error ? <p className={styles.error} role="alert">{/[ก-๙]/.test(error) ? error : "บันทึกไม่สำเร็จ ตรวจข้อมูลแล้วลองอีกครั้ง หรือโหลดข้อมูลล่าสุดก่อนแก้ไข"}</p> : null;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BackendApi, errorMessage } from "../lib/api/backend-api";
+import { BackendApi, errorMessage, isDefiniteRejection, rejectionMessage } from "../lib/api/backend-api";
 
 // Responses for superseded keys are ignored. An explicit reload of the same
 // path keeps showing the last server data (marked loading) so detail views do
@@ -44,27 +44,37 @@ export function useCommand() {
       if (!controller.signal.aborted) { pending.current = null; setBusy(false); }
     }
   }
-  return { busy, error, message, run };
+  return { busy, error, message, run, clear: () => { setError(""); setMessage(""); } };
 }
 
 // A versioned, idempotent command. The first attempt freezes its exact path,
 // key and payload; after an uncertain failure only an identical retry is
 // offered (never automatic). Success clears the attempt and calls onDone.
+// A 4xx means nothing was saved: the attempt is released, so the form can be
+// corrected and the next submit uses a fresh key.
 type Write = { path: string; method: string; payload: Record<string, unknown> };
 export function useRetryableWrite(api: BackendApi, onDone: () => void) {
   const command = useCommand();
   const [attempt, setAttempt] = useState<Write | null>(null);
+  const [rejected, setRejected] = useState(false);
   async function send(write: Write, signal: AbortSignal) {
     const { expected_version, ...rest } = write.payload;
-    await api.call(write.path, write.method, expected_version === undefined ? rest : { ...rest, expected_version: BigInt(expected_version as number | string) }, signal);
+    try {
+      await api.call(write.path, write.method, expected_version === undefined ? rest : { ...rest, expected_version: BigInt(expected_version as number | string) }, signal);
+    } catch (error) {
+      if (!isDefiniteRejection(error)) throw error;
+      setAttempt(null); setRejected(true);
+      throw new Error(rejectionMessage(error));
+    }
     setAttempt(null); onDone();
   }
   function submit(path: string, method: string, build: () => Record<string, unknown> | null, success = "Saved by the server.") {
     void command.run(async (signal) => {
+      setRejected(false);
       const payload = build(); if (!payload) return;
       const write = { path, method, payload }; setAttempt(write); await send(write, signal);
     }, success);
   }
   function retry() { if (attempt) void command.run((signal) => send(attempt, signal), "Saved by the server."); }
-  return { ...command, frozen: command.busy || Boolean(attempt), uncertain: Boolean(attempt) && Boolean(command.error) && !command.busy, submit, retry, discard: () => setAttempt(null) };
+  return { ...command, frozen: command.busy || Boolean(attempt), uncertain: Boolean(attempt) && Boolean(command.error) && !command.busy, rejected: rejected && !command.busy, submit, retry, discard: () => { setAttempt(null); setRejected(false); command.clear(); } };
 }
