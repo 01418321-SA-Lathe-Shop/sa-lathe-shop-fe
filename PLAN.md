@@ -1,5 +1,6 @@
 ## Audit fixes — 2026-11-06
 
+- Restore the required applicant name field on registration so `/auth/register` no longer receives an empty `name` and rejects every sign-up as `invalid_input`.
 - Align UC6 supplier recommendations with the backend material-specific API and restore frontend type checking.
 - Warn before a customer leaves an unsent request via an in-app link.
 - Hide unconfirmed landing contact details and remove visible placeholder claims.
