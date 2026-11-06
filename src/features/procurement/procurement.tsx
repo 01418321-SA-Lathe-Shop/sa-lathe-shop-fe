@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "../../components/appearance/icons";
-import type { BackendApi } from "../../lib/api/backend-api";
+import type { Account, BackendApi } from "../../lib/api/backend-api";
 import { useResource } from "../../hooks/backend-hooks";
 import { bahtTH, dateTH, quantityTH } from "../../components/staff-ui/staff-format";
 import { ORDER_STATE } from "../../components/staff-ui/staff-labels";
@@ -28,11 +28,11 @@ const EMPTY: Record<OrderTab, [string, string]> = {
 };
 const NEXT: Record<OrderTab, string> = { pending: "บันทึกคำตอบผู้ขาย", accepted: "รอรับของ", partial: "รอรับของที่เหลือ", received: "ดูใบสั่งซื้อ", cancelled: "ดูใบสั่งซื้อ" };
 
-export function LiveProcurement({ api }: { api: BackendApi }) {
-  return <Suspense fallback={<Skeleton label="กำลังเปิดสั่งซื้อวัตถุดิบ…" />}><ProcurementWorkspace api={api} /></Suspense>;
+export function LiveProcurement({ api, account }: { api: BackendApi; account: Account }) {
+  return <Suspense fallback={<Skeleton label="กำลังเปิดสั่งซื้อวัตถุดิบ…" />}><ProcurementWorkspace api={api} admin={account.role === "admin"} /></Suspense>;
 }
 
-function ProcurementWorkspace({ api }: { api: BackendApi }) {
+function ProcurementWorkspace({ api, admin }: { api: BackendApi; admin: boolean }) {
   const params = useSearchParams(); const pathname = usePathname(); const router = useRouter();
   const view = params.get("view") === "suppliers" ? "suppliers" : "orders";
   const cardView = params.get("layout") !== "list" && params.get("view") !== "list";
@@ -58,7 +58,7 @@ function ProcurementWorkspace({ api }: { api: BackendApi }) {
       <Link href={href({ view: undefined })} scroll={false} aria-current={view === "orders" ? "page" : undefined}>ใบสั่งซื้อ</Link>
       <Link href={href({ view: "suppliers", tab: undefined, order: undefined, q: undefined })} scroll={false} aria-current={view === "suppliers" ? "page" : undefined}>ผู้ขาย</Link>
     </nav>
-    {view === "suppliers" ? <SupplierView api={api} onSaved={setToast} /> : <>
+    {view === "suppliers" ? <SupplierView api={api} admin={admin} onSaved={setToast} /> : <>
       {shortageList.length > 0 && <Collapsible title={`วัสดุที่ขาดแคลนตามแผนการผลิต (${shortageList.length} รายการ · UC6 Q6.1)`}>
         <ul className={styles.lines}>{shortageList.map((item) => <li key={item.material_id}>
           <span><strong>{item.material_name}</strong><small>ต้องใช้รวม {quantityTH(item.total_needed)} {item.unit_name} · คงเหลือ {quantityTH(item.current_stock)} {item.unit_name}</small></span>

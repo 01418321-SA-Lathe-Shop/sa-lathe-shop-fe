@@ -13,7 +13,8 @@ type Editing = { kind: "new" } | { kind: "edit"; supplier: Supplier } | null;
 
 // UC6 suppliers (Admin). Contacts are optional and unverified; nothing is deleted,
 // a deactivated supplier stays in history and cannot receive new orders.
-export function SupplierView({ api, onSaved }: { api: BackendApi; onSaved: (message: string) => void }) {
+// Supplier master data is Admin-only (UC6); a Worker picks suppliers when ordering.
+export function SupplierView({ api, admin, onSaved }: { api: BackendApi; admin: boolean; onSaved: (message: string) => void }) {
   const [q, setQ] = useState(""); const [editing, setEditing] = useState<Editing>(null);
   const list = useCollection<Supplier>(api, `/suppliers?search=${encodeURIComponent(q)}`);
   const items = list.data?.items ?? [];
@@ -22,7 +23,7 @@ export function SupplierView({ api, onSaved }: { api: BackendApi; onSaved: (mess
     <div className={layout.toolbarEnd}>
       <SearchForm label="ค้นหาผู้ขาย" placeholder="ชื่อผู้ขาย" value={q} onSearch={setQ} />
       <Button onClick={list.reload} disabled={list.loading}>อัปเดตข้อมูล</Button>
-      <Button variant="primary" onClick={() => setEditing({ kind: "new" })}>เพิ่มผู้ขาย</Button>
+      {admin && <Button variant="primary" onClick={() => setEditing({ kind: "new" })}>เพิ่มผู้ขาย</Button>}
     </div>
     {q && <p className={layout.filterNote}>ผลการค้นหา “{q}” <Button variant="text" onClick={() => setQ("")}>ล้างการค้นหา</Button></p>}
     {list.loading && !list.data && <Skeleton label="กำลังโหลดผู้ขาย…" />}
@@ -32,7 +33,7 @@ export function SupplierView({ api, onSaved }: { api: BackendApi; onSaved: (mess
     {items.length > 0 && <ul className={styles.suppliers}>{items.map((supplier) => <li key={supplier.id}>
       <span><strong>{supplier.name}</strong><small>{[supplier.phone, supplier.email].filter(Boolean).join(" · ") || "ไม่มีข้อมูลติดต่อ"}</small></span>
       {supplier.is_active ? <ToneBadge tone="done">เปิดใช้งาน</ToneBadge> : <ToneBadge tone="quiet">ปิดใช้งาน</ToneBadge>}
-      <Button onClick={() => setEditing({ kind: "edit", supplier })}>แก้ไข<span className={layout.visuallyHidden}> {supplier.name}</span></Button>
+      {admin && <Button onClick={() => setEditing({ kind: "edit", supplier })}>แก้ไข<span className={layout.visuallyHidden}> {supplier.name}</span></Button>}
     </li>)}</ul>}
     <Drawer open={editing !== null} title={editing?.kind === "edit" ? `แก้ไข ${editing.supplier.name}` : "เพิ่มผู้ขาย"} onClose={() => setEditing(null)}>
       {editing && <SupplierForm key={editing.kind === "edit" ? `${editing.supplier.id}:${editing.supplier.version}` : "new"} api={api} supplier={editing.kind === "edit" ? editing.supplier : undefined} onSaved={() => saved(editing.kind === "edit" ? "บันทึกผู้ขายแล้ว" : "เพิ่มผู้ขายแล้ว")} />}
