@@ -1,3 +1,10 @@
+## Audit fixes — 2026-11-06
+
+- Align UC6 supplier recommendations with the backend material-specific API and restore frontend type checking.
+- Warn before a customer leaves an unsent request via an in-app link.
+- Hide unconfirmed landing contact details and remove visible placeholder claims.
+- Verification: native tests and TypeScript; live browser and production build status recorded at handoff.
+
 ## Fill-in documents: quotation, customer PO, contract data — 2026-11-03
 
 - Handoff: `docs/026-printable-documents.md`. Backend `32305d9`, `6f3a5a3`, `1ea2611` add migration 000017 (shop profile, customer billing, quotation note/valid-until, customer PO) and its endpoints (backend `docs/020-printed-documents.md`).

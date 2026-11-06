@@ -30,7 +30,7 @@ export default function LandingPage() {
     <Contact />
     <footer className="cinematic-footer">
       <Link href="/" aria-label="หน้าหลัก Lathe Shop Control"><Logo /></Link>
-      <p>{shop.name} · {shop.address}</p>
+      <p>{shop.name}{shop.address ? ` · ${shop.address}` : ""}</p>
       <div><SettingsToggle /><Link href="/register">ขอใบเสนอราคา <span aria-hidden="true">↗</span></Link></div>
     </footer>
     <FaqJsonLd />

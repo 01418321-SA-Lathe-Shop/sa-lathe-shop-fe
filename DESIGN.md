@@ -970,6 +970,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-06 | Public landing omits unverified contact, location and opening hours; replaces placeholder claims with factual request guidance. Customer request wizard confirms before following in-app links when a draft is dirty. Purchase-order supplier suggestions use material-specific history. | TypeScript, native tests, focused browser checks |
 | 2026-11-04 | การแปลงหน่วย redesign: explanation card, sentence-form factor input, locked standard factors, weight-from-size calculator, live stock preview, ค่าแปลง wording | Type check, lint, native tests (unit-conversion helpers new), DESIGN sync; no browser run against a real API |
 | 2026-11-04 | Address contact name (ชื่อผู้รับ / ผู้ติดต่อ) on registration step 2 and บัญชีและบริษัท, with owner address edit | Type check, lint, native tests, DESIGN sync; no browser run against a real API |
 | 2026-11-04 | Registration splits into two steps: account details, then address (joining by invitation stays one step) | Native tests, type check, lint, DESIGN sync |
@@ -4158,7 +4159,7 @@ export default function LandingPage() {
     <Contact />
     <footer className="cinematic-footer">
       <Link href="/" aria-label="หน้าหลัก Lathe Shop Control"><Logo /></Link>
-      <p>{shop.name} · {shop.address}</p>
+      <p>{shop.name}{shop.address ? ` · ${shop.address}` : ""}</p>
       <div><SettingsToggle /><Link href="/register">ขอใบเสนอราคา <span aria-hidden="true">↗</span></Link></div>
     </footer>
     <FaqJsonLd />
