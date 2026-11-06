@@ -26,20 +26,20 @@ export function SqlConsole({ api }: { api: BackendApi }) {
   const area = useRef<HTMLTextAreaElement>(null);
   const mirror = useRef<HTMLPreElement>(null);
 
-  async function run(confirmed = false) {
-    if (running.current || !sql.trim()) return;
+  async function run(confirmed = false, text = sql) {
+    if (running.current || !text.trim()) return;
     running.current = true; setBusy(true); setNote("");
     try {
-      const res = await api.call<SqlResult>("/admin/sql/execute", "POST", { sql, confirm: confirmed });
-      setResult({ ...res, sql }); setFailure(null); setSort(null);
+      const res = await api.call<SqlResult>("/admin/sql/execute", "POST", { sql: text, confirm: confirmed });
+      setResult({ ...res, sql: text }); setFailure(null); setSort(null);
       if (isSchemaChange(res.command)) schema.reload();
     } catch (error) {
       if (error instanceof ApiError && error.code === "confirmation_required") setConfirm(error.message);
-      else if (error instanceof ApiError && error.status === 404) setFailure({ sql, message: "SQL console ยังไม่เปิดใช้งานบนเซิร์ฟเวอร์ (SQL_CONSOLE_ENABLE=true)" });
+      else if (error instanceof ApiError && error.status === 404) setFailure({ sql: text, message: "SQL console ยังไม่เปิดใช้งานบนเซิร์ฟเวอร์ (SQL_CONSOLE_ENABLE=true)" });
       else if (error instanceof ApiError) {
         const d = error.details ?? {};
-        setFailure({ sql, message: error.message, sqlstate: d.sqlstate as string | undefined, position: (d.position as number) || undefined, detail: d.detail as string | undefined, hint: d.hint as string | undefined });
-      } else setFailure({ sql, message: "ติดต่อเซิร์ฟเวอร์ไม่ได้ คำสั่งอาจยังไม่ถูกรัน ตรวจสอบก่อนรันซ้ำ" });
+        setFailure({ sql: text, message: error.message, sqlstate: d.sqlstate as string | undefined, position: (d.position as number) || undefined, detail: d.detail as string | undefined, hint: d.hint as string | undefined });
+      } else setFailure({ sql: text, message: "ติดต่อเซิร์ฟเวอร์ไม่ได้ คำสั่งอาจยังไม่ถูกรัน ตรวจสอบก่อนรันซ้ำ" });
     } finally { running.current = false; setBusy(false); }
   }
 
@@ -76,7 +76,9 @@ export function SqlConsole({ api }: { api: BackendApi }) {
     if (!result) return;
     try { await navigator.clipboard.writeText(toTsv({ columns: result.columns, rows })); setNote("คัดลอกผลลัพธ์แล้ว"); } catch { setNote("คัดลอกไม่สำเร็จ ตรวจสอบสิทธิ์คลิปบอร์ดของเบราว์เซอร์"); }
   }
-  const insert = (text: string) => { setSql(text); area.current?.focus(); };
+  // Table browser: put a SELECT in the editor and run it right away.
+  const browse = (name: string) => { const text = `SELECT * FROM "${name.replaceAll('"', '""')}"
+LIMIT 100;`; setSql(text); void run(false, text); };
   const tables = schema.data?.tables ?? [];
   const where = failure?.position ? lineColumn(failure.sql, failure.position) : null;
 
@@ -88,7 +90,7 @@ export function SqlConsole({ api }: { api: BackendApi }) {
       {schema.data && !tables.length && <p className={styles.muted}>ยังไม่มีตารางใน schema public</p>}
       {tables.map((t) => <details key={t.name} className={styles.table}>
         <summary>{t.name}{t.kind === "view" && <ToneBadge tone="quiet">view</ToneBadge>}<small>{t.columns.length} คอลัมน์</small></summary>
-        <button type="button" className={styles.link} onClick={() => insert(`SELECT * FROM ${t.name}\nLIMIT 100;`)}>SELECT * … LIMIT 100</button>
+        <button type="button" className={styles.link} onClick={() => browse(t.name)} disabled={busy}>ดูข้อมูลในตาราง (100 แถวแรก)</button>
         <ul aria-label={`คอลัมน์ของ ${t.name}`}>{t.columns.map((c) => <li key={c.name}><code>{c.name}</code> <span>{c.type}{c.not_null ? " · NOT NULL" : ""}{c.default ? ` · default ${c.default}` : ""}</span></li>)}</ul>
         {t.constraints.length > 0 && <><h3>ข้อจำกัดและความสัมพันธ์</h3><ul>{t.constraints.map((k) => <li key={k.name}><ToneBadge tone={k.type === "foreign_key" ? "action" : "quiet"}>{k.type === "foreign_key" ? "FK" : k.type === "primary_key" ? "PK" : k.type === "unique" ? "UQ" : "CHECK"}</ToneBadge> <code>{k.definition}</code></li>)}</ul></>}
         {t.indexes.length > 0 && <><h3>ดัชนี</h3><ul>{t.indexes.map((x) => <li key={x.name}><code>{x.definition}</code></li>)}</ul></>}
