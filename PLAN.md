@@ -1,3 +1,9 @@
+## Clear write-failure messages — 2026-11-07
+
+- The Worker invoice report matched a backend bug already fixed in `7c2d72a`; Worker invoicing was re-verified on migration 27 through the browser.
+- `useRetryableWrite` now separates clear 4xx rejections from uncertain failures on every shared screen, so a rejection is no longer reported as a connection problem.
+- UC9 keeps the Staff invoice button (owner decision 2026-11-07), although the use case document words Step 1 as a `[System]` step.
+
 ## Audit fixes — 2026-11-06
 
 - Restore the required applicant name field on registration so `/auth/register` no longer receives an empty `name` and rejects every sign-up as `invalid_input`.
