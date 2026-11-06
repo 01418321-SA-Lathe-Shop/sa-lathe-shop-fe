@@ -3,7 +3,7 @@
 export const ROLES = ["Customer", "Worker", "Admin"] as const;
 export type Role = (typeof ROLES)[number];
 export type ApiRole = "customer" | "worker" | "admin";
-export type WorkspaceId = "overview" | "requests" | "quotations" | "deposit-po" | "materials" | "orders" | "receiving" | "production" | "delivery-payment" | "workers" | "inbox" | "memberships" | "settings";
+export type WorkspaceId = "overview" | "requests" | "quotations" | "deposit-po" | "materials" | "orders" | "receiving" | "production" | "delivery-payment" | "workers" | "sql" | "inbox" | "memberships" | "settings";
 export type Workspace = { id: Exclude<WorkspaceId, "overview">; useCase: string; description: string };
 
 export const API_ROLES: Record<ApiRole, Role> = { customer: "Customer", worker: "Worker", admin: "Admin" };
@@ -23,6 +23,7 @@ const DESCRIPTIONS: Record<Role, Partial<Record<Exclude<WorkspaceId, "overview">
   Admin: {
     requests: ["UC1–UC4", "ดูคำขอและใบเสนอราคา และตรวจหลักฐานมัดจำ/PO"],
     workers: ["ผู้ดูแลระบบ", "สร้างและจัดการบัญชีพนักงานและช่องทางติดต่อ"],
+    sql: ["SQL Console", "Super Admin เท่านั้น: รัน SQL ดูโครงสร้างตาราง และจัดการ schema บนฐานข้อมูลจริง"],
     materials: ["UC5", "ยอดวัตถุดิบ ปรับสต๊อก และข้อมูลหลัก (หน่วย/วัตถุดิบ)"],
     orders: ["UC6", "ผู้ขายและใบสั่งซื้อวัตถุดิบ"],
     receiving: ["UC7", "ติดตามการรับของ เครดิตผู้ขาย และการจ่ายเงินผู้ขาย"],
@@ -36,7 +37,7 @@ const DESCRIPTIONS: Record<Role, Partial<Record<Exclude<WorkspaceId, "overview">
 export const ROLE_WORKSPACES: Record<Role, Exclude<WorkspaceId, "overview">[]> = {
   Customer: ["requests", "quotations", "deposit-po", "delivery-payment", "inbox", "memberships"],
   Worker: ["quotations", "materials", "orders", "receiving", "production", "delivery-payment", "inbox", "settings"],
-  Admin: ["requests", "workers", "materials", "orders", "receiving", "production", "delivery-payment", "inbox", "settings"],
+  Admin: ["requests", "workers", "sql", "materials", "orders", "receiving", "production", "delivery-payment", "inbox", "settings"],
 };
 
 // Sidebar groups by workflow stage. Inbox stays routable but lives behind the
@@ -55,10 +56,13 @@ export const NAV_GROUPS: Record<"Worker" | "Admin", NavGroup[]> = {
     { label: "การผลิต", items: ["production", "materials"] },
     { label: "จัดซื้อ", items: ["orders", "receiving"] },
     { label: "ส่งมอบและการเงิน", items: ["delivery-payment"] },
-    { label: "ผู้ดูแลระบบ", items: ["workers"], admin: true },
+    { label: "ผู้ดูแลระบบ", items: ["workers", "sql"], admin: true },
     { label: "บัญชี", items: ["settings"] },
   ],
 };
+
+// Super Admin only; the API enforces it too. Hidden from plain Admins.
+export const SUPER_ADMIN_ONLY: WorkspaceId[] = ["sql"];
 
 export function getWorkspaces(role: Role): Workspace[] {
   return ROLE_WORKSPACES[role].map((id) => { const [useCase, description] = DESCRIPTIONS[role][id] ?? ["", ""]; return { id, useCase, description }; });

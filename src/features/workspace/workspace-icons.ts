@@ -9,6 +9,7 @@ export const workspaceIcons = {
   production: "machine",
   "delivery-payment": "truck",
   workers: "grid",
+  sql: "file",
   inbox: "bell",
   memberships: "grid",
   settings: "sun",

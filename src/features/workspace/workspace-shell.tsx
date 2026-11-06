@@ -8,7 +8,7 @@ import { ThemeToggle } from "../../components/appearance/appearance";
 import { Icon, Logo } from "../../components/appearance/icons";
 
 import { useApiSession } from "../auth/api-session";
-import { API_ROLES, canAccessWorkspace, getWorkspaces, NAV_GROUPS, type Role, type WorkspaceId } from "./workspace-access";
+import { API_ROLES, canAccessWorkspace, getWorkspaces, NAV_GROUPS, SUPER_ADMIN_ONLY, type Role, type WorkspaceId } from "./workspace-access";
 import { pageLabel, ROLE_ROOTS, workspacePath } from "./workspace-routes";
 import { WorkspaceBell } from "./workspace-bell";
 import ConnectedWorkspace from "./connected-workspace";
@@ -38,10 +38,10 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
     return () => window.removeEventListener("keydown", close);
   }, [menuOpen]);
   if (!session || role !== expected) return <main className={`page-content ${styles.scope}`}><p role="status">กำลังตรวจสอบพื้นที่ทำงาน…</p></main>;
-  if (!canAccessWorkspace(role, workspaceId)) return <main className={`page-content ${styles.scope}`}><h1>ไม่มีสิทธิ์เข้าถึงหน้านี้</h1><Link href={ROLE_ROOTS[role]}>กลับภาพรวม</Link></main>;
+  if (!canAccessWorkspace(role, workspaceId) || (SUPER_ADMIN_ONLY.includes(workspaceId) && !session.account.is_super_admin)) return <main className={`page-content ${styles.scope}`}><h1>ไม่มีสิทธิ์เข้าถึงหน้านี้</h1><Link href={ROLE_ROOTS[role]}>กลับภาพรวม</Link></main>;
   const { account } = session;
   const items = getWorkspaces(role);
-  const groups = role === "Customer" ? [] : NAV_GROUPS[role];
+  const groups = role === "Customer" ? [] : NAV_GROUPS[role].map((entry) => ({ ...entry, items: entry.items.filter((id) => account.is_super_admin || !SUPER_ADMIN_ONLY.includes(id)) }));
   const group = groups.find((entry) => entry.items.some((id) => id === workspaceId));
   const overview = workspaceId === "overview";
   const navLink = (id: WorkspaceId) => <Link key={id} href={workspacePath(role, id)} className={workspaceId === id ? "active" : ""} aria-current={workspaceId === id ? "page" : undefined} onClick={() => setMenuOpen(false)}><span className="nav-icon"><Icon name={icons[id]}/></span><span>{pageLabel(role, id)}</span></Link>;

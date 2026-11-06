@@ -7,6 +7,7 @@ import { StaffRequests } from "../requests/staff-requests";
 import { LiveWorkers } from "../workers/workers";
 import { SettingsPage } from "../settings/settings-page";
 import { LiveInventory } from "../inventory/inventory";
+import { SqlConsole } from "../sql-console/sql-console";
 import { Inbox } from "../inbox/inbox";
 
 import { LiveProcurement } from "../procurement/procurement";
@@ -30,6 +31,7 @@ export default function ConnectedWorkspace({ role, workspaceId, session }: { rol
     case "production": return <LiveProduction api={api} account={account} />;
     case "delivery-payment": return <LiveDelivery api={api} account={account} />;
     case "workers": return <LiveWorkers api={api} account={account} />;
+    case "sql": return account.is_super_admin ? <SqlConsole api={api} /> : null;
     case "inbox": return <Inbox api={api} admin={role === "Admin"} />;
     case "settings": return <SettingsPage />;
   }

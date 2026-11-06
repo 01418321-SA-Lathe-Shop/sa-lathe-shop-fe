@@ -233,6 +233,17 @@ Step 7 of the approved Staff/Admin redesign (`/admin/workers`, Admin only; no ne
 - No horizontal page scroll and no console errors.
 - Not exercised: saves that really reach the backend, and duplicate-username responses.
 
+### Super Admin SQL Console — 2026-11-06
+
+`/admin/sql` (new route, sidebar group ผู้ดูแลระบบ, "SQL Console"). Visible and reachable only for an active **Super Admin**; plain Admin, Worker and Customer get the existing no-access page and the API returns 403. Implemented against the real API (`GET /admin/sql/schema`, `POST /admin/sql/execute`), which exists only when the backend sets `SQL_CONSOLE_ENABLE=true` (otherwise 404 and the page says the console is disabled).
+
+- **Layout:** two columns (schema panel 15–20rem | editor + results); one column under 900px. Uses existing tokens `--line`, `--surface`, `--surface-2`, `--muted`; no new fonts or colors beyond four syntax-highlight hues (keyword blue, string green, number orange, comment muted; lighter variants in dark theme).
+- **Editor:** dependency-free textarea over a highlighted `<pre>` mirror, monospace 0.875rem; Enter keeps indentation (extra level after `(`), Tab inserts two spaces, **Ctrl/Cmd + Enter** runs. One statement per run, 10 s timeout, 1,000-row display cap (marked "ตัดที่ 1,000 แถว").
+- **Status/errors:** green "สำเร็จ" badge with command tag, row count or affected rows, and milliseconds; failures use a bordered alert with the database message, SQLSTATE, line/column, detail and hint, and state that the statement was rolled back.
+- **Results:** sortable columns (type shown under the name), NULL shown dimmed, คัดลอก (TSV) and ส่งออก CSV (UTF-8 BOM; cells starting with `= + - @` are prefixed with `'`).
+- **Schema panel:** tables/views with columns, types, NOT NULL/defaults, PK/UQ/FK/CHECK constraints (definition shows the referenced table), indexes, a `SELECT * … LIMIT 100` shortcut, a รีเฟรช button, and automatic refresh after CREATE/ALTER/DROP.
+- **Safety:** DROP, TRUNCATE and UPDATE/DELETE without `WHERE` open a danger ConfirmDialog showing the statement; the server independently rejects them (409 `confirmation_required`) until resent with `confirm: true`. Transaction control, SET/RESET and COPY are refused. Known limit: `WHERE true` counts as a WHERE.
+
 ### Staff/Admin การแจ้งเตือน — 2026-10-30
 
 Step 8 of the approved Staff/Admin redesign (`/staff/inbox`, `/admin/inbox`; reached from the bell's “ดูการแจ้งเตือนทั้งหมด”, not the sidebar). It replaces the English “Inbox” list.
@@ -970,6 +981,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-06 | Super Admin SQL Console at `/admin/sql` (new route, sidebar item for Super Admin only): highlighted editor, Ctrl+Enter, status/error panel, sortable result table with copy/CSV, schema inspector with FK/index detail, destructive-statement confirmation | Native tests; Go unit/handler tests; real PostgreSQL integration test; live HTTP run with Super Admin/Worker/Customer tokens. Browser pane was hidden, so the page itself was not visually checked |
 | 2026-11-04 | การแปลงหน่วย redesign: explanation card, sentence-form factor input, locked standard factors, weight-from-size calculator, live stock preview, ค่าแปลง wording | Type check, lint, native tests (unit-conversion helpers new), DESIGN sync; no browser run against a real API |
 | 2026-11-04 | Address contact name (ชื่อผู้รับ / ผู้ติดต่อ) on registration step 2 and บัญชีและบริษัท, with owner address edit | Type check, lint, native tests, DESIGN sync; no browser run against a real API |
 | 2026-11-04 | Registration splits into two steps: account details, then address (joining by invitation stays one step) | Native tests, type check, lint, DESIGN sync |
@@ -4198,6 +4210,7 @@ export function Logo({ onClick }: { onClick?: () => void }) {
 - `app/admin/receiving/page.tsx`
 - `app/admin/requests/page.tsx`
 - `app/admin/settings/page.tsx`
+- `app/admin/sql/page.tsx`
 - `app/admin/workers/page.tsx`
 - `app/customer/delivery-payment/page.tsx`
 - `app/customer/deposit-po/page.tsx`

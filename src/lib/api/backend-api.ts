@@ -7,8 +7,9 @@ export class ApiError extends Error {
   status: number;
   code: string;
   requestId?: string;
-  constructor(status: number, code: string, message: string, requestId?: string) {
-    super(message); this.name = "ApiError"; this.status = status; this.code = code; this.requestId = requestId;
+  details?: Record<string, unknown>;
+  constructor(status: number, code: string, message: string, requestId?: string, details?: Record<string, unknown>) {
+    super(message); this.name = "ApiError"; this.status = status; this.code = code; this.requestId = requestId; this.details = details;
   }
 }
 
@@ -90,7 +91,7 @@ export class BackendApi {
     if (!response.ok) {
       const envelope = await response.json().catch(() => null);
       if (response.status === 401 && this.token) { this.close(); this.onUnauthorized(); }
-      throw new ApiError(response.status, envelope?.error?.code ?? "http_error", envelope?.error?.message ?? "The server could not complete this action.", envelope?.error?.request_id);
+      throw new ApiError(response.status, envelope?.error?.code ?? "http_error", envelope?.error?.message ?? "The server could not complete this action.", envelope?.error?.request_id, envelope?.error);
     }
     if (response.status === 204) return undefined as T;
     return parseApiJSON(await response.text()) as T;

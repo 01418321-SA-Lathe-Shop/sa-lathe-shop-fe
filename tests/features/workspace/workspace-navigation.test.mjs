@@ -12,7 +12,7 @@ test("sidebar groups list every permitted Staff/Admin page exactly once, with in
     assert(grouped.every((id) => canAccessWorkspace(role, id)));
     assert(canAccessWorkspace(role, "inbox"));
   }
-  assert.deepEqual(NAV_GROUPS.Admin.filter((group) => group.admin).flatMap((group) => group.items), ["workers"]);
+  assert.deepEqual(NAV_GROUPS.Admin.filter((group) => group.admin).flatMap((group) => group.items), ["workers", "sql"]);
   assert(!NAV_GROUPS.Worker.some((group) => group.admin));
 });
 

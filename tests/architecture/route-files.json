@@ -8,6 +8,7 @@
   "app/admin/receiving/page.tsx",
   "app/admin/requests/page.tsx",
   "app/admin/settings/page.tsx",
+  "app/admin/sql/page.tsx",
   "app/admin/workers/page.tsx",
   "app/customer/delivery-payment/page.tsx",
   "app/customer/deposit-po/page.tsx",
