@@ -1,5 +1,28 @@
 # Machine Shop Custom Manufacturing System — Frontend Guide
 
+## Owner-requested testing fixes — 2026-11-06
+
+Supersedes the conflicting statements below (UC6 Admin-only, UC9 Admin-only
+payments, memory-only sessions):
+
+- Sessions persist across reload/reopen until expiry or sign-out. The API sets an
+  HttpOnly `sa_session` cookie; the shell resumes it with `POST /auth/session`
+  (requires `X-Session-Cookie: 1`) and keeps the token in memory only. Tokens,
+  passwords and roles are never stored in localStorage/sessionStorage/URLs.
+  Registration signs the new customer in.
+- UC2: Worker sends a request back with a question (`POST /requests/{id}/request-info`,
+  field `note`); a customer member corrects it with `PATCH /requests/{id}`
+  (description, qty, material_spec, deadline) while no quotation is `sent`/`approved`,
+  which clears the question. Forms show field-specific errors.
+- UC6: Worker and Admin create/submit material orders and record supplier
+  responses; supplier create/edit stays Admin-only.
+- UC7: receipt validation messages are tied to the field (good / defective) that
+  holds the invalid value.
+- UC8: the job page shows the customer's request images and job photos.
+- UC9: shipping fees are removed (database column dropped, migration 000027).
+  Worker and Admin both set credit days, issue invoices, ship, record cash and
+  review customer transfer proof; customers still accept/return and submit bank proof.
+
 ## Current access: real API only — 2026-10-28
 
 The owner requested complete browser-mock removal. Login, registration and all
@@ -70,10 +93,10 @@ Previously approved dependencies remain: `three`, React-19-compatible `@react-th
 This supersedes the Phase 9 scope below. The designed shell now runs on the real API client for AUTH and UC1–UC9, against backend `docs/UC1.md`–`UC9.md` and the Go DTOs at backend `develop` (UC9 `028dd88` and later). The fixture demo was removed. See `docs/11-phase-ten-handoff.md` for setup, mock accounts, the real-backend checklist and verification evidence.
 
 - Owner decisions (2026-10-24): `DESIGN.md` is the visual source; finish the frontend before database/system integration; one designed shell for live and test use; test accounts sign into an in-browser **contract mock** (explicit opt-in, never a fallback for live failures, no new config key); routes follow the backend's confirmed permissions (new Admin requests/materials/receiving/production/delivery-payment, Inbox for all roles, Customer memberships; Staff orders → receiving).
-- UC6 (Admin only): suppliers (optional plain email, 7–15 digit phone, versioned full replacement, no delete) and immutable supplier orders with exact six-place quantity/unit cost, half-up per-line THB totals, optional Asia/Bangkok expected time and job references; accept (optional note), reject/cancel (reason) per the UC6 state table.
+- UC6 (Worker + Admin orders since 2026-11-06; supplier master data Admin only): suppliers (optional plain email, 7–15 digit phone, versioned full replacement, no delete) and immutable supplier orders with exact six-place quantity/unit cost, half-up per-line THB totals, optional Asia/Bangkok expected time and job references; accept (optional note), reject/cancel (reason) per the UC6 state table.
 - UC7 (Staff + Admin): accepted orders, exact good/damaged receipts, replacement rows bounded by what the claim still owes, required supplier-contact note. Admin only: credit days once (0–36,500, no default), one full bank (proof required) or cash (proof optional) settlement after full receipt. Staff never receive finance fields.
 - UC8 (Staff act, Admin monitors): start only when the saved plan is nonempty and fully reserved at the current plan version; incremental actual use (own reservation first, extra/unplanned allowed from free stock); whole labor minutes; optional private JPEG/PNG photos; completion releases unused reservations without adding stock. Admin enters/revises actual labor cost; valuation/costs are Admin-only.
-- UC9: Admin credit days once; Staff/Admin issue the fixed invoice (job balance) and record whole-job shipments (self/third-party, receiver); scoped Customers accept (final) or return with a reason (same job reopens for free rework, invoice unchanged) and submit bank proof for amounts up to the balance; Admin records cash and approves/rejects proofs. Request closes only when the latest delivery is accepted and the invoice is fully paid. Staff never receive payments.
+- UC9 (Worker = Admin for staff actions since 2026-11-06; no shipping fee): credit days once; Staff/Admin issue the fixed invoice (job balance) and record whole-job shipments (self/third-party/pickup, receiver); scoped Customers accept (final) or return with a reason (same job reopens for free rework, invoice unchanged) and submit bank proof for amounts up to the balance; Worker/Admin record cash and approve/reject proofs. Request closes only when the latest delivery is accepted and the invoice is fully paid.
 - All UC6–UC9 commands send a UUID idempotency key and the current expected version; uncertain failures freeze the original key/payload for an explicit identical retry or a discard-and-reload, never automatic retry. Same-record reloads keep the last data visible; action forms render only from settled data.
 - Verification: 44 native tests and TypeScript pass; headless-Chrome checks against the mock pass for every role and UC flow. Update 2026-10-26: owner-approved Next.js 16.4.3 security upgrade (with matching eslint-config-next) makes `next build` pass and ESLint run (only the pre-existing appearance.tsx finding remains). Deployment for student testing: Vercel (frontend) + Railway (backend), see `docs/12-deploy-vercel-railway.md`. Real Go/PostgreSQL/S3 verification remains pending until the Railway deployment is exercised.
 

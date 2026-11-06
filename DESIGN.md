@@ -79,9 +79,53 @@ components:
 
 # Lathe Shop Control — Design specification
 
-อัปเดตล่าสุด: 2026-11-04 · สถานะ: login และ workspace ใช้ real API เท่านั้น; ปุ่ม Local test เชื่อม password-free endpoint เมื่อเปิด config เฉพาะ local; browser login จริงผ่านครบ 6 บัญชี ไม่ใช่การรับรอง workflow ทั้งหมด
+อัปเดตล่าสุด: 2026-11-06 · สถานะ: login และ workspace ใช้ real API เท่านั้น; ปุ่ม Local test เชื่อม password-free endpoint เมื่อเปิด config เฉพาะ local; browser login จริงผ่านครบ 6 บัญชี ไม่ใช่การรับรอง workflow ทั้งหมด
 
 เอกสารนี้ใช้ส่งต่องานให้ designer และ developer เพื่อสร้าง UI ให้ตรงกับระบบปัจจุบัน อ่านคู่กับ `docs/02-frontend.md` ซึ่งเป็นแหล่งอ้างอิง Business Flow และ permission การตรวจ frontend ด้วย unit tests ไม่ใช่หลักฐานว่า real Backend หรือ UC1–UC9 ทำงานครบ
+
+### UC testing fixes and persistent sessions — 2026-11-06
+
+Supersedes the memory-only/reload-signs-out statements below and the Admin-only
+UC6/UC9 notes in the สั่งซื้อวัตถุดิบ and ส่งมอบ sections.
+
+- **Session persistence.** Login, local-test login and registration (which now
+  signs the new customer in with the same credentials) keep working after reload,
+  navigation and reopening the app until the server session expires (default
+  12h) or the user signs out. The API sets an HttpOnly `sa_session` cookie next to
+  the existing in-memory Bearer token; on load the shell calls `POST
+  /auth/session` (cookie + `X-Session-Cookie: 1` guard header) and keeps the
+  returned token in memory only. While that check runs, protected pages show
+  “กำลังตรวจสอบพื้นที่ทำงาน…” instead of bouncing to `/login`; `/login` itself
+  forwards a resumed session to its role area (or `next`). Sign-out revokes the
+  session and clears the cookie; an expired/revoked session returns to
+  `/login?next=` with “เซสชันหมดอายุหรือถูกยกเลิก…”. No token, password or role
+  is written to localStorage/sessionStorage/URLs. Navbar/customer banners now say
+  “รีโหลดหน้าแล้วยังอยู่ในระบบ”; settings explains the session lifetime.
+- **UC2.** The request wizard shows each problem under its own field (red border,
+  `role="alert"` text) and keeps the user on step 2 until fixed; native browser
+  bubbles are no longer used there. Staff “ส่งคำขอกลับให้ลูกค้าแก้ไข” shows the
+  pending question. The customer request page shows the question with an inline
+  correction form (รายละเอียดงาน, จำนวน, ข้อกำหนดวัตถุดิบ, วันที่ต้องการรับงาน)
+  with the same per-field errors; saving clears the question.
+- **UC6.** Worker (ช่าง) creates/submits material orders and records supplier
+  responses on `/staff/orders`; the ผู้ขาย tab is read-only for Worker (เพิ่มผู้ขาย /
+  แก้ไข are Admin-only).
+- **UC7.** Receipt rows validate ของดี and เสียหาย independently; a negative or
+  malformed value is reported under the field that holds it (“ห้ามติดลบ…”), and
+  an over-remaining total marks every filled field of that row.
+- **UC8.** The job page shows “รูปและไฟล์อ้างอิงจากลูกค้า” (image thumbnails, 4:3
+  contain, 160px-min auto-fill grid, open full size in a new tab, file list below)
+  and “รูปงานจากช่าง” thumbnails. Images load through private signed links into
+  blob URLs; storage URLs never reach the DOM.
+- **UC9.** Shipping fees are removed everywhere (no ค่าจัดส่ง field, summary or
+  detail text). Worker and Admin share every staff action and tab
+  (ตั้งเครดิต, ออกใบแจ้งหนี้, ส่งมอบ, ตรวจการชำระ, รับเงินสด) and the page label
+  is ส่งมอบและรับชำระ for both.
+- **UC10.** `.inlineForm` (เพิ่มหน่วย, เพิ่มหน่วยที่กรอกได้, weight calculator)
+  aligns fields by their tops so hints/errors of different lengths no longer shift
+  neighbouring inputs; equal-width fields (14–24rem); the button beside a field is
+  offset by the label row so it lines up with the inputs; the weight calculator,
+  preview list and messages take their own full row. Phones stack full width.
 
 ### Current authentication surface — 2026-10-29
 
@@ -986,6 +1030,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-06 | Persistent sessions (HttpOnly cookie resume via `POST /auth/session`, restore gate on protected pages, `/login` forwards resumed sessions, registration signs in); UC2 per-field request errors, staff send-back and customer correction form; UC6 Worker ordering with Admin-only supplier edits; UC7 per-field receipt errors; UC8 customer reference images and job photos as thumbnails on the job page; UC9 shipping fee removed and Worker gets every staff payment action; UC10 top-aligned `.inlineForm` | `tsc`, ESLint on changed files, 243 native tests, Go unit tests; real local API/DB in the in-app browser at 1366 and 375: reload/deep-link/logout/revoked-session, Worker order+accept, receipt field errors, job thumbnails after reload, customer correction and wizard errors, Worker UC9 terms→invoice→ship→review→cash via API |
 | 2026-11-06 | SQL Console status shortcuts: 10 buttons above the SQL summary count documents per status with a `GROUP BY` and run immediately | `tsc`, ESLint, native tests; headless Chromium at 1440/768/375 in light theme against the real API and PostgreSQL: all 10 buttons return 200, and the ใบเสนอราคา and คำของาน counts match `psql` |
 | 2026-11-06 | SQL Console redesign: searchable one-open-at-a-time table panel with only “Query ทั้งตาราง” and attributes (name, PK/FK, type); whole-table query without LIMIT plus a 1,000-row notice; collapsible editor; type-aware Filter bar that writes a real WHERE and hides after a manual SQL edit; UI text 15px, data 14px; single-line result rows; failed queries clear old rows | `tsc`, ESLint, native tests; headless Chromium at 1440/1024/768/375 in light and dark with a stubbed API (flows, generated SQL, no horizontal scroll, no console errors). Not run against real PostgreSQL: the generated SQL has only been unit-checked |
 | 2026-11-06 | Registration account details restore the required applicant/contact name field that is sent as `name` to the API. | Focused auth test, TypeScript, lint, native tests, production build |
@@ -2397,6 +2442,8 @@ src/features/workspace/workspace.module.css
 .root :global(.cust-footer) { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; padding: 1.5rem clamp(1rem, 2.5vw, 2.5rem); width: 100%; max-width: 100%; box-sizing: border-box; margin: auto 0 0 0; border-top: 1px solid var(--cust-line); color: var(--cust-muted); font-size: .875rem; }
 .root :global(.cust-field) { display: grid; gap: 8px; margin-bottom: 20px; font-weight: 550; }
 .root :global(.cust-field small) { font-weight: 400; font-size: .875rem; }
+.root :global(.cust-field .cust-field-error) { color: var(--danger, #c62828); font-weight: 550; }
+.root :global(.cust-field :is(input, select, textarea)[aria-invalid="true"]) { border-color: var(--danger, #c62828); }
 .root :global(.cust-actions) { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 24px; }
 .root :global(.cust-pagination) { display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 32px; }
 .root :global(.cust-disclosure) { border-top: 1px solid var(--cust-line); padding: 12px 0; margin-top: 24px; }
@@ -3561,6 +3608,10 @@ src/features/workspace/workspace.module.css
 .files li > span { display: grid; gap: 2px; min-width: 0; }
 .files strong { overflow-wrap: anywhere; }
 .files small { color: var(--muted); font-size: 0.8125rem; }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin: 0 0 10px; padding: 0; list-style: none; }
+.thumbs a { display: block; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface-2); }
+.thumbs img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: contain; }
+.thumbState { display: grid; place-items: center; gap: 4px; aspect-ratio: 4 / 3; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); font-size: 0.8125rem; text-align: center; }
 
 .moneyGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .minimum { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); color: var(--muted); font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
@@ -3674,9 +3725,13 @@ src/features/workspace/workspace.module.css
 .catalog { display: grid; gap: 16px; }
 .unitList { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .unitList li { padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-2); font-size: 0.875rem; }
-.inlineForm { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+/* Fields align by their tops so hints/errors of different lengths never shift a
+   neighbour's input; the submit button lines up with the inputs (label row = 1.5em
+   of the 0.9375rem label + the 6px field gap). Panels and messages take a full row. */
+.inlineForm { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; }
 .inlineForm > label { flex: 1 1 14rem; max-width: 24rem; }
-.inlineForm > :is(p, [role="alert"]) { flex-basis: 100%; }
+.inlineForm > label + :is(button, a) { margin-top: calc(0.9375rem * 1.5 + 6px); }
+.inlineForm > :is(p, [role="alert"], details, ul) { flex-basis: 100%; margin-block: 0; }
 .catalogList { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
 .catalogList li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .catalogList li:last-child { border-bottom: 0; }

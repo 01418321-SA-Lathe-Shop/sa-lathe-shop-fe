@@ -79,9 +79,13 @@
 .catalog { display: grid; gap: 16px; }
 .unitList { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .unitList li { padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-2); font-size: 0.875rem; }
-.inlineForm { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
+/* Fields align by their tops so hints/errors of different lengths never shift a
+   neighbour's input; the submit button lines up with the inputs (label row = 1.5em
+   of the 0.9375rem label + the 6px field gap). Panels and messages take a full row. */
+.inlineForm { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 12px; }
 .inlineForm > label { flex: 1 1 14rem; max-width: 24rem; }
-.inlineForm > :is(p, [role="alert"]) { flex-basis: 100%; }
+.inlineForm > label + :is(button, a) { margin-top: calc(0.9375rem * 1.5 + 6px); }
+.inlineForm > :is(p, [role="alert"], details, ul) { flex-basis: 100%; margin-block: 0; }
 .catalogList { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
 .catalogList li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .catalogList li:last-child { border-bottom: 0; }
