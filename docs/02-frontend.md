@@ -18,7 +18,7 @@ payments, memory-only sessions):
   responses; supplier create/edit stays Admin-only.
 - UC7: receipt validation messages are tied to the field (good / defective) that
   holds the invalid value.
-- UC8: the job page shows the customer's request images and job photos.
+- UC8: the job page shows the customer's request images and job photos. The customer's own job detail also shows the ready job photos (owner request 2026-11-06).
 - UC9: shipping fees are removed (database column dropped, migration 000027).
   Worker and Admin both set credit days, issue invoices, ship, record cash and
   review customer transfer proof; customers still accept/return and submit bank proof.

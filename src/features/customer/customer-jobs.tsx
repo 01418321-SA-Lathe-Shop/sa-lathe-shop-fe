@@ -16,6 +16,7 @@ import { CustomerInvoice } from "./customer-invoice";
 import { CustomerInvoiceList } from "./customer-invoice-list";
 import { CustomerJobList } from "./customer-job-list";
 import { JobContractPrint } from "../documents/job-contract-print";
+import { ImageThumbs } from "../requests/request-files";
 import styles from "./customer-requests.module.css";
 
 export function CustomerJobs({ api, mode = "jobs" }: { api: BackendApi; mode?: "jobs" | "payments" | "inspection" }) {
@@ -73,7 +74,7 @@ function JobContent({ api, account, state, mode, settled, reload, saved }: { api
         const current = ["queued", "in_progress", "completed"].indexOf(state.job_status); const done = current > index;
         return <li key={status} className={done ? "done" : current === index ? "current" : ""} aria-current={current === index ? "step" : undefined}><span className="cust-timeline-point"><Icon name={status === "completed" ? "layers" : status === "in_progress" ? "machine" : "clock"} /></span><div><strong>{JOB_LABELS[status]}</strong><p>{done ? "ผ่านขั้นตอนนี้แล้ว" : current === index ? "ขั้นตอนปัจจุบัน" : "ยังไม่ถึงขั้นตอนนี้"}</p></div></li>;
       })}</ol>{state.job_status === "cancelled" && <p className="cust-alert">งานถูกยกเลิก ไม่สามารถเริ่มงานหรือเปลี่ยนสถานะเองได้</p>}
-      <section className="cust-section"><h2>รูปผลงาน</h2><p className="cust-muted">ยังไม่มีรูปผลงานที่เปิดให้คุณดู</p></section>
+      <section className="cust-section"><h2>รูปผลงาน</h2>{state.photos?.length ? <ImageThumbs api={api} files={state.photos} alt="รูปผลงาน" path={(photo) => `/job-photos/${photo.id}/download`} /> : <p className="cust-muted">ช่างยังไม่ได้แนบรูปผลงาน</p>}</section>
       {Boolean(state.rework_history?.length) && <section className="cust-section"><h2>ประวัติการแก้ไขงาน</h2>{state.rework_history?.map((cycle) => <p className="cust-history-row" key={cycle.cycle}>งานรอบ {cycle.cycle} · ส่งคืนเมื่อ {dateTH(cycle.reopened_at)}</p>)}</section>}
     </section><aside className="cust-job-summary"><section><h2>การส่งมอบ</h2>{delivery ? <><Badge value={delivery.status} labels={DELIVERY_LABELS} /><p>{delivery.method === "third_party" ? "ผู้ให้บริการภายนอก" : "ร้านจัดส่ง / รับเอง"} · ผู้รับ {delivery.receiver_name}</p><p>ส่งเมื่อ {dateTH(delivery.shipped_at)}</p></> : <p>ยังไม่มีการจัดส่ง</p>}{actions.includes("inspect") && <Link className="cust-primary" href={customerHref("delivery-payment", { job: state.job_id })}>ตรวจรับงาน</Link>}</section>
       <section><h2>การชำระเงิน</h2><p>มัดจำที่อนุมัติจริง {moneyTH(state.deposit)}</p>{state.invoice ? <><Badge value={state.invoice.status} labels={INVOICE_LABELS} /><p>ยอดคงเหลือ {moneyTH(state.invoice.balance)}</p><Link className={actions.includes("inspect") ? "cust-link" : actions.includes("bank") ? "cust-primary" : "cust-link"} href={customerHref("payments", { job: state.job_id })}>{actions.includes("bank") ? "ดูใบแจ้งหนี้และชำระเงิน" : "ดูใบแจ้งหนี้"}</Link></> : <p>ยอดหลังมัดจำ {moneyTH(state.opening_balance)} · ยังไม่มีใบแจ้งหนี้</p>}</section>

@@ -117,6 +117,9 @@ UC6/UC9 notes in the สั่งซื้อวัตถุดิบ and ส่
   contain, 160px-min auto-fill grid, open full size in a new tab, file list below)
   and “รูปงานจากช่าง” thumbnails. Images load through private signed links into
   blob URLs; storage URLs never reach the DOM.
+  The customer job detail (`/customer/jobs?job=…`) “รูปผลงาน” section shows the
+  same thumbnails for every ready job photo (from `photos` on the fulfillment
+  job); with none it says “ช่างยังไม่ได้แนบรูปผลงาน”.
 - **UC9.** Shipping fees are removed everywhere (no ค่าจัดส่ง field, summary or
   detail text). Worker and Admin share every staff action and tab
   (ตั้งเครดิต, ออกใบแจ้งหนี้, ส่งมอบ, ตรวจการชำระ, รับเงินสด) and the page label
@@ -1030,6 +1033,7 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-06 | Customer job detail “รูปผลงาน” shows the Worker's ready job photos as private thumbnails (was a fixed placeholder). Worker/Admin invoice without preset credit terms no longer fails | `tsc`, ESLint, native tests; real local API: owner customer 200, other customer 404, no login 401, Worker invoice 200; browser check as somchai |
 | 2026-11-06 | Persistent sessions (HttpOnly cookie resume via `POST /auth/session`, restore gate on protected pages, `/login` forwards resumed sessions, registration signs in); UC2 per-field request errors, staff send-back and customer correction form; UC6 Worker ordering with Admin-only supplier edits; UC7 per-field receipt errors; UC8 customer reference images and job photos as thumbnails on the job page; UC9 shipping fee removed and Worker gets every staff payment action; UC10 top-aligned `.inlineForm` | `tsc`, ESLint on changed files, 243 native tests, Go unit tests; real local API/DB in the in-app browser at 1366 and 375: reload/deep-link/logout/revoked-session, Worker order+accept, receipt field errors, job thumbnails after reload, customer correction and wizard errors, Worker UC9 terms→invoice→ship→review→cash via API |
 | 2026-11-06 | SQL Console status shortcuts: 10 buttons above the SQL summary count documents per status with a `GROUP BY` and run immediately | `tsc`, ESLint, native tests; headless Chromium at 1440/768/375 in light theme against the real API and PostgreSQL: all 10 buttons return 200, and the ใบเสนอราคา and คำของาน counts match `psql` |
 | 2026-11-06 | SQL Console redesign: searchable one-open-at-a-time table panel with only “Query ทั้งตาราง” and attributes (name, PK/FK, type); whole-table query without LIMIT plus a 1,000-row notice; collapsible editor; type-aware Filter bar that writes a real WHERE and hides after a manual SQL edit; UI text 15px, data 14px; single-line result rows; failed queries clear old rows | `tsc`, ESLint, native tests; headless Chromium at 1440/1024/768/375 in light and dark with a stubbed API (flows, generated SQL, no horizontal scroll, no console errors). Not run against real PostgreSQL: the generated SQL has only been unit-checked |

@@ -1,12 +1,13 @@
 // UC9 delivery, invoice, installments and free rework (backend UC9.md).
 import { moneyInput } from "../../lib/api/backend-api.ts";
+import type { Attachment } from "../../lib/api/types.ts";
 import { bangkokInstant } from "../fulfillment/fulfillment-domain.ts";
 
 export type Invoice = { id: string; number: string; amount: string; paid: string; balance: string; status: "unpaid" | "partial" | "paid"; credit_days: number; issued_at: string; due_at: string };
 export type Shipment = { id: string; cycle: number; method: "self" | "third_party" | "pickup"; receiver_name: string; status: "shipping" | "delivered" | "returned"; shipped_at: string; decided_at?: string; decided_by?: string; reason: string };
 export type Payment = { id: string; submitted_by: string; method: "bank" | "cash"; amount: string; paid_at: string; status: "pending" | "approved" | "rejected"; evidence_id?: string; reason: string; reviewed_by?: string };
 export type ReworkCycle = { cycle: number; started_at: string; completed_at: string; reopened_at: string; delivery_id: string };
-export type FulfillmentJob = { job_id: string; request_id: string; job_status: string; request_status: string; version: number | string; cycle: number; credit_days?: number; opening_balance: string; deposit: string; invoice?: Invoice; deliveries: Shipment[] | null; payments?: Payment[] | null; events: { id: string; action: string; version: number | string; actor_id: string; created_at: string }[] | null; rework_history: ReworkCycle[] | null };
+export type FulfillmentJob = { job_id: string; request_id: string; job_status: string; request_status: string; version: number | string; cycle: number; credit_days?: number; opening_balance: string; deposit: string; invoice?: Invoice; deliveries: Shipment[] | null; payments?: Payment[] | null; events: { id: string; action: string; version: number | string; actor_id: string; created_at: string }[] | null; rework_history: ReworkCycle[] | null; photos?: Attachment[] | null };
 export type Role = "customer" | "worker" | "admin";
 export type DeliveryAction = "terms" | "invoice" | "ship" | "inspect" | "bank" | "cash" | "review";
 type Command = { idempotency_key: string; expected_version: number | string };
