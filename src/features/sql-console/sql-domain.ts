@@ -54,8 +54,7 @@ export function lineColumn(sql: string, position: number): { line: number; colum
 }
 
 // Tables that map to the project ER diagram (backend docs/021-er-schema-comparison.md). The schema panel shows only these by default.
-export const ER_TABLES = new Set("person customer customer_address admin worker job_request request_attachment quotation quotation_cost term_evidence job job_photo material unit unit_conversion supplier material_order material_order_item material_claim material_reservation job_material_usage stock_movement delivery invoice customer_payment payment_allocation".split(" "));
+export const ER_TABLES = new Set("person customer address admin worker job_request request_attachment quotation quotation_cost purchase_order deposit job job_photo job_material_usage material_reservation material unit unit_conversion delivery supplier material_order material_order_item stock_movement material_defect_log invoice payment payment_allocation".split(" "));
 
-// ER entity name shown in the panel; only differs from the table name where the schema renamed it. Queries always use the real table name.
-const ER_RENAMED: Record<string, string> = { customer_payment: "PAYMENT", customer_address: "ADDRESS", material_claim: "MATERIAL_DEFECT_LOG", term_evidence: "DEPOSIT / PURCHASE_ORDER" };
-export const erName = (table: string): string | null => (ER_TABLES.has(table) ? ER_RENAMED[table] ?? table.toUpperCase() : null);
+// Tables now carry the ER entity names, so the panel label is the upper-cased table name.
+export const erName = (table: string): string | null => (ER_TABLES.has(table) ? table.toUpperCase() : null);
