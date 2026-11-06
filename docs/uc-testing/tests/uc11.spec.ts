@@ -114,7 +114,7 @@ test("N03 worker denied", async ({ browser }) => {
   const anan = await asUser(browser, "anan.staff");
   const { page } = anan;
   await t.step("N03", page, "Worker (anan.staff)", async () => {
-    await page.evaluate(() => (window as any).next.router.push("/admin/workers"));
+    await page.evaluate(() => (window as Window & { next: { router: { push: (url: string) => void } } }).next.router.push("/admin/workers"));
     await page.waitForURL(/\/staff/, { timeout: 30_000 }).catch(() => {});
     await ready(page);
     await t.N(page, "worker-denied-admin-workers", "Worker เปิด /admin/workers ไม่ได้ ระบบพากลับพื้นที่พนักงาน", { check: async () => {

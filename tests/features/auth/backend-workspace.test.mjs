@@ -21,6 +21,7 @@ test("registration asks for the address on a second step", () => {
   assert.match(source, /if \(register && !joining && !addressStep\) \{/);
   assert.match(source, /input\.setCustomValidity\(passwordError\(input\.value\) \?\? ""\)/);
   assert.match(source, /<div className="register-step" hidden=\{addressStep\}>/);
+  assert.match(source, /<input name="name" required maxLength=\{200\}/);
   assert.match(source, /<fieldset className="register-step" hidden=\{!addressStep\} disabled=\{!addressStep\}>/);
   assert.match(source, /"ถัดไป"/);
 });

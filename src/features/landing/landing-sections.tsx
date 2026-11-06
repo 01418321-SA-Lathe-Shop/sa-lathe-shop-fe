@@ -106,7 +106,8 @@ export function Contact() {
     { label: "โทร", value: shop.phone.label, href: shop.phone.href },
     { label: "LINE", value: shop.line.label, href: shop.line.href },
     { label: "อีเมล", value: shop.email.label, href: shop.email.href },
-  ];
+  ].filter((channel) => channel.value);
+  const hasDetails = channels.length > 0 || shop.address || shop.hours.length > 0 || shop.mapEmbedUrl || shop.mapLink;
   return <section className="landing-section landing-contact" id="contact" aria-labelledby="contact-title">
     <div className="landing-cta" data-reveal>
       <p className="landing-eyebrow">เริ่มงานกับเรา</p>
@@ -117,16 +118,16 @@ export function Contact() {
         <Link href="/login" className="landing-text-link">มีบัญชีแล้ว? เข้าสู่ระบบ</Link>
       </div>
     </div>
-    <div className="landing-contact-card" data-reveal style={stagger(1)}>
+    {hasDetails && <div className="landing-contact-card" data-reveal style={stagger(1)}>
       <h3>{shop.name}</h3>
       <dl>
         {channels.map(c => <div key={c.label}><dt>{c.label}</dt><dd>{c.href ? <a href={c.href}>{c.value}</a> : c.value}</dd></div>)}
-        <div><dt>ที่อยู่</dt><dd>{shop.address}</dd></div>
-        <div><dt>เวลาเปิดทำการ</dt><dd>{shop.hours.map(h => <span key={h.days}>{h.days} {h.time}</span>)}</dd></div>
+        {shop.address && <div><dt>ที่อยู่</dt><dd>{shop.address}</dd></div>}
+        {shop.hours.length > 0 && <div><dt>เวลาเปิดทำการ</dt><dd>{shop.hours.map(h => <span key={h.days}>{h.days} {h.time}</span>)}</dd></div>}
       </dl>
-      <MapFacade embedUrl={shop.mapEmbedUrl} address={shop.address} />
+      {shop.mapEmbedUrl && <MapFacade embedUrl={shop.mapEmbedUrl} address={shop.address} />}
       {shop.mapLink && <a className="landing-text-link" href={shop.mapLink} target="_blank" rel="noopener noreferrer">เปิดใน Google Maps <span aria-hidden="true">↗</span></a>}
-    </div>
+    </div>}
   </section>;
 }
 

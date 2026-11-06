@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import type { BackendApi } from "../../lib/api/backend-api";
-import { useResource, useRetryableWrite } from "../../hooks/backend-hooks";
+import { useRetryableWrite } from "../../hooks/backend-hooks";
 import { bahtTH, quantityTH } from "../../components/staff-ui/staff-format";
 import { Button, ConfirmDialog, ErrorText, Field, LoadError, RetryPanel, Skeleton } from "../../components/staff-ui/staff-ui";
 import { useCollection } from "../customer/customer-hooks";
@@ -10,6 +10,7 @@ import { inventoryDecimal } from "../inventory/inventory-domain";
 import { MaterialPicker } from "../inventory/material-picker";
 import { lineTotal, orderPayload, orderTotal, type DraftLine, type ShortageItem, type Supplier, type SupplierRecommendation } from "./procurement-domain";
 import { JobChooser } from "./procurement-jobs";
+import { useSupplierRecommendations } from "./use-supplier-recommendations";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./procurement.module.css";
 
@@ -28,9 +29,7 @@ export function NewOrderForm({ api, shortages = [], onPlaced, onLock }: { api: B
   const write = useRetryableWrite(api, onPlaced);
   useEffect(() => onLock(write.frozen), [onLock, write.frozen]);
 
-  const matIds = lines.map((line) => line.material_id).join(",");
-  const recs = useResource<{ items: SupplierRecommendation[] | null }>(api, matIds ? `/suppliers/recommendations?material_ids=${encodeURIComponent(matIds)}` : null);
-  const recItems = recs.data?.items ?? [];
+  const recItems = useSupplierRecommendations(api, lines.map((line) => line.material_id));
 
   const errors = lines.map((line) => ({ quantity: line.quantity.trim() && !valid(line.quantity.trim(), true) ? QUANTITY : "", cost: line.unit_cost.trim() && !valid(line.unit_cost.trim(), false) ? COST : "" }));
   const complete = lines.length > 0 && lines.every((line, index) => line.quantity.trim() && line.unit_cost.trim() && !errors[index].quantity && !errors[index].cost);

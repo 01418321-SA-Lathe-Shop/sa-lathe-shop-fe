@@ -25,7 +25,21 @@ export function CustomerRequestWizard({ api }: { api: BackendApi }) {
   useEffect(() => {
     if (!dirty && !uncertain) return;
     const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
-    window.addEventListener("beforeunload", warn); return () => window.removeEventListener("beforeunload", warn);
+    const guardLink = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const link = target.closest("a[href]");
+      if (!(link instanceof HTMLAnchorElement)) return;
+      const destination = new URL(link.href);
+      if (destination.origin !== window.location.origin || destination.href === window.location.href) return;
+      if (!window.confirm("ข้อมูลคำขอที่ยังไม่ได้ส่งจะหายไป ต้องการออกจากหน้านี้หรือไม่?")) {
+        event.preventDefault(); event.stopPropagation();
+      }
+    };
+    window.addEventListener("beforeunload", warn);
+    document.addEventListener("click", guardLink, true);
+    return () => { window.removeEventListener("beforeunload", warn); document.removeEventListener("click", guardLink, true); };
   }, [dirty, uncertain]);
   function payload() {
     if (!material.trim()) throw new Error("กรุณาระบุข้อกำหนดวัตถุดิบ");

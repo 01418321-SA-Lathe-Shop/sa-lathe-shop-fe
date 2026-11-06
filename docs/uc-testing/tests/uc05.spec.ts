@@ -180,7 +180,7 @@ test("N01 N02 stock rules", async () => {
 test("N03 customer denied", async ({ browser }) => {
   const somchai = await asUser(browser, "somchai");
   await t.step("N03", somchai.page, "ลูกค้า (somchai)", async () => {
-    await somchai.page.evaluate(() => (window as any).next.router.push("/staff/materials"));
+    await somchai.page.evaluate(() => (window as Window & { next: { router: { push: (url: string) => void } } }).next.router.push("/staff/materials"));
     await somchai.page.waitForURL(/\/customer/, { timeout: 30_000 }).catch(() => {});
     await ready(somchai.page);
     await t.N(somchai.page, "customer-denied-staff-materials", "ลูกค้าเปิด /staff/materials ไม่ได้ ระบบพากลับพื้นที่ลูกค้า", { n: 1, check: async () => {

@@ -8,7 +8,8 @@ import { useResource, useRetryableWrite } from "../../hooks/backend-hooks";
 import { bahtTH, dateTimeTH, quantityTH } from "../../components/staff-ui/staff-format";
 import { ORDER_EVENT, ORDER_STATE } from "../../components/staff-ui/staff-labels";
 import { Button, Collapsible, ConfirmDialog, ErrorText, Field, NextAction, RetryPanel, StatusBadge } from "../../components/staff-ui/staff-ui";
-import { allowedActions, orderActionPayload, orderTabOf, type OrderAction, type SupplierOrder, type SupplierRecommendation } from "./procurement-domain";
+import { allowedActions, orderActionPayload, orderTabOf, type OrderAction, type SupplierOrder } from "./procurement-domain";
+import { useSupplierRecommendations } from "./use-supplier-recommendations";
 import { RelatedJobs } from "./procurement-jobs";
 import { PurchaseOrderDocument } from "../documents/business-documents";
 import { shopParty } from "../documents/documents-domain";
@@ -31,12 +32,7 @@ export function OrderDetail({ api, order, backHref, receivingHref, onChanged }: 
   const shop = useResource<ShopProfile>(api, "/shop-profile");
   const write = useRetryableWrite(api, () => onChanged(action ? ACTION[action].done : ""));
   const lines = order.lines ?? []; const events = order.events ?? []; const jobs = order.job_ids ?? [];
-  const matIds = lines.map((l) => l.material_id).join(",");
-  const altSuppliers = useResource<{ items: SupplierRecommendation[] | null }>(
-    api,
-    order.supplier_response === "rejected" && matIds ? `/suppliers/recommendations?material_ids=${encodeURIComponent(matIds)}&exclude_supplier_id=${encodeURIComponent(order.supplier.id)}` : null,
-  );
-  const altList = altSuppliers.data?.items ?? [];
+  const altList = useSupplierRecommendations(api, order.supplier_response === "rejected" ? lines.map((line) => line.material_id) : [], order.supplier.id);
   const ended = [...events].reverse().find((event) => event.action === "reject" || event.action === "cancel");
   const open = (next: OrderAction) => { setAction(next); setReason(""); setReasonError(""); setDialog(true); };
   const buttons = (keys: OrderAction[]) => <div className={layout.actions}>

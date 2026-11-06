@@ -981,6 +981,8 @@ Details, business writes, navbar notifications, APIs and dependencies are unchan
 
 | Date | Change | Verification |
 | --- | --- | --- |
+| 2026-11-06 | Registration account details restore the required applicant/contact name field that is sent as `name` to the API. | Focused auth test, TypeScript, lint, native tests, production build |
+| 2026-11-06 | Public landing omits unverified contact, location and opening hours; replaces placeholder claims with factual request guidance. Customer request wizard confirms before following in-app links when a draft is dirty. Purchase-order supplier suggestions use material-specific history. | TypeScript, native tests, focused browser checks |
 | 2026-11-06 | Super Admin SQL Console at `/admin/sql` (new route, sidebar item for Super Admin only): highlighted editor, Ctrl+Enter, status/error panel, sortable result table with copy/CSV, schema inspector with FK/index detail, destructive-statement confirmation | Native tests; Go unit/handler tests; real PostgreSQL integration test; live HTTP run with Super Admin/Worker/Customer tokens. Browser pane was hidden, so the page itself was not visually checked |
 | 2026-11-06 | Opening a staff/customer page while signed out (including a full reload, since the session is memory-only) now redirects to `/login?next=<path>`; after sign-in the user returns to that page when it lies inside their own role area, else to the role root | `tsc`, native tests (one pre-existing failure); not browser-checked |
 | 2026-11-06 | SQL Console table browser: each table in the schema panel has "ดูข้อมูลในตาราง (100 แถวแรก)", which puts `SELECT * FROM "<table>" LIMIT 100` in the editor and runs it, showing the rows in the result table | `tsc`, native tests; not browser-checked |
@@ -4175,7 +4177,7 @@ export default function LandingPage() {
     <Contact />
     <footer className="cinematic-footer">
       <Link href="/" aria-label="หน้าหลัก Lathe Shop Control"><Logo /></Link>
-      <p>{shop.name} · {shop.address}</p>
+      <p>{shop.name}{shop.address ? ` · ${shop.address}` : ""}</p>
       <div><SettingsToggle /><Link href="/register">ขอใบเสนอราคา <span aria-hidden="true">↗</span></Link></div>
     </footer>
     <FaqJsonLd />
