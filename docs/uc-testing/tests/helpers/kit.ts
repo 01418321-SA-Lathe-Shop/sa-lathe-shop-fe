@@ -55,7 +55,7 @@ export async function throttleLogin() {
   log.push(Date.now());
   fs.writeFileSync(LOGINS, JSON.stringify(log));
 }
-export const CONTEXT = { baseURL: "http://localhost:3100", viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2, locale: "th-TH", timezoneId: "Asia/Bangkok", acceptDownloads: true } as const;
+export const CONTEXT = { baseURL: process.env.UC_BASE_URL ?? "http://localhost:3100", viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2, locale: "th-TH", timezoneId: "Asia/Bangkok", acceptDownloads: true } as const;
 export type Session = { ctx: BrowserContext; page: Page; user: string };
 const PICKER = "บัญชีทดสอบ Local · เข้าสู่ระบบทันที";
 

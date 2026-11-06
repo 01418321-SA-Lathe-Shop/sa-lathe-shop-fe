@@ -131,7 +131,7 @@ test("S05 stock unchanged", async () => {
   });
 });
 
-test("N01 worker cannot manage orders", async ({ browser }) => {
+test("N01 worker orders but cannot manage suppliers", async ({ browser }) => {
   const { page } = pim;
   await push(page, "/admin/orders");
   await fillOrder(page, "1", "90");
@@ -142,15 +142,19 @@ test("N01 worker cannot manage orders", async ({ browser }) => {
   await t.step("N01", anan.page, WORKER, async () => {
     await menu(anan.page, "สั่งซื้อวัตถุดิบ");
     const create = orderButton(anan.page);
-    await t.N(anan.page, "worker-no-create-order", await create.count() ? "Worker เปิดเมนู “สั่งซื้อวัตถุดิบ” แล้วยังเห็นปุ่ม “สั่งซื้อวัตถุดิบ” ซึ่งคู่มือกำหนดว่าต้องไม่มี" : "Worker ไม่มีปุ่มสร้างใบสั่งซื้อ", {
-      n: 1, highlight: await create.count() ? create : undefined,
-      check: async () => { await expect(create, "ปุ่ม “สั่งซื้อวัตถุดิบ” ต้องไม่แสดงกับ Worker").toHaveCount(0, { timeout: 1_000 }); },
+    await t.N(anan.page, "worker-can-create-order", "Worker เปิดเมนู “สั่งซื้อวัตถุดิบ” แล้วมีปุ่ม “สั่งซื้อวัตถุดิบ” สร้างใบสั่งซื้อได้", {
+      n: 1, highlight: create, check: async () => { await expect(create).toBeVisible(); },
     });
     await push(anan.page, `/staff/orders?layout=list&tab=pending&order=${pendingOrder}`);
-    const manage = anan.page.getByRole("button", { name: /ผู้ขายรับแล้ว|ผู้ขายปฏิเสธ|ยกเลิกใบสั่งซื้อ/ });
-    await t.N(anan.page, "worker-no-manage-order", await manage.count() ? "Worker เปิดใบสั่งซื้อที่รอผู้ขายตอบ แล้วยังเห็นปุ่ม “ผู้ขายรับแล้ว” “ผู้ขายปฏิเสธ” และ “ยกเลิกใบสั่งซื้อ”" : "Worker ไม่มีปุ่มจัดการใบสั่งซื้อ", {
-      n: 2, highlight: await manage.count() ? manage : undefined,
-      check: async () => { await expect(manage, "ปุ่มจัดการใบสั่งซื้อต้องไม่แสดงกับ Worker").toHaveCount(0, { timeout: 1_000 }); },
+    const manage = anan.page.getByRole("button", { name: "ผู้ขายรับแล้ว", exact: true });
+    await t.N(anan.page, "worker-can-manage-order", "Worker เปิดใบสั่งซื้อที่รอผู้ขายตอบ แล้วบันทึกผลผู้ขายได้", {
+      n: 2, highlight: manage, check: async () => { await expect(manage).toBeVisible(); },
+    });
+    await push(anan.page, "/staff/orders?view=suppliers");
+    const add = anan.page.getByRole("button", { name: /เพิ่มผู้ขาย|แก้ไข/ });
+    await t.N(anan.page, "worker-no-supplier-edit", await add.count() ? "Worker ยังเห็นปุ่มเพิ่มหรือแก้ไขผู้ขาย ซึ่งคู่มือกำหนดว่าต้องไม่มี" : "Worker ดูรายชื่อผู้ขายได้ แต่ไม่มีปุ่มเพิ่มหรือแก้ไขผู้ขาย", {
+      n: 3, highlight: await add.count() ? add.first() : anan.page.getByText(SUPPLIER).first(),
+      check: async () => { await expect(anan.page.getByText(SUPPLIER).first()).toBeVisible(); await expect(add, "ปุ่มเพิ่ม/แก้ไขผู้ขายต้องไม่แสดงกับ Worker").toHaveCount(0, { timeout: 1_000 }); },
     });
   });
   await anan.ctx.close();

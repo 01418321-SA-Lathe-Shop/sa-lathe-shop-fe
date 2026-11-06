@@ -189,15 +189,15 @@ test("S06 review", async () => {
   });
 });
 
-test("N02 worker has no payment data", async () => {
+test("N02 worker handles payments", async () => {
   const { page } = anan;
   await t.step("N02", page, WORKER, async () => {
     await reopen(page, "/staff", `/staff/delivery-payment?job=${J1}`);
-    await t.N(page, "worker-no-payment-data", "Worker ไม่เห็นหลักฐานการชำระและไม่มีปุ่มรับเงินสด", { highlight: page.getByText("การรับชำระและตรวจหลักฐานจัดการโดยแอดมิน"), check: async () => {
-      const text = await pageText(page);
-      expect(text).not.toContain("โอนผ่านธนาคาร ·");
-      expect(text).not.toContain("เปิดหลักฐาน");
-      await expect(page.getByText("บันทึกรับเงินสด")).toHaveCount(0);
+    const proof = page.getByRole("button", { name: "เปิดหลักฐาน" }).first();
+    await t.N(page, "worker-sees-payment-data", "Worker เห็นหลักฐานการชำระของลูกค้า มีปุ่ม “บันทึกรับเงินสด” และการส่งมอบไม่มีช่องค่าส่ง", { highlight: proof, check: async () => {
+      await expect(proof).toBeVisible();
+      await expect(page.locator("summary", { hasText: "บันทึกรับเงินสด" })).toBeVisible();
+      expect(await pageText(page)).not.toContain("ค่าส่ง");
     } });
   });
 });
