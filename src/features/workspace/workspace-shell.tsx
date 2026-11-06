@@ -2,7 +2,7 @@
 import { workspaceStyles as styles } from "../../components/ui/style-scopes";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ThemeToggle } from "../../components/appearance/appearance";
 import { Icon, Logo } from "../../components/appearance/icons";
@@ -24,13 +24,14 @@ const descriptions: Record<Role, string> = {
 
 export default function WorkspaceShell({ role: expected, workspaceId = "overview" }: { role: Role; workspaceId?: WorkspaceId }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { session, signOut } = useApiSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const role = session ? API_ROLES[session.account.role] : null;
   useEffect(() => {
-    if (!session) router.replace("/login");
+    if (!session) router.replace(`/login?next=${encodeURIComponent(pathname)}`);
     else if (role !== expected) router.replace(ROLE_ROOTS[role as Role]);
-  }, [session, role, expected, router]);
+  }, [session, role, expected, router, pathname]);
   useEffect(() => {
     if (!menuOpen) return;
     const close = (event: KeyboardEvent) => { if (event.key === "Escape") { setMenuOpen(false); document.getElementById("navigation-toggle")?.focus(); } };

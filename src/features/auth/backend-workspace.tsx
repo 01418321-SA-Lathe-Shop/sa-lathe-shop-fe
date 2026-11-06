@@ -19,13 +19,16 @@ import { DemoAccountPicker } from "./demo-account-picker";
 export default function BackendWorkspace({ initialRegister = false }: { initialRegister?: boolean }) {
   const router = useRouter();
   const { signIn, signInLocalTest, localTestEnabled, notice, liveBase } = useApiSession();
+  const next = useSearchParams().get("next");
+  // Return to the page that bounced us here, only if it is inside the signed-in role's own area.
+  const destination = (role: keyof typeof ROLE_ROOTS) => next && next.startsWith(ROLE_ROOTS[role] + "/") && !next.startsWith("//") ? next : ROLE_ROOTS[role];
   async function enter(username: string, password: string) {
     const session = await signIn(username, password);
-    router.push(ROLE_ROOTS[API_ROLES[session.account.role]]);
+    router.push(destination(API_ROLES[session.account.role]));
   }
   async function enterLocalTest(username: string) {
     const session = await signInLocalTest(username);
-    router.push(ROLE_ROOTS[API_ROLES[session.account.role]]);
+    router.push(destination(API_ROLES[session.account.role]));
   }
   return <LiveLogin key={initialRegister ? "register" : "login"} base={liveBase} notice={notice} initialRegister={initialRegister} onLogin={enter} localTestEnabled={localTestEnabled} onLocalLogin={enterLocalTest} />;
 }
