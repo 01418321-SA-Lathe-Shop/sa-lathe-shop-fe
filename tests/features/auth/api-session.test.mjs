@@ -44,7 +44,7 @@ function sessionHarness(failLogin = false, localEnabled = false, base = "https:/
     Error,
     module: componentModule, exports: componentModule.exports,
     process: { env: { NEXT_PUBLIC_API_BASE_URL: base, NEXT_PUBLIC_LOCAL_TEST_LOGIN_ENABLED: localEnabled ? "true" : undefined } },
-    require: (name) => name === "react/jsx-runtime" ? require(name) : name === "react" ? hooks : name === "../../lib/api/backend-api" ? { BackendApi: TestApi } : name === "./local-test-login" ? { isLocalTestLoginEnabled, localTestLoginError } : assert.fail(`Unexpected import: ${name}`),
+    require: (name) => name === "react/jsx-runtime" ? require(name) : name === "react" ? hooks : name === "../../lib/api/backend-api" ? { BackendApi: TestApi, ApiError: class ApiError extends Error {} } : name === "./local-test-login" ? { isLocalTestLoginEnabled, localTestLoginError } : assert.fail(`Unexpected import: ${name}`),
   });
   const context = componentModule.exports.ApiSessionProvider({ children: null }).props.value;
   return { context, calls, instances, account, state: () => ({ session: savedSession, notice: savedNotice }) };
