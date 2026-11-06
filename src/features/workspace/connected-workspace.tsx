@@ -29,7 +29,7 @@ export default function ConnectedWorkspace({ role, workspaceId, session }: { rol
     case "orders": return <LiveProcurement api={api} account={account} />;
     case "receiving": return <LiveReceiving api={api} account={account} />;
     case "production": return <LiveProduction api={api} account={account} />;
-    case "delivery-payment": return <LiveDelivery api={api} account={account} />;
+    case "delivery-payment": return <LiveDelivery api={api} />;
     case "workers": return <LiveWorkers api={api} account={account} />;
     case "sql": return account.is_super_admin ? <SqlConsole api={api} /> : null;
     case "inbox": return <Inbox api={api} admin={role === "Admin"} />;

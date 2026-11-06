@@ -4,12 +4,12 @@ import Link from "next/link";
 import { Suspense, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "../../components/appearance/icons";
-import type { Account, BackendApi, JobRequest } from "../../lib/api/backend-api";
+import type { BackendApi, JobRequest } from "../../lib/api/backend-api";
 import { bahtTH, dateTH } from "../../components/staff-ui/staff-format";
 import { DELIVERY_STATE } from "../../components/staff-ui/staff-labels";
 import { Button, EmptyState, LoadError, SearchForm, Skeleton, StatusBadge, StatusTabs, Toast, ToneBadge, TruncatedNotice } from "../../components/staff-ui/staff-ui";
 import { useCollection } from "../customer/customer-hooks";
-import { defaultDeliveryTab, deliveryCounts, deliveryTab, deliveryTabs, hasPendingPayment, inDeliveryTab, matchDelivery, type DeliveryTab, type FulfillmentJob } from "./delivery-domain";
+import { DELIVERY_TABS, defaultDeliveryTab, deliveryCounts, deliveryTab, hasPendingPayment, inDeliveryTab, matchDelivery, type DeliveryTab, type FulfillmentJob } from "./delivery-domain";
 import { DeliveryDetail } from "./delivery-detail";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./delivery.module.css";
@@ -24,13 +24,13 @@ const EMPTY: Record<DeliveryTab, [string, string]> = {
   closed: ["ยังไม่มีงานที่ปิดแล้ว", "งานจะปิดเมื่อลูกค้ารับงานและชำระครบ"],
 };
 
-// UC9 ส่งมอบและใบแจ้งหนี้ (Staff) / ส่งมอบและรับชำระ (Admin). The list returns
-// full fulfillment documents (payments only for Admin), so tabs need no extra reads.
-export function LiveDelivery({ api, account }: { api: BackendApi; account: Account }) {
-  return <Suspense fallback={<Skeleton label="กำลังเปิดส่งมอบ…" />}><DeliveryWorkspace api={api} admin={account.role === "admin"} /></Suspense>;
+// UC9 ส่งมอบและรับชำระ (Worker and Admin). The list returns
+// full fulfillment documents (payments included for Worker and Admin), so tabs need no extra reads.
+export function LiveDelivery({ api }: { api: BackendApi }) {
+  return <Suspense fallback={<Skeleton label="กำลังเปิดส่งมอบ…" />}><DeliveryWorkspace api={api} /></Suspense>;
 }
 
-function DeliveryWorkspace({ api, admin }: { api: BackendApi; admin: boolean }) {
+function DeliveryWorkspace({ api }: { api: BackendApi }) {
   const params = useSearchParams(); const pathname = usePathname(); const router = useRouter();
   const cardView = params.get("view") === "cards" || params.get("layout") === "cards";
   const q = params.get("q") ?? ""; const selected = params.get("job") ?? "";
@@ -39,8 +39,8 @@ function DeliveryWorkspace({ api, admin }: { api: BackendApi; admin: boolean }) 
   const lookup = new Map((requests.data?.items ?? []).map((request) => [request.id, request]));
   const label = (job: FulfillmentJob) => { const request = lookup.get(job.request_id); return request ? `คำขอ #${request.no_request} · ${request.description}` : requests.loading ? "กำลังโหลดคำขอ…" : "คำขอผลิต"; };
   const items = jobs.data?.items ?? []; const matched = items.filter((job) => matchDelivery(job, label(job), q));
-  const counts = deliveryCounts(matched, admin); const tab = deliveryTab(params.get("tab"), admin) ?? defaultDeliveryTab(counts, admin);
-  const rows = matched.filter((job) => inDeliveryTab(tab, job, admin));
+  const counts = deliveryCounts(matched); const tab = deliveryTab(params.get("tab")) ?? defaultDeliveryTab(counts);
+  const rows = matched.filter((job) => inDeliveryTab(tab, job));
   const [toast, setToast] = useState(""); const clearToast = () => setToast("");
   const href = (changes: Record<string, string | undefined>) => {
     const next = new URLSearchParams(params);
@@ -53,7 +53,7 @@ function DeliveryWorkspace({ api, admin }: { api: BackendApi; admin: boolean }) 
   return <section className={layout.page}>
     <div className={layout.toolbar}>
       <div className={styles.toolbarHead}>
-        <StatusTabs label="สถานะการส่งมอบ" tabs={deliveryTabs(admin).map((key) => ({ key, label: DELIVERY_STATE[key][0], count: counts[key], attention: ["terms", "invoice", "ship", "review"].includes(key) }))} current={tab} href={(key) => href({ tab: key, job: undefined })} loading={listLoading} unavailable={Boolean(jobs.error && !jobs.data)} />
+        <StatusTabs label="สถานะการส่งมอบ" tabs={DELIVERY_TABS.map((key) => ({ key, label: DELIVERY_STATE[key][0], count: counts[key], attention: ["terms", "invoice", "ship", "review"].includes(key) }))} current={tab} href={(key) => href({ tab: key, job: undefined })} loading={listLoading} unavailable={Boolean(jobs.error && !jobs.data)} />
         <nav className={styles.viewSwitch} aria-label="รูปแบบการแสดงงานส่งมอบ">
           <Link href={href({ view: "cards", layout: undefined, job: undefined })} scroll={false} aria-current={cardView ? "page" : undefined}><Icon name="grid" size={17} /> การ์ด</Link>
           <Link href={href({ view: undefined, layout: undefined, job: undefined })} scroll={false} aria-current={!cardView ? "page" : undefined}><Icon name="file" size={17} /> รายการ</Link>
@@ -72,7 +72,7 @@ function DeliveryWorkspace({ api, admin }: { api: BackendApi; admin: boolean }) 
       <div className={styles.cardWorkspace}>
         <div className={styles.cardGrid} role="region" aria-label="งานส่งมอบแบบการ์ด">
           {listLoading && <Skeleton label="กำลังโหลดรายการงาน…" />}
-          {rows.map((item) => <DeliveryCard key={item.job_id} job={item} label={label(item)} tab={tab} admin={admin} selected={item.job_id === selected} href={href({ job: item.job_id, tab })} grid />)}
+          {rows.map((item) => <DeliveryCard key={item.job_id} job={item} label={label(item)} tab={tab} selected={item.job_id === selected} href={href({ job: item.job_id, tab })} grid />)}
           {jobs.data && !rows.length && <EmptyState title={q ? "ไม่พบงานที่ค้นหา" : EMPTY[tab][0]}>{q ? "ลองค้นด้วยเลขใบแจ้งหนี้หรือเลขคำขออื่น" : EMPTY[tab][1]}</EmptyState>}
         </div>
       </div>
@@ -80,25 +80,25 @@ function DeliveryWorkspace({ api, admin }: { api: BackendApi; admin: boolean }) 
       <div className={`${layout.layout} ${styles.splitLayout}`} data-detail="open">
         <div className={layout.list} role="region" aria-label="รายการงานส่งมอบ">
           {listLoading && <Skeleton label="กำลังโหลดรายการงาน…" />}
-          {rows.map((item) => <DeliveryCard key={item.job_id} job={item} label={label(item)} tab={tab} admin={admin} selected={item.job_id === selected} href={href({ job: item.job_id, tab })} />)}
+          {rows.map((item) => <DeliveryCard key={item.job_id} job={item} label={label(item)} tab={tab} selected={item.job_id === selected} href={href({ job: item.job_id, tab })} />)}
           {jobs.data && !rows.length && <EmptyState title={q ? "ไม่พบงานที่ค้นหา" : EMPTY[tab][0]}>{q ? "ลองค้นด้วยเลขใบแจ้งหนี้หรือเลขคำขออื่น" : EMPTY[tab][1]}</EmptyState>}
         </div>
         <div className={layout.detail}>
-          {selected ? <DeliveryDetail key={selected} api={api} admin={admin} id={selected} label={job ? label(job) : "งานส่งมอบ"} backHref={href({ job: undefined })} onChanged={saved} />
-            : <div className={layout.placeholder}><EmptyState title="เลือกงานจากรายการ">เปิดงานเพื่อออกใบแจ้งหนี้ บันทึกส่งมอบ{admin ? " หรือตรวจการชำระ" : ""}</EmptyState></div>}
+          {selected ? <DeliveryDetail key={selected} api={api} id={selected} label={job ? label(job) : "งานส่งมอบ"} backHref={href({ job: undefined })} onChanged={saved} />
+            : <div className={layout.placeholder}><EmptyState title="เลือกงานจากรายการ">เปิดงานเพื่อออกใบแจ้งหนี้ บันทึกส่งมอบ หรือตรวจการชำระ</EmptyState></div>}
         </div>
       </div>
     ) : (
       <div className={styles.fullListWorkspace}>
         <div className={styles.fullList} role="region" aria-label="รายการงานส่งมอบ">
           {listLoading && <Skeleton label="กำลังโหลดรายการงาน…" />}
-          {rows.map((item) => <DeliveryCard key={item.job_id} job={item} label={label(item)} tab={tab} admin={admin} selected={false} href={href({ job: item.job_id, tab })} row />)}
+          {rows.map((item) => <DeliveryCard key={item.job_id} job={item} label={label(item)} tab={tab} selected={false} href={href({ job: item.job_id, tab })} row />)}
           {jobs.data && !rows.length && <EmptyState title={q ? "ไม่พบงานที่ค้นหา" : EMPTY[tab][0]}>{q ? "ลองค้นด้วยเลขใบแจ้งหนี้หรือเลขคำขออื่น" : EMPTY[tab][1]}</EmptyState>}
         </div>
       </div>
     )}
     {cardView && selected && <DeliveryModal closeHref={href({ job: undefined })} returnFocusId={`delivery-card-${selected}`} onClose={() => router.replace(href({ job: undefined }), { scroll: false })}>
-      <DeliveryDetail key={selected} api={api} admin={admin} id={selected} label={job ? label(job) : "งานส่งมอบ"} backHref={href({ job: undefined })} onChanged={saved} />
+      <DeliveryDetail key={selected} api={api} id={selected} label={job ? label(job) : "งานส่งมอบ"} backHref={href({ job: undefined })} onChanged={saved} />
     </DeliveryModal>}
     <Toast message={toast} onDone={clearToast} />
   </section>;
@@ -118,20 +118,20 @@ function DeliveryModal({ closeHref, returnFocusId, onClose, children }: { closeH
   </dialog>;
 }
 
-function nextStep(tab: DeliveryTab, job: FulfillmentJob, admin: boolean): [string, boolean] {
+function nextStep(tab: DeliveryTab): [string, boolean] {
   switch (tab) {
     case "terms": return ["ตั้งเครดิต", true];
-    case "invoice": return !admin && job.credit_days === undefined ? ["รอแอดมินตั้งเครดิต", false] : ["ออกใบแจ้งหนี้", true];
+    case "invoice": return ["ออกใบแจ้งหนี้", true];
     case "ship": return ["บันทึกส่งมอบ", true];
     case "inspect": return ["รอลูกค้าตรวจรับ", false];
     case "review": return ["ตรวจหลักฐานการชำระ", true];
-    case "unpaid": return [admin ? "ดูยอดค้าง / รับเงินสด" : "ดูยอดค้าง", false];
+    case "unpaid": return ["ดูยอดค้าง / รับเงินสด", false];
     case "closed": return ["ดูรายละเอียด", false];
   }
 }
 
-function DeliveryCard({ job, label, tab, admin, selected, href, grid = false, row = false }: { job: FulfillmentJob; label: string; tab: DeliveryTab; admin: boolean; selected: boolean; href: string; grid?: boolean; row?: boolean }) {
-  const [next, act] = nextStep(tab, job, admin); const last = job.deliveries?.at(-1);
+function DeliveryCard({ job, label, tab, selected, href, grid = false, row = false }: { job: FulfillmentJob; label: string; tab: DeliveryTab; selected: boolean; href: string; grid?: boolean; row?: boolean }) {
+  const [next, act] = nextStep(tab); const last = job.deliveries?.at(-1);
 
   if (grid) {
     return <Link id={`delivery-card-${job.job_id}`} href={href} scroll={false} className={styles.gridCard} aria-current={selected ? "true" : undefined}>
@@ -156,10 +156,10 @@ function DeliveryCard({ job, label, tab, admin, selected, href, grid = false, ro
         </div>
       </dl>
       <div className={styles.cardStep}>
-        {(job.cycle > 1 || last?.status === "returned" || (admin && hasPendingPayment(job))) && <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+        {(job.cycle > 1 || last?.status === "returned" || hasPendingPayment(job)) && <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
           {job.cycle > 1 && <ToneBadge tone="progress">แก้ไขรอบ {job.cycle}</ToneBadge>}
           {last?.status === "returned" && <ToneBadge tone="problem">ลูกค้าส่งคืน</ToneBadge>}
-          {admin && hasPendingPayment(job) && <ToneBadge tone="action">มีหลักฐานรอตรวจ</ToneBadge>}
+          {hasPendingPayment(job) && <ToneBadge tone="action">มีหลักฐานรอตรวจ</ToneBadge>}
         </div>}
       </div>
       <footer className={styles.cardFooter}>
@@ -176,17 +176,17 @@ function DeliveryCard({ job, label, tab, admin, selected, href, grid = false, ro
     </div>
     {row && <div className={styles.rowStatus}>
       <StatusBadge map={DELIVERY_STATE} value={tab} />
-      {(job.cycle > 1 || last?.status === "returned" || (admin && hasPendingPayment(job))) && <>
+      {(job.cycle > 1 || last?.status === "returned" || hasPendingPayment(job)) && <>
         {job.cycle > 1 && <ToneBadge tone="progress">แก้ไขรอบ {job.cycle}</ToneBadge>}
         {last?.status === "returned" && <ToneBadge tone="problem">ลูกค้าส่งคืน</ToneBadge>}
-        {admin && hasPendingPayment(job) && <ToneBadge tone="action">มีหลักฐานรอตรวจ</ToneBadge>}
+        {hasPendingPayment(job) && <ToneBadge tone="action">มีหลักฐานรอตรวจ</ToneBadge>}
       </>}
     </div>}
     <div className={row ? styles.rowMeta : undefined}>
-      {!row && (job.cycle > 1 || last?.status === "returned" || (admin && hasPendingPayment(job))) && <span className={layout.cardMeta}>
+      {!row && (job.cycle > 1 || last?.status === "returned" || hasPendingPayment(job)) && <span className={layout.cardMeta}>
         {job.cycle > 1 && <ToneBadge tone="progress">แก้ไขรอบ {job.cycle}</ToneBadge>}
         {last?.status === "returned" && <ToneBadge tone="problem">ลูกค้าส่งคืน</ToneBadge>}
-        {admin && hasPendingPayment(job) && <ToneBadge tone="action">มีหลักฐานรอตรวจ</ToneBadge>}
+        {hasPendingPayment(job) && <ToneBadge tone="action">มีหลักฐานรอตรวจ</ToneBadge>}
       </span>}
     </div>
     {row && <span className={layout.cardNext} data-quiet={act ? undefined : ""}>{next} <Icon name="arrow" size={14} /></span>}

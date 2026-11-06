@@ -11,7 +11,7 @@ export function workspacePath(role: Role, id: WorkspaceId): string {
   if (!canAccessWorkspace(role, id)) return ROLE_ROOTS[role];
   return id === "overview" ? ROLE_ROOTS[role] : `${ROLE_ROOTS[role]}/${id}`;
 }
-// Staff issue invoices and ship but do not receive payments (UC9).
-export function pageLabel(role: Role, id: WorkspaceId): string {
-  return role === "Worker" && id === "delivery-payment" ? "ส่งมอบและใบแจ้งหนี้" : PAGE_LABELS[id];
+// UC9: Worker and Admin both ship and take payments, so labels no longer differ by role.
+export function pageLabel(_role: Role, id: WorkspaceId): string {
+  return PAGE_LABELS[id];
 }

@@ -55,10 +55,9 @@ export function InvoiceForm({ api, state, onSaved }: Props) {
 export function ShipForm({ api, state, onSaved }: Props) {
   const [method, setMethod] = useState<"self" | "third_party" | "pickup">("self");
   const [receiver, setReceiver] = useState("");
-  const [shippingCost, setShippingCost] = useState("0.00");
   const [error, setError] = useState(""); const [confirming, setConfirming] = useState(false);
   const write = useRetryableWrite(api, () => onSaved("บันทึกส่งมอบแล้ว ลูกค้าจะได้รับแจ้งให้ตรวจรับ"));
-  const build = () => shipPayload(command(state), method, receiver, shippingCost);
+  const build = () => shipPayload(command(state), method, receiver);
   return <div className={layout.form}>
     <fieldset disabled={write.frozen}>
       <Field label="วิธีส่ง (UC9 Q9.1)">
@@ -69,13 +68,12 @@ export function ShipForm({ api, state, onSaved }: Props) {
         </select>
       </Field>
       <Field label="ชื่อผู้รับ" error={error || undefined}><input maxLength={200} autoComplete="off" value={receiver} aria-invalid={Boolean(error) || undefined} onChange={(event) => { setReceiver(event.target.value); setError(""); }} /></Field>
-      <Field label="ค่าจัดส่ง (บาท · UC9 Q9.1)" hint="0.00 หากไม่มีค่าจัดส่ง"><input inputMode="decimal" autoComplete="off" value={shippingCost} onChange={(event) => { setShippingCost(event.target.value); setError(""); }} /></Field>
     </fieldset>
     <p className={layout.muted}>ส่งทั้งงานในครั้งเดียว การบันทึกส่งไม่ใช่การที่ลูกค้ารับงาน</p>
     <div className={layout.actions}><button type="button" className={layout.submit} disabled={write.frozen || !receiver.trim()} onClick={() => { if (check(build, setError)) setConfirming(true); }}>บันทึกส่งมอบ</button></div>
     <Outcome write={write} onSaved={onSaved} />
     <ConfirmDialog open={confirming} title="บันทึกส่งมอบ?" confirmLabel="ยืนยันส่งมอบ" checks={["ส่งงานครบทั้งงานแล้ว"]} onClose={() => setConfirming(false)} onConfirm={() => { setConfirming(false); write.submit(`/fulfillment/jobs/${state.job_id}/deliveries`, "POST", build, ""); }}>
-      <p>{METHOD_LABEL[method] ?? method} · ผู้รับ {receiver.trim()}{shippingCost.trim() ? ` · ค่าจัดส่ง ${bahtTH(shippingCost.trim())}` : ""}</p><p>ลูกค้าจะตรวจรับหรือส่งคืนเพื่อแก้ไขฟรีในระบบ</p>
+      <p>{METHOD_LABEL[method] ?? method} · ผู้รับ {receiver.trim()}</p><p>ลูกค้าจะตรวจรับหรือส่งคืนเพื่อแก้ไขฟรีในระบบ</p>
     </ConfirmDialog>
   </div>;
 }
