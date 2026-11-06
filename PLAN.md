@@ -336,3 +336,9 @@ Decision: current backend UC/API contracts and owner-confirmed rules take preced
 - [ ] Open: registration fails (FE sends no `name` and an unknown `contact_name`); more-info request fails (FE `message`, BE `note`); renamed units stay old on open orders; the test guide and the Use Case document disagree on Worker procurement and supplier payment status.
 
 No application code changed. Screenshots are not committed.
+
+## SQL Console redesign (2026-11-06)
+
+- [x] Agree the design with the owner: database-side filters, whole-table query without LIMIT, attributes with name/type/PK/FK, filter bar above results, collapsible editor, type-based operators, search plus one open table, filter bar hidden after manual SQL edits, 14–15px type.
+- [x] Implement and check in a browser with a stubbed API (light/dark, 1440–375px).
+- [ ] Open: run the generated filter SQL against real PostgreSQL with `SQL_CONSOLE_ENABLE=true`.
