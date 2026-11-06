@@ -42,7 +42,7 @@ test("destructive statements are confirmed and re-sent with confirm:true; Ctrl+E
 });
 
 test("schema panel shows only ER tables unless 'show all' is ticked", () => {
-  const source = read("sql-console/sql-console.tsx");
+  const source = read("sql-console/sql-schema-panel.tsx");
   assert.match(source, /allTables\.filter\(\(t\) => ER_TABLES\.has\(t\.name\)\)/);
   assert.match(source, /แสดงทุกตาราง/);
 });
@@ -52,5 +52,66 @@ test("panel shows ER entity names while queries keep the real table name", async
   assert.equal(erName("job_request"), "JOB_REQUEST");
   assert.equal(erName("payment"), "PAYMENT");
   assert.equal(erName("auth_session"), null);
-  assert.match(read("sql-console/sql-console.tsx"), /browse\(t\.name\)/);
+  assert.match(read("sql-console/sql-domain.ts"), /SELECT \* FROM \$\{quoteIdent\(table\.name\)\}/);
+});
+
+test("whole-table query has no LIMIT and quotes identifiers", async () => {
+  const { buildTableQuery } = await import("../../../src/features/sql-console/sql-domain.ts");
+  assert.equal(buildTableQuery({ name: 'we"ird', columns: [] }), 'SELECT * FROM "we""ird";');
+});
+
+test("filters become one AND-joined WHERE with values safely quoted", async () => {
+  const { buildTableQuery } = await import("../../../src/features/sql-console/sql-domain.ts");
+  const columns = [{ name: "status", type: "text", not_null: false }, { name: "amount", type: "numeric(18,6)", not_null: false }];
+  const filter = (id, column, op, value = "") => ({ id, column, op, value });
+  assert.equal(buildTableQuery({ name: "payment", columns }, [filter(1, "status", "eq", "pa'id"), filter(2, "amount", "gte", " 500.5 ")]),
+    `SELECT * FROM "payment"\nWHERE "status" = 'pa''id'\n  AND "amount" >= 500.5;`);
+  assert.equal(buildTableQuery({ name: "payment", columns }, [filter(1, "status", "contains", "50%_a\\")]),
+    `SELECT * FROM "payment"\nWHERE "status"::text ILIKE '%50\\%\\_a\\\\%';`);
+  assert.equal(buildTableQuery({ name: "payment", columns }, [filter(1, "status", "null")]), `SELECT * FROM "payment"\nWHERE "status" IS NULL;`);
+});
+
+test("date filters compare whole days, in Bangkok for timestamptz", async () => {
+  const { buildTableQuery } = await import("../../../src/features/sql-console/sql-domain.ts");
+  const columns = [{ name: "a", type: "timestamp with time zone", not_null: true }, { name: "b", type: "timestamp without time zone", not_null: true }, { name: "c", type: "date", not_null: true }];
+  const sql = buildTableQuery({ name: "t", columns }, ["a", "b", "c"].map((column, id) => ({ id, column, op: "gte", value: "2026-11-06" })));
+  assert.equal(sql, `SELECT * FROM "t"\nWHERE ("a" AT TIME ZONE 'Asia/Bangkok')::date >= '2026-11-06'\n  AND "b"::date >= '2026-11-06'\n  AND "c" >= '2026-11-06';`);
+});
+
+test("operators follow the attribute type and invalid values are reported before running", async () => {
+  const { filterKind, opsFor, filterError } = await import("../../../src/features/sql-console/sql-domain.ts");
+  assert.equal(filterKind("character varying(100)"), "text");
+  assert.equal(filterKind("uuid"), "text");
+  assert.equal(filterKind("numeric(18,6)"), "number");
+  assert.equal(filterKind("timestamp with time zone"), "date");
+  assert.equal(filterKind("boolean"), "boolean");
+  assert.equal(filterKind("jsonb"), "other");
+  assert.equal(filterKind("text[]"), "other");
+  assert.ok(!opsFor("boolean").includes("gt") && !opsFor("other").includes("eq") && opsFor("text").includes("contains"));
+  const base = { id: 1, column: "x" };
+  assert.equal(filterError("number", { ...base, op: "gt", value: "1; DROP TABLE x" }), "กรอกเป็นตัวเลข");
+  assert.equal(filterError("number", { ...base, op: "gt", value: "-1.5" }), null);
+  assert.equal(filterError("text", { ...base, op: "eq", value: "  " }), "กรอกค่าที่ต้องการกรอง");
+  assert.equal(filterError("date", { ...base, op: "eq", value: "x" }), "เลือกวันที่");
+  assert.equal(filterError("text", { ...base, op: "null", value: "" }), null);
+});
+
+test("attribute keys are read from constraint definitions and long types are shortened", async () => {
+  const { keyColumns, shortType } = await import("../../../src/features/sql-console/sql-domain.ts");
+  const keys = keyColumns({ constraints: [
+    { name: "a", type: "primary_key", definition: "PRIMARY KEY (id)" },
+    { name: "b", type: "foreign_key", definition: 'FOREIGN KEY (invoice_id, "Line") REFERENCES invoice(id, line)' },
+    { name: "c", type: "check", definition: "CHECK ((amount > 0))" },
+  ] });
+  assert.deepEqual([...keys.pk], ["id"]);
+  assert.deepEqual([...keys.fk], ["invoice_id", "Line"]);
+  assert.equal(shortType("timestamp with time zone"), "timestamptz");
+  assert.equal(shortType("character varying(20)"), "varchar(20)");
+});
+
+test("filter bar only exists for panel-written SQL, so it can never overwrite a manual edit", () => {
+  const source = read("sql-console/sql-console.tsx");
+  assert.match(source, /browsing && browsing\.sql === sql \?/);
+  assert.match(source, /\{filterTable && <SqlFilterBar/);
+  assert.match(source, /result\?\.truncated && /);
 });

@@ -58,3 +58,85 @@ export const ER_TABLES = new Set("person customer address admin worker job_reque
 
 // Tables now carry the ER entity names, so the panel label is the upper-cased table name.
 export const erName = (table: string): string | null => (ER_TABLES.has(table) ? table.toUpperCase() : null);
+
+// --- Table browser: attribute display and filters that become a real WHERE clause ---
+
+// PK/FK column names, read from pg_get_constraintdef output such as "FOREIGN KEY (a, b) REFERENCES t(id)".
+export function keyColumns(table: Pick<SchemaTable, "constraints">): { pk: Set<string>; fk: Set<string> } {
+  const keys = { pk: new Set<string>(), fk: new Set<string>() };
+  for (const constraint of table.constraints) {
+    if (constraint.type !== "primary_key" && constraint.type !== "foreign_key") continue;
+    const list = /\(([^)]*)\)/.exec(constraint.definition)?.[1] ?? "";
+    const target = constraint.type === "primary_key" ? keys.pk : keys.fk;
+    for (const name of list.split(",")) target.add(name.trim().replace(/^"|"$/g, ""));
+  }
+  return keys;
+}
+
+export const shortType = (type: string): string => type
+  .replace("timestamp with time zone", "timestamptz")
+  .replace("timestamp without time zone", "timestamp")
+  .replace("character varying", "varchar");
+
+export type FilterKind = "text" | "number" | "date" | "boolean" | "other";
+export type FilterOp = "contains" | "eq" | "ne" | "gt" | "gte" | "lt" | "lte" | "true" | "false" | "null" | "notnull";
+export type TableFilter = { id: number; column: string; op: FilterOp; value: string };
+
+export function filterKind(type: string): FilterKind {
+  const t = type.toLowerCase();
+  if (t.endsWith("[]") || /^(json|jsonb|bytea|xml)\b/.test(t)) return "other";
+  if (/^(smallint|integer|bigint|numeric|decimal|real|double precision)\b/.test(t)) return "number";
+  if (/^(date|timestamp)\b/.test(t)) return "date";
+  return t === "boolean" ? "boolean" : "text";
+}
+
+const OPS: Record<FilterKind, FilterOp[]> = {
+  text: ["contains", "eq", "ne", "null", "notnull"],
+  number: ["eq", "ne", "gt", "gte", "lt", "lte", "null", "notnull"],
+  date: ["eq", "gt", "gte", "lt", "lte", "null", "notnull"],
+  boolean: ["true", "false", "null", "notnull"],
+  other: ["contains", "null", "notnull"],
+};
+export const opsFor = (kind: FilterKind): FilterOp[] => OPS[kind];
+
+const OP_LABEL: Record<FilterOp, string> = { contains: "มีคำว่า", eq: "=", ne: "≠", gt: ">", gte: "≥", lt: "<", lte: "≤", true: "เป็นจริง", false: "เป็นเท็จ", null: "ว่าง (NULL)", notnull: "ไม่ว่าง" };
+export const opLabel = (kind: FilterKind, op: FilterOp): string => kind === "text" && op === "eq" ? "เท่ากับ" : kind === "text" && op === "ne" ? "ไม่เท่ากับ" : OP_LABEL[op];
+export const opNeedsValue = (op: FilterOp): boolean => !["true", "false", "null", "notnull"].includes(op);
+
+export const quoteIdent = (name: string): string => `"${name.replaceAll('"', '""')}"`;
+export const quoteLiteral = (value: string): string => `'${value.replaceAll("'", "''")}'`;
+
+export function filterError(kind: FilterKind, filter: TableFilter): string | null {
+  if (!opNeedsValue(filter.op)) return null;
+  if (!filter.value.trim()) return "กรอกค่าที่ต้องการกรอง";
+  if (kind === "number" && !/^-?\d+(\.\d+)?$/.test(filter.value.trim())) return "กรอกเป็นตัวเลข";
+  if (kind === "date" && !/^\d{4}-\d{2}-\d{2}$/.test(filter.value)) return "เลือกวันที่";
+  return null;
+}
+
+const COMPARE: Partial<Record<FilterOp, string>> = { eq: "=", ne: "<>", gt: ">", gte: ">=", lt: "<", lte: "<=" };
+
+// Date filters compare whole days; timestamptz days are Bangkok days (the project's display zone).
+function filterCondition(type: string, filter: TableFilter): string {
+  const column = quoteIdent(filter.column);
+  const kind = filterKind(type);
+  if (filter.op === "null") return `${column} IS NULL`;
+  if (filter.op === "notnull") return `${column} IS NOT NULL`;
+  if (filter.op === "true") return `${column} IS TRUE`;
+  if (filter.op === "false") return `${column} IS FALSE`;
+  if (filter.op === "contains") return `${column}::text ILIKE ${quoteLiteral(`%${filter.value.replace(/[\\%_]/g, "\\$&")}%`)}`;
+  if (kind === "number") return `${column} ${COMPARE[filter.op]} ${filter.value.trim()}`;
+  if (kind === "date") {
+    const lower = type.toLowerCase();
+    const day = lower.startsWith("timestamp with time zone") ? `(${column} AT TIME ZONE 'Asia/Bangkok')::date` : lower.startsWith("timestamp") ? `${column}::date` : column;
+    return `${day} ${COMPARE[filter.op]} ${quoteLiteral(filter.value)}`;
+  }
+  return `${column} ${COMPARE[filter.op]} ${quoteLiteral(filter.value)}`;
+}
+
+// Whole-table query: no LIMIT, the server caps the response and reports truncation.
+export function buildTableQuery(table: Pick<SchemaTable, "name" | "columns">, filters: TableFilter[] = []): string {
+  const conditions = filters.map((filter) => filterCondition(table.columns.find((c) => c.name === filter.column)?.type ?? "text", filter));
+  const where = conditions.length ? `\nWHERE ${conditions.join("\n  AND ")}` : "";
+  return `SELECT * FROM ${quoteIdent(table.name)}${where};`;
+}

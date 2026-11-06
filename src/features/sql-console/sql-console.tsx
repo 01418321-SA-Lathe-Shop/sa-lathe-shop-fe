@@ -3,8 +3,10 @@
 import { useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { ApiError, type BackendApi } from "../../lib/api/backend-api";
 import { useResource } from "../../hooks/backend-hooks";
-import { Button, ConfirmDialog, LoadError, Skeleton, ToneBadge } from "../../components/staff-ui/staff-ui";
-import { ER_TABLES, erName, highlight, isSchemaChange, lineColumn, newlineIndent, toCsv, toTsv, type SchemaTable, type SqlResult } from "./sql-domain";
+import { Button, ConfirmDialog, ToneBadge } from "../../components/staff-ui/staff-ui";
+import { SqlFilterBar } from "./sql-filter-bar";
+import { SqlSchemaPanel } from "./sql-schema-panel";
+import { buildTableQuery, highlight, isSchemaChange, lineColumn, newlineIndent, shortType, toCsv, toTsv, type SchemaTable, type SqlResult, type TableFilter } from "./sql-domain";
 import styles from "./sql-console.module.css";
 
 type Failure = { message: string; sqlstate?: string; position?: number; detail?: string; hint?: string; sql: string };
@@ -22,9 +24,12 @@ export function SqlConsole({ api }: { api: BackendApi }) {
   const [confirm, setConfirm] = useState<string | null>(null);
   const [sort, setSort] = useState<{ col: number; desc: boolean } | null>(null);
   const [note, setNote] = useState("");
-  const [showAll, setShowAll] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(true);
+  // The table being browsed and the SQL the panel/filters wrote for it. Any manual edit makes
+  // the editor differ from that SQL, which hides the filter bar so it can never overwrite it.
+  const [browsing, setBrowsing] = useState<{ table: string; sql: string } | null>(null);
+  const [filters, setFilters] = useState<TableFilter[]>([]);
   const running = useRef(false);
-  const area = useRef<HTMLTextAreaElement>(null);
   const mirror = useRef<HTMLPreElement>(null);
 
   async function run(confirmed = false, text = sql) {
@@ -36,11 +41,15 @@ export function SqlConsole({ api }: { api: BackendApi }) {
       if (isSchemaChange(res.command)) schema.reload();
     } catch (error) {
       if (error instanceof ApiError && error.code === "confirmation_required") setConfirm(error.message);
-      else if (error instanceof ApiError && error.status === 404) setFailure({ sql: text, message: "SQL console ยังไม่เปิดใช้งานบนเซิร์ฟเวอร์ (SQL_CONSOLE_ENABLE=true)" });
-      else if (error instanceof ApiError) {
-        const d = error.details ?? {};
-        setFailure({ sql: text, message: error.message, sqlstate: d.sqlstate as string | undefined, position: (d.position as number) || undefined, detail: d.detail as string | undefined, hint: d.hint as string | undefined });
-      } else setFailure({ sql: text, message: "ติดต่อเซิร์ฟเวอร์ไม่ได้ คำสั่งอาจยังไม่ถูกรัน ตรวจสอบก่อนรันซ้ำ" });
+      else {
+        // Old rows under a failed filter would read as that filter's result.
+        setResult(null);
+        if (error instanceof ApiError && error.status === 404) setFailure({ sql: text, message: "SQL console ยังไม่เปิดใช้งานบนเซิร์ฟเวอร์ (SQL_CONSOLE_ENABLE=true)" });
+        else if (error instanceof ApiError) {
+          const d = error.details ?? {};
+          setFailure({ sql: text, message: error.message, sqlstate: d.sqlstate as string | undefined, position: (d.position as number) || undefined, detail: d.detail as string | undefined, hint: d.hint as string | undefined });
+        } else setFailure({ sql: text, message: "ติดต่อเซิร์ฟเวอร์ไม่ได้ คำสั่งอาจยังไม่ถูกรัน ตรวจสอบก่อนรันซ้ำ" });
+      }
     } finally { running.current = false; setBusy(false); }
   }
 
@@ -77,64 +86,74 @@ export function SqlConsole({ api }: { api: BackendApi }) {
     if (!result) return;
     try { await navigator.clipboard.writeText(toTsv({ columns: result.columns, rows })); setNote("คัดลอกผลลัพธ์แล้ว"); } catch { setNote("คัดลอกไม่สำเร็จ ตรวจสอบสิทธิ์คลิปบอร์ดของเบราว์เซอร์"); }
   }
-  // Table browser: put a SELECT in the editor and run it right away.
-  const browse = (name: string) => { const text = `SELECT * FROM "${name.replaceAll('"', '""')}"
-LIMIT 100;`; setSql(text); void run(false, text); };
-  const allTables = schema.data?.tables ?? [];
-  const tables = showAll ? allTables : allTables.filter((t) => ER_TABLES.has(t.name));
+
+  function runTableQuery(table: SchemaTable, next: TableFilter[]) {
+    const text = buildTableQuery(table, next);
+    setBrowsing({ table: table.name, sql: text });
+    setSql(text);
+    setEditorOpen(false);
+    void run(false, text);
+  }
+  function browse(table: SchemaTable) { setFilters([]); runTableQuery(table, []); }
+
+  const tables = schema.data?.tables ?? null;
+  const filterTable = browsing && browsing.sql === sql ? tables?.find((t) => t.name === browsing.table) ?? null : null;
   const where = failure?.position ? lineColumn(failure.sql, failure.position) : null;
+  const hasRows = Boolean(result && result.columns.length > 0);
 
   return <div className={styles.layout}>
-    <aside className={styles.schema} aria-label="โครงสร้างฐานข้อมูล">
-      <div className={styles.bar}><h2>ตารางในฐานข้อมูล</h2><Button onClick={schema.reload} disabled={schema.loading}>รีเฟรช</Button></div>
-      {schema.loading && !schema.data && <Skeleton label="กำลังโหลดโครงสร้าง…" />}
-      {schema.error && !schema.data && <LoadError title="โหลดโครงสร้างไม่สำเร็จ (ต้องเป็น Super Admin และเปิด SQL_CONSOLE_ENABLE)" onRetry={schema.reload} />}
-      {schema.data && <label className={styles.muted}><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} /> แสดงทุกตาราง ({tables.length} จาก {allTables.length}; ค่าเริ่มต้นเฉพาะตารางตาม ER)</label>}
-      {schema.data && !tables.length && <p className={styles.muted}>ยังไม่มีตารางใน schema public</p>}
-      {tables.map((t) => <details key={t.name} className={styles.table}>
-        <summary>{erName(t.name) ?? t.name}{erName(t.name) && erName(t.name)!.toLowerCase() !== t.name && <small className={styles.muted}> ({t.name})</small>}{t.kind === "view" && <ToneBadge tone="quiet">view</ToneBadge>}<small>{t.columns.length} คอลัมน์</small></summary>
-        <button type="button" className={styles.link} onClick={() => browse(t.name)} disabled={busy}>ดูข้อมูลในตาราง (100 แถวแรก)</button>
-        <ul aria-label={`คอลัมน์ของ ${t.name}`}>{t.columns.map((c) => <li key={c.name}><code>{c.name}</code> <span>{c.type}{c.not_null ? " · NOT NULL" : ""}{c.default ? ` · default ${c.default}` : ""}</span></li>)}</ul>
-        {t.constraints.length > 0 && <><h3>ข้อจำกัดและความสัมพันธ์</h3><ul>{t.constraints.map((k) => <li key={k.name}><ToneBadge tone={k.type === "foreign_key" ? "action" : "quiet"}>{k.type === "foreign_key" ? "FK" : k.type === "primary_key" ? "PK" : k.type === "unique" ? "UQ" : "CHECK"}</ToneBadge> <code>{k.definition}</code></li>)}</ul></>}
-        {t.indexes.length > 0 && <><h3>ดัชนี</h3><ul>{t.indexes.map((x) => <li key={x.name}><code>{x.definition}</code></li>)}</ul></>}
-      </details>)}
-    </aside>
+    <SqlSchemaPanel tables={tables} loading={schema.loading} failed={Boolean(schema.error)} busy={busy} activeTable={filterTable?.name ?? null} onReload={schema.reload} onQuery={(t) => browse(t)} />
 
     <section className={styles.main} aria-label="SQL console">
-      <div className={styles.editor}>
-        <pre ref={mirror} className={styles.mirror} aria-hidden="true">{highlight(sql).map((t, i) => <span key={i} className={styles[t.kind]}>{t.text}</span>)}{"\n"}</pre>
-        <textarea ref={area} className={styles.input} value={sql} spellCheck={false} aria-label="SQL editor" autoCapitalize="off" autoCorrect="off"
-          onChange={(e) => setSql(e.target.value)} onKeyDown={onKeyDown}
-          onScroll={(e) => { if (mirror.current) { mirror.current.scrollTop = e.currentTarget.scrollTop; mirror.current.scrollLeft = e.currentTarget.scrollLeft; } }} />
-      </div>
-      <div className={styles.toolbar}>
-        <Button variant="primary" onClick={() => void run()} disabled={busy || !sql.trim()}>{busy ? "กำลังรัน…" : "รันคำสั่ง (Ctrl + Enter)"}</Button>
-        <span className={styles.muted}>คำสั่งละ 1 statement · หมดเวลา 10 วินาที · แสดงสูงสุด 1,000 แถว · DROP / TRUNCATE / UPDATE-DELETE ไม่มี WHERE ต้องยืนยัน</span>
-      </div>
+      {editorOpen ? <div className={styles.editorPanel}>
+        <div className={styles.editor}>
+          <pre ref={mirror} className={styles.mirror} aria-hidden="true">{highlight(sql).map((t, i) => <span key={i} className={styles[t.kind]}>{t.text}</span>)}{"\n"}</pre>
+          <textarea className={styles.input} value={sql} spellCheck={false} aria-label="SQL editor" autoCapitalize="off" autoCorrect="off"
+            onChange={(e) => setSql(e.target.value)} onKeyDown={onKeyDown}
+            onScroll={(e) => { if (mirror.current) { mirror.current.scrollTop = e.currentTarget.scrollTop; mirror.current.scrollLeft = e.currentTarget.scrollLeft; } }} />
+        </div>
+        <div className={styles.toolbar}>
+          <Button variant="primary" onClick={() => void run()} disabled={busy || !sql.trim()}>{busy ? "กำลังรัน…" : "รันคำสั่ง"}</Button>
+          {result && <Button variant="text" onClick={() => setEditorOpen(false)}>ย่อ</Button>}
+          <span className={styles.muted}>Ctrl + Enter · ครั้งละ 1 คำสั่ง · หมดเวลา 10 วินาที</span>
+        </div>
+      </div> : <div className={styles.sqlLine}>
+        <code title={sql}>{sql.replace(/\s+/g, " ")}</code>
+        <Button onClick={() => setEditorOpen(true)}>แก้ไข SQL</Button>
+      </div>}
+
+      {filterTable && <SqlFilterBar table={filterTable} filters={filters} busy={busy} currentSql={sql} onChange={setFilters} onApply={(next) => runTableQuery(filterTable, next)} />}
 
       <div className={styles.status} role="status" aria-live="polite">
-        {busy && "กำลังรันคำสั่ง…"}
-        {!busy && result && !failure && <><ToneBadge tone="done">สำเร็จ</ToneBadge> <strong>{result.command}</strong> · {result.columns.length ? `${result.rows.length.toLocaleString("th-TH")} แถว` : `กระทบ ${result.rows_affected.toLocaleString("th-TH")} แถว`} · {result.elapsed_ms} ms{result.truncated && " · ตัดที่ 1,000 แถว"}</>}
-        {note}
+        <span>
+          {busy && "กำลังรันคำสั่ง…"}
+          {!busy && result && !failure && <><ToneBadge tone="done">สำเร็จ</ToneBadge> {result.columns.length ? `${result.rows.length.toLocaleString("th-TH")} แถว` : `${result.command} · กระทบ ${result.rows_affected.toLocaleString("th-TH")} แถว`} · {result.elapsed_ms} ms</>}
+          {note && <> · {note}</>}
+        </span>
+        {hasRows && <span className={styles.resultActions}><Button variant="text" onClick={() => void copy()}>คัดลอก</Button><Button variant="text" onClick={download}>ส่งออก CSV</Button></span>}
       </div>
+
+      {result?.truncated && <p className={styles.truncated} role="note">แสดงเฉพาะ 1,000 แถวแรก ข้อมูลมีมากกว่านี้ {filterTable ? "ใช้ Filter เพื่อแคบผลลัพธ์" : "เพิ่ม WHERE เพื่อแคบผลลัพธ์"}</p>}
+
       {failure && <div className={styles.error} role="alert">
         <strong>คำสั่งไม่สำเร็จ{failure.sqlstate && ` (SQLSTATE ${failure.sqlstate})`}</strong>
         <p>{failure.message}</p>
         {where && <p>ที่บรรทัด {where.line} คอลัมน์ {where.column}</p>}
         {failure.detail && <p>{failure.detail}</p>}
         {failure.hint && <p>คำแนะนำ: {failure.hint}</p>}
-        <small>ไม่มีการเปลี่ยนแปลงข้อมูล (rollback แล้ว)</small>
+        {failure.sqlstate && <small>ไม่มีการเปลี่ยนแปลงข้อมูล (rollback แล้ว)</small>}
       </div>}
 
-      {result && result.columns.length > 0 && <div className={styles.results}>
-        <div className={styles.bar}><span>{result.rows.length.toLocaleString("th-TH")} แถว</span><span><Button onClick={() => void copy()}>คัดลอก</Button> <Button onClick={download}>ส่งออก CSV</Button></span></div>
+      {hasRows && result && <div className={styles.results}>
         <div className={styles.scroll}><table>
           <thead><tr>{result.columns.map((c, i) => <th key={i} scope="col" aria-sort={sort?.col === i ? (sort.desc ? "descending" : "ascending") : undefined}>
-            <button type="button" onClick={() => setSort(sort?.col === i ? { col: i, desc: !sort.desc } : { col: i, desc: false })}>{c.name}<small>{c.type}</small></button></th>)}</tr></thead>
-          <tbody>{rows.map((r, i) => <tr key={i}>{r.map((v, j) => <td key={j}>{v === null ? <em className={styles.null}>NULL</em> : v}</td>)}</tr>)}</tbody>
+            <button type="button" className={styles.sortButton} onClick={() => setSort(sort?.col === i ? { col: i, desc: !sort.desc } : { col: i, desc: false })}>{c.name}{sort?.col === i && <span aria-hidden="true"> {sort.desc ? "↓" : "↑"}</span>}<small>{shortType(c.type)}</small></button></th>)}</tr></thead>
+          <tbody>{rows.map((r, i) => <tr key={i}>{r.map((v, j) => <td key={j} title={v ?? undefined}>{v === null ? <em className={styles.null}>NULL</em> : v}</td>)}</tr>)}</tbody>
         </table></div>
-        {!rows.length && <p className={styles.muted}>คำสั่งสำเร็จ แต่ไม่มีแถวผลลัพธ์</p>}
+        {!rows.length && <p className={styles.emptyResult}>{filterTable && filters.length ? "ไม่พบข้อมูลตาม Filter นี้" : "ไม่มีแถวผลลัพธ์"}</p>}
       </div>}
+
+      {!result && !failure && !busy && <p className={styles.emptyResult}>เลือกตารางทางซ้ายแล้วกด Query ทั้งตาราง หรือเขียน SQL แล้วกดรันคำสั่ง</p>}
     </section>
 
     <ConfirmDialog open={confirm !== null} title="ยืนยันคำสั่งที่อาจทำลายข้อมูล?" confirmLabel="ยืนยันและรัน" danger onClose={() => setConfirm(null)} onConfirm={() => { setConfirm(null); void run(true); }}>
