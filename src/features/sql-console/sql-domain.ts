@@ -140,3 +140,22 @@ export function buildTableQuery(table: Pick<SchemaTable, "name" | "columns">, fi
   const where = conditions.length ? `\nWHERE ${conditions.join("\n  AND ")}` : "";
   return `SELECT * FROM ${quoteIdent(table.name)}${where};`;
 }
+
+// --- Shortcuts: how many documents sit in each status, in workflow order ---
+export const STATUS_SHORTCUTS: { label: string; table: string; column: string }[] = [
+  { label: "คำของาน", table: "job_request", column: "status" },
+  { label: "ใบเสนอราคา", table: "quotation", column: "status" },
+  { label: "มัดจำ", table: "deposit", column: "status" },
+  { label: "PO ลูกค้า", table: "purchase_order", column: "status" },
+  { label: "งานผลิต", table: "job", column: "status" },
+  { label: "ใบสั่งซื้อวัตถุดิบ", table: "material_order", column: "status" },
+  { label: "การจ่าย Supplier", table: "material_order", column: "payment_status" },
+  { label: "การส่งมอบ", table: "delivery", column: "status" },
+  { label: "ใบแจ้งหนี้", table: "invoice", column: "status" },
+  { label: "การชำระเงิน", table: "payment", column: "status" },
+];
+
+export function buildStatusCountQuery(shortcut: { table: string; column: string }): string {
+  const column = quoteIdent(shortcut.column);
+  return `SELECT ${column}, count(*) AS total\nFROM ${quoteIdent(shortcut.table)}\nGROUP BY ${column}\nORDER BY total DESC, ${column};`;
+}

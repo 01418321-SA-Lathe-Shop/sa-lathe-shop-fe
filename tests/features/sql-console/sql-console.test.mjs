@@ -115,3 +115,12 @@ test("filter bar only exists for panel-written SQL, so it can never overwrite a 
   assert.match(source, /\{filterTable && <SqlFilterBar/);
   assert.match(source, /result\?\.truncated && /);
 });
+
+test("status shortcuts count one workflow document status each, in tables that exist", async () => {
+  const { STATUS_SHORTCUTS, ER_TABLES, buildStatusCountQuery } = await import("../../../src/features/sql-console/sql-domain.ts");
+  assert.equal(STATUS_SHORTCUTS.length, 10);
+  assert.equal(new Set(STATUS_SHORTCUTS.map((s) => s.label)).size, 10);
+  for (const shortcut of STATUS_SHORTCUTS) assert.ok(ER_TABLES.has(shortcut.table), shortcut.table);
+  assert.equal(buildStatusCountQuery({ table: "material_order", column: "payment_status" }),
+    'SELECT "payment_status", count(*) AS total\nFROM "material_order"\nGROUP BY "payment_status"\nORDER BY total DESC, "payment_status";');
+});

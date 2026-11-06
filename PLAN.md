@@ -341,4 +341,5 @@ No application code changed. Screenshots are not committed.
 
 - [x] Agree the design with the owner: database-side filters, whole-table query without LIMIT, attributes with name/type/PK/FK, filter bar above results, collapsible editor, type-based operators, search plus one open table, filter bar hidden after manual SQL edits, 14–15px type.
 - [x] Implement and check in a browser with a stubbed API (light/dark, 1440–375px).
-- [ ] Open: run the generated filter SQL against real PostgreSQL with `SQL_CONSOLE_ENABLE=true`.
+- [x] Run the generated filter SQL against real PostgreSQL with `SQL_CONSOLE_ENABLE=true`: 472 of 510 attribute/operator combinations on 5 tables passed; the other 38 were `uuid` `=`/`≠` given a non-UUID test value, which returns a database error by design.
+- [x] Add 10 status-count shortcuts (owner-agreed: counts only, 9 core documents plus Supplier payment, row above the SQL, only statuses that have documents).

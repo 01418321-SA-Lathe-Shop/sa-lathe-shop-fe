@@ -6,7 +6,7 @@ import { useResource } from "../../hooks/backend-hooks";
 import { Button, ConfirmDialog, ToneBadge } from "../../components/staff-ui/staff-ui";
 import { SqlFilterBar } from "./sql-filter-bar";
 import { SqlSchemaPanel } from "./sql-schema-panel";
-import { buildTableQuery, highlight, isSchemaChange, lineColumn, newlineIndent, shortType, toCsv, toTsv, type SchemaTable, type SqlResult, type TableFilter } from "./sql-domain";
+import { STATUS_SHORTCUTS, buildStatusCountQuery, buildTableQuery, highlight, isSchemaChange, lineColumn, newlineIndent, shortType, toCsv, toTsv, type SchemaTable, type SqlResult, type TableFilter } from "./sql-domain";
 import styles from "./sql-console.module.css";
 
 type Failure = { message: string; sqlstate?: string; position?: number; detail?: string; hint?: string; sql: string };
@@ -95,6 +95,13 @@ export function SqlConsole({ api }: { api: BackendApi }) {
     void run(false, text);
   }
   function browse(table: SchemaTable) { setFilters([]); runTableQuery(table, []); }
+  function runShortcut(text: string) {
+    setBrowsing(null);
+    setFilters([]);
+    setSql(text);
+    setEditorOpen(false);
+    void run(false, text);
+  }
 
   const tables = schema.data?.tables ?? null;
   const filterTable = browsing && browsing.sql === sql ? tables?.find((t) => t.name === browsing.table) ?? null : null;
@@ -105,6 +112,14 @@ export function SqlConsole({ api }: { api: BackendApi }) {
     <SqlSchemaPanel tables={tables} loading={schema.loading} failed={Boolean(schema.error)} busy={busy} activeTable={filterTable?.name ?? null} onReload={schema.reload} onQuery={(t) => browse(t)} />
 
     <section className={styles.main} aria-label="SQL console">
+      <div className={styles.shortcuts} role="group" aria-label="นับจำนวนตาม status">
+        <span className={styles.muted}>นับ status</span>
+        {STATUS_SHORTCUTS.map((shortcut) => {
+          const text = buildStatusCountQuery(shortcut);
+          return <button key={`${shortcut.table}.${shortcut.column}`} type="button" className={styles.shortcut} aria-pressed={sql === text} disabled={busy} onClick={() => runShortcut(text)}>{shortcut.label}</button>;
+        })}
+      </div>
+
       {editorOpen ? <div className={styles.editorPanel}>
         <div className={styles.editor}>
           <pre ref={mirror} className={styles.mirror} aria-hidden="true">{highlight(sql).map((t, i) => <span key={i} className={styles[t.kind]}>{t.text}</span>)}{"\n"}</pre>
