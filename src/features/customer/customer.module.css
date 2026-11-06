@@ -216,6 +216,8 @@
 .root :global(.cust-footer) { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; padding: 1.5rem clamp(1rem, 2.5vw, 2.5rem); width: 100%; max-width: 100%; box-sizing: border-box; margin: auto 0 0 0; border-top: 1px solid var(--cust-line); color: var(--cust-muted); font-size: .875rem; }
 .root :global(.cust-field) { display: grid; gap: 8px; margin-bottom: 20px; font-weight: 550; }
 .root :global(.cust-field small) { font-weight: 400; font-size: .875rem; }
+.root :global(.cust-field .cust-field-error) { color: var(--danger, #c62828); font-weight: 550; }
+.root :global(.cust-field :is(input, select, textarea)[aria-invalid="true"]) { border-color: var(--danger, #c62828); }
 .root :global(.cust-actions) { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 24px; }
 .root :global(.cust-pagination) { display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 32px; }
 .root :global(.cust-disclosure) { border-top: 1px solid var(--cust-line); padding: 12px 0; margin-top: 24px; }

@@ -25,8 +25,8 @@ export function ActionFeedback({ busy, error, message }: { busy?: boolean; error
 export function Limited({ complete }: { complete?: boolean }) {
   return complete === false ? <p className="cust-alert">ข้อมูลยังไม่ครบ การค้นหาและจำนวนครอบคลุมเฉพาะรายการที่โหลดสำเร็จ · ระบบโหลดได้สูงสุด 1,000 รายการต่อชุด</p> : null;
 }
-export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
-  return <label className="cust-field"><span>{label}</span>{children}{hint && <small>{hint}</small>}</label>;
+export function Field({ label, children, hint, error }: { label: string; children: ReactNode; hint?: string; error?: string }) {
+  return <label className="cust-field"><span>{label}</span>{children}{hint && <small>{hint}</small>}{error && <small className="cust-field-error" role="alert">{error}</small>}</label>;
 }
 export function PrivateFile({ api, path, name = "เปิดไฟล์" }: { api: BackendApi; path: string; name?: string }) {
   const action = useCommand();

@@ -126,19 +126,20 @@ export function QuoteForm({ api, request, draft, revision, onSaved }: { api: Bac
   </NextAction>;
 }
 
-export function RequestMoreInfo({ api, id, onSaved }: { api: BackendApi; id: string; onSaved: (message: string) => void }) {
+export function RequestMoreInfo({ api, id, pending, onSaved }: { api: BackendApi; id: string; pending?: string; onSaved: (message: string) => void }) {
   const [message, setMessage] = useState(""); const [problem, setProblem] = useState("");
   const action = useCommand();
   const trimmed = message.trim();
-  return <Collapsible title="ข้อมูลไม่ครบ? ขอข้อมูลเพิ่มเติมจากลูกค้า (UC2 Alt-Step 5)">
+  return <Collapsible title="ข้อมูลไม่ครบ? ส่งคำขอกลับให้ลูกค้าแก้ไข (UC2 Alt-Step 5)">
+    {pending && <p className={layout.warning} role="status">รอลูกค้าแก้ไขข้อมูล · คำถามล่าสุด: {pending}</p>}
     <form className={layout.form} onSubmit={(event) => {
       event.preventDefault();
       if (!trimmed || [...trimmed].length > 2000) { setProblem("กรอกรายละเอียดที่ต้องการสอบถาม 1–2,000 ตัวอักษร"); return; }
       setProblem("");
       void action.run(async (signal) => {
-        await api.call(`/requests/${id}/request-info`, "POST", { message: trimmed }, signal);
+        await api.call(`/requests/${id}/request-info`, "POST", { note: trimmed }, signal);
         setMessage("");
-        onSaved("บันทึกการขอข้อมูลเพิ่มเติมแล้ว · สถานะคำขอยังคงรอประเมิน");
+        onSaved("ส่งคำขอกลับให้ลูกค้าแก้ไขแล้ว · ลูกค้าจะเห็นข้อความนี้และแก้ไขคำขอได้");
       }, "");
     }}>
       <fieldset disabled={action.busy}>

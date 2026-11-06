@@ -6,7 +6,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { ApiError, uploadType, type BackendApi, type Customer, type JobRequest } from "../../lib/api/backend-api";
 import { useCommand, useResource } from "../../hooks/backend-hooks";
 import { customerHref, dateTH } from "./customer-domain";
-import { requestPayload } from "./customer-request-domain";
+import { requestErrors, requestPayload, type RequestErrors } from "./customer-request-domain";
 import { FILE_ACCEPT } from "./customer-upload";
 import { ActionFeedback, Empty, Field, PageTitle, ResourceFeedback } from "./customer-ui";
 
@@ -19,7 +19,7 @@ export function CustomerRequestWizard({ api }: { api: BackendApi }) {
   const [step, setStep] = useState(0); const [customerId, setCustomerId] = useState("");
   const [description, setDescription] = useState(""); const [qty, setQty] = useState("1"); const [material, setMaterial] = useState(""); const [deadline, setDeadline] = useState("");
   const [source, setSource] = useState<"net" | "phone" | "line">("net");
-  const [files, setFiles] = useState<Picked[]>([]); const [error, setError] = useState(""); const [created, setCreated] = useState<JobRequest | null>(null); const [uncertain, setUncertain] = useState(false); const [stage, setStage] = useState("");
+  const [files, setFiles] = useState<Picked[]>([]); const [error, setError] = useState(""); const [fieldErrors, setFieldErrors] = useState<RequestErrors>({}); const [created, setCreated] = useState<JobRequest | null>(null); const [uncertain, setUncertain] = useState(false); const [stage, setStage] = useState("");
   const profile = profiles.data?.items?.find((item) => item.id === customerId) ?? profiles.data?.items?.[0];
   const dirty = Boolean(description || material || deadline || files.length);
   useEffect(() => {
@@ -41,15 +41,23 @@ export function CustomerRequestWizard({ api }: { api: BackendApi }) {
     document.addEventListener("click", guardLink, true);
     return () => { window.removeEventListener("beforeunload", warn); document.removeEventListener("click", guardLink, true); };
   }, [dirty, uncertain]);
+  const input = () => ({ customerId: profile?.id ?? "", description, qty, material, deadline, source });
+  // Field problems stay next to their inputs; the user fixes them on step 2 before going on.
+  function check() {
+    const errors = requestErrors(input(), Date.now(), { material: true, deadline: true }); setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  }
   function payload() {
-    if (!material.trim()) throw new Error("กรุณาระบุข้อกำหนดวัตถุดิบ");
-    if (!deadline.trim()) throw new Error("กรุณาระบุวันที่ต้องการรับงาน");
-    return requestPayload({ customerId: profile?.id ?? "", description, qty, material, deadline, source }, Date.now());
+    if (!check()) { setStep(1); throw new Error("ข้อมูลคำขอยังไม่ครบหรือไม่ถูกต้อง แก้ไขช่องที่แจ้งเตือนแล้วส่งอีกครั้ง"); }
+    return requestPayload(input(), Date.now());
   }
   function advance(event: FormEvent) {
     event.preventDefault(); setError("");
-    try { if (!profile) throw new Error("เลือกบัญชีผู้สั่งก่อนดำเนินการต่อ"); if (step >= 1) payload(); setStep(step + 1); } catch (error) { setError((error as Error).message); }
+    if (!profile) { setError("เลือกบัญชีผู้สั่งก่อนดำเนินการต่อ"); return; }
+    if (step >= 1 && !check()) { setStep(1); setError("ข้อมูลคำขอยังไม่ครบหรือไม่ถูกต้อง แก้ไขช่องที่แจ้งเตือน"); return; }
+    setStep(step + 1);
   }
+  const edit = (field: keyof RequestErrors, set: (value: string) => void) => (value: string) => { set(value); setFieldErrors((old) => ({ ...old, [field]: undefined })); };
   async function send(signal: AbortSignal) {
     let request = created;
     const wasNew = !request;
@@ -88,7 +96,7 @@ export function CustomerRequestWizard({ api }: { api: BackendApi }) {
       <h2>{created ? `คำขอ #${created.no_request} ถูกสร้างแล้ว` : `ขั้นที่ ${step + 1} · ${steps[step]}`}</h2>
       <fieldset disabled={action.busy || uncertain || Boolean(created)}>
         {step === 0 && <><Field label="สั่งในนาม *"><select value={profile?.id ?? ""} onChange={(e) => setCustomerId(e.target.value)} required>{profiles.data?.items?.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></Field><p>ประเภทลูกค้า: {profile?.customer_type === "company" ? "บริษัท" : "บุคคลทั่วไป"}</p><p className="cust-muted">ประเภทลูกค้าอ้างอิงบัญชีผู้สั่ง ไม่เปลี่ยนประเภทแยกในแต่ละคำขอ</p></>}
-        {step === 1 && <><Field label="ช่องทางที่ส่งคำขอ (Source) *"><select value={source} onChange={(e) => setSource(e.target.value as "net" | "phone" | "line")} required><option value="net">เว็บไซต์ (Net)</option><option value="phone">โทรศัพท์ (Phone)</option><option value="line">LINE</option></select></Field><Field label="รายละเอียดงาน *"><textarea required maxLength={10000} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="อธิบายชิ้นงาน ขนาด และสิ่งที่ต้องการให้ผลิต" /></Field><Field label="จำนวน *"><input required inputMode="numeric" pattern="[1-9][0-9]*" value={qty} onChange={(e) => setQty(e.target.value)} /></Field><Field label="ข้อกำหนดวัตถุดิบ *"><textarea required maxLength={2000} value={material} onChange={(e) => setMaterial(e.target.value)} placeholder="เช่น ชนิดเหล็ก หรือข้อกำหนดที่มี" /></Field><Field label="วันที่ต้องการรับงาน *" hint="เวลาไทย · เป็นวันที่ต้องการ ไม่ใช่กำหนดส่งที่ร้านยืนยัน"><input required type="datetime-local" value={deadline} onChange={(e) => setDeadline(e.target.value)} /></Field></>}
+        {step === 1 && <><Field label="ช่องทางที่ส่งคำขอ (Source) *"><select value={source} onChange={(e) => setSource(e.target.value as "net" | "phone" | "line")} required><option value="net">เว็บไซต์ (Net)</option><option value="phone">โทรศัพท์ (Phone)</option><option value="line">LINE</option></select></Field><Field label="รายละเอียดงาน *" error={fieldErrors.description}><textarea maxLength={10000} aria-invalid={Boolean(fieldErrors.description) || undefined} value={description} onChange={(e) => edit("description", setDescription)(e.target.value)} placeholder="อธิบายชิ้นงาน ขนาด และสิ่งที่ต้องการให้ผลิต" /></Field><Field label="จำนวน *" error={fieldErrors.qty}><input inputMode="numeric" aria-invalid={Boolean(fieldErrors.qty) || undefined} value={qty} onChange={(e) => edit("qty", setQty)(e.target.value)} /></Field><Field label="ข้อกำหนดวัตถุดิบ *" error={fieldErrors.material}><textarea maxLength={2000} aria-invalid={Boolean(fieldErrors.material) || undefined} value={material} onChange={(e) => edit("material", setMaterial)(e.target.value)} placeholder="เช่น ชนิดเหล็ก หรือข้อกำหนดที่มี" /></Field><Field label="วันที่ต้องการรับงาน *" hint="เวลาไทย · เป็นวันที่ต้องการ ไม่ใช่กำหนดส่งที่ร้านยืนยัน" error={fieldErrors.deadline}><input type="datetime-local" aria-invalid={Boolean(fieldErrors.deadline) || undefined} value={deadline} onChange={(e) => edit("deadline", setDeadline)(e.target.value)} /></Field></>}
         {step === 2 && <><Field label="เลือกไฟล์แนบ (ไม่บังคับ)" hint="PDF, DOC/DOCX, XLS/XLSX, TXT, JPEG/PNG · ไม่เกิน 100 MB (100,000,000 bytes) ต่อไฟล์"><input type="file" multiple accept={FILE_ACCEPT} onChange={(event) => { setError(""); const picked = Array.from(event.target.files ?? []); try { picked.forEach(uploadType); setFiles((old) => [...old, ...picked.map((file): Picked => ({ file, state: "selected" }))]); } catch { setError("เลือกไฟล์ประเภทที่รองรับ ขนาดไม่เกิน 100 MB (100,000,000 bytes) และชนิดไฟล์ต้องตรงกับนามสกุล"); } event.target.value = ""; }} /></Field><p className="cust-muted">ไฟล์จะเริ่มอัปโหลดหลังสร้างคำขอในขั้นสุดท้าย หากอัปโหลดไฟล์ไม่สำเร็จระบบจะยกเลิกคำขออัตโนมัติ (Rollback)</p></>}
         {step === 3 && <><p className="cust-muted">ตรวจข้อมูลด้านล่างและไฟล์แนบ หากต้องการแก้ไขให้ย้อนกลับก่อนส่ง</p><RequestSummary profile={profile} source={source} description={description} qty={qty} material={material} deadline={deadline} /></>}
       </fieldset>
