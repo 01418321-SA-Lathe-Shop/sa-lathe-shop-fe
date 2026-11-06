@@ -15,6 +15,7 @@ import { laborPayload, type ProductionState } from "./production-domain";
 import { editableQuantity, isPositiveQuantity, planReadiness } from "./production-list-domain";
 import { WorkPanel } from "./production-work";
 import { JobContractPrint } from "../documents/job-contract-print";
+import { ImageThumbs, RequestFiles } from "../requests/request-files";
 import layout from "../../components/staff-ui/staff-layout.module.css";
 import styles from "./production.module.css";
 
@@ -46,9 +47,11 @@ export function ProductionDetail({ api, account, id, request, requestLoading, no
         <div><dt>เวลาทำงานรวม</dt><dd>{minutesTH(job.labor_minutes)}</dd></div>
       </dl>
       <section className={layout.section} aria-label="เอกสารงาน"><h3>เอกสาร</h3><div className={layout.actions}><JobContractPrint api={api} requestId={job.request_id} jobId={job.job_id} button={(props) => <Button {...props} />} /></div></section>
+      <RequestFiles api={api} id={job.request_id} title="รูปและไฟล์อ้างอิงจากลูกค้า" />
+      {Boolean(job.photos?.length) && <section className={layout.section} aria-label="รูปงานจากช่าง"><h3>รูปงานจากช่าง</h3><ImageThumbs api={api} files={job.photos ?? []} alt="รูปงาน" path={(photo) => `/job-photos/${photo.id}/download`} /></section>}
       {job.status === "queued" && <PlanStep api={api} job={job} canWrite={worker && settled} onSaved={saved} />}
       {job.status === "in_progress" && <><Steps steps={STEPS} current={2} />{worker ? settled && <WorkPanel api={api} job={job} onSaved={saved} /> : <p className={layout.muted}>พนักงานกำลังบันทึกงานนี้ Admin ดูความคืบหน้าและต้นทุนได้ด้านล่าง</p>}</>}
-      {job.status === "completed" && <><Steps steps={STEPS} current={STEPS.length} /><NextAction title="ผลิตเสร็จแล้ว"><p>วัตถุดิบที่จองแต่ไม่ได้ใช้ถูกคืนแล้ว ขั้นต่อไปคือออกใบแจ้งหนี้และส่งมอบ</p><Link className={layout.linkButton} href={deliveryHref}>{worker ? "ไปที่ส่งมอบและใบแจ้งหนี้" : "ไปที่ส่งมอบและรับชำระ"} <Icon name="arrow" size={16} /></Link></NextAction></>}
+      {job.status === "completed" && <><Steps steps={STEPS} current={STEPS.length} /><NextAction title="ผลิตเสร็จแล้ว"><p>วัตถุดิบที่จองแต่ไม่ได้ใช้ถูกคืนแล้ว ขั้นต่อไปคือออกใบแจ้งหนี้และส่งมอบ</p><Link className={layout.linkButton} href={deliveryHref}>ไปที่ส่งมอบและรับชำระ <Icon name="arrow" size={16} /></Link></NextAction></>}
       {job.status === "cancelled" && <p className={layout.warning}>งานนี้ถูกยกเลิก ไม่สามารถบันทึกงานเพิ่มได้</p>}
       <MaterialsSummary job={job} />
       {account.role === "admin" && settled && <AdminCost api={api} job={job} onSaved={saved} />}

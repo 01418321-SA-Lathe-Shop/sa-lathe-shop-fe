@@ -12,6 +12,10 @@
 .files li > span { display: grid; gap: 2px; min-width: 0; }
 .files strong { overflow-wrap: anywhere; }
 .files small { color: var(--muted); font-size: 0.8125rem; }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin: 0 0 10px; padding: 0; list-style: none; }
+.thumbs a { display: block; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface-2); }
+.thumbs img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: contain; }
+.thumbState { display: grid; place-items: center; gap: 4px; aspect-ratio: 4 / 3; border: 1px dashed var(--line); border-radius: 10px; color: var(--muted); font-size: 0.8125rem; text-align: center; }
 
 .moneyGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .minimum { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); color: var(--muted); font-size: 0.9375rem; font-variant-numeric: tabular-nums; }
