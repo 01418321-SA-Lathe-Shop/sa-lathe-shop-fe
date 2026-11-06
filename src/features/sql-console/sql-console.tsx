@@ -4,7 +4,7 @@ import { useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { ApiError, type BackendApi } from "../../lib/api/backend-api";
 import { useResource } from "../../hooks/backend-hooks";
 import { Button, ConfirmDialog, LoadError, Skeleton, ToneBadge } from "../../components/staff-ui/staff-ui";
-import { highlight, isSchemaChange, lineColumn, newlineIndent, toCsv, toTsv, type SchemaTable, type SqlResult } from "./sql-domain";
+import { ER_TABLES, highlight, isSchemaChange, lineColumn, newlineIndent, toCsv, toTsv, type SchemaTable, type SqlResult } from "./sql-domain";
 import styles from "./sql-console.module.css";
 
 type Failure = { message: string; sqlstate?: string; position?: number; detail?: string; hint?: string; sql: string };
@@ -22,6 +22,7 @@ export function SqlConsole({ api }: { api: BackendApi }) {
   const [confirm, setConfirm] = useState<string | null>(null);
   const [sort, setSort] = useState<{ col: number; desc: boolean } | null>(null);
   const [note, setNote] = useState("");
+  const [showAll, setShowAll] = useState(false);
   const running = useRef(false);
   const area = useRef<HTMLTextAreaElement>(null);
   const mirror = useRef<HTMLPreElement>(null);
@@ -79,7 +80,8 @@ export function SqlConsole({ api }: { api: BackendApi }) {
   // Table browser: put a SELECT in the editor and run it right away.
   const browse = (name: string) => { const text = `SELECT * FROM "${name.replaceAll('"', '""')}"
 LIMIT 100;`; setSql(text); void run(false, text); };
-  const tables = schema.data?.tables ?? [];
+  const allTables = schema.data?.tables ?? [];
+  const tables = showAll ? allTables : allTables.filter((t) => ER_TABLES.has(t.name));
   const where = failure?.position ? lineColumn(failure.sql, failure.position) : null;
 
   return <div className={styles.layout}>
@@ -87,6 +89,7 @@ LIMIT 100;`; setSql(text); void run(false, text); };
       <div className={styles.bar}><h2>ตารางในฐานข้อมูล</h2><Button onClick={schema.reload} disabled={schema.loading}>รีเฟรช</Button></div>
       {schema.loading && !schema.data && <Skeleton label="กำลังโหลดโครงสร้าง…" />}
       {schema.error && !schema.data && <LoadError title="โหลดโครงสร้างไม่สำเร็จ (ต้องเป็น Super Admin และเปิด SQL_CONSOLE_ENABLE)" onRetry={schema.reload} />}
+      {schema.data && <label className={styles.muted}><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} /> แสดงทุกตาราง ({tables.length} จาก {allTables.length}; ค่าเริ่มต้นเฉพาะตารางตาม ER)</label>}
       {schema.data && !tables.length && <p className={styles.muted}>ยังไม่มีตารางใน schema public</p>}
       {tables.map((t) => <details key={t.name} className={styles.table}>
         <summary>{t.name}{t.kind === "view" && <ToneBadge tone="quiet">view</ToneBadge>}<small>{t.columns.length} คอลัมน์</small></summary>

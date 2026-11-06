@@ -40,3 +40,9 @@ test("destructive statements are confirmed and re-sent with confirm:true; Ctrl+E
   assert.match(source, /\{ sql: text, confirm: confirmed \}/);
   assert.match(source, /event\.ctrlKey \|\| event\.metaKey\) && event\.key === "Enter"/);
 });
+
+test("schema panel shows only ER tables unless 'show all' is ticked", () => {
+  const source = read("sql-console/sql-console.tsx");
+  assert.match(source, /allTables\.filter\(\(t\) => ER_TABLES\.has\(t\.name\)\)/);
+  assert.match(source, /แสดงทุกตาราง/);
+});

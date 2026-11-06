@@ -52,3 +52,6 @@ export function lineColumn(sql: string, position: number): { line: number; colum
   const before = sql.slice(0, Math.max(0, position - 1)).split("\n");
   return { line: before.length, column: before[before.length - 1].length + 1 };
 }
+
+// Tables that map to the project ER diagram (backend docs/021-er-schema-comparison.md). The schema panel shows only these by default.
+export const ER_TABLES = new Set("person customer customer_address admin worker job_request request_attachment quotation quotation_cost term_evidence job job_photo material unit unit_conversion supplier material_order material_order_item material_receipt_line material_claim material_reservation job_material_usage stock_movement delivery invoice customer_payment payment_allocation".split(" "));
