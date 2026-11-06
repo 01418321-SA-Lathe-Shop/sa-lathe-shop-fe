@@ -37,6 +37,6 @@ test("SQL console is Super Admin only in navigation, shell and workspace", () =>
 test("destructive statements are confirmed and re-sent with confirm:true; Ctrl+Enter runs", () => {
   const source = read("sql-console/sql-console.tsx");
   assert.match(source, /error\.code === "confirmation_required"\) setConfirm/);
-  assert.match(source, /\{ sql, confirm: confirmed \}/);
+  assert.match(source, /\{ sql: text, confirm: confirmed \}/);
   assert.match(source, /event\.ctrlKey \|\| event\.metaKey\) && event\.key === "Enter"/);
 });
