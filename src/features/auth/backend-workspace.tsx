@@ -18,10 +18,13 @@ import { DemoAccountPicker } from "./demo-account-picker";
 // Login and registration use only the configured real API.
 export default function BackendWorkspace({ initialRegister = false }: { initialRegister?: boolean }) {
   const router = useRouter();
-  const { signIn, signInLocalTest, localTestEnabled, notice, liveBase } = useApiSession();
+  const { session, restoring, signIn, signInLocalTest, localTestEnabled, notice, liveBase } = useApiSession();
   const next = useSearchParams().get("next");
   // Return to the page that bounced us here, only if it is inside the signed-in role's own area.
   const destination = (role: keyof typeof ROLE_ROOTS) => next && next.startsWith(ROLE_ROOTS[role] + "/") && !next.startsWith("//") ? next : ROLE_ROOTS[role];
+  // A session resumed from the cookie skips the login form.
+  const resumed = !restoring && session ? destination(API_ROLES[session.account.role]) : null;
+  useEffect(() => { if (resumed) router.replace(resumed); }, [resumed, router]);
   async function enter(username: string, password: string) {
     const session = await signIn(username, password);
     router.push(destination(API_ROLES[session.account.role]));
@@ -36,7 +39,7 @@ const noSubscribe = () => () => {};
 function LiveLogin({ base, notice, initialRegister, onLogin, localTestEnabled, onLocalLogin }: { base: string; notice: string; initialRegister: boolean; onLogin: (username: string, password: string) => Promise<void>; localTestEnabled: boolean; onLocalLogin: (username: string) => Promise<void> }) {
   const showTestAccounts = useSearchParams().get("accounts") === "test";
   const router = useRouter();
-  const [register, setRegister] = useState(initialRegister);
+  const [register] = useState(initialRegister);
   const [type, setType] = useState("individual");
   const [companyMode, setCompanyMode] = useState("new");
   // Invitation joins use the company's existing addresses; the API rejects an address with an invitation.
@@ -76,9 +79,9 @@ function LiveLogin({ base, notice, initialRegister, onLogin, localTestEnabled, o
         const phone = text(data, "phone"); const email = text(data, "email"); const taxId = text(data, "tax_id");
         const line1 = text(data, "address_line1"); const line2 = text(data, "address_line2"); const district = text(data, "district"); const province = text(data, "province"); const postalCode = text(data, "postal_code");
         await api.call("/auth/register", "POST", { username: text(data, "username"), password, name: text(data, "name"), ...(phone ? { phone } : {}), ...(email ? { email } : {}), customer_type: type, ...(type === "company" ? companyMode === "new" ? { company_name: text(data, "company_name"), ...(taxId ? { tax_id: taxId } : {}) } : { invitation: text(data, "invitation") } : {}), ...(joining ? {} : { address: text(data, "address"), contact_name: text(data, "contact_name") }), ...(!joining && (line1 || district || province || postalCode) ? { address_line1: line1, address_line2: line2, district, province, postal_code: postalCode } : {}) }, signal);
-        api.close(); setRegister(false); router.replace("/login");
+        api.close(); await onLogin(text(data, "username"), password);
       } else { await onLogin(text(data, "username"), password); }
-    }, register ? "สร้างบัญชีแล้ว เข้าสู่ระบบด้วยชื่อผู้ใช้และรหัสผ่านของคุณ" : "");
+    }, "");
   }
   return <main className={`login-page ${styles.scope}`}>
     <section className="login-showcase"><Logo onClick={() => router.push("/")}/><div className="login-showcase-copy"><span className="hero-kicker"><i className="live-dot"/> LATHE SHOP CONTROL</span><h1>{register ? <>เริ่มต้นงานใหม่<br/>ให้เป็นระบบ</> : <>ทุกงานสำคัญ<br/>อยู่ในที่เดียว</>}</h1><p>จัดการงานผลิต ติดตามความคืบหน้า และตรวจสอบเอกสารได้จากบัญชีของคุณ</p></div><div className="login-machine" aria-hidden="true"><div className="machine-orbit orbit-one"/><div className="machine-orbit orbit-two"/><div className="machine-core"><span/><i/></div></div><div className="login-showcase-footer"><span>LATHE SHOP CONTROL</span><small>Bangkok · Thailand</small></div></section>
@@ -88,7 +91,6 @@ function LiveLogin({ base, notice, initialRegister, onLogin, localTestEnabled, o
       <form ref={loginForm} method="post" onSubmit={submit} aria-busy={action.busy}><fieldset disabled={action.busy || !hydrated} className="live-fields">
         {register && !joining && <small className="auth-help">ขั้นที่ {addressStep ? "2 จาก 2 · ที่อยู่" : "1 จาก 2 · ข้อมูลบัญชี"}</small>}
         <div className="register-step" hidden={addressStep}>
-        {register && <label className="login-field"><span>ชื่อผู้ติดต่อ</span><div><Icon name="file"/><input name="name" required maxLength={200} autoComplete="name" placeholder="ชื่อผู้ติดต่อ"/></div></label>}
         {register && <label className="login-field"><span>เบอร์โทรศัพท์</span><div><input name="phone" inputMode="tel" maxLength={32} autoComplete="tel" placeholder="เช่น 0812345678"/></div></label>}
         {register && <label className="login-field"><span>อีเมล</span><div><input name="email" type="email" maxLength={254} autoComplete="email" placeholder="name@example.com"/></div></label>}
         {register && <label className="login-field"><span>ชื่อ–นามสกุล / ชื่อผู้ติดต่อ</span><div><input name="name" required maxLength={200} autoComplete="name" placeholder="ชื่อผู้สมัครบัญชี"/></div></label>}

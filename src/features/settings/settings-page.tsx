@@ -50,7 +50,7 @@ function Security() {
   if (!session) return null;
   const { role } = session.account;
   return <>
-    <SettingsPanel title="เซสชันนี้" description="เซสชันเก็บในหน่วยความจำเท่านั้น รีโหลดหน้าแล้วต้องเข้าสู่ระบบใหม่" action={<button type="button" className={styles.secondary} onClick={() => dialog.current?.showModal()}>ออกจากระบบ</button>}>
+    <SettingsPanel title="เซสชันนี้" description="เซสชันยังอยู่หลังรีโหลดหรือเปิดแอปใหม่จนกว่าจะหมดอายุหรือออกจากระบบ (คุกกี้ HttpOnly ไม่เก็บใน localStorage)" action={<button type="button" className={styles.secondary} onClick={() => dialog.current?.showModal()}>ออกจากระบบ</button>}>
       <Facts rows={[["หมดอายุ", dateTH(session.expiresAt)]]} />
     </SettingsPanel>
     <SettingsPanel title="เปลี่ยนรหัสผ่าน" description="เปลี่ยนรหัสผ่านของบัญชีนี้เท่านั้น เมื่อสำเร็จ เซสชันอื่นของบัญชีจะถูกยกเลิก เซสชันนี้ยังใช้งานต่อได้">

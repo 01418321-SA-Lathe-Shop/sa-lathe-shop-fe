@@ -123,7 +123,7 @@ export default function CustomerShell({ session, leave }: { session: ApiSession;
         <header className="cust-topbar">
           <div className="cust-topbar-env">
             <span className="cust-mode live">
-              เชื่อมต่อข้อมูลจริง · รีโหลดหน้าต้องเข้าสู่ระบบใหม่
+              เชื่อมต่อข้อมูลจริง · รีโหลดหน้าแล้วยังอยู่ในระบบ
             </span>
           </div>
           <div className="cust-topbar-actions">
@@ -191,7 +191,7 @@ export default function CustomerShell({ session, leave }: { session: ApiSession;
         {/* Mobile Environment Notice */}
         <div className="cust-environment">
           <span className="cust-mode live">
-            เชื่อมต่อข้อมูลจริง · รีโหลดหน้าต้องเข้าสู่ระบบใหม่
+            เชื่อมต่อข้อมูลจริง · รีโหลดหน้าแล้วยังอยู่ในระบบ
           </span>
         </div>
 

@@ -16,7 +16,7 @@ test("local test login sends only username and uses the normal opaque Bearer ses
   assert.equal(calls[0].method, "POST");
   assert.equal(calls[0].body, '{"username":"pim.admin"}');
   assert.equal(calls[0].headers.Authorization, undefined);
-  assert.equal(calls[0].credentials, "omit");
+  assert.equal(calls[0].credentials, "include");
   assert.equal(calls[0].cache, "no-store");
   await api.call("/auth/me"); assert.equal(calls[1].headers.Authorization, "Bearer test-only-token");
   await api.logout(); assert.equal(calls[2].url, "http://localhost:8080/auth/logout");

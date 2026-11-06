@@ -84,10 +84,11 @@ export class BackendApi {
   close() { this.token = ""; this.controller.abort(); }
   async call<T>(path: string, method = "GET", body?: unknown, signal?: AbortSignal): Promise<T> {
     if (!path.startsWith("/") || path.startsWith("//") || path.includes("://")) throw new Error("Invalid API path.");
-    const headers: Record<string, string> = { Accept: "application/json" };
+    // X-Session-Cookie lets the API accept its HttpOnly session cookie (forces a CORS preflight).
+    const headers: Record<string, string> = { Accept: "application/json", "X-Session-Cookie": "1" };
     if (this.token) headers.Authorization = `Bearer ${this.token}`;
     if (body !== undefined) headers["Content-Type"] = "application/json";
-    const response = await this.transport.fetch(`${this.base}${path}`, { method, headers, body: body === undefined ? undefined : wireJSON(body), cache: "no-store", credentials: "omit", redirect: "error", signal: signal ? AbortSignal.any([signal, this.controller.signal]) : this.controller.signal });
+    const response = await this.transport.fetch(`${this.base}${path}`, { method, headers, body: body === undefined ? undefined : wireJSON(body), cache: "no-store", credentials: "include", redirect: "error", signal: signal ? AbortSignal.any([signal, this.controller.signal]) : this.controller.signal });
     if (!response.ok) {
       const envelope = await response.json().catch(() => null);
       if (response.status === 401 && this.token) { this.close(); this.onUnauthorized(); }
@@ -106,6 +107,11 @@ export class BackendApi {
     if (session.token_type !== "Bearer" || !session.access_token || !["customer", "worker", "admin"].includes(session.account.role)) throw new Error("Unsupported login response.");
     this.token = session.access_token;
     return session;
+  }
+  // After reload the HttpOnly cookie (never readable by JS) resumes the same
+  // server session into memory, unchanged expiry; 401 means signed out.
+  async restore(signal?: AbortSignal): Promise<Login> {
+    return this.acceptLogin(await this.call<Login>("/auth/session", "POST", undefined, signal));
   }
   async logout() { try { await this.call<void>("/auth/logout", "POST"); } finally { this.close(); } }
   async upload(requestId: string, file: File, signal?: AbortSignal): Promise<Attachment> {
@@ -126,9 +132,10 @@ export class BackendApi {
     return this.call<T>(completePath(link.attachment_id), "POST", undefined, signal);
   }
   // Requests a short-lived private link and opens it without keeping the URL in state.
-  async preview(file: Attachment, signal?: AbortSignal): Promise<Blob> {
+  // `path` is the file's signed-link endpoint (request attachments by default, e.g. job photos).
+  async preview(file: Attachment, signal?: AbortSignal, path = `/attachments/${file.id}/download`): Promise<Blob> {
     const combined = signal ? AbortSignal.any([signal, this.controller.signal]) : this.controller.signal;
-    return readPrivatePreview(file, () => this.call<SignedLink>(`/attachments/${file.id}/download`, "GET", undefined, combined), this.transport, combined);
+    return readPrivatePreview(file, () => this.call<SignedLink>(path, "GET", undefined, combined), this.transport, combined);
   }
   async download(path: string, fileName?: string, signal?: AbortSignal): Promise<void> {
     const link = await this.call<SignedLink>(path, "GET", undefined, signal);

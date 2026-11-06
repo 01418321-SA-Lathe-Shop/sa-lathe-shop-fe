@@ -4,12 +4,15 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { ApiError, BackendApi, type Account, type Login } from "../../lib/api/backend-api";
 import { isLocalTestLoginEnabled, localTestLoginError } from "./local-test-login";
 
-// One memory-only session for the whole designed shell. Client navigation keeps
-// it; reload or sign-out discards it. Tokens never touch browser storage/URLs.
+// One session for the whole designed shell. The token lives in memory only; the
+// API also sets an HttpOnly cookie so a reload resumes the same server session
+// (POST /auth/session). Tokens never touch browser storage/URLs.
 // All sessions use the configured real backend; failures never select fixtures.
 export type ApiSession = { api: BackendApi; account: Account; expiresAt: string; localTest?: true };
 type SessionContext = {
   session: ApiSession | null;
+  // True until the first cookie-based restore attempt settles; guards wait for it.
+  restoring: boolean;
   notice: string;
   liveBase: string;
   localTestEnabled: boolean;
@@ -25,6 +28,7 @@ const LOCAL_TEST_ENABLED = isLocalTestLoginEnabled(LIVE_BASE, process.env.NEXT_P
 export function ApiSessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<ApiSession | null>(null);
   const [notice, setNotice] = useState("");
+  const [restoring, setRestoring] = useState(true);
   const active = useRef<BackendApi | null>(null);
 
   useEffect(() => () => active.current?.close(), []);
@@ -67,6 +71,16 @@ export function ApiSessionProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const restoreStarted = useRef(false);
+  useEffect(() => {
+    // Once per page load (StrictMode re-runs effects; a second restore would race
+    // the first and revoke the shared session). No/expired cookie = signed out.
+    if (restoreStarted.current) return;
+    restoreStarted.current = true;
+    // In explicit local-test mode a resumed session keeps the test-account switch.
+    void openSession((api) => api.restore(), LOCAL_TEST_ENABLED).catch(() => {}).finally(() => setRestoring(false));
+  }, [openSession]);
+
   const signIn = useCallback(async (username: string, password: string) => {
     try { return await openSession((api) => api.login(username, password)); }
     catch (error) {
@@ -90,7 +104,7 @@ export function ApiSessionProvider({ children }: { children: ReactNode }) {
     setNotice(message); return message;
   }, []);
 
-  const value = useMemo(() => ({ session, notice, liveBase: LIVE_BASE, localTestEnabled: LOCAL_TEST_ENABLED, signIn, signInLocalTest, signOut }), [session, notice, signIn, signInLocalTest, signOut]);
+  const value = useMemo(() => ({ session, restoring, notice, liveBase: LIVE_BASE, localTestEnabled: LOCAL_TEST_ENABLED, signIn, signInLocalTest, signOut }), [session, restoring, notice, signIn, signInLocalTest, signOut]);
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
 

@@ -25,13 +25,14 @@ const descriptions: Record<Role, string> = {
 export default function WorkspaceShell({ role: expected, workspaceId = "overview" }: { role: Role; workspaceId?: WorkspaceId }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { session, signOut } = useApiSession();
+  const { session, restoring, signOut } = useApiSession();
   const [menuOpen, setMenuOpen] = useState(false);
   const role = session ? API_ROLES[session.account.role] : null;
   useEffect(() => {
+    if (restoring) return;
     if (!session) router.replace(`/login?next=${encodeURIComponent(pathname)}`);
     else if (role !== expected) router.replace(ROLE_ROOTS[role as Role]);
-  }, [session, role, expected, router, pathname]);
+  }, [session, restoring, role, expected, router, pathname]);
   useEffect(() => {
     if (!menuOpen) return;
     const close = (event: KeyboardEvent) => { if (event.key === "Escape") { setMenuOpen(false); document.getElementById("navigation-toggle")?.focus(); } };
@@ -66,7 +67,7 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
     </aside>
     <div className="app-stage">
       <header className="topbar integrated-topbar workspace-navbar">
-        <div className="workspace-navbar-environment">เชื่อมต่อข้อมูลจริง · รีโหลดหน้าต้องเข้าสู่ระบบใหม่</div>
+        <div className="workspace-navbar-environment">เชื่อมต่อข้อมูลจริง · รีโหลดหน้าแล้วยังอยู่ในระบบ</div>
         <div className="workspace-navbar-brand"><Logo onClick={() => router.push(ROLE_ROOTS[role])}/></div>
         <div className="workspace-navbar-actions">
           <ThemeToggle/>
@@ -76,7 +77,7 @@ export default function WorkspaceShell({ role: expected, workspaceId = "overview
       </header>
       <main id="main-content" className={`page-content ${styles.scope}`}>
         <section className="page-heading"><div>{!overview && <span className="eyebrow">{group?.label ?? pageLabel(role, workspaceId)}</span>}<h1 id="workspace-title" tabIndex={-1}>{overview ? "ภาพรวมการผลิต" : pageLabel(role, workspaceId)}</h1><p>{overview ? descriptions[role] : items.find((item) => item.id === workspaceId)?.description}</p></div></section>
-        <p className="demo-context">ข้อมูลจริง · เวลาไทย · เงินบาท ไม่รวม VAT · รีโหลดหน้าต้องเข้าสู่ระบบใหม่</p>
+        <p className="demo-context">ข้อมูลจริง · เวลาไทย · เงินบาท ไม่รวม VAT</p>
         <div className="workflow-content live-workspace"><ConnectedWorkspace key={`${account.id}:${workspaceId}`} role={role} workspaceId={workspaceId} session={session} /></div>
       </main>
     </div>

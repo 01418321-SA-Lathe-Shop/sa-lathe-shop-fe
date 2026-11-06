@@ -65,12 +65,13 @@ test("failed upload requires a fresh intent and never completes failed storage w
     assert.equal(intents, 2); assert.equal(completions, 1);
   } finally { globalThis.fetch = original; }
 });
-test("API requests omit cookies, reject redirects, bypass cache and abort on session close", async () => {
+test("API requests send only the guarded session cookie, reject redirects, bypass cache and abort on session close", async () => {
   const original = globalThis.fetch; let captured;
   globalThis.fetch = async (_, init) => { captured = init; return new Response(null, { status: 204 }); };
   try {
     const api = new BackendApi("https://api.test"); await api.call("/requests");
-    assert.equal(captured.credentials, "omit"); assert.equal(captured.redirect, "error"); assert.equal(captured.cache, "no-store");
+    // The HttpOnly session cookie is accepted by the API only with this guard header.
+    assert.equal(captured.credentials, "include"); assert.equal(captured.headers["X-Session-Cookie"], "1"); assert.equal(captured.redirect, "error"); assert.equal(captured.cache, "no-store");
     assert.equal(captured.signal.aborted, false); api.close(); assert.equal(captured.signal.aborted, true);
     assert.throws(() => new BackendApi("https://user:secret@api.test"));
     assert.throws(() => new BackendApi("https://api.test?token=not-allowed"));
