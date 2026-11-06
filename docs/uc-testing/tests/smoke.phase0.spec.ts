@@ -19,7 +19,7 @@ test("customer typed URL and client-side push to staff route", async ({ page }) 
   await loginAs(page, "somchai");
   await page.waitForLoadState("networkidle");
   // Client-side navigation keeps the in-memory session, so it exercises the role guard itself.
-  await page.evaluate(() => (window as any).next.router.push("/staff/materials"));
+  await page.evaluate(() => (window as Window & { next: { router: { push: (url: string) => void } } }).next.router.push("/staff/materials"));
   await page.waitForTimeout(4000);
   console.log("PUSH", page.url(), "|", (await page.locator("main, body").first().innerText()).replace(/\s+/g, " ").slice(0, 200));
   // A typed URL is a full reload and drops the memory-only session.

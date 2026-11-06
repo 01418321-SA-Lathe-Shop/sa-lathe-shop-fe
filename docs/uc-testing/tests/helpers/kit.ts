@@ -24,7 +24,7 @@ export type Status = "PASS" | "FAIL" | "SKIP";
 export type Entry = { file: string; uc: string; uc_name: string; step: string; kind: string; role: string; url: string; caption_th: string; expected_th: string; status: Status; note: string };
 
 // ---- persisted run state (data chain between spec files) ----
-export function readState(): Record<string, any> { try { return JSON.parse(fs.readFileSync(STATE, "utf8")); } catch { return {}; } }
+export function readState(): Record<string, unknown> { try { return JSON.parse(fs.readFileSync(STATE, "utf8")); } catch { return {}; } }
 export function saveState(patch: Record<string, unknown>) { fs.mkdirSync(TMP, { recursive: true }); fs.writeFileSync(STATE, JSON.stringify({ ...readState(), ...patch }, null, 1)); }
 
 // ---- manifest ----
@@ -98,7 +98,7 @@ export async function passwordLogin(page: Page, username: string, password: stri
 // ---- navigation ----
 /** Client-side navigation: keeps the memory-only session where the sidebar has no direct link. */
 export async function push(page: Page, url: string) {
-  await page.evaluate((target) => (window as any).next.router.push(target), url);
+  await page.evaluate((target) => (window as Window & { next: { router: { push: (url: string) => void } } }).next.router.push(target), url);
   const pathname = url.split("?")[0];
   await page.waitForURL((u) => u.pathname === pathname, { timeout: 30_000 });
   await ready(page);
