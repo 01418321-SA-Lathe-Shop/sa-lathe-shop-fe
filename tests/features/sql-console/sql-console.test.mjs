@@ -46,3 +46,11 @@ test("schema panel shows only ER tables unless 'show all' is ticked", () => {
   assert.match(source, /allTables\.filter\(\(t\) => ER_TABLES\.has\(t\.name\)\)/);
   assert.match(source, /แสดงทุกตาราง/);
 });
+
+test("panel shows ER entity names while queries keep the real table name", async () => {
+  const { erName } = await import("../../../src/features/sql-console/sql-domain.ts");
+  assert.equal(erName("job_request"), "JOB_REQUEST");
+  assert.equal(erName("customer_payment"), "PAYMENT");
+  assert.equal(erName("auth_session"), null);
+  assert.match(read("sql-console/sql-console.tsx"), /browse\(t\.name\)/);
+});

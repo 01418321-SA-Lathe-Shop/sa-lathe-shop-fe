@@ -4,7 +4,7 @@ import { useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { ApiError, type BackendApi } from "../../lib/api/backend-api";
 import { useResource } from "../../hooks/backend-hooks";
 import { Button, ConfirmDialog, LoadError, Skeleton, ToneBadge } from "../../components/staff-ui/staff-ui";
-import { ER_TABLES, highlight, isSchemaChange, lineColumn, newlineIndent, toCsv, toTsv, type SchemaTable, type SqlResult } from "./sql-domain";
+import { ER_TABLES, erName, highlight, isSchemaChange, lineColumn, newlineIndent, toCsv, toTsv, type SchemaTable, type SqlResult } from "./sql-domain";
 import styles from "./sql-console.module.css";
 
 type Failure = { message: string; sqlstate?: string; position?: number; detail?: string; hint?: string; sql: string };
@@ -92,7 +92,7 @@ LIMIT 100;`; setSql(text); void run(false, text); };
       {schema.data && <label className={styles.muted}><input type="checkbox" checked={showAll} onChange={(e) => setShowAll(e.target.checked)} /> แสดงทุกตาราง ({tables.length} จาก {allTables.length}; ค่าเริ่มต้นเฉพาะตารางตาม ER)</label>}
       {schema.data && !tables.length && <p className={styles.muted}>ยังไม่มีตารางใน schema public</p>}
       {tables.map((t) => <details key={t.name} className={styles.table}>
-        <summary>{t.name}{t.kind === "view" && <ToneBadge tone="quiet">view</ToneBadge>}<small>{t.columns.length} คอลัมน์</small></summary>
+        <summary>{erName(t.name) ?? t.name}{erName(t.name) && erName(t.name)!.toLowerCase() !== t.name && <small className={styles.muted}> ({t.name})</small>}{t.kind === "view" && <ToneBadge tone="quiet">view</ToneBadge>}<small>{t.columns.length} คอลัมน์</small></summary>
         <button type="button" className={styles.link} onClick={() => browse(t.name)} disabled={busy}>ดูข้อมูลในตาราง (100 แถวแรก)</button>
         <ul aria-label={`คอลัมน์ของ ${t.name}`}>{t.columns.map((c) => <li key={c.name}><code>{c.name}</code> <span>{c.type}{c.not_null ? " · NOT NULL" : ""}{c.default ? ` · default ${c.default}` : ""}</span></li>)}</ul>
         {t.constraints.length > 0 && <><h3>ข้อจำกัดและความสัมพันธ์</h3><ul>{t.constraints.map((k) => <li key={k.name}><ToneBadge tone={k.type === "foreign_key" ? "action" : "quiet"}>{k.type === "foreign_key" ? "FK" : k.type === "primary_key" ? "PK" : k.type === "unique" ? "UQ" : "CHECK"}</ToneBadge> <code>{k.definition}</code></li>)}</ul></>}
