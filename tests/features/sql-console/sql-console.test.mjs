@@ -124,3 +124,13 @@ test("status shortcuts count one workflow document status each, in tables that e
   assert.equal(buildStatusCountQuery({ table: "material_order", column: "payment_status" }),
     'SELECT "payment_status", count(*) AS total\nFROM "material_order"\nGROUP BY "payment_status"\nORDER BY total DESC, "payment_status";');
 });
+
+test("write templates key UPDATE/DELETE on the primary key and skip defaulted columns on INSERT", async () => {
+  const { buildWriteTemplate } = await import("../../../src/features/sql-console/sql-domain.ts");
+  const table = { name: "unit", constraints: [{ name: "unit_pkey", type: "primary_key", definition: "PRIMARY KEY (id)" }],
+    columns: [{ name: "id", type: "bigint", not_null: true, default: "nextval('unit_id_seq')" }, { name: "code", type: "character varying", not_null: true }, { name: "note", type: "text", not_null: false }] };
+  assert.equal(buildWriteTemplate(table, "delete"), 'DELETE FROM "unit"\nWHERE "id" = NULL\nRETURNING *;');
+  assert.equal(buildWriteTemplate(table, "update"), 'UPDATE "unit"\nSET "code" = NULL\nWHERE "id" = NULL\nRETURNING *;');
+  assert.equal(buildWriteTemplate(table, "insert"), 'INSERT INTO "unit" ("code", "note")\nVALUES (\n  NULL, -- code varchar NOT NULL\n  NULL  -- note text\n)\nRETURNING *;');
+  assert.match(buildWriteTemplate({ ...table, constraints: [] }, "delete"), /WHERE false/);
+});

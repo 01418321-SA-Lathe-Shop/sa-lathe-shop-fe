@@ -6,7 +6,7 @@ import { useResource } from "../../hooks/backend-hooks";
 import { Button, ConfirmDialog, ToneBadge } from "../../components/staff-ui/staff-ui";
 import { SqlFilterBar } from "./sql-filter-bar";
 import { SqlSchemaPanel } from "./sql-schema-panel";
-import { STATUS_SHORTCUTS, buildStatusCountQuery, buildTableQuery, highlight, isSchemaChange, lineColumn, newlineIndent, shortType, toCsv, toTsv, type SchemaTable, type SqlResult, type TableFilter } from "./sql-domain";
+import { STATUS_SHORTCUTS, buildStatusCountQuery, buildTableQuery, buildWriteTemplate, highlight, isSchemaChange, lineColumn, newlineIndent, shortType, toCsv, toTsv, type SchemaTable, type SqlResult, type TableFilter, type WriteKind } from "./sql-domain";
 import styles from "./sql-console.module.css";
 
 type Failure = { message: string; sqlstate?: string; position?: number; detail?: string; hint?: string; sql: string };
@@ -95,6 +95,13 @@ export function SqlConsole({ api }: { api: BackendApi }) {
     void run(false, text);
   }
   function browse(table: SchemaTable) { setFilters([]); runTableQuery(table, []); }
+  // Templates only fill the editor; the user edits the values and runs it themselves.
+  function writeTemplate(table: SchemaTable, kind: WriteKind) {
+    setBrowsing(null);
+    setFilters([]);
+    setSql(buildWriteTemplate(table, kind));
+    setEditorOpen(true);
+  }
   function runShortcut(text: string) {
     setBrowsing(null);
     setFilters([]);
@@ -109,7 +116,7 @@ export function SqlConsole({ api }: { api: BackendApi }) {
   const hasRows = Boolean(result && result.columns.length > 0);
 
   return <div className={styles.layout}>
-    <SqlSchemaPanel tables={tables} loading={schema.loading} failed={Boolean(schema.error)} busy={busy} activeTable={filterTable?.name ?? null} onReload={schema.reload} onQuery={(t) => browse(t)} />
+    <SqlSchemaPanel tables={tables} loading={schema.loading} failed={Boolean(schema.error)} busy={busy} activeTable={filterTable?.name ?? null} onReload={schema.reload} onQuery={(t) => browse(t)} onTemplate={writeTemplate} />
 
     <section className={styles.main} aria-label="SQL console">
       <div className={styles.shortcuts} role="group" aria-label="นับจำนวนตาม status">
@@ -168,7 +175,7 @@ export function SqlConsole({ api }: { api: BackendApi }) {
         {!rows.length && <p className={styles.emptyResult}>{filterTable && filters.length ? "ไม่พบข้อมูลตาม Filter นี้" : "ไม่มีแถวผลลัพธ์"}</p>}
       </div>}
 
-      {!result && !failure && !busy && <p className={styles.emptyResult}>เลือกตารางทางซ้ายแล้วกด Query ทั้งตาราง หรือเขียน SQL แล้วกดรันคำสั่ง</p>}
+      {!result && !failure && !busy && <p className={styles.emptyResult}>เลือกตารางทางซ้ายแล้วกด Query ทั้งตาราง หรือ INSERT / UPDATE / DELETE เพื่อเขียนคำสั่งแก้ไขข้อมูล แล้วกดรันคำสั่ง</p>}
     </section>
 
     <ConfirmDialog open={confirm !== null} title="ยืนยันคำสั่งที่อาจทำลายข้อมูล?" confirmLabel="ยืนยันและรัน" danger onClose={() => setConfirm(null)} onConfirm={() => { setConfirm(null); void run(true); }}>

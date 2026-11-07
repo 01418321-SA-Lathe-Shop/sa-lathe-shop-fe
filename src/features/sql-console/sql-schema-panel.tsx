@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button, LoadError, Skeleton, ToneBadge } from "../../components/staff-ui/staff-ui";
-import { ER_TABLES, erName, keyColumns, shortType, type SchemaTable } from "./sql-domain";
+import { ER_TABLES, erName, keyColumns, shortType, type SchemaTable, type WriteKind } from "./sql-domain";
 import styles from "./sql-console.module.css";
 
 type Props = {
@@ -13,10 +13,11 @@ type Props = {
   activeTable: string | null;
   onReload: () => void;
   onQuery: (table: SchemaTable) => void;
+  onTemplate: (table: SchemaTable, kind: WriteKind) => void;
 };
 
 // Table list: search, one open table at a time, a whole-table query button and the attributes.
-export function SqlSchemaPanel({ tables, loading, failed, busy, activeTable, onReload, onQuery }: Props) {
+export function SqlSchemaPanel({ tables, loading, failed, busy, activeTable, onReload, onQuery, onTemplate }: Props) {
   const [search, setSearch] = useState("");
   const [showAll, setShowAll] = useState(false);
   const [open, setOpen] = useState<string | null>(null);
@@ -43,6 +44,9 @@ export function SqlSchemaPanel({ tables, loading, failed, busy, activeTable, onR
           </button>
           {isOpen && <div className={styles.tableBody}>
             <Button variant="primary" className={styles.queryButton} onClick={() => onQuery(t)} disabled={busy}>Query ทั้งตาราง</Button>
+            {t.kind === "table" && <div className={styles.writeButtons} role="group" aria-label={`เขียน SQL แก้ไขข้อมูลใน ${t.name}`}>
+              {(["insert", "update", "delete"] as const).map((kind) => <Button key={kind} onClick={() => onTemplate(t, kind)} disabled={busy}>{kind.toUpperCase()}</Button>)}
+            </div>}
             <ul className={styles.attributes} aria-label={`Attributes ของ ${t.name}`}>
               {t.columns.map((c) => <li key={c.name}>
                 <code>{c.name}</code>

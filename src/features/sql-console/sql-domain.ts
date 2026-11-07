@@ -159,3 +159,24 @@ export function buildStatusCountQuery(shortcut: { table: string; column: string 
   const column = quoteIdent(shortcut.column);
   return `SELECT ${column}, count(*) AS total\nFROM ${quoteIdent(shortcut.table)}\nGROUP BY ${column}\nORDER BY total DESC, ${column};`;
 }
+
+// --- Write templates: fill the editor (never run) with INSERT/UPDATE/DELETE for one table ---
+export type WriteKind = "insert" | "update" | "delete";
+
+// Placeholder values are NULL and the key condition is `= NULL`, so an unedited UPDATE/DELETE matches no rows.
+export function buildWriteTemplate(table: Pick<SchemaTable, "name" | "columns" | "constraints">, kind: WriteKind): string {
+  const name = quoteIdent(table.name);
+  const { pk } = keyColumns(table);
+  const keys = table.columns.filter((c) => pk.has(c.name));
+  const where = keys.length ? keys.map((c) => `${quoteIdent(c.name)} = NULL`).join(" AND ") : "false -- ใส่เงื่อนไข";
+  if (kind === "delete") return `DELETE FROM ${name}\nWHERE ${where}\nRETURNING *;`;
+  if (kind === "update") {
+    const target = table.columns.find((c) => !pk.has(c.name)) ?? table.columns[0];
+    return `UPDATE ${name}\nSET ${target ? quoteIdent(target.name) : "column"} = NULL\nWHERE ${where}\nRETURNING *;`;
+  }
+  // Columns with a default (ids, timestamps) are left to the database.
+  const cols = table.columns.filter((c) => c.default === undefined || c.default === "");
+  const list = cols.length ? cols : table.columns;
+  const values = list.map((c, i) => `  NULL${i < list.length - 1 ? "," : " "} -- ${c.name} ${shortType(c.type)}${c.not_null ? " NOT NULL" : ""}`).join("\n");
+  return `INSERT INTO ${name} (${list.map((c) => quoteIdent(c.name)).join(", ")})\nVALUES (\n${values}\n)\nRETURNING *;`;
+}
